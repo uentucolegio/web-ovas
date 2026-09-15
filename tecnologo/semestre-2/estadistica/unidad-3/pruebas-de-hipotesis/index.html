@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Pruebas de Hipótesis</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .acc-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            h2 { font-size: 1.5rem !important; } h3 { font-size: 1.25rem !important; } h4 { font-size: 1.125rem !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .content-pane p { text-align: justify; }
+
+        /* Tarjetas institucionales */
+        .card-institucional { background: white; border: 1px solid #cbd5e1; border-left: 4px solid #15803d; border-radius: 0.75rem; }
+        .card-institucional-alt { background: white; border: 1px solid #cbd5e1; border-left: 4px solid #1d4ed8; border-radius: 0.75rem; }
+        .hero-institucional { background: linear-gradient(135deg, #15803d 0%, #166534 55%, #b45309 100%); }
+        .score-chip { background: #15803d; color: white; border-radius: 9999px; padding: 4px 14px; font-weight: 700; font-size: 0.85rem; display: inline-block; }
+        .badge-chip { background: #fde68a; color: #78350f; border: 1px solid #b45309; border-radius: 9999px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+
+        /* Acordeón */
+        .acc-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .acc-btn .acc-icon { transition: transform 0.3s; display: inline-block; }
+        .acc-btn.acc-open .acc-icon { transform: rotate(45deg); }
+
+        /* Inputs y validación */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        .chk-input { transition: all 0.25s ease; }
+        .chk-input.correct { border-color: #22c55e !important; border-width: 3px; background-color: #f0fdf4; animation: bounce 0.3s ease-in-out; }
+        .chk-input.wrong { border-color: #ef4444 !important; border-width: 3px; background-color: #fef2f2; animation: shake 0.3s ease-in-out; }
+
+        /* Opciones tipo juego (selección múltiple) */
+        .game-option { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, background 0.2s; border: 2px solid #cbd5e1; }
+        .game-option:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #15803d; }
+        .game-option.correct { background: #dcfce7 !important; border-color: #15803d !important; }
+        .game-option.wrong { background: #fee2e2 !important; border-color: #dc2626 !important; animation: shake 0.3s; }
+        .game-option.disabled { pointer-events: none; opacity: 0.65; }
+
+        /* Gauge del valor p */
+        .gauge-track { position: relative; height: 28px; background: #f1f5f9; border-radius: 8px; overflow: visible; }
+        .gauge-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 8px; transition: width 0.25s ease, background 0.25s ease; }
+        .gauge-alpha-line { position: absolute; top: -6px; bottom: -6px; width: 3px; background: #166534; z-index: 5; }
+
+        /* Selector dinámico */
+        .dyn-btn { cursor: pointer; transition: all 0.25s; border: 2px solid #cbd5e1; background: white; }
+        .dyn-btn:hover { border-color: #15803d; }
+        .dyn-btn.active-dyn { background: #15803d; color: white; border-color: #15803d; }
+
+        /* Walkthrough de pasos */
+        .step-card { animation: fadeIn 0.4s ease-out; }
+        .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; transition: background 0.3s; }
+        .step-dot.done { background: #15803d; }
+    </style>
+</head>
+<body class="bg-slate-50">
+<div class="flex min-h-screen flex-col">
+<div class="flex flex-1">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+        <div class="p-4">
+            <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 hover:shadow-green-400 transition-shadow">
+                <img src="img/logo.webp" alt="Logo" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+        </div>
+        <nav class="mt-6 flex-1">
+            <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+        <!-- Mobile header -->
+        <div class="md:hidden mb-6 flex flex-col items-center">
+            <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg mb-2">
+                <img src="img/logo.webp" alt="Logo" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+            <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                <option value="introduccion">🚀 Introducción</option>
+                <option value="objetivos">🎯 Objetivos</option>
+                <option value="contenido">📚 Contenido</option>
+                <option value="actividades">✍️ Actividades</option>
+                <option value="evaluacion">✔️ Evaluación</option>
+                <option value="recursos">📖 Recursos</option>
+                <option value="bibliografia">📚 Bibliografía</option>
+            </select>
+        </div>
+
+        <!-- ══════════════════════ INTRODUCCIÓN ══════════════════════ -->
+        <div id="introduccion" class="content-pane active">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Pruebas de Hipótesis</h2>
+
+            <p class="text-slate-700 leading-relaxed mb-4">
+                En el tema anterior de esta unidad aprendiste a construir intervalos de confianza para acompañar tus estimaciones con un rango honesto. Ahora vas a dar el siguiente paso: imagina que tu equipo lanza una nueva versión de una app prometiendo que ahora "abre más rápido". Después de medir los tiempos en una muestra de usuarios, observas que el promedio bajó de 3.0 a 2.8 segundos. Surge la gran pregunta: <strong>¿esa mejora es real, o simplemente fue suerte de la muestra que tomaste?</strong> Si midieras otra vez con usuarios distintos, ¿seguiría siendo más rápida, o volvería a 3.0?
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                Responder este tipo de preguntas con rigor es exactamente para lo que sirven las <strong>pruebas de hipótesis</strong>: un procedimiento que permite tomar decisiones sobre una población a partir de los datos de una muestra, midiendo si un resultado observado es lo bastante fuerte como para considerarlo real o si podría deberse simplemente al azar. Es una de las herramientas más usadas en la ciencia, la industria y la tecnología: desde probar si un medicamento funciona, hasta decidir si un nuevo botón en una app genera más clics.
+            </p>
+
+            <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                <p class="text-green-800">
+                    <span class="text-xl">⚖️</span> La lógica de una prueba de hipótesis se parece a la de un juicio: una persona se considera inocente hasta que se demuestre lo contrario. En estadística ocurre algo parecido — se parte de una suposición "por defecto" y solo se abandona si los datos aportan evidencia suficientemente fuerte en su contra. <span class="text-xl">👨‍⚖️</span>
+                </p>
+            </div>
+
+            <div class="mt-8 hero-institucional rounded-xl p-6 text-white">
+                <h3 class="text-lg font-bold mb-2 text-center">🎯 Pregunta detonante</h3>
+                <p class="text-sm opacity-90 text-center mb-4">Tu equipo lanza una actualización y el tiempo de apertura de la app baja de <strong>3.0 a 2.8 segundos</strong> en una muestra de usuarios.</p>
+                <div class="bg-white/10 rounded-lg p-4 text-sm text-center max-w-2xl mx-auto">
+                    <p>¿Es una mejora real que se mantendría con otros usuarios, o pudo ser pura casualidad de esa muestra en particular? 🤔</p>
+                    <p class="font-bold mt-2">Vas a aprender a responder esa pregunta con datos, no con corazonadas. 👇</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ OBJETIVOS ══════════════════════ -->
+        <div id="objetivos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+            <ul class="space-y-4">
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">⚖️</span><span><strong>Comprender</strong> qué es una prueba de hipótesis y para qué sirve dentro de la inferencia estadística, reconociéndola como un método para tomar decisiones basadas en datos.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">✍️</span><span><strong>Formular</strong> correctamente la hipótesis nula (H0) y la hipótesis alternativa (H1) a partir de una afirmación o pregunta de investigación.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">🎯</span><span><strong>Comprender</strong> de forma intuitiva los conceptos de nivel de significancia (α), valor p y la regla de decisión para rechazar o no rechazar la hipótesis nula.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">🪜</span><span><strong>Identificar</strong> los pasos generales de una prueba de hipótesis y aplicarlos a situaciones sencillas del desarrollo de software.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">🔍</span><span><strong>Interpretar</strong> los resultados de una prueba de hipótesis en su contexto, reconociendo los posibles errores (tipo I y tipo II) al tomar una decisión.</span></li>
+            </ul>
+        </div>
+
+        <!-- ══════════════════════ CONTENIDO ══════════════════════ -->
+        <div id="contenido" class="content-pane">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800">Desarrollo del Contenido</h2>
+                <span id="contenido-score-chip" class="score-chip">🧭 Puntos de exploración: 0</span>
+            </div>
+
+            <!-- PESTAÑAS PRINCIPALES -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button id="btn-tab-que-es" onclick="showMainTab('tab-que-es')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-700 bg-green-700 text-white transition-all shadow-sm">¿Qué es?</button>
+                <button id="btn-tab-hipotesis" onclick="showMainTab('tab-hipotesis')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Las dos hipótesis</button>
+                <button id="btn-tab-significancia" onclick="showMainTab('tab-significancia')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Significancia y valor p</button>
+                <button id="btn-tab-pasos" onclick="showMainTab('tab-pasos')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Los pasos</button>
+                <button id="btn-tab-errores" onclick="showMainTab('tab-errores')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Tipos de error</button>
+                <button id="btn-tab-aplicaciones" onclick="showMainTab('tab-aplicaciones')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Aplicaciones</button>
+            </div>
+
+            <!-- ══ TAB 1: ¿QUÉ ES? ══ -->
+            <div id="tab-que-es" class="main-tab-content bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <div class="card-institucional p-5">
+                        <h4 class="font-bold text-green-800 mb-2">📌 Definición: Prueba de hipótesis</h4>
+                        <p class="text-sm">Una <strong>prueba de hipótesis</strong> es un procedimiento estadístico que utiliza los datos de una muestra para decidir entre dos afirmaciones opuestas sobre una población, determinando si la evidencia es suficiente para rechazar una suposición inicial.</p>
+                    </div>
+                    <p>En pocas palabras: es una forma de responder preguntas del tipo "¿este cambio realmente sirvió?" o "¿esta diferencia es real o fue casualidad?" usando datos en lugar de opiniones.</p>
+
+                    <h4 class="font-bold text-green-800 text-lg">⚖️ La lógica del juicio</h4>
+                    <p>Toda prueba de hipótesis funciona como un juicio en el que la afirmación "no hay cambio" es la inocente por defecto.</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead><tr class="bg-green-800 text-white"><th class="p-3 text-left rounded-tl-lg">En un juicio</th><th class="p-3 text-left rounded-tr-lg">En una prueba de hipótesis</th></tr></thead>
+                            <tbody>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3">Se presume inocencia</td><td class="p-3">Se presume que no hay cambio (H0)</td></tr>
+                                <tr class="bg-white border-b border-slate-200"><td class="p-3">El fiscal debe probar la culpa</td><td class="p-3">Los datos deben probar que sí hay cambio (H1)</td></tr>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3">Solo se condena con evidencia fuerte</td><td class="p-3">Solo se rechaza H0 con evidencia fuerte</td></tr>
+                                <tr class="bg-white"><td class="p-3">"No culpable" no es lo mismo que "inocente"</td><td class="p-3">"No rechazar H0" no prueba que H0 sea verdadera</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center italic">Tabla 1. Analogía entre un juicio y una prueba de hipótesis.</p>
+
+                    <!-- Mini-reto -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-5">
+                        <h4 class="font-bold text-amber-800 mb-3">⚡ Mini-reto</h4>
+                        <p class="text-sm mb-3">Tu app bajó de 3.0 a 2.8 segundos en una muestra. ¿Por qué no basta con mirar esa diferencia y ya, sin hacer una prueba de hipótesis?</p>
+                        <div id="mini-reto-1" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderMiniReto(this, true, 1)">Porque esa diferencia podría deberse solo al azar del muestreo, y hay que evaluar si es lo bastante fuerte para ser real.</div>
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderMiniReto(this, false, 1)">Porque las pruebas de hipótesis eliminan por completo la necesidad de tomar muestras.</div>
+                        </div>
+                        <p id="mini-reto-1-fb" class="text-sm mt-3 font-medium"></p>
+                    </div>
+
+                    <!-- RECURSO EXTERNO id="recurso-ext-1" — activado -->
+                    <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-3 flex-wrap">
+                            <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Video</span>
+                        </div>
+                        <p class="text-green-800 font-semibold mb-3">Hipótesis de investigación, nula y alternativa, FÁCIL CON EJEMPLOS</p>
+                        <div class="ratio-16x9 rounded-lg overflow-hidden border-4 border-green-500" style="position:relative;padding-top:56.25%;">
+                            <iframe src="https://www.youtube.com/embed/f9M_24JmjMw"
+                                title="Hipótesis de investigación, nula y alternativa, FÁCIL CON EJEMPLOS"
+                                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen
+                                style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 2: LAS DOS HIPÓTESIS ══ -->
+            <div id="tab-hipotesis" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <p>En toda prueba se enfrentan dos afirmaciones opuestas y excluyentes:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="card-institucional p-5">
+                            <h4 class="font-bold text-green-800 mb-2">H0 — Hipótesis nula</h4>
+                            <p class="text-sm">La suposición "por defecto": afirma que no hay cambio, no hay diferencia o no hay efecto. Es la "inocente" del juicio. Casi siempre contiene un signo de igualdad (=).</p>
+                        </div>
+                        <div class="card-institucional-alt p-5">
+                            <h4 class="font-bold text-blue-800 mb-2">H1 — Hipótesis alternativa</h4>
+                            <p class="text-sm">Lo que el investigador quiere demostrar: afirma que sí hay un cambio, una diferencia o un efecto. Es la "acusación", que solo se acepta si los datos aportan evidencia fuerte a su favor.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <h4 class="font-bold text-slate-700 mb-3 text-center">🔀 De la pregunta a las dos hipótesis</h4>
+                        <div class="overflow-x-auto">
+                            <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto block" style="min-width:340px">
+                                <defs>
+                                    <marker id="arrHip" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+                                        <polygon points="0 0,9 3,0 6" fill="#166534"/>
+                                    </marker>
+                                </defs>
+                                <circle cx="90" cy="110" r="60" fill="#f1f5f9" stroke="#64748b" stroke-width="2.5"/>
+                                <text x="90" y="105" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" fill="#334155">PREGUNTA DE</text>
+                                <text x="90" y="120" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" fill="#334155">INVESTIGACIÓN</text>
+                                <line x1="145" y1="95" x2="240" y2="55" stroke="#15803d" stroke-width="2" marker-end="url(#arrHip)"/>
+                                <line x1="145" y1="125" x2="240" y2="165" stroke="#1d4ed8" stroke-width="2" marker-end="url(#arrHip)"/>
+                                <circle cx="310" cy="50" r="55" fill="#dcfce7" stroke="#15803d" stroke-width="2.5"/>
+                                <text x="310" y="46" text-anchor="middle" font-family="Poppins,sans-serif" font-size="13" font-weight="700" fill="#166534">H0</text>
+                                <text x="310" y="62" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" fill="#166534">no hay cambio</text>
+                                <circle cx="310" cy="170" r="55" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2.5"/>
+                                <text x="310" y="166" text-anchor="middle" font-family="Poppins,sans-serif" font-size="13" font-weight="700" fill="#1e3a8a">H1</text>
+                                <text x="310" y="182" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" fill="#1e3a8a">sí hay cambio</text>
+                                <line x1="365" y1="70" x2="460" y2="100" stroke="#b45309" stroke-width="2" marker-end="url(#arrHip)"/>
+                                <line x1="365" y1="150" x2="460" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#arrHip)"/>
+                                <circle cx="520" cy="110" r="60" fill="#fde68a" stroke="#b45309" stroke-width="2.5"/>
+                                <text x="520" y="105" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" fill="#78350f">LOS DATOS</text>
+                                <text x="520" y="120" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" fill="#78350f">DECIDEN</text>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 text-center italic mt-1">Figura 1. Las dos hipótesis en competencia: H0 se mantiene salvo que la evidencia sea suficientemente fuerte para inclinar la balanza hacia H1.</p>
+                    </div>
+
+                    <div class="card-institucional p-5">
+                        <h4 class="font-bold text-green-800 mb-2">Ejemplo — Formular las hipótesis</h4>
+                        <p class="text-sm mb-2">Afirmación a probar: <em>"La nueva versión de la app abre en menos de 3 segundos en promedio."</em></p>
+                        <p class="text-sm font-mono bg-slate-50 rounded p-2 border border-slate-200">H0: μ = 3 (el tiempo promedio es igual a 3 s, no hubo mejora)</p>
+                        <p class="text-sm font-mono bg-slate-50 rounded p-2 border border-slate-200 mt-1">H1: μ &lt; 3 (el tiempo promedio es menor que 3 s, sí hubo mejora)</p>
+                        <p class="text-sm mt-2 text-green-700">La prueba decidirá, con base en los datos, si hay evidencia suficiente para rechazar H0 y quedarse con H1.</p>
+                    </div>
+
+                    <!-- FORMULADOR DE HIPÓTESIS -->
+                    <div class="bg-slate-50 rounded-xl p-5 border-2 border-green-300">
+                        <h4 class="font-bold text-slate-700 mb-3">🧩 Formulador de hipótesis — practica con dos casos</h4>
+
+                        <p class="text-sm font-semibold text-slate-700 mb-2">Caso 1: Un videojuego afirma que su nuevo servidor soporta más de 1000 usuarios simultáneos (antes soportaba 1000).</p>
+                        <div id="form-hip-1" class="grid grid-cols-1 gap-2 mb-5">
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderFormHip(this, false, 1)">H0: el servidor soporta más de 1000 usuarios &nbsp;/&nbsp; H1: el servidor soporta 1000 usuarios</div>
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderFormHip(this, true, 1)">H0: el servidor soporta 1000 usuarios (μ = 1000) &nbsp;/&nbsp; H1: el servidor soporta más de 1000 (μ &gt; 1000)</div>
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderFormHip(this, false, 1)">H0: el servidor soporta menos de 1000 usuarios &nbsp;/&nbsp; H1: el servidor soporta 1000 usuarios</div>
+                        </div>
+                        <p id="form-hip-1-fb" class="text-sm mb-5 font-medium"></p>
+
+                        <p class="text-sm font-semibold text-slate-700 mb-2">Caso 2: Una app de streaming cree que su tasa de buffering cambió respecto a la anterior (que era del 5 %).</p>
+                        <div id="form-hip-2" class="grid grid-cols-1 gap-2">
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderFormHip(this, true, 2)">H0: la tasa de buffering es igual al 5 % (p = 0.05) &nbsp;/&nbsp; H1: la tasa de buffering es distinta al 5 % (p ≠ 0.05)</div>
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderFormHip(this, false, 2)">H0: la tasa de buffering es mayor al 5 % &nbsp;/&nbsp; H1: la tasa de buffering es del 5 %</div>
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderFormHip(this, false, 2)">H0: no existe la tasa de buffering &nbsp;/&nbsp; H1: la tasa de buffering es del 5 %</div>
+                        </div>
+                        <p id="form-hip-2-fb" class="text-sm mt-3 font-medium"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 3: SIGNIFICANCIA Y VALOR P ══ -->
+            <div id="tab-significancia" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="card-institucional p-5">
+                            <h4 class="font-bold text-green-800 mb-2">α — Nivel de significancia</h4>
+                            <p class="text-sm">El límite que fijamos <strong>antes</strong> de la prueba para decidir qué tan fuerte debe ser la evidencia. Es el riesgo que aceptamos de equivocarnos al rechazar H0. Los valores más usados son α = 0.05 (5 %) y α = 0.01 (1 %).</p>
+                        </div>
+                        <div class="card-institucional-alt p-5">
+                            <h4 class="font-bold text-blue-800 mb-2">Valor p</h4>
+                            <p class="text-sm">La probabilidad de haber obtenido un resultado como el observado (o más extremo) si H0 fuera verdadera. Mide qué tan "sorprendentes" son los datos si asumimos que no hubo ningún cambio.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-600 rounded-r-xl p-5">
+                        <h4 class="font-bold text-amber-800 mb-2">🎯 La regla de decisión</h4>
+                        <p class="text-sm mb-2">Comparamos el valor p con el nivel de significancia α:</p>
+                        <ul class="text-sm list-disc pl-5 space-y-1">
+                            <li>Si <strong>p ≤ α</strong>: se <strong>rechaza H0</strong>. La evidencia es suficientemente fuerte; el resultado es estadísticamente significativo.</li>
+                            <li>Si <strong>p &gt; α</strong>: <strong>no se rechaza H0</strong>. La evidencia no alcanza; el resultado pudo deberse al azar.</li>
+                        </ul>
+                        <p class="text-sm mt-3 font-bold text-amber-900">💬 "Si p es pequeño, H0 se va."</p>
+                    </div>
+
+                    <!-- SIMULADOR: SEMÁFORO DE DECISIÓN -->
+                    <div class="bg-slate-50 rounded-xl p-5 border-2 border-green-300">
+                        <h4 class="font-bold text-slate-700 mb-3">🚦 Simulador — Semáforo de decisión</h4>
+                        <p class="text-sm text-slate-600 mb-4">Mueve el valor p y elige α para ver cómo cambia la decisión en tiempo real.</p>
+
+                        <div class="flex flex-wrap gap-2 mb-4" id="gauge-alpha-selector">
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold active-dyn" data-alpha="0.05" onclick="seleccionarAlpha(0.05, this)">α = 0.05</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-alpha="0.01" onclick="seleccionarAlpha(0.01, this)">α = 0.01</button>
+                        </div>
+
+                        <label class="text-xs font-semibold text-slate-600 mb-1 block">Valor p = <span id="gauge-pval-label">0.20</span></label>
+                        <input type="range" id="gauge-pval" min="0" max="1" step="0.01" value="0.20" class="w-full mb-4" oninput="actualizarGauge()">
+
+                        <div class="gauge-track mb-2">
+                            <div id="gauge-fill" class="gauge-fill"></div>
+                            <div id="gauge-alpha-line" class="gauge-alpha-line"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500 mb-4"><span>p = 0</span><span>p = 1</span></div>
+
+                        <div id="gauge-resultado" class="hero-institucional rounded-xl p-4 text-white text-center">
+                            <p class="text-sm opacity-90">Resultado:</p>
+                            <p id="gauge-decision" class="text-xl font-bold"></p>
+                        </div>
+                    </div>
+
+                    <!-- RETO RÁPIDO -->
+                    <div class="hero-institucional rounded-xl p-5 text-white">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                            <h4 class="font-bold text-lg">⚡ Reto rápido: ¿rechazas o no rechazas H0?</h4>
+                            <span id="reto-p-badge" class="badge-chip hidden">🏅 ¡Regla de decisión dominada!</span>
+                        </div>
+                        <p class="text-sm opacity-90 mb-4">Genera un caso al azar y decide rápido.</p>
+                        <button onclick="generarCasoP()" class="bg-white text-green-800 font-bold py-2 px-6 rounded-lg hover:bg-amber-100 transition-colors mb-4">🎲 Generar caso</button>
+                        <div id="reto-p-caso" class="bg-white/10 rounded-lg p-4 text-center mb-4 hidden">
+                            <p class="text-lg font-bold" id="reto-p-datos"></p>
+                            <div class="flex justify-center gap-3 mt-3">
+                                <button onclick="responderRetoP(true)" class="bg-white text-green-800 font-bold py-2 px-5 rounded-lg hover:bg-green-100">Rechazar H0</button>
+                                <button onclick="responderRetoP(false)" class="bg-white text-red-700 font-bold py-2 px-5 rounded-lg hover:bg-red-100">No rechazar H0</button>
+                            </div>
+                        </div>
+                        <p id="reto-p-feedback" class="text-sm bg-white/10 rounded-lg p-3 hidden"></p>
+                        <p class="text-center text-sm mt-3">Aciertos: <strong id="reto-p-tally">0 / 0</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 4: LOS PASOS ══ -->
+            <div id="tab-pasos" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <p>Aunque existen muchos tipos de pruebas, todas siguen los mismos pasos generales:</p>
+                    <ol class="list-decimal pl-5 text-sm space-y-1">
+                        <li>Plantear las hipótesis H0 y H1 a partir de la afirmación que se quiere evaluar.</li>
+                        <li>Fijar el nivel de significancia α (normalmente 0.05).</li>
+                        <li>Recolectar los datos de la muestra y calcular el estadístico correspondiente.</li>
+                        <li>Obtener el valor p asociado a ese resultado.</li>
+                        <li>Tomar la decisión: comparar el valor p con α.</li>
+                        <li>Interpretar la conclusión en el contexto del problema, en lenguaje claro.</li>
+                    </ol>
+
+                    <!-- WALKTHROUGH -->
+                    <div class="bg-slate-50 rounded-xl p-5 border-2 border-green-300">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                            <h4 class="font-bold text-slate-700">🪜 Sigamos el ejemplo completo: ¿la nueva versión es más rápida?</h4>
+                            <span id="pasos-badge" class="badge-chip hidden">🏅 ¡Procedimiento dominado!</span>
+                        </div>
+                        <div class="flex items-center gap-2 mb-4" id="pasos-dots">
+                            <span class="step-dot" data-step="1"></span><span class="step-dot" data-step="2"></span><span class="step-dot" data-step="3"></span><span class="step-dot" data-step="4"></span><span class="step-dot" data-step="5"></span>
+                        </div>
+                        <div id="pasos-content" class="min-h-24"></div>
+                        <div class="flex gap-3 mt-4">
+                            <button id="pasos-btn" onclick="siguientePaso()" class="bg-green-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-800 transition-colors">Ver paso 1</button>
+                            <button onclick="reiniciarPasos()" class="bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors">Reiniciar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 5: TIPOS DE ERROR ══ -->
+            <div id="tab-errores" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <p>Como la decisión se toma con base en una muestra, siempre existe el riesgo de equivocarse. Hay dos formas de error posibles:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="card-institucional p-5">
+                            <h4 class="font-bold text-green-800 mb-1">🚨 Error tipo I (falso positivo)</h4>
+                            <p class="text-sm">Ocurre cuando rechazamos H0 siendo verdadera: concluimos que hay un cambio cuando en realidad no lo hay. Es como condenar a un inocente. Su probabilidad es exactamente <strong>α</strong>.</p>
+                            <p class="text-xs text-slate-500 mt-2">Ej: afirmar que la nueva versión es más rápida cuando en realidad es igual de lenta.</p>
+                        </div>
+                        <div class="card-institucional-alt p-5">
+                            <h4 class="font-bold text-blue-800 mb-1">🙈 Error tipo II (falso negativo)</h4>
+                            <p class="text-sm">Ocurre cuando no rechazamos H0 siendo falsa: concluimos que no hay cambio cuando en realidad sí lo hay. Es como dejar libre a un culpable. Su probabilidad se representa con <strong>β</strong>.</p>
+                            <p class="text-xs text-slate-500 mt-2">Ej: no detectar que la nueva versión es más rápida cuando en verdad sí lo es.</p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead><tr class="bg-green-800 text-white"><th class="p-3 text-left rounded-tl-lg"></th><th class="p-3 text-left">H0 es verdadera</th><th class="p-3 text-left rounded-tr-lg">H0 es falsa</th></tr></thead>
+                            <tbody>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3 font-semibold">Se rechaza H0</td><td class="p-3 text-red-700">Error tipo I (falso positivo). Prob. = α</td><td class="p-3 text-green-700">Decisión correcta</td></tr>
+                                <tr class="bg-white"><td class="p-3 font-semibold">No se rechaza H0</td><td class="p-3 text-green-700">Decisión correcta</td><td class="p-3 text-red-700">Error tipo II (falso negativo). Prob. = β</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center italic">Tabla 2. Los dos tipos de error en una prueba de hipótesis.</p>
+
+                    <!-- CLASIFICADOR DE ERRORES -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-5">
+                        <h4 class="font-bold text-amber-800 mb-3">🔍 Clasifica el error</h4>
+                        <p class="text-sm mb-3"><strong>Situación 1:</strong> Un equipo concluye que su optimización redujo el tiempo de respuesta del servidor, pero en realidad el servidor sigue igual de lento que antes.</p>
+                        <div id="clasif-1" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                            <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="true" onclick="responderClasif(this, true, 1)">Error tipo I</div>
+                            <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="false" onclick="responderClasif(this, false, 1)">Error tipo II</div>
+                        </div>
+                        <p id="clasif-1-fb" class="text-sm mb-5 font-medium"></p>
+
+                        <p class="text-sm mb-3"><strong>Situación 2:</strong> Un modelo de machine learning en realidad sí es más preciso que el anterior, pero la prueba concluye que "no hay diferencia significativa".</p>
+                        <div id="clasif-2" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="false" onclick="responderClasif(this, false, 2)">Error tipo I</div>
+                            <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="true" onclick="responderClasif(this, true, 2)">Error tipo II</div>
+                        </div>
+                        <p id="clasif-2-fb" class="text-sm mt-3 font-medium"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 6: APLICACIONES ══ -->
+            <div id="tab-aplicaciones" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-3 text-slate-700">
+                    <h4 class="font-bold text-green-800 text-lg mb-2">Aplicaciones en el desarrollo de software</h4>
+                    <p class="mb-3 text-sm">Haz clic en cada tarjeta para expandirla:</p>
+
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-ab')">
+                            🧪 Pruebas A/B <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-ab" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Son pruebas de hipótesis puras. Se comparan dos versiones (A y B) de una app o página y se decide si la diferencia en clics, ventas o registros es estadísticamente significativa o fruto del azar.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-rendimiento')">
+                            ⚡ Rendimiento <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-rendimiento" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Comprobar si una optimización realmente redujo el tiempo de respuesta del servidor, y no fue solo variación normal.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-calidad')">
+                            ✅ Calidad de software <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-calidad" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Decidir si una nueva versión tiene una tasa de errores menor que la anterior con evidencia estadística.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-ml')">
+                            🤖 Machine learning <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-ml" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Comparar dos modelos para decidir si uno es realmente más preciso que el otro o si la diferencia no es significativa.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-ux')">
+                            🎨 Experiencia de usuario <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-ux" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Validar si un cambio de diseño aumenta de verdad el tiempo de permanencia de los usuarios en la app.</div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════ ACTIVIDADES ══════════════════════ -->
+        <div id="actividades" class="content-pane">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800">Actividades prácticas</h2>
+                <span id="act-score-chip" class="score-chip">🏅 Puntaje: 0 / 9</span>
+            </div>
+
+            <!-- ACTIVIDAD 1 -->
+            <div class="bg-white border-l-4 border-green-700 rounded-lg shadow-sm p-6 mb-8">
+                <h3 class="text-xl font-bold text-slate-700 mb-4">🧩 Misión 1 — Formulador de Hipótesis</h3>
+                <p class="text-slate-600 mb-4 text-sm">Para cada afirmación, elige el par correcto de hipótesis H0 / H1.</p>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">1. Un equipo afirma que su nueva actualización reduce el consumo de batería (antes era 20 % por hora).</p>
+                <div id="act1-q1" class="grid grid-cols-1 gap-2 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct1(this, true, 1)">H0: el consumo es igual al 20 % (p = 0.20) &nbsp;/&nbsp; H1: el consumo es menor al 20 % (p &lt; 0.20)</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 1)">H0: el consumo es menor al 20 % &nbsp;/&nbsp; H1: el consumo es igual al 20 %</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 1)">H0: el consumo aumentó &nbsp;/&nbsp; H1: el consumo se mantuvo igual</div>
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">2. Se quiere comprobar si el tiempo promedio de respuesta de un servidor es distinto de 200 ms.</p>
+                <div id="act1-q2" class="grid grid-cols-1 gap-2 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 2)">H0: el tiempo es menor a 200 ms &nbsp;/&nbsp; H1: el tiempo es igual a 200 ms</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct1(this, true, 2)">H0: el tiempo es igual a 200 ms (μ = 200) &nbsp;/&nbsp; H1: el tiempo es distinto de 200 ms (μ ≠ 200)</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 2)">H0: el tiempo es mayor a 200 ms &nbsp;/&nbsp; H1: el tiempo es menor a 200 ms</div>
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">3. Una tienda online cree que su nuevo botón de compra aumenta el porcentaje de usuarios que compran (antes era 15 %).</p>
+                <div id="act1-q3" class="grid grid-cols-1 gap-2 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct1(this, true, 3)">H0: la proporción es igual al 15 % (p = 0.15) &nbsp;/&nbsp; H1: la proporción es mayor al 15 % (p &gt; 0.15)</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 3)">H0: la proporción es mayor al 15 % &nbsp;/&nbsp; H1: la proporción es igual al 15 %</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 3)">H0: la proporción es distinta al 15 % &nbsp;/&nbsp; H1: la proporción es igual al 15 %</div>
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">4. Se desea verificar si la proporción de pruebas que fallan es menor al 10 % con la nueva versión.</p>
+                <div id="act1-q4" class="grid grid-cols-1 gap-2">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 4)">H0: la proporción de fallos es menor al 10 % &nbsp;/&nbsp; H1: la proporción es igual al 10 %</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct1(this, true, 4)">H0: la proporción de fallos es igual al 10 % (p = 0.10) &nbsp;/&nbsp; H1: la proporción es menor al 10 % (p &lt; 0.10)</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct1(this, false, 4)">H0: la proporción de fallos es mayor al 10 % &nbsp;/&nbsp; H1: la proporción es menor al 10 %</div>
+                </div>
+                <div id="act1-feedback" class="mt-4 text-sm font-medium"></div>
+                <button onclick="reiniciarActividad1()" class="mt-4 bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors">Reiniciar Misión 1</button>
+            </div>
+
+            <!-- ACTIVIDAD 2 -->
+            <div class="bg-white border-l-4 border-blue-700 rounded-lg shadow-sm p-6 mb-8">
+                <h3 class="text-xl font-bold text-slate-700 mb-4">🔬 Misión 2 — Detective del Valor p</h3>
+                <p class="text-slate-600 mb-4 text-sm">En cada caso, decide si se rechaza o no H0.</p>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">A. Prueba A/B de un botón nuevo: valor p = 0.03, α = 0.05.</p>
+                <div id="act2-q1" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="true" onclick="responderAct2(this, true, 1)">Se rechaza H0</div>
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="false" onclick="responderAct2(this, false, 1)">No se rechaza H0</div>
+                </div>
+                <p id="act2-q1-fb" class="text-xs text-slate-600 mb-5"></p>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">B. Prueba de velocidad de un servidor: valor p = 0.12, α = 0.05.</p>
+                <div id="act2-q2" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="false" onclick="responderAct2(this, false, 2)">Se rechaza H0</div>
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="true" onclick="responderAct2(this, true, 2)">No se rechaza H0</div>
+                </div>
+                <p id="act2-q2-fb" class="text-xs text-slate-600 mb-5"></p>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">C. Prueba de tasa de errores: valor p = 0.008, α = 0.01.</p>
+                <div id="act2-q3" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="true" onclick="responderAct2(this, true, 3)">Se rechaza H0</div>
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="false" onclick="responderAct2(this, false, 3)">No se rechaza H0</div>
+                </div>
+                <p id="act2-q3-fb" class="text-xs text-slate-600 mb-5"></p>
+
+                <div class="mt-2">
+                    <p class="text-slate-600 mb-2 text-sm font-semibold">Reflexión para tu cuaderno (no se califica):</p>
+                    <p class="text-slate-600 mb-3 text-sm">¿Por qué un valor p pequeño es evidencia en contra de la hipótesis nula?</p>
+                    <textarea id="act2-reflexion" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Escribe aquí tu reflexión..."></textarea>
+                </div>
+                <div id="act2-feedback" class="mt-4 text-sm font-medium"></div>
+                <button onclick="reiniciarActividad2()" class="mt-4 bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors">Reiniciar Misión 2</button>
+            </div>
+
+            <!-- ACTIVIDAD 3 -->
+            <div class="bg-white border-l-4 border-amber-600 rounded-lg shadow-sm p-6">
+                <h3 class="text-xl font-bold text-slate-700 mb-2">🏆 Reto final — Analista de Decisiones</h3>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm text-slate-700">
+                    Un equipo de desarrollo prueba si su nueva versión reduce el tiempo de carga (antes 4 segundos). Obtienen un valor p = 0.01 con α = 0.05.
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">1. ¿Cuál es la hipótesis nula correcta para este caso?</p>
+                <div id="act3-q1" class="grid grid-cols-1 gap-2 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct3(this, true, 1)">H0: el tiempo promedio de carga es igual a 4 s (no hubo mejora)</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct3(this, false, 1)">H0: el tiempo promedio de carga es menor a 4 s (sí hubo mejora)</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct3(this, false, 1)">H0: el tiempo promedio de carga es mayor a 4 s</div>
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">2. Con p = 0.01 y α = 0.05, ¿qué decisión se toma?</p>
+                <div id="act3-q2" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="true" onclick="responderAct3(this, true, 2)">Se rechaza H0: la mejora es real</div>
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-correct="false" onclick="responderAct3(this, false, 2)">No se rechaza H0: no hay evidencia de mejora</div>
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">3. En este caso, un error tipo I sería:</p>
+                <div id="act3-q3" class="grid grid-cols-1 gap-2 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct3(this, true, 3)">Concluir que la nueva versión es más rápida cuando en realidad el tiempo de carga sigue igual.</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct3(this, false, 3)">No detectar que la nueva versión sí es más rápida cuando en realidad sí lo es.</div>
+                </div>
+
+                <p class="text-sm font-semibold text-slate-700 mb-2">4. Y un error tipo II sería:</p>
+                <div id="act3-q4" class="grid grid-cols-1 gap-2 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderAct3(this, false, 4)">Concluir que la nueva versión es más rápida cuando en realidad el tiempo de carga sigue igual.</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderAct3(this, true, 4)">No detectar que la nueva versión sí es más rápida cuando en realidad sí lo es.</div>
+                </div>
+
+                <div class="mt-2 mb-4">
+                    <p class="text-slate-600 mb-2 text-sm font-semibold">Reflexión (no se califica):</p>
+                    <p class="text-slate-600 mb-3 text-sm">¿Cuál de los dos errores te parece más grave para la empresa y por qué?</p>
+                    <textarea id="act3-reflexion1" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Escribe aquí tu reflexión..."></textarea>
+                </div>
+
+                <div class="mt-2 mb-4">
+                    <p class="text-slate-600 mb-2 text-sm font-semibold">Reflexión (no se califica):</p>
+                    <p class="text-slate-600 mb-3 text-sm">Un analista concluye: "como no rechazamos H0, queda demostrado que la nueva versión es idéntica a la anterior." ¿Por qué esa afirmación es incorrecta? (recuerda la analogía del juicio: "no culpable" no significa "inocente")</p>
+                    <textarea id="act3-reflexion2" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Escribe aquí tu reflexión..."></textarea>
+                </div>
+
+                <div id="act3-badges" class="flex flex-wrap gap-2"></div>
+                <div id="act3-feedback" class="mt-4 text-sm font-medium"></div>
+                <button onclick="reiniciarActividad3()" class="mt-4 bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors">Reiniciar Reto final</button>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ EVALUACIÓN ══════════════════════ -->
+        <div id="evaluacion" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                <div id="quiz-container"></div>
+                <div class="flex gap-4 mt-6">
+                    <button id="submit-quiz-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <button id="reset-quiz-btn" class="bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors hidden">Reiniciar evaluación</button>
+                </div>
+                <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ RECURSOS ══════════════════════ -->
+        <div id="recursos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+            <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre pruebas de hipótesis:</p>
+            <ul class="space-y-4">
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Video — Pruebas de hipótesis explicadas fácil</h3>
+                        <p class="text-slate-600 mb-2">Búsqueda en video sobre H0, H1, nivel de significancia y valor p</p>
+                        <a href="https://www.youtube.com/results?search_query=pruebas+de+hipotesis+explicado+facil" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr1.png" alt="QR Video pruebas de hipótesis" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Recurso interactivo — Educaplay</h3>
+                        <p class="text-slate-600 mb-2">Plataforma de actividades interactivas de repaso sobre estadística</p>
+                        <a href="https://es.educaplay.com" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr2.png" alt="QR Recurso interactivo Educaplay" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ══════════════════════ BIBLIOGRAFÍA ══════════════════════ -->
+        <div id="bibliografia" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+            <div class="space-y-4">
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Cadena Lozano, J. B. (2024). <em>Estadística descriptiva y probabilidad para los negocios</em>. Editorial CESA.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Lind, D. A., Marchal, W. G., y Wathen, S. A. (2019). <em>Estadística aplicada a los negocios y la economía</em> (17.ª ed.). McGraw-Hill Education.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Mendenhall, W., Beaver, R. J., y Beaver, B. M. (2015). <em>Introducción a la probabilidad y estadística</em> (14.ª ed.). Cengage Learning.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Triola, M. F. (2018). <em>Estadística</em> (12.ª ed.). Pearson Educación.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Walpole, R. E., Myers, R. H., Myers, S. L., y Ye, K. (2012). <em>Probabilidad y estadística para ingeniería y ciencias</em> (9.ª ed.). Pearson Educación.</span></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- FOOTER FIJO EN TODAS LAS PÁGINAS -->
+<footer class="w-full py-6 border-t-2 border-slate-200 text-center bg-white md:ml-64 md:w-[calc(100%-16rem)]">
+    <p class="text-slate-600 font-medium">Creado por:</p>
+    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+</footer>
+
+</div>
+
+<script>
+/* ==================== NAVEGACIÓN ==================== */
+document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = this.dataset.target;
+        document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+        this.classList.add('active');
+    });
+});
+document.getElementById('mobile-nav').addEventListener('change', function() {
+    document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById(this.value).classList.add('active');
+});
+
+/* ==================== PESTAÑAS DE CONTENIDO ==================== */
+function showMainTab(tabId) {
+    document.querySelectorAll('.main-tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.main-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-green-700', 'text-white', 'border-green-700');
+        btn.classList.add('bg-white', 'text-slate-600', 'border-green-200');
+    });
+    document.getElementById(tabId).classList.remove('hidden');
+    const btn = document.getElementById('btn-' + tabId);
+    btn.classList.add('bg-green-700', 'text-white', 'border-green-700');
+    btn.classList.remove('bg-white', 'text-slate-600', 'border-green-200');
+}
+
+/* ==================== ACORDEÓN (Aplicaciones) ==================== */
+function toggleAcc(btn, panelId) {
+    const panel = document.getElementById(panelId);
+    const isOpen = btn.classList.contains('acc-open');
+    document.querySelectorAll('.acc-panel').forEach(p => p.style.maxHeight = null);
+    document.querySelectorAll('.acc-btn').forEach(b => b.classList.remove('acc-open'));
+    if (!isOpen) {
+        btn.classList.add('acc-open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+    }
+}
+
+/* ==================== PUNTAJE DE CONTENIDO ==================== */
+let contenidoScore = 0;
+const contenidoLogros = new Set();
+function sumarContenido(id, pts) {
+    if (contenidoLogros.has(id)) return;
+    contenidoLogros.add(id);
+    contenidoScore += pts;
+    document.getElementById('contenido-score-chip').textContent = `🧭 Puntos de exploración: ${contenidoScore}`;
+}
+
+function responderMiniReto(el, esCorrecta, num) {
+    const contenedor = document.getElementById('mini-reto-' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    const fb = document.getElementById('mini-reto-' + num + '-fb');
+    if (esCorrecta) {
+        el.classList.add('correct');
+        fb.textContent = '✅ ¡Correcto! Una diferencia observada puede deberse al azar; por eso hace falta una prueba formal.';
+        fb.className = 'text-sm mt-3 font-medium text-green-700';
+        sumarContenido('mini-reto-1', 2);
+    } else {
+        el.classList.add('wrong');
+        fb.textContent = '❌ No es eso. Siempre se necesitan muestras; la prueba de hipótesis evalúa si la diferencia observada es real o azar.';
+        fb.className = 'text-sm mt-3 font-medium text-red-600';
+    }
+}
+
+function responderFormHip(el, esCorrecta, num) {
+    const contenedor = document.getElementById('form-hip-' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    const fb = document.getElementById('form-hip-' + num + '-fb');
+    if (esCorrecta) {
+        el.classList.add('correct');
+        fb.textContent = '✅ ¡Correcto!';
+        fb.className = 'text-sm mb-5 font-medium text-green-700';
+        sumarContenido('form-hip-' + num, 2);
+    } else {
+        el.classList.add('wrong');
+        contenedor.querySelectorAll('.game-option').forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+        fb.textContent = '❌ Revisa la opción marcada en verde: H0 siempre lleva el signo de igualdad.';
+        fb.className = 'text-sm mb-5 font-medium text-red-600';
+    }
+}
+
+/* ==================== SEMÁFORO DE DECISIÓN ==================== */
+let gaugeAlpha = 0.05;
+function seleccionarAlpha(alpha, btn) {
+    gaugeAlpha = alpha;
+    document.querySelectorAll('#gauge-alpha-selector .dyn-btn').forEach(b => b.classList.remove('active-dyn'));
+    btn.classList.add('active-dyn');
+    renderGauge();
+    sumarContenido('gauge-uso', 2);
+}
+function actualizarGauge() {
+    renderGauge();
+    sumarContenido('gauge-uso', 2);
+}
+function renderGauge() {
+    const p = parseFloat(document.getElementById('gauge-pval').value);
+    document.getElementById('gauge-pval-label').textContent = p.toFixed(2);
+    const fill = document.getElementById('gauge-fill');
+    const rechaza = p <= gaugeAlpha;
+    fill.style.width = (p * 100) + '%';
+    fill.style.background = rechaza ? '#4ade80' : '#fca5a5';
+    document.getElementById('gauge-alpha-line').style.left = (gaugeAlpha * 100) + '%';
+    const decision = document.getElementById('gauge-decision');
+    if (rechaza) {
+        decision.textContent = '✅ Se rechaza H0 (resultado significativo)';
+    } else {
+        decision.textContent = '❌ No se rechaza H0 (pudo ser azar)';
+    }
+}
+
+/* ==================== RETO RÁPIDO: VALOR P ==================== */
+let retoPActual = null, retoPTotal = 0, retoPAciertos = 0;
+function generarCasoP() {
+    const alpha = Math.random() < 0.5 ? 0.05 : 0.01;
+    let p;
+    do { p = Math.round(Math.random() * 100) / 100; } while (Math.abs(p - alpha) < 0.005);
+    retoPActual = { p, alpha, rechaza: p <= alpha };
+    document.getElementById('reto-p-caso').classList.remove('hidden');
+    document.getElementById('reto-p-datos').textContent = `valor p = ${p.toFixed(2)}   |   α = ${alpha}`;
+    document.getElementById('reto-p-feedback').classList.add('hidden');
+}
+function responderRetoP(eligeRechazar) {
+    if (!retoPActual) return;
+    retoPTotal++;
+    const correcto = eligeRechazar === retoPActual.rechaza;
+    if (correcto) retoPAciertos++;
+    document.getElementById('reto-p-tally').textContent = `${retoPAciertos} / ${retoPTotal}`;
+    const fb = document.getElementById('reto-p-feedback');
+    fb.classList.remove('hidden');
+    fb.textContent = correcto
+        ? `✅ ¡Correcto! p = ${retoPActual.p.toFixed(2)} ${retoPActual.rechaza ? '≤' : '>'} α = ${retoPActual.alpha} → ${retoPActual.rechaza ? 'se rechaza H0' : 'no se rechaza H0'}.`
+        : `❌ No. p = ${retoPActual.p.toFixed(2)} ${retoPActual.rechaza ? '≤' : '>'} α = ${retoPActual.alpha} → ${retoPActual.rechaza ? 'se rechaza H0' : 'no se rechaza H0'}.`;
+    document.getElementById('reto-p-caso').classList.add('hidden');
+    if (retoPTotal >= 5 && retoPAciertos >= 4) {
+        sumarContenido('reto-p-badge', 3);
+        document.getElementById('reto-p-badge').classList.remove('hidden');
+    }
+}
+
+/* ==================== WALKTHROUGH: LOS PASOS ==================== */
+const PASOS_DATA = [
+    { titulo: 'Paso 1. Hipótesis', texto: 'H0: μ = 3 s (no mejoró) &nbsp;|&nbsp; H1: μ &lt; 3 s (sí mejoró)' },
+    { titulo: 'Paso 2. Nivel de significancia', texto: 'α = 0.05' },
+    { titulo: 'Pasos 3-4. Datos y valor p', texto: 'Con los datos de la muestra, el análisis arroja un valor p = 0.02.' },
+    { titulo: 'Paso 5. Decisión', texto: 'Como p = 0.02 ≤ 0.05 = α, se rechaza H0.' },
+    { titulo: 'Paso 6. Conclusión', texto: 'Hay evidencia estadística suficiente para afirmar que la nueva versión abre, en promedio, en menos de 3 segundos. La mejora es real y no producto del azar.' }
+];
+let pasoActual = 0;
+function siguientePaso() {
+    if (pasoActual >= PASOS_DATA.length) return;
+    const data = PASOS_DATA[pasoActual];
+    const cont = document.getElementById('pasos-content');
+    const div = document.createElement('div');
+    div.className = 'step-card card-institucional p-4 mb-3';
+    div.innerHTML = `<h5 class="font-bold text-green-800 mb-1">${data.titulo}</h5><p class="text-sm">${data.texto}</p>`;
+    cont.appendChild(div);
+    pasoActual++;
+    document.querySelectorAll('#pasos-dots .step-dot').forEach((dot, i) => { if (i < pasoActual) dot.classList.add('done'); });
+    const btn = document.getElementById('pasos-btn');
+    if (pasoActual < PASOS_DATA.length) {
+        btn.textContent = 'Ver ' + PASOS_DATA[pasoActual].titulo.split('.')[0].toLowerCase();
+    }
+    if (pasoActual === PASOS_DATA.length) {
+        btn.textContent = 'Completado';
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        sumarContenido('pasos-badge', 3);
+        document.getElementById('pasos-badge').classList.remove('hidden');
+    }
+}
+function reiniciarPasos() {
+    pasoActual = 0;
+    document.getElementById('pasos-content').innerHTML = '';
+    document.querySelectorAll('#pasos-dots .step-dot').forEach(dot => dot.classList.remove('done'));
+    const btn = document.getElementById('pasos-btn');
+    btn.textContent = 'Ver paso 1';
+    btn.disabled = false;
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    document.getElementById('pasos-badge').classList.add('hidden');
+}
+
+/* ==================== CLASIFICADOR DE ERRORES ==================== */
+function responderClasif(el, esCorrecta, num) {
+    const contenedor = document.getElementById('clasif-' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    const fb = document.getElementById('clasif-' + num + '-fb');
+    if (esCorrecta) {
+        el.classList.add('correct');
+        fb.textContent = '✅ ¡Correcto!';
+        fb.className = num === 1 ? 'text-sm mb-5 font-medium text-green-700' : 'text-sm mt-3 font-medium text-green-700';
+        sumarContenido('clasif-' + num, 2);
+    } else {
+        el.classList.add('wrong');
+        contenedor.querySelectorAll('.game-option').forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+        fb.textContent = '❌ Revisa la opción marcada en verde.';
+        fb.className = num === 1 ? 'text-sm mb-5 font-medium text-red-600' : 'text-sm mt-3 font-medium text-red-600';
+    }
+}
+
+/* ==================== PUNTAJE GLOBAL DE ACTIVIDADES ==================== */
+let actScore = 0;
+const actLogros = new Set();
+function sumarActividad(id, pts) {
+    if (actLogros.has(id)) return;
+    actLogros.add(id);
+    actScore = Math.min(actScore + pts, 9);
+    document.getElementById('act-score-chip').textContent = `🏅 Puntaje: ${actScore.toFixed(1).replace('.0', '')} / 9`;
+}
+
+/* ==================== ACTIVIDAD 1 ==================== */
+function responderAct1(el, esCorrecta, num) {
+    const contenedor = document.getElementById('act1-q' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    if (esCorrecta) {
+        el.classList.add('correct');
+        sumarActividad('act1-' + num, 1);
+    } else {
+        el.classList.add('wrong');
+        contenedor.querySelectorAll('.game-option').forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+    }
+    const fb = document.getElementById('act1-feedback');
+    const total = [1,2,3,4].filter(n => actLogros.has('act1-' + n)).length;
+    fb.className = 'mt-4 text-sm font-medium text-green-700';
+    fb.textContent = `Llevas ${total}/4 correctas en la Misión 1.` + (total === 4 ? ' ✅ ¡Misión 1 completa!' : '');
+}
+function reiniciarActividad1() {
+    [1,2,3,4].forEach(n => {
+        document.querySelectorAll(`#act1-q${n} .game-option`).forEach(o => o.classList.remove('disabled', 'correct', 'wrong'));
+        if (actLogros.has('act1-' + n)) { actLogros.delete('act1-' + n); actScore = Math.max(actScore - 1, 0); }
+    });
+    document.getElementById('act-score-chip').textContent = `🏅 Puntaje: ${actScore.toFixed(1).replace('.0', '')} / 9`;
+    document.getElementById('act1-feedback').textContent = '';
+}
+
+/* ==================== ACTIVIDAD 2 ==================== */
+const ACT2_EXPLICA = {
+    1: '0.03 ≤ 0.05 → se rechaza H0: el botón nuevo tuvo un efecto significativo.',
+    2: '0.12 > 0.05 → no se rechaza H0: no hay evidencia suficiente de un cambio real en la velocidad.',
+    3: '0.008 ≤ 0.01 → se rechaza H0: hay evidencia de que la tasa de errores cambió.'
+};
+function responderAct2(el, esCorrecta, num) {
+    const contenedor = document.getElementById('act2-q' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    if (esCorrecta) {
+        el.classList.add('correct');
+        sumarActividad('act2-' + num, 1);
+    } else {
+        el.classList.add('wrong');
+        contenedor.querySelectorAll('.game-option').forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+    }
+    document.getElementById('act2-q' + num + '-fb').textContent = ACT2_EXPLICA[num];
+    const fb = document.getElementById('act2-feedback');
+    const total = [1,2,3].filter(n => actLogros.has('act2-' + n)).length;
+    fb.className = 'mt-4 text-sm font-medium text-blue-700';
+    fb.textContent = `Llevas ${total}/3 correctas en la Misión 2.` + (total === 3 ? ' ✅ ¡Misión 2 completa!' : '');
+}
+function reiniciarActividad2() {
+    [1,2,3].forEach(n => {
+        document.querySelectorAll(`#act2-q${n} .game-option`).forEach(o => o.classList.remove('disabled', 'correct', 'wrong'));
+        document.getElementById('act2-q' + n + '-fb').textContent = '';
+        if (actLogros.has('act2-' + n)) { actLogros.delete('act2-' + n); actScore = Math.max(actScore - 1, 0); }
+    });
+    document.getElementById('act-score-chip').textContent = `🏅 Puntaje: ${actScore.toFixed(1).replace('.0', '')} / 9`;
+    document.getElementById('act2-feedback').textContent = '';
+}
+
+/* ==================== ACTIVIDAD 3 ==================== */
+function responderAct3(el, esCorrecta, num) {
+    const contenedor = document.getElementById('act3-q' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    if (esCorrecta) {
+        el.classList.add('correct');
+        sumarActividad('act3-' + num, 0.5);
+    } else {
+        el.classList.add('wrong');
+        contenedor.querySelectorAll('.game-option').forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+    }
+    const total = [1,2,3,4].filter(n => actLogros.has('act3-' + n)).length;
+    const fb = document.getElementById('act3-feedback');
+    fb.className = 'mt-4 text-sm font-medium text-amber-700';
+    fb.textContent = `Llevas ${total}/4 correctas en el Reto final.`;
+    if (total === 4) {
+        fb.textContent += ' ✅ ¡Reto completo!';
+        const cont = document.getElementById('act3-badges');
+        cont.innerHTML = '<span class="badge-chip">🏆 ¡Analista de Decisiones desbloqueado!</span>';
+    }
+}
+function reiniciarActividad3() {
+    [1,2,3,4].forEach(n => {
+        document.querySelectorAll(`#act3-q${n} .game-option`).forEach(o => o.classList.remove('disabled', 'correct', 'wrong'));
+        if (actLogros.has('act3-' + n)) { actLogros.delete('act3-' + n); actScore = Math.max(actScore - 0.5, 0); }
+    });
+    document.getElementById('act-score-chip').textContent = `🏅 Puntaje: ${actScore.toFixed(1).replace('.0', '')} / 9`;
+    document.getElementById('act3-feedback').textContent = '';
+    document.getElementById('act3-badges').innerHTML = '';
+}
+
+/* ==================== EVALUACIÓN (QUIZ) ==================== */
+const quizData = [
+    {
+        question: "¿Qué es una prueba de hipótesis?",
+        options: [
+            "Un procedimiento estadístico que usa los datos de una muestra para decidir entre dos afirmaciones opuestas sobre una población",
+            "Un método para calcular el promedio exacto de una población",
+            "Una encuesta de opinión sin base matemática",
+            "Un sinónimo de intervalo de confianza"
+        ],
+        correct: 0
+    },
+    {
+        question: "¿Qué afirma la hipótesis nula (H0)?",
+        options: [
+            "Que definitivamente hay un cambio o efecto",
+            "Que no hay cambio, diferencia o efecto (la suposición por defecto)",
+            "El resultado que el investigador quiere demostrar",
+            "El tamaño de la muestra necesario"
+        ],
+        correct: 1
+    },
+    {
+        question: "El nivel de significancia (α) representa...",
+        options: [
+            "El promedio de la muestra",
+            "El riesgo que aceptamos de rechazar H0 por error, fijado antes de la prueba",
+            "El tamaño mínimo de la muestra",
+            "La probabilidad de que H1 sea verdadera"
+        ],
+        correct: 1
+    },
+    {
+        question: "Un valor p muy pequeño es evidencia de que...",
+        options: [
+            "H0 es casi seguramente verdadera",
+            "Los datos observados serían muy raros si H0 fuera cierta, lo que es evidencia en contra de H0",
+            "La muestra fue mal tomada",
+            "Se debe aumentar el nivel de significancia"
+        ],
+        correct: 1
+    },
+    {
+        question: "Si el valor p = 0.02 y α = 0.05, la decisión correcta es...",
+        options: ["No se rechaza H0", "Se rechaza H0", "La prueba no es válida", "Hay que repetir el experimento"],
+        correct: 1
+    },
+    {
+        question: "Un error tipo I ocurre cuando...",
+        options: [
+            "No rechazamos H0 siendo falsa",
+            "Rechazamos H0 siendo verdadera (falso positivo)",
+            "El tamaño de muestra es muy pequeño",
+            "El valor p es exactamente igual a α"
+        ],
+        correct: 1
+    },
+    {
+        question: "En una prueba A/B, la diferencia en clics entre dos versiones da un valor p = 0.20 con α = 0.05. ¿Qué se concluye?",
+        options: [
+            "Se rechaza H0: la diferencia es claramente significativa",
+            "No se rechaza H0: no hay evidencia suficiente de que la diferencia sea real, pudo deberse al azar",
+            "Hay que declarar ganadora automáticamente a la versión B",
+            "El experimento fue un fracaso total"
+        ],
+        correct: 1
+    }
+];
+
+const quizContainer = document.getElementById('quiz-container');
+quizData.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.classList.add('mb-6');
+    div.innerHTML = `
+        <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+            ${item.options.map((opt, i) => `
+                <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                     data-question="${index}" data-option="${i}">
+                    <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                </div>
+            `).join('')}
+        </div>
+    `;
+    quizContainer.appendChild(div);
+});
+
+document.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        const q = this.dataset.question;
+        document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+    });
+});
+
+document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+    let score = 0;
+    quizData.forEach((item, index) => {
+        const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+        if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+    });
+    const result = document.getElementById('quiz-result');
+    const pct = Math.round((score / quizData.length) * 100);
+    result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+    result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+    document.getElementById('reset-quiz-btn').classList.remove('hidden');
+});
+
+document.getElementById('reset-quiz-btn').addEventListener('click', () => {
+    document.querySelectorAll('.quiz-option.selected').forEach(o => o.classList.remove('selected'));
+    document.getElementById('quiz-result').textContent = '';
+    document.getElementById('reset-quiz-btn').classList.add('hidden');
+});
+
+/* ==================== INICIALIZACIÓN ==================== */
+renderGauge();
+</script>
+
+<!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
