@@ -57,6 +57,42 @@ function encontrarOvas(dir, acc = []) {
   return acc;
 }
 
+/**
+ * Concatena el JavaScript local del OVA (archivos .js dentro de su carpeta).
+ * Muchos OVAs guardan el quiz o la gamificación en js/*.js en lugar de inline;
+ * hay que leerlos para evaluar el OVA como realmente se ejecuta.
+ */
+function leerJsLocales(dir) {
+  let out = '';
+  const recorrer = (d) => {
+    for (const name of readdirSync(d)) {
+      if (name.startsWith('.') || name === 'node_modules') continue;
+      const full = join(d, name);
+      const st = statSync(full);
+      if (st.isDirectory()) recorrer(full);
+      else if (name.endsWith('.js')) { try { out += '\n' + readFileSync(full, 'utf8'); } catch { /* ignora */ } }
+    }
+  };
+  try { recorrer(dir); } catch { /* ignora */ }
+  return out;
+}
+
+/**
+ * Devuelve el trozo de HTML de una sección: desde su id="<sec>" hasta donde
+ * empieza la siguiente sección (o el final). Sirve para revisar el diseño de
+ * una sección concreta (ej: que Objetivos sea una lista y no tarjetas).
+ */
+function contenidoSeccion(html, sec) {
+  const m = new RegExp(`id=["']${sec}["']`).exec(html);
+  if (!m) return '';
+  const rest = html.slice(m.index + 5);
+  const next = /id=["'](introduccion|objetivos|contenido|actividades|evaluacion|recursos|bibliografia)["']/.exec(rest);
+  return next ? html.slice(m.index, m.index + 5 + next.index) : html.slice(m.index);
+}
+
+/** Texto plano de un fragmento HTML (sin etiquetas, espacios colapsados). */
+const aTexto = (frag) => frag.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
 // --- Validación -----------------------------------------------------------
 const ovas = encontrarOvas(ROOT);
 
@@ -149,6 +185,9 @@ for (const dir of ovas) {
 
   // Trabajamos sobre el HTML sin comentarios para no dar falsos positivos.
   const htmlSinComentarios = html.replace(/<!--[\s\S]*?-->/g, '');
+  // "Código" del OVA = HTML + su JavaScript local. Muchos OVAs guardan el quiz
+  // y la gamificación en js/*.js; hay que mirarlos para no dar falsos positivos.
+  const codigoOva = htmlSinComentarios + '\n' + leerJsLocales(dir);
 
   // E1) Tipografía institucional: Poppins (OBLIGATORIA).
   if (!/Poppins/i.test(html))
@@ -172,36 +211,101 @@ for (const dir of ovas) {
 
   // E4) Gamificación en Contenido y Actividades (obligatoria por CONTRIBUTING).
   const GAMIFICACION = /(gamificaci[oó]n|misi[oó]n|misiones|insignia|medalla|logro|puntos?|nivel(?:es)?|progreso|desaf[ií]o|reto|racha|recompensa|\bXP\b|ranking|tablero)/i;
-  if (!GAMIFICACION.test(htmlSinComentarios))
+  if (!GAMIFICACION.test(codigoOva))
     warn(rel,
       'No se detectan elementos de gamificación (puntos, misiones, insignias, barra de progreso…), que deben estar en Contenido y Actividades.',
       'Agrega gamificación en las secciones Contenido y Actividades: por ejemplo puntos, misiones, insignias o una barra de progreso.');
 
   // E5) Controles de voz propios: elens.js ya aporta accesibilidad/voz.
-  if (/speechSynthesis|SpeechSynthesisUtterance/.test(htmlSinComentarios))
+  if (/speechSynthesis|SpeechSynthesisUtterance/.test(codigoOva))
     warn(rel,
       'El OVA trae su propia lectura por voz (speechSynthesis), que se duplica con el plugin de accesibilidad elens.js.',
-      'Quita los botones/controles de voz propios: la lectura por voz ya la aporta el plugin elens.js.');
+      'Quita los botones/controles de voz propios (por ejemplo un archivo js/speech.js): la lectura por voz ya la aporta el plugin elens.js.');
 
   // (Nota) No validamos "position: fixed" de forma determinista: el layout base
   // estándar (barra lateral + header móvil) lo usa legítimamente. Distinguir una
   // barra flotante de gamificación de la navegación base requiere análisis visual
   // (Nivel B), no de texto. Queda fuera del Nivel A para no dar falsos positivos.
 
-  // E6) Cuestionario de evaluación con al menos 5 preguntas (parse de quizData).
-  const quizMatch = html.match(/(?:const|let|var)\s+quizData\s*=\s*(\[[\s\S]*?\])\s*;/);
-  if (quizMatch) {
-    // Contamos objetos de primer nivel de forma tolerante (cuenta de "pregunta"/"question").
-    const preguntas = (quizMatch[1].match(/\b(?:pregunta|question)\s*:/gi) || []).length;
-    if (preguntas > 0 && preguntas < 5)
-      warn(rel,
-        `La autoevaluación tiene solo ${preguntas} pregunta(s). Se recomiendan al menos 5.`,
-        'Amplía el arreglo quizData del index.html hasta tener 5 o más preguntas.');
-  } else {
-    warn(rel,
-      'No se encontró la autoevaluación (el arreglo "quizData") en la sección de evaluación.',
-      'Implementa el cuestionario con un arreglo quizData de al menos 5 preguntas. Puedes guiarte por el _template.');
+  // E6) Cuestionario de evaluación con al menos 5 preguntas.
+  // Reconocemos los DOS motores de quiz usados en el repo:
+  //   a) arreglo JS "quizData = [ { question/pregunta … } ]" (inline o en js/quiz.js)
+  //   b) contenedor con data-correct='[…]' (un valor por pregunta)
+  // Miramos codigoOva (HTML + JS local) y nos quedamos con el mayor conteo.
+  let tieneQuiz = false, preguntas = 0;
+  if (/\bquizData\b/.test(codigoOva)) {
+    tieneQuiz = true;
+    preguntas = Math.max(preguntas, (codigoOva.match(/\b(?:pregunta|question)\s*:/gi) || []).length);
   }
+  for (const m of codigoOva.matchAll(/data-correct=['"]\s*\[([^\]]*)\]/g)) {
+    tieneQuiz = true;
+    preguntas = Math.max(preguntas, m[1].split(',').map(s => s.trim()).filter(Boolean).length);
+  }
+  if (!tieneQuiz) {
+    warn(rel,
+      'No se encontró la autoevaluación (ni un arreglo "quizData" ni un contenedor con data-correct) en la sección de evaluación.',
+      'Implementa el cuestionario con al menos 5 preguntas (arreglo quizData inline/en js/quiz.js, o el motor con data-correct). Puedes guiarte por el _template.');
+  } else if (preguntas > 0 && preguntas < 5) {
+    warn(rel,
+      `La autoevaluación tiene solo ${preguntas} pregunta(s). Se recomiendan al menos 5.`,
+      'Agrega más preguntas hasta llegar a 5 o más (en el arreglo quizData o en el motor con data-correct).');
+  }
+
+  // === REGLAS DE ESTILO — SEGUNDO LOTE (estructura y diseño de secciones) ===
+  // Trabajamos sobre htmlSinComentarios para no reaccionar a bloques comentados
+  // ni a los ejemplos entre corchetes de las cajas de instrucciones al docente.
+  const secObjetivos = contenidoSeccion(htmlSinComentarios, 'objetivos');
+  const secRecursos  = contenidoSeccion(htmlSinComentarios, 'recursos');
+  const secBiblio    = contenidoSeccion(htmlSinComentarios, 'bibliografia');
+
+  // E7) Orden correcto de las 7 secciones (intro → objetivos → … → bibliografia).
+  const posiciones = SECCIONES
+    .map(s => { const m = new RegExp(`id=["']${s}["']`).exec(html); return m ? m.index : -1; })
+    .filter(i => i >= 0);
+  if (posiciones.some((p, i) => i > 0 && p < posiciones[i - 1]))
+    err(rel,
+      'Las 7 secciones no están en el orden correcto dentro de la página.',
+      `Ordénalas así (de arriba a abajo): ${SECCIONES.join(' → ')}.`);
+
+  // E8) Objetivos como LISTA, no como tarjetas (error común: convertir a cards).
+  if (secObjetivos && !(/<[uo]l/i.test(secObjetivos) && /<li/i.test(secObjetivos)))
+    warn(rel,
+      'La sección Objetivos no usa una lista (<ul>/<ol> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
+      'Deja los objetivos como lista: <ul class="space-y-4"> con un <li> por objetivo, tal como en _template/index.html.');
+
+  // E9) Objetivos NO centrados (error común: centran el texto de la sección).
+  if (/\btext-center\b/.test(secObjetivos))
+    err(rel,
+      'La sección Objetivos está centrada (usa la clase text-center). Los objetivos deben ir alineados a la izquierda.',
+      'Quita la clase text-center de la sección Objetivos y usa la lista con "flex items-start", como en _template/index.html.');
+
+  // E10) Recursos como LISTA, no como tarjetas.
+  if (secRecursos && !(/<[uo]l/i.test(secRecursos) && /<li/i.test(secRecursos)))
+    warn(rel,
+      'La sección Recursos no usa una lista (<ul>/<ol> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
+      'Deja los recursos como lista: <ul class="space-y-4"> con un <li> por recurso, tal como en _template/index.html.');
+
+  // E11) Bibliografía con entradas reales (no vacía).
+  const bibTexto = aTexto(secBiblio).replace(/^.*?Bibliograf[íi]a/i, '').trim();
+  if (secBiblio && bibTexto.length < 40)
+    err(rel,
+      'La sección Bibliografía está vacía o casi vacía.',
+      'Agrega al menos una referencia real (autor, año, título y fuente/URL) dentro de la sección Bibliografía.');
+
+  // E12) Sin texto de relleno ni marcadores de la plantilla sin completar.
+  const RELLENO = /(lorem ipsum|\bFIXME\b|\[TODO\]|\bx{4,}\b|\[por completar\]|pendiente de contenido|contenido pendiente)/i;
+  const PLANTILLA = /\[(?:Objetivo \d|Nombre del recurso \d|Descripci[oó]n breve del recurso\]|Apellido\]|T[íi]tulo del libro|Editorial o URL\]|Inicial\]|A[ñn]o\])/i;
+  if (RELLENO.test(htmlSinComentarios) || PLANTILLA.test(htmlSinComentarios))
+    err(rel,
+      'El OVA tiene texto de relleno o marcadores de la plantilla sin completar (ej: "Lorem ipsum", "xxxx", "[Objetivo 1]", "[Apellido]").',
+      'Reemplaza todos esos textos de ejemplo por el contenido real del OVA.');
+
+  // E13) Objetivos redactados con verbos de aprendizaje (taxonomía SOLO). Aproximado.
+  const VERBOS_SOLO = /\b(identificar|reconocer|definir|enumerar|listar|nombrar|describir|comprender|explicar|clasificar|comparar|relacionar|analizar|aplicar|resolver|calcular|implementar|construir|dise[ñn]ar|evaluar|argumentar|justificar|crear|desarrollar|distinguir|interpretar|demostrar|utilizar|emplear|configurar|gestionar|administrar|programar|modelar)\b/i;
+  if (secObjetivos && !VERBOS_SOLO.test(aTexto(secObjetivos)))
+    warn(rel,
+      'Los objetivos no parecen redactarse con un verbo de aprendizaje (taxonomía SOLO).',
+      'Redacta cada objetivo iniciando con un verbo en infinitivo (ej: Identificar…, Explicar…, Aplicar…, Diseñar…).');
 }
 
 // --- Presentación de resultados ------------------------------------------

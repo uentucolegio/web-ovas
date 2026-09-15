@@ -695,6 +695,21 @@
 
             <!-- Contenido -->
             <div id="contenido" class="content-pane ">
+                <div class="ova-gamificacion bg-green-50 border-2 border-green-300 rounded-xl p-5 my-6">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-3xl">🎯</span>
+                        <h3 class="font-bold text-green-800 text-lg">Misión de aprendizaje: domina la normalización</h3>
+                    </div>
+                    <p class="text-slate-700 mb-3">Completa los <strong>3 retos</strong> de la sección <em>Actividades</em> para ganar <strong>puntos</strong>, llenar tu <strong>barra de progreso</strong> y desbloquear la insignia <strong>«Arquitecto de Datos» 🏅</strong>.</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="inline-flex items-center gap-1 bg-white border border-green-300 rounded-full px-3 py-1 text-sm font-semibold text-green-800">⭐ Puntos: <span id="gam-puntos">0</span>/30</span>
+                        <span class="inline-flex items-center gap-1 bg-white border border-green-300 rounded-full px-3 py-1 text-sm font-semibold text-green-800">🏅 Insignia: <span id="gam-insignia">bloqueada</span></span>
+                    </div>
+                    <div class="w-full bg-green-100 rounded-full h-3 mt-3 overflow-hidden">
+                        <div id="gam-barra" class="bg-green-600 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
                 <div data-speech-segment="contenido-0"><h2 class="text-2xl font-bold text-green-800 mb-3 mt-6">¿Qué es la normalización?</h2></div>
 <div data-speech-segment="contenido-0"><div class="text-slate-700 leading-relaxed mb-4"><p>La normalización es un conjunto de reglas que se aplican al diseño de una base de datos para:</p></div></div>
 <div data-speech-segment="contenido-0">
@@ -741,6 +756,17 @@
 
             <!-- Actividades -->
             <div id="actividades" class="content-pane ">
+                <div class="ova-retos bg-white border-l-4 border-green-500 p-6 my-6 rounded-lg shadow-sm">
+                    <h3 class="font-bold text-green-800 text-xl mb-3">🎮 Retos de la misión</h3>
+                    <p class="text-slate-700 mb-3">Marca cada reto cuando lo completes para sumar puntos y avanzar en tu progreso:</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-2"><input type="checkbox" class="gam-reto mt-1" data-puntos="10"><span class="text-slate-700">Reto 1: Identifica en la tabla del colegio los datos que se repiten y explican la redundancia.</span></li>
+                        <li class="flex items-start gap-2"><input type="checkbox" class="gam-reto mt-1" data-puntos="10"><span class="text-slate-700">Reto 2: Separa esa tabla en entidades independientes (estudiante, curso, docente).</span></li>
+                        <li class="flex items-start gap-2"><input type="checkbox" class="gam-reto mt-1" data-puntos="10"><span class="text-slate-700">Reto 3: Decide un caso donde usarías SQL y otro donde usarías NoSQL, y justifícalo.</span></li>
+                    </ul>
+                    <p id="gam-msg" class="mt-3 font-semibold text-green-700"></p>
+                </div>
+
                 <div data-speech-segment="actividades-0">
                 <div class="bg-white border-l-4 border-green-500 p-6 my-6 rounded-lg shadow-sm">
                     <h3 class="font-bold text-green-800 text-xl mb-3">✍️ Actividad 1. </h3>
@@ -1679,5 +1705,31 @@
     </script>
     <script src="https://elens.ecodestudio.dev/elens.js"></script>
 <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center"><p class="text-slate-600 font-medium">Creado por:</p><p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p><p class="text-slate-500 text-sm">Universidad de Córdoba</p></footer>
+<script>
+(function(){
+  var retos = document.querySelectorAll('.gam-reto');
+  var puntosEl = document.getElementById('gam-puntos');
+  var barra = document.getElementById('gam-barra');
+  var insignia = document.getElementById('gam-insignia');
+  var msg = document.getElementById('gam-msg');
+  var total = 30;
+  function actualizar(){
+    var p = 0;
+    retos.forEach(function(r){ if(r.checked) p += parseInt(r.getAttribute('data-puntos'),10) || 0; });
+    if(puntosEl) puntosEl.textContent = p;
+    var pct = Math.min(100, Math.round(p/total*100));
+    if(barra) barra.style.width = pct + '%';
+    if(p >= total){
+      if(insignia) insignia.textContent = '\u00a1desbloqueada! \ud83c\udfc5';
+      if(msg) msg.textContent = '\ud83c\udf89 \u00a1Misi\u00f3n completada! Ganaste la insignia \u00abArquitecto de Datos\u00bb.';
+    } else {
+      if(insignia) insignia.textContent = 'bloqueada';
+      if(msg) msg.textContent = p > 0 ? ('\u00a1Vas bien! Llevas ' + p + ' puntos.') : '';
+    }
+  }
+  retos.forEach(function(r){ r.addEventListener('change', actualizar); });
+})();
+</script>
+
 </body>
 </html>
