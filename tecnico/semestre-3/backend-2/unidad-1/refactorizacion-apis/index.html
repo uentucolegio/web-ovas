@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Refactorización de APIs - Arquitectura por Capas</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .badge {
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .layer-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .layer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Refactorización de APIs: Organiza tu código como un profesional 🔧</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Imagina que tienes una habitación donde tiras toda la ropa: camisas, pantalones, calcetines, todo en un montón gigante. Funciona, pero cuando necesitas algo específico... ¡es un caos! 😅 Lo mismo pasa con el código de una API cuando crece sin organización.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Las aplicaciones web modernas (como las que usas todos los días: Netflix, Instagram, Spotify) tienen un <strong>backend</strong> que procesa millones de peticiones. Si todo el código está mezclado en un solo archivo, se vuelve imposible de mantener, escalar y trabajar en equipo.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La <strong class="text-green-800">arquitectura por capas</strong> es como organizar esa habitación: camisas en un lado, pantalones en otro, calcetines en cajitas. Cada capa tiene una responsabilidad específica y se comunica solo con las que necesita. Esto hace tu código más limpio, reutilizable y fácil de entender. 🏗️
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> En este OVA aprenderás a transformar una API desorganizada en una estructura profesional usando rutas, controladores, servicios y repositorios. ¡Tu código futuro te lo agradecerá! <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Analizar las limitaciones de una API desarrollada sin una arquitectura claramente definida, identificando problemas relacionados con el mantenimiento, la reutilización del código y la escalabilidad.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Comprender la función y responsabilidad de cada una de las capas que conforman una arquitectura Backend moderna: rutas, controladores, servicios y repositorios.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Aplicar el proceso de refactorización de una API REST existente mediante la separación adecuada de responsabilidades, favoreciendo la organización del proyecto y la reutilización del código.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+                    
+                    <!-- Acordeón 1: ¿Por qué refactorizar? -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-por-que-refactorizar">
+                            <span>🤔 ¿Por qué refactorizar una API?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-por-que-refactorizar" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="refactorizar-intro" class="content-section">
+                                <p class="mb-4">
+                                    Cuando empiezas a programar, es natural poner todo en un solo archivo: rutas, consultas a la base de datos, validaciones... todo junto. Funciona al principio, pero cuando el proyecto crece, se convierte en un dolor de cabeza. 🤯
+                                </p>
+                                <p class="mb-4">
+                                    <strong class="text-green-800">Refactorizar</strong> significa reorganizar el código para mejorar su estructura sin cambiar lo que hace el sistema. Es como reorganizar tu habitación: sigue teniendo las mismas cosas, pero ahora están en orden y son fáciles de encontrar.
+                                </p>
+                                
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión 1: Identifica el problema</p>
+                                    <p class="text-slate-600 text-sm mb-3">Haz click en los síntomas de código desorganizado para descubrir sus consecuencias:</p>
+                                    <div id="reveal-symptoms" class="space-y-2"></div>
+                                    <div class="mt-4 p-3 bg-white border border-teal-300 rounded-lg">
+                                        <p class="text-sm text-teal-800 font-bold mb-2">🏆 Puntos acumulados: <span id="symptoms-score">0</span>/5</p>
+                                        <div class="w-full bg-teal-200 rounded-full h-2">
+                                            <div id="symptoms-progress" class="progress-bar bg-teal-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: Refactorización de código y deuda técnica
+                                     Buscar: "refactorización código deuda técnica tutorial español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: ¿Qué es la deuda técnica y por qué refactorizar?</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"refactorización código deuda técnica tutorial español"</em></p>
+                                    <a href="#" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💡 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: Arquitectura por Capas -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-arquitectura-capas">
+                            <span>🏗️ La Arquitectura por Capas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-arquitectura-capas" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="arquitectura-intro" class="content-section">
+                                <p class="mb-4">
+                                    La arquitectura por capas divide tu aplicación en componentes independientes, donde cada uno cumple una función específica. Es como una empresa: cada departamento hace su trabajo y se comunica solo con los que necesita.
+                                </p>
+                                <p class="mb-4">En una API REST con Express.js, las capas principales son:</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                    <div class="layer-card bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                                        <h4 class="font-bold text-blue-800 mb-2">🛣️ Rutas (Routes)</h4>
+                                        <p class="text-sm text-slate-700">Definen los endpoints de la API. Reciben las peticiones HTTP y las envían al controlador.</p>
+                                    </div>
+                                    <div class="layer-card bg-purple-50 border-l-4 border-purple-500 p-4 rounded-lg">
+                                        <h4 class="font-bold text-purple-800 mb-2">🎮 Controladores (Controllers)</h4>
+                                        <p class="text-sm text-slate-700">Validan los datos y coordinan la lógica. Llaman a los servicios y devuelven la respuesta.</p>
+                                    </div>
+                                    <div class="layer-card bg-orange-50 border-l-4 border-orange-500 p-4 rounded-lg">
+                                        <h4 class="font-bold text-orange-800 mb-2">⚙️ Servicios (Services)</h4>
+                                        <p class="text-sm text-slate-700">Contienen la lógica de negocio. Procesan datos y aplican reglas del sistema.</p>
+                                    </div>
+                                    <div class="layer-card bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                                        <h4 class="font-bold text-green-800 mb-2">💾 Repositorios (Repositories)</h4>
+                                        <p class="text-sm text-slate-700">Manejan el acceso a datos. Se comunican con la base de datos y devuelven entidades.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión 2: Conecta las capas</p>
+                                    <p class="text-slate-600 text-sm mb-3">Arrastra cada responsabilidad a la capa correcta:</p>
+                                    <div id="drag-drop-layers" class="min-h-32"></div>
+                                    <div class="mt-4 p-3 bg-white border border-teal-300 rounded-lg">
+                                        <p class="text-sm text-teal-800 font-bold mb-2">🏆 Puntos: <span id="layers-score">0</span>/4</p>
+                                        <div class="w-full bg-teal-200 rounded-full h-2">
+                                            <div id="layers-progress" class="progress-bar bg-teal-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Flujo de una Petición -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-flujo-peticion">
+                            <span>🔄 El Flujo de una Petición</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-flujo-peticion" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="flujo-intro" class="content-section">
+                                <p class="mb-4">
+                                    Cuando un cliente hace una petición a tu API, esta viaja a través de las capas en un orden específico. Entender este flujo es clave para saber dónde poner cada pieza de código.
+                                </p>
+                                
+                                <div class="bg-slate-100 p-6 rounded-lg mb-4">
+                                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-2">🛣️</div>
+                                            <p class="text-sm font-semibold">Rutas</p>
+                                        </div>
+                                        <div class="text-2xl text-slate-400">→</div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-purple-500 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-2">🎮</div>
+                                            <p class="text-sm font-semibold">Controlador</p>
+                                        </div>
+                                        <div class="text-2xl text-slate-400">→</div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-2">⚙️</div>
+                                            <p class="text-sm font-semibold">Servicio</p>
+                                        </div>
+                                        <div class="text-2xl text-slate-400">→</div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-2">💾</div>
+                                            <p class="text-sm font-semibold">Repositorio</p>
+                                        </div>
+                                        <div class="text-2xl text-slate-400">→</div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-slate-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-2">🗄️</div>
+                                            <p class="text-sm font-semibold">Base de Datos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión 3: Ordena el flujo</p>
+                                    <p class="text-slate-600 text-sm mb-3">Haz click en los pasos en el orden correcto que sigue una petición:</p>
+                                    <div id="order-flow" class="space-y-2"></div>
+                                    <div class="mt-4 p-3 bg-white border border-teal-300 rounded-lg">
+                                        <p class="text-sm text-teal-800 font-bold mb-2">🏆 Puntos: <span id="flow-score">0</span>/5</p>
+                                        <div class="w-full bg-teal-200 rounded-full h-2">
+                                            <div id="flow-progress" class="progress-bar bg-teal-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Middlewares -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-middlewares">
+                            <span>🛡️ Middlewares: Guardianes de tu API</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-middlewares" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="middlewares-intro" class="content-section">
+                                <p class="mb-4">
+                                    Los <strong class="text-green-800">middlewares</strong> son funciones que se ejecutan antes de que la petición llegue a tu controlador. Son como los guardias de seguridad de un edificio: verifican quién entra, si tiene permiso, y solo dejan pasar a los autorizados. 🛡️
+                                </p>
+                                <p class="mb-4">Usos comunes de middlewares:</p>
+                                <ul class="list-disc list-inside space-y-2 mb-4">
+                                    <li><strong>Autenticación:</strong> Verificar si el usuario está logueado</li>
+                                    <li><strong>Validación:</strong> Comprobar que los datos son correctos</li>
+                                    <li><strong>Logging:</strong> Registrar cada petición para debugging</li>
+                                    <li><strong>CORS:</strong> Controlar quién puede acceder a tu API</li>
+                                </ul>
+                                
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión 4: Identifica el middleware</p>
+                                    <p class="text-slate-600 text-sm mb-3">Selecciona el middleware correcto para cada situación:</p>
+                                    <div id="middleware-quiz" class="space-y-3"></div>
+                                    <div class="mt-4 p-3 bg-white border border-teal-300 rounded-lg">
+                                        <p class="text-sm text-teal-800 font-bold mb-2">🏆 Puntos: <span id="middleware-score">0</span>/4</p>
+                                        <div class="w-full bg-teal-200 rounded-full h-2">
+                                            <div id="middleware-progress" class="progress-bar bg-teal-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- RECURSO-EXTERNO id="recurso-ext-2"
+                                     Tema: Middlewares en Express.js
+                                     Buscar: "middlewares Express.js tutorial español"
+                                -->
+                                <div id="recurso-ext-2" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: Middlewares en Express.js explicado</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"middlewares Express.js tutorial español"</em></p>
+                                    <a href="#" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💡 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-2 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5: Ejemplo Práctico -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-ejemplo-practico">
+                            <span>💻 Ejemplo Práctico: Antes y Después</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-ejemplo-practico" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="ejemplo-intro" class="content-section">
+                                <p class="mb-4">
+                                    Veamos un ejemplo concreto de cómo refactorizar un endpoint de una API. Imaginemos que tenemos una ruta para crear usuarios que actualmente tiene toda la lógica mezclada.
+                                </p>
+                                
+                                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-4">
+                                    <h4 class="font-bold text-red-800 mb-2">❌ ANES (Todo en un solo archivo)</h4>
+                                    <pre class="bg-slate-800 text-red-400 p-4 rounded-lg overflow-x-auto text-sm"><code>// app.js - Todo mezclado
+app.post('/users', async (req, res) => {
+  // Validación
+  if (!req.body.name || !req.body.email) {
+    return res.status(400).json({ error: 'Faltan datos' });
+  }
+  
+  // Consulta a base de datos
+  const user = await db.query(
+    'INSERT INTO users (name, email) VALUES (?, ?)',
+    [req.body.name, req.body.email]
+  );
+  
+  // Lógica de negocio
+  const welcomeEmail = sendWelcomeEmail(req.body.email);
+  
+  // Respuesta
+  res.status(201).json({ id: user.id, name: req.body.name });
+});</code></pre>
+                                </div>
+                                
+                                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg mb-4">
+                                    <h4 class="font-bold text-green-800 mb-2">✅ DESPUÉS (Arquitectura por capas)</h4>
+                                    <pre class="bg-slate-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"><code>// routes/users.js
+router.post('/users', userController.create);
+
+// controllers/userController.js
+async create(req, res) {
+  const data = await userService.create(req.body);
+  res.status(201).json(data);
+}
+
+// services/userService.js
+async create(userData) {
+  await this.validate(userData);
+  const user = await userRepository.create(userData);
+  await emailService.sendWelcome(user.email);
+  return user;
+}
+
+// repositories/userRepository.js
+async create(userData) {
+  return await db.query(
+    'INSERT INTO users (name, email) VALUES (?, ?)',
+    [userData.name, userData.email]
+  );
+}</code></pre>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión final: Encuentra las diferencias</p>
+                                    <p class="text-slate-600 text-sm mb-3">Haz click en las mejoras que aporta la arquitectura por capas:</p>
+                                    <div id="find-differences" class="space-y-2"></div>
+                                    <div class="mt-4 p-3 bg-white border border-teal-300 rounded-lg">
+                                        <p class="text-sm text-teal-800 font-bold mb-2">🏆 Puntos: <span id="differences-score">0</span>/4</p>
+                                        <div class="w-full bg-teal-200 rounded-full h-2">
+                                            <div id="differences-progress" class="progress-bar bg-teal-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                        <div id="badge-final" class="mt-3 hidden">
+                                            <span class="badge inline-block bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">🏅 ¡Insignia desbloqueada: Arquitecto Junior!</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔍 Actividad 1: Análisis de código existente</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Analiza el siguiente código de una API REST que no sigue una arquitectura por capas. Identifica al menos 3 problemas de organización y explica cómo afectan el mantenimiento del proyecto.
+                        </p>
+                        <pre class="bg-slate-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm mb-4"><code>// index.js - API sin arquitectura
+const express = require('express');
+const app = express();
+const mysql = require('mysql2');
+
+app.use(express.json());
+
+app.get('/products', (req, res) => {
+  const connection = mysql.createConnection({...});
+  connection.query('SELECT * FROM products', (err, results) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      const filtered = results.filter(p => p.price > 100);
+      res.json(filtered);
+    }
+  });
+});
+
+app.post('/products', (req, res) => {
+  const connection = mysql.createConnection({...});
+  connection.query(
+    'INSERT INTO products SET ?',
+    req.body,
+    (err, result) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(201).json({ id: result.insertId });
+      }
+    }
+  );
+});
+
+app.listen(3000);</code></pre>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Un documento donde identifiques los problemas de organización y propongas cómo separar el código en capas (rutas, controladores, servicios, repositorios).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🏗️ Actividad 2: Diseño de arquitectura por capas</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Diseña la estructura de carpetas para una API de gestión de tareas que incluya las siguientes funcionalidades: crear tarea, listar tareas, marcar como completada, eliminar tarea. Define qué archivos crearías en cada capa.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Un diagrama o lista de la estructura de carpetas con los nombres de archivos y su responsabilidad (ej: routes/tasks.js, controllers/taskController.js, etc.).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">⚙️ Actividad 3: Implementación de servicio</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Implementa un servicio que contenga la lógica de negocio para calcular el precio final de un producto aplicando descuentos según la categoría: electrónica (10% descuento), ropa (15% descuento), otros (5% descuento).
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Código JavaScript de un servicio con la función calcularPrecioFinal(producto) que aplique la lógica de descuentos.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre arquitectura por capas y refactorización. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre arquitectura por capas y refactorización, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de Express.js</h3>
+                            <p class="text-slate-600 mb-2">Guía completa sobre routing, middlewares y mejores prácticas en Express.js.</p>
+                            <a href="https://expressjs.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Documentación Express.js" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de Node.js.</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial sobre módulos, API y funcionalidades del entorno de ejecución Node.js para el desarrollo de aplicaciones backend.</p>
+                            <a href="https://nodejs.org/docs/latest/api/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR Clean Architecture" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de MySQL</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial para consultar comandos SQL, administración de bases de datos y características de MySQL.</p>
+                            <a href="https://dev.mysql.com/doc/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR MySQL Documentation" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 4 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Postman Learning Center</h3>
+                            <p class="text-slate-600 mb-2">Centro de aprendizaje con tutoriales y guías para crear, probar y documentar APIs utilizando Postman.</p>
+                            <a href="https://learning.postman.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-4.png" alt="Postman Learning Center" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Martin, R. (2008). <i>Clean Code: A Handbook of Agile Software Craftsmanship</i>. Prentice Hall.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Fowler, M. (2019). <i>Refactoring: Improving the Design of Existing Code</i> (3rd ed.). Addison-Wesley.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Brown, S. (2022). <i>Node.js Design Patterns</i>.<br>
+                            <a href="https://github.com/i0natan/nodebook" class="text-green-700 underline break-all" target="_blank">https://github.com/i0natan/nodebook</a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito principal de la capa de Controladores en una arquitectura por capas?",
+                options: ["Manejar directamente las consultas a la base de datos", "Validar datos y coordinar la lógica, llamando a servicios", "Definir los endpoints HTTP de la API", "Aplicar reglas de negocio complejas"],
+                correct: 1
+            },
+            {
+                question: "¿Qué capa es responsable de comunicarse directamente con la base de datos?",
+                options: ["Rutas", "Controladores", "Servicios", "Repositorios"],
+                correct: 3
+            },
+            {
+                question: "¿Qué es un middleware en Express.js?",
+                options: ["Una función que se ejecuta después del controlador", "Una función que se ejecuta antes de llegar al controlador", "Un tipo de base de datos", "Una librería de frontend"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es un beneficio principal de usar arquitectura por capas?",
+                options: ["El código es más rápido", "Facilita el mantenimiento y la reutilización del código", "Reduce el tamaño del proyecto", "Elimina la necesidad de bases de datos"],
+                correct: 1
+            },
+            {
+                question: "¿En qué capa debería ir la lógica de calcular descuentos según la categoría de un producto?",
+                options: ["Rutas", "Controladores", "Servicios", "Repositorios"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ==================== MISIÓN 1: Síntomas de código desorganizado ====================
+        const symptomsData = [
+            { symptom: "Código duplicado en múltiples archivos", consequence: "Difícil de mantener, un cambio requiere modificar varios lugares" },
+            { symptom: "Archivos con cientos de líneas de código", consequence: "Casi imposible entender qué hace cada parte" },
+            { symptom: "Lógica de negocio mezclada con consultas SQL", consequence: "No se puede reutilizar la lógica en otros lugares" },
+            { symptom: "Difícil localizar errores", consequence: "Pérdida de tiempo en debugging" },
+            { symptom: "Conflictos frecuentes al trabajar en equipo", consequence: "Colaboración ineficiente y frustrante" }
+        ];
+        
+        let symptomsScore = 0;
+        const symptomsContainer = document.getElementById('reveal-symptoms');
+        
+        symptomsData.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left p-3 bg-white border border-teal-300 rounded-lg hover:bg-teal-100 transition-colors text-sm';
+            btn.innerHTML = `<span class="font-semibold text-teal-800">🔍 ${item.symptom}</span>`;
+            btn.addEventListener('click', function() {
+                if (!this.dataset.revealed) {
+                    this.innerHTML = `<span class="font-semibold text-green-700">✅ ${item.symptom}</span><br><span class="text-slate-600 text-xs mt-1">→ ${item.consequence}</span>`;
+                    this.className = 'w-full text-left p-3 bg-green-50 border border-green-400 rounded-lg text-sm';
+                    this.dataset.revealed = 'true';
+                    symptomsScore++;
+                    document.getElementById('symptoms-score').textContent = symptomsScore;
+                    document.getElementById('symptoms-progress').style.width = `${(symptomsScore / 5) * 100}%`;
+                }
+            });
+            symptomsContainer.appendChild(btn);
+        });
+
+        // ==================== MISIÓN 2: Drag and Drop de capas ====================
+        const layersData = [
+            { responsibility: "Definir endpoints HTTP (/users, /products)", layer: "Rutas" },
+            { responsibility: "Validar datos y coordinar respuestas", layer: "Controladores" },
+            { responsibility: "Aplicar reglas de negocio y cálculos", layer: "Servicios" },
+            { responsibility: "Ejecutar consultas SQL a la base de datos", layer: "Repositorios" }
+        ];
+        
+        let layersScore = 0;
+        const layersContainer = document.getElementById('drag-drop-layers');
+        let currentLayerIndex = 0;
+        
+        function renderLayerQuestion() {
+            if (currentLayerIndex >= layersData.length) {
+                layersContainer.innerHTML = `<p class="text-green-700 font-bold text-center">🎉 ¡Completaste todas las asociaciones!</p>`;
+                return;
+            }
+            
+            const current = layersData[currentLayerIndex];
+            layersContainer.innerHTML = `
+                <p class="font-semibold text-teal-800 mb-3">Responsabilidad: "${current.responsibility}"</p>
+                <p class="text-sm text-slate-600 mb-3">¿A qué capa pertenece?</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="layer-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm" data-answer="Rutas">🛣️ Rutas</button>
+                    <button class="layer-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm" data-answer="Controladores">🎮 Controladores</button>
+                    <button class="layer-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm" data-answer="Servicios">⚙️ Servicios</button>
+                    <button class="layer-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm" data-answer="Repositorios">💾 Repositorios</button>
+                </div>
+            `;
+            
+            document.querySelectorAll('.layer-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const answer = this.dataset.answer;
+                    if (answer === current.layer) {
+                        layersScore++;
+                        document.getElementById('layers-score').textContent = layersScore;
+                        document.getElementById('layers-progress').style.width = `${(layersScore / 4) * 100}%`;
+                        this.className = 'layer-option p-2 bg-green-100 border border-green-500 rounded text-sm font-semibold';
+                        this.textContent = `✅ ${answer}`;
+                        currentLayerIndex++;
+                        setTimeout(renderLayerQuestion, 500);
+                    } else {
+                        this.className = 'layer-option p-2 bg-red-100 border border-red-500 rounded text-sm';
+                        setTimeout(() => {
+                            this.className = 'layer-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm';
+                        }, 500);
+                    }
+                });
+            });
+        }
+        
+        renderLayerQuestion();
+
+        // ==================== MISIÓN 3: Ordenar el flujo ====================
+        const flowSteps = [
+            { step: "La petición llega al endpoint", order: 1 },
+            { step: "El controlador valida los datos", order: 2 },
+            { step: "El servicio procesa la lógica", order: 3 },
+            { step: "El repositorio consulta la base de datos", order: 4 },
+            { step: "La respuesta viaja de vuelta al cliente", order: 5 }
+        ];
+        
+        let flowScore = 0;
+        let currentFlowOrder = 1;
+        const flowContainer = document.getElementById('order-flow');
+        
+        function renderFlowQuestion() {
+            if (currentFlowOrder > 5) {
+                flowContainer.innerHTML = `<p class="text-green-700 font-bold text-center">🎉 ¡Ordenaste correctamente todo el flujo!</p>`;
+                return;
+            }
+            
+            const shuffled = [...flowSteps].sort(() => Math.random() - 0.5);
+            flowContainer.innerHTML = `
+                <p class="font-semibold text-teal-800 mb-3">Paso ${currentFlowOrder}: ¿Qué sucede primero?</p>
+                <div class="space-y-2">
+                    ${shuffled.map(item => `
+                        <button class="flow-option w-full text-left p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm" data-order="${item.order}">
+                            ${item.step}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.querySelectorAll('.flow-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const order = parseInt(this.dataset.order);
+                    if (order === currentFlowOrder) {
+                        flowScore++;
+                        document.getElementById('flow-score').textContent = flowScore;
+                        document.getElementById('flow-progress').style.width = `${(flowScore / 5) * 100}%`;
+                        currentFlowOrder++;
+                        setTimeout(renderFlowQuestion, 300);
+                    } else {
+                        this.className = 'flow-option w-full text-left p-2 bg-red-100 border border-red-500 rounded text-sm';
+                        setTimeout(() => {
+                            this.className = 'flow-option w-full text-left p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm';
+                        }, 500);
+                    }
+                });
+            });
+        }
+        
+        renderFlowQuestion();
+
+        // ==================== MISIÓN 4: Quiz de middlewares ====================
+        const middlewareQuestions = [
+            { situation: "Verificar si el usuario tiene un token válido", answer: "Autenticación" },
+            { situation: "Comprobar que el email tiene formato válido", answer: "Validación" },
+            { situation: "Registrar cada petición en consola", answer: "Logging" },
+            { situation: "Permitir acceso solo desde dominios específicos", answer: "CORS" }
+        ];
+        
+        let middlewareScore = 0;
+        let middlewareIndex = 0;
+        const middlewareContainer = document.getElementById('middleware-quiz');
+        
+        function renderMiddlewareQuestion() {
+            if (middlewareIndex >= middlewareQuestions.length) {
+                middlewareContainer.innerHTML = `<p class="text-green-700 font-bold text-center">🎉 ¡Identificaste todos los middlewares!</p>`;
+                return;
+            }
+            
+            const current = middlewareQuestions[middlewareIndex];
+            const options = ["Autenticación", "Validación", "Logging", "CORS"].sort(() => Math.random() - 0.5);
+            
+            middlewareContainer.innerHTML = `
+                <p class="font-semibold text-teal-800 mb-2">Situación ${middlewareIndex + 1}: ${current.situation}</p>
+                <div class="grid grid-cols-2 gap-2">
+                    ${options.map(opt => `
+                        <button class="middleware-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm" data-answer="${opt}">${opt}</button>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.querySelectorAll('.middleware-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const answer = this.dataset.answer;
+                    if (answer === current.answer) {
+                        middlewareScore++;
+                        document.getElementById('middleware-score').textContent = middlewareScore;
+                        document.getElementById('middleware-progress').style.width = `${(middlewareScore / 4) * 100}%`;
+                        middlewareIndex++;
+                        setTimeout(renderMiddlewareQuestion, 300);
+                    } else {
+                        this.className = 'middleware-option p-2 bg-red-100 border border-red-500 rounded text-sm';
+                        setTimeout(() => {
+                            this.className = 'middleware-option p-2 bg-white border border-teal-300 rounded hover:bg-teal-100 transition-colors text-sm';
+                        }, 500);
+                    }
+                });
+            });
+        }
+        
+        renderMiddlewareQuestion();
+
+        // ==================== MISIÓN FINAL: Encuentra las diferencias ====================
+        const differencesData = [
+            { diff: "Cada capa tiene una responsabilidad única", correct: true },
+            { diff: "El código es más fácil de probar unitariamente", correct: true },
+            { diff: "Hay más archivos, por lo que es más lento", correct: false },
+            { diff: "Facilita el trabajo en equipo sin conflictos", correct: true }
+        ];
+        
+        let differencesScore = 0;
+        const differencesContainer = document.getElementById('find-differences');
+        
+        differencesData.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left p-3 bg-white border border-teal-300 rounded-lg hover:bg-teal-100 transition-colors text-sm';
+            btn.innerHTML = `<span class="font-semibold text-teal-800">👆 ${item.diff}</span>`;
+            btn.addEventListener('click', function() {
+                if (!this.dataset.clicked) {
+                    this.dataset.clicked = 'true';
+                    if (item.correct) {
+                        differencesScore++;
+                        this.className = 'w-full text-left p-3 bg-green-50 border border-green-500 rounded text-sm';
+                        this.innerHTML = `<span class="font-semibold text-green-700">✅ ${item.diff}</span>`;
+                    } else {
+                        this.className = 'w-full text-left p-3 bg-red-50 border border-red-500 rounded text-sm';
+                        this.innerHTML = `<span class="font-semibold text-red-700">❌ ${item.diff}</span><br><span class="text-red-600 text-xs">→ Esto no es una mejora</span>`;
+                    }
+                    document.getElementById('differences-score').textContent = differencesScore;
+                    document.getElementById('differences-progress').style.width = `${(differencesScore / 3) * 100}%`;
+                    
+                    if (differencesScore >= 3) {
+                        document.getElementById('badge-final').classList.remove('hidden');
+                    }
+                }
+            });
+            differencesContainer.appendChild(btn);
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Protección de la API: CORS, rate limiting, consultas parametrizadas y manejo seguro de errores</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .stars { color: #fbbf24; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .code-block { background: #1e293b; color: #e2e8f0; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; font-family: monospace; font-size: 0.875rem; }
+        .timer { font-variant-numeric: tabular-nums; }
+        .progress-ring { transition: stroke-dashoffset 0.5s ease; }
+        .game-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .game-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .locked { filter: grayscale(0.6); opacity: 0.7; }
+        .mission-complete { border-left: 4px solid #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Protección de la API: tu escudo digital 🛡️</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Imagina que tu API es como la recepción de un edificio. Cualquiera puede tocar la puerta, pero no todos pueden entrar, y mucho menos hacer lo que quieran adentro. La protección de una API REST consiste en construir esos filtros: decidir quién puede preguntar, con qué frecuencia, cómo hablar con la base de datos y qué decir cuando algo falla.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En este OVA vas a aprender cuatro escudos esenciales: <strong>CORS</strong> para controlar quién puede consumir tu API desde un navegador, <strong>rate limiting</strong> para evitar abusos por exceso de peticiones, <strong>consultas parametrizadas</strong> para que la base de datos no ejecute código malicioso, y <strong>manejo seguro de errores</strong> para no regalar pistas a los atacantes.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    No se trata de memorizar teoría, sino de tomar decisiones de seguridad con confianza. Vas a jugar con configuraciones, ordenar middlewares, reparar consultas y simular ataques. ¡Prepárate para convertirte en guardián de tus APIs! 🚀
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Una API bien protegida no es la que nunca falla, sino la que falla sin contar secretos. Aprende a responder con inteligencia bajo presión. <span class="text-xl">🔒</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje 🎯</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Comprender el propósito y el funcionamiento de CORS como mecanismo de control de acceso entre orígenes en una API REST.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Aplicar técnicas de rate limiting para prevenir abusos de consumo y garantizar la disponibilidad del servicio.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Implementar consultas parametrizadas en el acceso a bases de datos para evitar inyecciones SQL y NoSQL.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛡️</span>
+                        <span>Diseñar un manejo seguro de errores que oculte información sensible y ofrezca respuestas consistentes a los clientes.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- Barra de progreso de contenido (gamificación local) -->
+                    <div id="progress-panel" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-green-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-bold text-green-800">🏆 Progreso de escudos</span>
+                            <span id="progress-text" class="text-sm text-slate-600">0 de 4 escudos activados</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3">
+                            <div id="progress-bar" class="bg-green-500 h-3 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <span id="badge-cors" class="badge bg-slate-100 text-slate-500">CORS</span>
+                            <span id="badge-rate" class="badge bg-slate-100 text-slate-500">Rate limiting</span>
+                            <span id="badge-query" class="badge bg-slate-100 text-slate-500">Consultas</span>
+                            <span id="badge-error" class="badge bg-slate-100 text-slate-500">Errores</span>
+                        </div>
+                        <p class="mt-2 text-sm text-slate-600">Puntos: <span id="points-display" class="font-bold text-green-700">0</span> ⭐</p>
+                    </div>
+
+                    <!-- ACORDEÓN 1: CORS -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-cors">
+                            <span>🌐 Escudo 1: CORS, el portero de orígenes</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-cors" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="cors-contenido" class="content-section">
+                                <p class="mb-4">
+                                    <strong>CORS</strong> (Cross-Origin Resource Sharing) no es un sistema de autenticación, aunque mucha gente lo confunde con eso. Es un mecanismo del navegador que le pregunta al servidor: "¿me permites leer esta respuesta desde otro origen?". Si el servidor dice que no, el navegador bloquea la lectura del resultado.
+                                </p>
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                    <p class="text-blue-800 text-sm font-semibold mb-2">💡 Recuerda esto</p>
+                                    <p class="text-slate-700 text-sm">CORS solo afecta a JavaScript que corre en un navegador. No protege contra llamadas hechas con <code>curl</code>, Postman, Insomnia o scripts servidor-a-servidor. Por eso CORS y autenticación van de la mano, pero nunca son lo mismo.</p>
+                                </div>
+
+                                <h4 class="font-bold text-green-700 mb-2">¿Qué decide el servidor?</h4>
+                                <ul class="list-disc pl-5 space-y-2 mb-4">
+                                    <li><strong>Access-Control-Allow-Origin:</strong> qué dominios pueden leer la respuesta.</li>
+                                    <li><strong>Access-Control-Allow-Methods:</strong> qué métodos HTTP están permitidos.</li>
+                                    <li><strong>Access-Control-Allow-Headers:</strong> qué cabeceras puede enviar el cliente.</li>
+                                    <li><strong>Access-Control-Allow-Credentials:</strong> si se permiten cookies o credenciales.</li>
+                                </ul>
+
+                                <h4 class="font-bold text-green-700 mb-2">Ejemplo práctico en Express</h4>
+                                <pre class="code-block"><code>const allowedOrigins = ['https://app.ejemplo.com', 'https://admin.ejemplo.com'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));</code></pre>
+
+                                <!-- INTERACTIVO: Decisión CORS -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg game-card">
+                                    <p class="text-green-800 font-bold mb-2">🎮 Misión 1: ¿Permites o bloqueas?</p>
+                                    <p class="text-slate-600 text-sm mb-4">Una petición llega con el origen <code>https://evil.com</code>. Tu lista blanca solo tiene <code>https://app.ejemplo.com</code>. ¿Qué hace el servidor?</p>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" class="cors-choice py-2 px-4 bg-white border-2 border-slate-200 rounded-lg font-semibold" data-correct="yes" data-choice="allow">Permitir</button>
+                                        <button type="button" class="cors-choice py-2 px-4 bg-white border-2 border-slate-200 rounded-lg font-semibold" data-correct="yes" data-choice="block">Bloquear</button>
+                                    </div>
+                                    <p id="cors-feedback" class="mt-3 text-sm font-semibold"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2: Rate limiting -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-rate">
+                            <span>⏱️ Escudo 2: Rate limiting, el control de tráfico</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-rate" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="rate-contenido" class="content-section">
+                                <p class="mb-4">
+                                    El <strong>rate limiting</strong> es como el semáforo de una autopista: limita cuántos autos (peticiones) pueden pasar en un tiempo determinado. Sin él, un atacante podría intentar adivinar contraseñas a gran velocidad, descargar toda tu base de datos o simplemente tumbar tu servicio con tráfico masivo.
+                                </p>
+
+                                <h4 class="font-bold text-green-700 mb-2">Conceptos clave</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm border-collapse border border-green-300 mb-4">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Término</th>
+                                                <th class="border border-green-300 p-2 text-left">Significado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Límite</td>
+                                                <td class="border border-green-300 p-2">Máximo de peticiones permitidas.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Ventana</td>
+                                                <td class="border border-green-300 p-2">Tiempo en que se cuenta ese límite (por minuto, hora, etc.).</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Identificador</td>
+                                                <td class="border border-green-300 p-2">Cómo reconocer al cliente: IP, API key, id de usuario.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">429</td>
+                                                <td class="border border-green-300 p-2">Código HTTP de "Too Many Requests".</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <h4 class="font-bold text-green-700 mb-2">Configuración con express-rate-limit</h4>
+                                <pre class="code-block"><code>const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // máximo 100 peticiones por IP
+  message: 'Demasiadas peticiones, intenta más tarde.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', limiter);</code></pre>
+
+                                <!-- INTERACTIVO: Simulador de rate limiting -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg game-card">
+                                    <p class="text-green-800 font-bold mb-2">🎮 Misión 2: Simulador de tráfico</p>
+                                    <p class="text-slate-600 text-sm mb-3">El límite es de <strong>5 peticiones por minuto</strong>. Pulsa "Enviar petición" y observa qué pasa cuando te pasas.</p>
+                                    <div class="flex items-center gap-4 mb-3">
+                                        <button type="button" id="rate-send" class="py-2 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">Enviar petición</button>
+                                        <span class="text-sm">Enviadas: <span id="rate-count" class="font-bold">0</span></span>
+                                        <span class="text-sm">Estado: <span id="rate-status" class="font-bold text-green-700">OK</span></span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2">
+                                        <div id="rate-bar" class="bg-green-500 h-2 rounded-full" style="width:0%"></div>
+                                    </div>
+                                    <p id="rate-feedback" class="mt-2 text-sm font-semibold"></p>
+                                    <button type="button" id="rate-reset" class="mt-3 text-sm text-green-700 underline hidden">Reiniciar simulador</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3: Consultas parametrizadas -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-query">
+                            <span>🛡️ Escudo 3: Consultas parametrizadas, la base de datos blindada</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-query" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="query-contenido" class="content-section">
+                                <p class="mb-4">
+                                    La regla de oro para hablar con una base de datos es: <strong>nunca confíes en datos que vienen del usuario</strong>. Si concatenas una entrada directamente en una consulta SQL, un atacante puede inyectar código y leer, modificar o borrar información.
+                                </p>
+
+                                <h4 class="font-bold text-green-700 mb-2">❌ Código vulnerable</h4>
+                                <pre class="code-block"><code>const email = req.body.email;
+const query = `SELECT * FROM users WHERE email = '${email}'`;
+// Si email es: ' OR '1'='1' --
+// la consulta devuelve todos los usuarios</code></pre>
+
+                                <h4 class="font-bold text-green-700 mb-2">✅ Consulta parametrizada</h4>
+                                <pre class="code-block"><code>const result = await db.query(
+  'SELECT * FROM users WHERE email = $1',
+  [email]
+);
+// El motor trata el valor como dato, nunca como código</code></pre>
+
+                                <h4 class="font-bold text-green-700 mb-2">En NoSQL también importa</h4>
+                                <p class="mb-4 text-sm">En MongoDB, si pasas directamente un objeto JSON como filtro, un atacante puede inyectar operadores como <code>{ "$gt": "" }</code>. La solución es validar el tipo antes de consultar.</p>
+
+                                <!-- INTERACTIVO: Repara la consulta -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg game-card">
+                                    <p class="text-green-800 font-bold mb-2">🎮 Misión 3: Repara la consulta</p>
+                                    <p class="text-slate-600 text-sm mb-3">Selecciona la versión segura de esta consulta:</p>
+                                    <pre class="code-block mb-3"><code>// Entrada: req.body.id
+const query = "SELECT * FROM productos WHERE id = " + req.body.id;</code></pre>
+                                    <div class="space-y-2" id="query-options">
+                                        <button type="button" class="query-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="no">
+                                            <code>db.query(`SELECT * FROM productos WHERE id = ${req.body.id}`)</code>
+                                        </button>
+                                        <button type="button" class="query-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="yes">
+                                            <code>db.query('SELECT * FROM productos WHERE id = $1', [req.body.id])</code>
+                                        </button>
+                                        <button type="button" class="query-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="no">
+                                            <code>db.query("SELECT * FROM productos WHERE id = '" + req.body.id + "'")</code>
+                                        </button>
+                                    </div>
+                                    <p id="query-feedback" class="mt-3 text-sm font-semibold"></p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4: Manejo seguro de errores -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-error">
+                            <span>🚨 Escudo 4: Manejo seguro de errores, callar con elegancia</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-error" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="error-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Cuando algo falla en tu API, el cliente merece una respuesta clara, pero el atacante no merece información útil. Un error que dice <code>"Column 'password' does not exist"</code> o entrega una traza completa de la base de datos está regalando el plano del edificio.
+                                </p>
+
+                                <h4 class="font-bold text-green-700 mb-2">Principios del manejo seguro</h4>
+                                <ul class="list-disc pl-5 space-y-2 mb-4">
+                                    <li>Usa un formato consistente: <code>{ status, message, code }</code>.</li>
+                                    <li>No expongas rutas internas, nombres de tablas ni contraseñas.</li>
+                                    <li>Registra los errores detallados solo en el servidor (logs).</li>
+                                    <li>Devuelve códigos HTTP adecuados: 400, 401, 403, 404, 429, 500.</li>
+                                    <li>En producción, oculta el <code>stack trace</code>; en desarrollo, sí puedes mostrarlo.</li>
+                                </ul>
+
+                                <h4 class="font-bold text-green-700 mb-2">Middleware de errores en Express</h4>
+                                <pre class="code-block"><code>app.use((err, req, res, next) => {
+  console.error(err); // detalle completo en logs del servidor
+
+  const status = err.status || 500;
+  const message = status === 500 && process.env.NODE_ENV === 'production'
+    ? 'Error interno del servidor'
+    : err.message;
+
+  res.status(status).json({
+    error: {
+      status,
+      message,
+      code: err.code || 'INTERNAL_ERROR'
+    }
+  });
+});</code></pre>
+
+                                <!-- INTERACTIVO: Clasifica el error -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg game-card">
+                                    <p class="text-green-800 font-bold mb-2">🎮 Misión 4: ¿Qué dices al cliente?</p>
+                                    <p class="text-slate-600 text-sm mb-3">Ocurrió un error de conexión a la base de datos. ¿Qué mensaje envías al cliente?</p>
+                                    <div class="space-y-2" id="error-options">
+                                        <button type="button" class="error-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="no">
+                                            "Error: connect ECONNREFUSED 127.0.0.1:5432 en db.js:42"
+                                        </button>
+                                        <button type="button" class="error-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="yes">
+                                            { status: 500, message: "Error interno del servidor", code: "DB_ERROR" }
+                                        </button>
+                                        <button type="button" class="error-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="no">
+                                            "No se pudo conectar a PostgreSQL con el usuario admin"
+                                        </button>
+                                    </div>
+                                    <p id="error-feedback" class="mt-3 text-sm font-semibold"></p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Misiones de protección ⚔️</h2>
+                <p class="text-slate-600 mb-4">Completa las misiones para desbloquear insignias. Toda la gamificación ocurre aquí.</p>
+
+                <!-- Tabla de logros -->
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-green-200">
+                    <h3 class="font-bold text-green-800 mb-3">🏅 Tabla de logros</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="badges-container">
+                        <div class="badge-card p-3 bg-slate-100 rounded-lg text-center text-sm text-slate-500" id="badge-m1">🥇 Portero de orígenes</div>
+                        <div class="badge-card p-3 bg-slate-100 rounded-lg text-center text-sm text-slate-500" id="badge-m2">🥈 Guardián del tráfico</div>
+                        <div class="badge-card p-3 bg-slate-100 rounded-lg text-center text-sm text-slate-500" id="badge-m3">🛡️ Blindador de consultas</div>
+                        <div class="badge-card p-3 bg-slate-100 rounded-lg text-center text-sm text-slate-500" id="badge-m4">🏆 Maestro del silencio</div>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-600">Puntos totales: <span id="activity-points" class="font-bold text-green-700">0</span> ⭐</p>
+                </div>
+
+                <!-- Misión 1: Orden de middlewares -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6" id="mission-1">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Misión 1: Ordena el flujo de protección</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">
+                        El orden de los middlewares importa tanto como tenerlos. Arrastra o haz clic en los pasos para ordenarlos correctamente: primero seguridad y CORS, luego rate limiting, después parseo y autenticación, y finalmente las rutas y manejo de errores.
+                    </p>
+                    <div class="space-y-2" id="middleware-steps">
+                        <button type="button" class="step-item w-full text-left py-2 px-3 bg-slate-100 border-2 border-slate-200 rounded-lg" data-order="4">Handler de errores global</button>
+                        <button type="button" class="step-item w-full text-left py-2 px-3 bg-slate-100 border-2 border-slate-200 rounded-lg" data-order="3">Autenticación y rutas</button>
+                        <button type="button" class="step-item w-full text-left py-2 px-3 bg-slate-100 border-2 border-slate-200 rounded-lg" data-order="1">CORS y seguridad</button>
+                        <button type="button" class="step-item w-full text-left py-2 px-3 bg-slate-100 border-2 border-slate-200 rounded-lg" data-order="2">Rate limiting y parseo de body</button>
+                    </div>
+                    <p id="order-feedback" class="mt-3 text-sm font-semibold"></p>
+                    <button type="button" id="check-order" class="mt-3 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700">Verificar orden</button>
+                </div>
+
+                <!-- Misión 2: Calculadora de rate limit -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6" id="mission-2">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">⏱️ Misión 2: Calcula el límite correcto</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">
+                        Un endpoint de login no puede permitir más de 5 intentos por minuto por IP. Si configuras una ventana de 60 segundos, ¿cuál debe ser el <code>max</code> para ese endpoint?
+                    </p>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <button type="button" class="rate-calc-choice py-2 px-4 bg-white border-2 border-slate-200 rounded-lg" data-correct="no">max: 100</button>
+                        <button type="button" class="rate-calc-choice py-2 px-4 bg-white border-2 border-slate-200 rounded-lg" data-correct="yes">max: 5</button>
+                        <button type="button" class="rate-calc-choice py-2 px-4 bg-white border-2 border-slate-200 rounded-lg" data-correct="no">max: 1</button>
+                    </div>
+                    <p id="rate-calc-feedback" class="text-sm font-semibold"></p>
+                </div>
+
+                <!-- Misión 3: Caza de errores -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6" id="mission-3">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Misión 3: Caza el error de seguridad</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">
+                        Lee el siguiente snippet y selecciona la vulnerabilidad presente.
+                    </p>
+                    <pre class="code-block mb-4"><code>app.get('/usuario/:id', async (req, res) => {
+  const user = await db.query(`
+    SELECT * FROM users WHERE id = ${req.params.id}
+  `);
+  res.json(user);
+});</code></pre>
+                    <div class="space-y-2" id="bug-options">
+                        <button type="button" class="bug-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="no">Falta autenticación</button>
+                        <button type="button" class="bug-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="yes">Inyección SQL por concatenación de parámetro</button>
+                        <button type="button" class="bug-choice w-full text-left py-2 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm" data-correct="no">No hay CORS configurado</button>
+                    </div>
+                    <p id="bug-feedback" class="mt-3 text-sm font-semibold"></p>
+                </div>
+
+                <!-- Misión 4: Quiz contra reloj -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6" id="mission-4">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">⚡ Misión 4: Quiz contra reloj</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">
+                        Responde 5 preguntas en menos de 60 segundos. Cada respuesta correcta suma 20 puntos.
+                    </p>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-lg font-bold text-red-600">⏰ <span id="timer" class="timer">60</span>s</span>
+                        <button type="button" id="start-timer-quiz" class="py-2 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">Iniciar reto</button>
+                    </div>
+                    <div id="timer-questions" class="hidden space-y-4"></div>
+                    <p id="timer-feedback" class="mt-3 text-sm font-semibold"></p>
+                </div>
+
+                <!-- Productos esperados -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">📝 Producto esperado</h3>
+                    <p class="text-slate-700 leading-relaxed">
+                        Diseña un mini plan de protección para una API de registro de usuarios. Indica qué middlewares usarías, en qué orden, qué límites de rate limiting aplicarías, cómo harías las consultas a la base de datos y cómo responderías ante errores. Entrega tu respuesta en un documento o captura de pantalla.
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Middleware CORS para Express</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial del paquete cors para configurar el intercambio de recursos entre orígenes en aplicaciones Express.</p>
+                            <a href="https://expressjs.com/en/resources/middleware/cors.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Middleware CORS para Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">express-rate-limit</h3>
+                            <p class="text-slate-600 mb-2">Repositorio y documentación del middleware express-rate-limit para limitar peticiones repetidas a APIs públicas.</p>
+                            <a href="https://www.npmjs.com/package/express-rate-limit" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR express-rate-limit" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Códigos de estado HTTP (MDN)</h3>
+                            <p class="text-slate-600 mb-2">Guía de MDN Web Docs con los códigos de estado HTTP más comunes, incluyendo 400, 401, 403, 404, 429 y 500.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Status" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR Códigos de estado HTTP MDN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Ruiz Barea, R. (2023). <i>Protección de APIs REST</i> [Trabajo Fin de Máster, Universitat Oberta de Catalunya]. Repositorio O2 UOC. (implementación y securización de un API Gateway universitario frente a los riesgos de seguridad más comunes de una API REST). <a href="https://scholar.google.com/scholar?q=Protecci%C3%B3n+de+APIs+REST+Ruiz+Barea" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Protecci%C3%B3n+de+APIs+REST+Ruiz+Barea</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Leones Zambrano, W. P., Macías Bazurto, L. M., Pilla Zúñiga, W. I., y Fernández Sánchez, E. G. (2024). Diseño estratégico de APIs escalables y seguras para la integración de sistemas y aplicaciones. <i>Ciencia Latina Revista Científica Multidisciplinar</i>, 8(5), 13395-13408. (pp. 13405-13406). <a href="https://scholar.google.com/scholar?q=Dise%C3%B1o+estrat%C3%A9gico+de+APIs+escalables+y+seguras+para+la+integraci%C3%B3n+de+sistemas+y+aplicaciones" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Dise%C3%B1o+estrat%C3%A9gico+de+APIs+escalables+y+seguras+para+la+integraci%C3%B3n+de+sistemas+y+aplicaciones</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cevallos Muñoz, F. D. (2022). <i>Propuesta de buenas prácticas de seguridad para creación, transporte y almacenamiento de JSON Web Tokens</i> [Tesis de maestría, Pontificia Universidad Católica del Ecuador, Sede Ambato]. <a href="https://scholar.google.com/scholar?q=Propuesta+de+buenas+pr%C3%A1cticas+de+seguridad+para+creaci%C3%B3n+transporte+y+almacenamiento+de+JSON+Web+Tokens" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Propuesta+de+buenas+pr%C3%A1cticas+de+seguridad+para+creaci%C3%B3n+transporte+y+almacenamiento+de+JSON+Web+Tokens</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Ramírez Patajalo, G. A. (2023). Seguridad en desarrollo web: mejores prácticas para proteger aplicaciones y datos. <i>Dominio de las Ciencias</i>, 9(3), 2219-2229. (manejo seguro de errores y protección integral de aplicaciones web frente a accesos no autorizados). <a href="https://scholar.google.com/scholar?q=Seguridad+en+desarrollo+web+mejores+pr%C3%A1cticas+para+proteger+aplicaciones+y+datos" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Seguridad+en+desarrollo+web+mejores+pr%C3%A1cticas+para+proteger+aplicaciones+y+datos</a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Navegación y acordeones -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- Evaluación -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué protege realmente CORS en una API?",
+                options: [
+                    "Evita que cualquier origen lea la respuesta en un navegador",
+                    "Autentica a los usuarios que consumen la API",
+                    "Bloquea todas las peticiones maliciosas",
+                    "Cifra los datos entre cliente y servidor"
+                ],
+                correct: 0
+            },
+            {
+                question: "¿Qué código HTTP se devuelve cuando se excede un límite de rate limiting?",
+                options: ["200 OK", "401 Unauthorized", "429 Too Many Requests", "500 Internal Server Error"],
+                correct: 2
+            },
+            {
+                question: "¿Por qué son seguras las consultas parametrizadas?",
+                options: [
+                    "Porque usan más memoria",
+                    "Porque el motor de base de datos trata los valores como datos, no como código",
+                    "Porque solo funcionan con bases de datos SQL",
+                    "Porque ocultan la consulta al cliente"
+                ],
+                correct: 1
+            },
+            {
+                question: "En producción, ¿qué información NUNCA debe incluir un mensaje de error al cliente?",
+                options: [
+                    "El código de estado HTTP",
+                    "Un mensaje genérico como 'Error interno del servidor'",
+                    "El stack trace con rutas y nombres de base de datos",
+                    "Un identificador de error para soporte"
+                ],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es el orden recomendado de middlewares en Express?",
+                options: [
+                    "Rutas → CORS → autenticación → handler de errores",
+                    "CORS/seguridad → rate limiting → parseo/autenticación → rutas → handler de errores",
+                    "Handler de errores → CORS → rutas → autenticación",
+                    "Autenticación → CORS → rate limiting → rutas"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál configuración de CORS es más segura cuando la API usa cookies o tokens?",
+                options: [
+                    "Access-Control-Allow-Origin: *",
+                    "Una lista blanca de orígenes con credentials: true",
+                    "Permitir cualquier método y cabecera",
+                    "Deshabilitar el preflight OPTIONS"
+                ],
+                correct: 1
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- Gamificación e interactividad -->
+    <script>
+        // Estado global de gamificación
+        const gameState = {
+            points: 0,
+            completed: { cors: false, rate: false, query: false, error: false },
+            badges: { m1: false, m2: false, m3: false, m4: false }
+        };
+
+        function updatePoints(amount) {
+            gameState.points += amount;
+            document.getElementById('points-display').textContent = gameState.points;
+            document.getElementById('activity-points').textContent = gameState.points;
+        }
+
+        function updateProgress() {
+            const total = Object.keys(gameState.completed).length;
+            const done = Object.values(gameState.completed).filter(v => v).length;
+            const pct = Math.round((done / total) * 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('progress-text').textContent = `${done} de ${total} escudos activados`;
+
+            const badges = ['cors', 'rate', 'query', 'error'];
+            badges.forEach(b => {
+                const el = document.getElementById('badge-' + b);
+                if (gameState.completed[b]) {
+                    el.className = 'badge bg-green-200 text-green-800';
+                }
+            });
+        }
+
+        function unlockBadge(id) {
+            if (!gameState.badges[id]) {
+                gameState.badges[id] = true;
+                const el = document.getElementById('badge-' + id);
+                el.classList.remove('bg-slate-100', 'text-slate-500');
+                el.classList.add('bg-green-200', 'text-green-800', 'mission-complete');
+            }
+        }
+
+        // --- Misión CORS ---
+        document.querySelectorAll('.cors-choice').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const choice = this.dataset.choice;
+                const feedback = document.getElementById('cors-feedback');
+                document.querySelectorAll('.cors-choice').forEach(b => {
+                    b.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500');
+                });
+                if (choice === 'block') {
+                    this.classList.add('bg-green-100', 'border-green-500');
+                    feedback.textContent = '¡Correcto! 🎉 El origen no está en la lista blanca, así que CORS lo bloquea.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-green-700';
+                    if (!gameState.completed.cors) {
+                        gameState.completed.cors = true;
+                        updatePoints(25);
+                        updateProgress();
+                    }
+                } else {
+                    this.classList.add('bg-red-100', 'border-red-500');
+                    feedback.textContent = '¡Casi! Inténtalo de nuevo 💪. evil.com no es de confianza.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-red-600';
+                    this.classList.add('shake');
+                    setTimeout(() => this.classList.remove('shake'), 400);
+                }
+            });
+        });
+
+        // --- Misión Rate limiting ---
+        let rateCount = 0;
+        const rateLimit = 5;
+        document.getElementById('rate-send').addEventListener('click', function() {
+            rateCount++;
+            document.getElementById('rate-count').textContent = rateCount;
+            const pct = Math.min((rateCount / rateLimit) * 100, 100);
+            document.getElementById('rate-bar').style.width = pct + '%';
+            const status = document.getElementById('rate-status');
+            const feedback = document.getElementById('rate-feedback');
+            if (rateCount <= rateLimit) {
+                status.textContent = 'OK 200';
+                status.className = 'font-bold text-green-700';
+                feedback.textContent = 'Petición aceptada ✅';
+                feedback.className = 'mt-2 text-sm font-semibold text-green-700';
+            } else {
+                status.textContent = '429 Too Many Requests';
+                status.className = 'font-bold text-red-600';
+                feedback.textContent = '¡Bloqueado! Has superado el límite de 5 peticiones por minuto 🚫';
+                feedback.className = 'mt-2 text-sm font-semibold text-red-600';
+                this.disabled = true;
+                document.getElementById('rate-reset').classList.remove('hidden');
+                if (!gameState.completed.rate) {
+                    gameState.completed.rate = true;
+                    updatePoints(25);
+                    updateProgress();
+                }
+            }
+        });
+        document.getElementById('rate-reset').addEventListener('click', function() {
+            rateCount = 0;
+            document.getElementById('rate-count').textContent = 0;
+            document.getElementById('rate-bar').style.width = '0%';
+            document.getElementById('rate-status').textContent = 'OK';
+            document.getElementById('rate-status').className = 'font-bold text-green-700';
+            document.getElementById('rate-feedback').textContent = '';
+            document.getElementById('rate-send').disabled = false;
+            this.classList.add('hidden');
+        });
+
+        // --- Misión consultas parametrizadas ---
+        document.querySelectorAll('.query-choice').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const isCorrect = this.dataset.correct === 'yes';
+                const feedback = document.getElementById('query-feedback');
+                document.querySelectorAll('.query-choice').forEach(b => b.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500'));
+                if (isCorrect) {
+                    this.classList.add('bg-green-100', 'border-green-500');
+                    feedback.textContent = '¡Excelente! 🎉 Así separamos datos de código.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-green-700';
+                    if (!gameState.completed.query) {
+                        gameState.completed.query = true;
+                        updatePoints(25);
+                        updateProgress();
+                    }
+                } else {
+                    this.classList.add('bg-red-100', 'border-red-500');
+                    feedback.textContent = '¡Casi! Inténtalo de nuevo 💪. Esa opción sigue concatenando datos.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-red-600';
+                    this.classList.add('shake');
+                    setTimeout(() => this.classList.remove('shake'), 400);
+                }
+            });
+        });
+
+        // --- Misión manejo de errores ---
+        document.querySelectorAll('.error-choice').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const isCorrect = this.dataset.correct === 'yes';
+                const feedback = document.getElementById('error-feedback');
+                document.querySelectorAll('.error-choice').forEach(b => b.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500'));
+                if (isCorrect) {
+                    this.classList.add('bg-green-100', 'border-green-500');
+                    feedback.textContent = '¡Perfecto! 🎉 Mensaje genérico, útil y sin filtrar secretos.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-green-700';
+                    if (!gameState.completed.error) {
+                        gameState.completed.error = true;
+                        updatePoints(25);
+                        updateProgress();
+                    }
+                } else {
+                    this.classList.add('bg-red-100', 'border-red-500');
+                    feedback.textContent = '¡Cuidado! 💪 Eso filtraría información interna al atacante.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-red-600';
+                    this.classList.add('shake');
+                    setTimeout(() => this.classList.remove('shake'), 400);
+                }
+            });
+        });
+
+        // --- Actividad 1: Ordenar middlewares ---
+        document.querySelectorAll('.step-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = document.getElementById('middleware-steps');
+                parent.removeChild(this);
+                parent.appendChild(this);
+            });
+        });
+        document.getElementById('check-order').addEventListener('click', function() {
+            const items = Array.from(document.querySelectorAll('.step-item'));
+            const order = items.map(i => parseInt(i.dataset.order));
+            const isSorted = order.every((v, i, a) => !i || a[i-1] <= v);
+            const feedback = document.getElementById('order-feedback');
+            if (isSorted) {
+                feedback.textContent = '¡Orden perfecto! 🎉 CORS primero, límite después, luego parseo/autenticación, rutas y errores al final.';
+                feedback.className = 'mt-3 text-sm font-semibold text-green-700';
+                unlockBadge('m1');
+                updatePoints(30);
+            } else {
+                feedback.textContent = 'Aún no está ordenado 💪. Recuerda: seguridad → límites → parseo/autenticación → rutas → errores.';
+                feedback.className = 'mt-3 text-sm font-semibold text-red-600';
+            }
+        });
+
+        // --- Actividad 2: Calculadora de rate limit ---
+        document.querySelectorAll('.rate-calc-choice').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const isCorrect = this.dataset.correct === 'yes';
+                const feedback = document.getElementById('rate-calc-feedback');
+                document.querySelectorAll('.rate-calc-choice').forEach(b => b.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500'));
+                if (isCorrect) {
+                    this.classList.add('bg-green-100', 'border-green-500');
+                    feedback.textContent = '¡Exacto! 🎉 5 intentos por minuto es un límite razonable contra fuerza bruta.';
+                    feedback.className = 'text-sm font-semibold text-green-700';
+                    unlockBadge('m2');
+                    updatePoints(30);
+                } else {
+                    this.classList.add('bg-red-100', 'border-red-500');
+                    feedback.textContent = 'No es el valor adecuado 💪. Piensa en los intentos de fuerza bruta.';
+                    feedback.className = 'text-sm font-semibold text-red-600';
+                    this.classList.add('shake');
+                    setTimeout(() => this.classList.remove('shake'), 400);
+                }
+            });
+        });
+
+        // --- Actividad 3: Caza de errores ---
+        document.querySelectorAll('.bug-choice').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const isCorrect = this.dataset.correct === 'yes';
+                const feedback = document.getElementById('bug-feedback');
+                document.querySelectorAll('.bug-choice').forEach(b => b.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500'));
+                if (isCorrect) {
+                    this.classList.add('bg-green-100', 'border-green-500');
+                    feedback.textContent = '¡Detectado! 🎉 La concatenación permite inyección SQL. Usa parametrización.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-green-700';
+                    unlockBadge('m3');
+                    updatePoints(30);
+                } else {
+                    this.classList.add('bg-red-100', 'border-red-500');
+                    feedback.textContent = 'Ese no es el problema principal aquí 💪. Mira cómo se usa req.params.id.';
+                    feedback.className = 'mt-3 text-sm font-semibold text-red-600';
+                    this.classList.add('shake');
+                    setTimeout(() => this.classList.remove('shake'), 400);
+                }
+            });
+        });
+
+        // --- Actividad 4: Quiz contra reloj ---
+        const timerQuestions = [
+            { q: "¿CORS bloquea peticiones hechas con curl?", a: "No", options: ["Sí", "No"] },
+            { q: "¿Cuál es el límite sugerido para intentos de login?", a: "5 por minuto", options: ["100 por minuto", "5 por minuto"] },
+            { q: "¿Las consultas parametrizadas evitan inyección SQL?", a: "Sí", options: ["Sí", "No"] },
+            { q: "¿En producción debe mostrarse el stack trace al cliente?", a: "No", options: ["Sí", "No"] },
+            { q: "¿Rate limiting protege contra fuerza bruta?", a: "Sí", options: ["Sí", "No"] }
+        ];
+        let timerInterval = null;
+        let timeLeft = 60;
+        let timerScore = 0;
+
+        document.getElementById('start-timer-quiz').addEventListener('click', function() {
+            this.disabled = true;
+            const container = document.getElementById('timer-questions');
+            container.classList.remove('hidden');
+            container.innerHTML = '';
+            timerScore = 0;
+            timeLeft = 60;
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('timer-feedback').textContent = '';
+
+            timerQuestions.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <p class="font-semibold text-slate-800 mb-2">${idx + 1}. ${item.q}</p>
+                    <div class="flex gap-3 timer-options-${idx}"></div>
+                `;
+                container.appendChild(div);
+                const optsDiv = div.querySelector(`.timer-options-${idx}`);
+                item.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = opt;
+                    btn.className = 'py-1 px-3 bg-white border-2 border-slate-200 rounded-lg text-sm';
+                    btn.addEventListener('click', function() {
+                        if (opt === item.a) {
+                            btn.classList.add('bg-green-100', 'border-green-500');
+                            timerScore += 20;
+                        } else {
+                            btn.classList.add('bg-red-100', 'border-red-500');
+                        }
+                        optsDiv.querySelectorAll('button').forEach(b => b.disabled = true);
+                    });
+                    optsDiv.appendChild(btn);
+                });
+            });
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endTimerQuiz();
+                }
+            }, 1000);
+        });
+
+        function endTimerQuiz() {
+            const feedback = document.getElementById('timer-feedback');
+            feedback.textContent = `¡Tiempo! Conseguiste ${timerScore} puntos. ${timerScore >= 60 ? '🎉 ¡Excelente!' : '💪 Sigue practicando.'}`;
+            feedback.className = timerScore >= 60 ? 'mt-3 text-sm font-semibold text-green-700' : 'mt-3 text-sm font-semibold text-red-600';
+            if (timerScore >= 60) {
+                unlockBadge('m4');
+                updatePoints(timerScore);
+            }
+            document.getElementById('start-timer-quiz').disabled = false;
+            document.querySelectorAll('[id^="timer-options-"] button, [class^="timer-options-"] button').forEach(b => b.disabled = true);
+        }
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
