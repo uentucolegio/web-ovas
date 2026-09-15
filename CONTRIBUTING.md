@@ -55,6 +55,8 @@ Cada `index.html` debe tener las **7 secciones estándar** (con estos `id`): `in
 
 El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs. Por eso **cada OVA lleva su propio Tailwind horneado**:
 
+> 🛠️ ¿Vas a migrar OVAs antiguos que todavía usan el CDN? Sigue la guía [`ARREGLAR-TAILWIND.md`](ARREGLAR-TAILWIND.md): explica el problema y trae un prompt listo para que tu agente de IA los arregle en bloque.
+
 - En el `<head>`: `<link rel="stylesheet" href="tailwind.css">` — **prohibido** `<script src="https://cdn.tailwindcss.com">`.
 - Genera el `tailwind.css` **dentro de la carpeta del OVA** con:
 
