@@ -228,18 +228,27 @@ for (const dir of ovas) {
   // (Nivel B), no de texto. Queda fuera del Nivel A para no dar falsos positivos.
 
   // E6) Cuestionario de evaluación con al menos 5 preguntas.
-  // El quiz puede estar inline (index.html) o en un js/ del OVA (ej: js/quiz.js);
-  // por eso miramos codigoOva. Contamos las claves de pregunta de forma tolerante.
+  // Reconocemos los DOS motores de quiz usados en el repo:
+  //   a) arreglo JS "quizData = [ { question/pregunta … } ]" (inline o en js/quiz.js)
+  //   b) contenedor con data-correct='[…]' (un valor por pregunta)
+  // Miramos codigoOva (HTML + JS local) y nos quedamos con el mayor conteo.
+  let tieneQuiz = false, preguntas = 0;
   if (/\bquizData\b/.test(codigoOva)) {
-    const preguntas = (codigoOva.match(/\b(?:pregunta|question)\s*:/gi) || []).length;
-    if (preguntas > 0 && preguntas < 5)
-      warn(rel,
-        `La autoevaluación tiene solo ${preguntas} pregunta(s). Se recomiendan al menos 5.`,
-        'Amplía el arreglo quizData (en index.html o en js/quiz.js) hasta tener 5 o más preguntas.');
-  } else {
+    tieneQuiz = true;
+    preguntas = Math.max(preguntas, (codigoOva.match(/\b(?:pregunta|question)\s*:/gi) || []).length);
+  }
+  for (const m of codigoOva.matchAll(/data-correct=['"]\s*\[([^\]]*)\]/g)) {
+    tieneQuiz = true;
+    preguntas = Math.max(preguntas, m[1].split(',').map(s => s.trim()).filter(Boolean).length);
+  }
+  if (!tieneQuiz) {
     warn(rel,
-      'No se encontró la autoevaluación (el arreglo "quizData") en la sección de evaluación.',
-      'Implementa el cuestionario con un arreglo quizData de al menos 5 preguntas (inline o en js/quiz.js). Puedes guiarte por el _template.');
+      'No se encontró la autoevaluación (ni un arreglo "quizData" ni un contenedor con data-correct) en la sección de evaluación.',
+      'Implementa el cuestionario con al menos 5 preguntas (arreglo quizData inline/en js/quiz.js, o el motor con data-correct). Puedes guiarte por el _template.');
+  } else if (preguntas > 0 && preguntas < 5) {
+    warn(rel,
+      `La autoevaluación tiene solo ${preguntas} pregunta(s). Se recomiendan al menos 5.`,
+      'Agrega más preguntas hasta llegar a 5 o más (en el arreglo quizData o en el motor con data-correct).');
   }
 
   // === REGLAS DE ESTILO — SEGUNDO LOTE (estructura y diseño de secciones) ===
@@ -259,9 +268,9 @@ for (const dir of ovas) {
       `Ordénalas así (de arriba a abajo): ${SECCIONES.join(' → ')}.`);
 
   // E8) Objetivos como LISTA, no como tarjetas (error común: convertir a cards).
-  if (secObjetivos && !(/<ul/i.test(secObjetivos) && /<li/i.test(secObjetivos)))
+  if (secObjetivos && !(/<[uo]l/i.test(secObjetivos) && /<li/i.test(secObjetivos)))
     warn(rel,
-      'La sección Objetivos no usa una lista (<ul> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
+      'La sección Objetivos no usa una lista (<ul>/<ol> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
       'Deja los objetivos como lista: <ul class="space-y-4"> con un <li> por objetivo, tal como en _template/index.html.');
 
   // E9) Objetivos NO centrados (error común: centran el texto de la sección).
@@ -271,9 +280,9 @@ for (const dir of ovas) {
       'Quita la clase text-center de la sección Objetivos y usa la lista con "flex items-start", como en _template/index.html.');
 
   // E10) Recursos como LISTA, no como tarjetas.
-  if (secRecursos && !(/<ul/i.test(secRecursos) && /<li/i.test(secRecursos)))
+  if (secRecursos && !(/<[uo]l/i.test(secRecursos) && /<li/i.test(secRecursos)))
     warn(rel,
-      'La sección Recursos no usa una lista (<ul> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
+      'La sección Recursos no usa una lista (<ul>/<ol> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
       'Deja los recursos como lista: <ul class="space-y-4"> con un <li> por recurso, tal como en _template/index.html.');
 
   // E11) Bibliografía con entradas reales (no vacía).
