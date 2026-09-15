@@ -58,6 +58,26 @@ function encontrarOvas(dir, acc = []) {
 }
 
 /**
+ * Concatena el JavaScript local del OVA (archivos .js dentro de su carpeta).
+ * Muchos OVAs guardan el quiz o la gamificación en js/*.js en lugar de inline;
+ * hay que leerlos para evaluar el OVA como realmente se ejecuta.
+ */
+function leerJsLocales(dir) {
+  let out = '';
+  const recorrer = (d) => {
+    for (const name of readdirSync(d)) {
+      if (name.startsWith('.') || name === 'node_modules') continue;
+      const full = join(d, name);
+      const st = statSync(full);
+      if (st.isDirectory()) recorrer(full);
+      else if (name.endsWith('.js')) { try { out += '\n' + readFileSync(full, 'utf8'); } catch { /* ignora */ } }
+    }
+  };
+  try { recorrer(dir); } catch { /* ignora */ }
+  return out;
+}
+
+/**
  * Devuelve el trozo de HTML de una sección: desde su id="<sec>" hasta donde
  * empieza la siguiente sección (o el final). Sirve para revisar el diseño de
  * una sección concreta (ej: que Objetivos sea una lista y no tarjetas).
@@ -165,6 +185,9 @@ for (const dir of ovas) {
 
   // Trabajamos sobre el HTML sin comentarios para no dar falsos positivos.
   const htmlSinComentarios = html.replace(/<!--[\s\S]*?-->/g, '');
+  // "Código" del OVA = HTML + su JavaScript local. Muchos OVAs guardan el quiz
+  // y la gamificación en js/*.js; hay que mirarlos para no dar falsos positivos.
+  const codigoOva = htmlSinComentarios + '\n' + leerJsLocales(dir);
 
   // E1) Tipografía institucional: Poppins (OBLIGATORIA).
   if (!/Poppins/i.test(html))
@@ -188,35 +211,35 @@ for (const dir of ovas) {
 
   // E4) Gamificación en Contenido y Actividades (obligatoria por CONTRIBUTING).
   const GAMIFICACION = /(gamificaci[oó]n|misi[oó]n|misiones|insignia|medalla|logro|puntos?|nivel(?:es)?|progreso|desaf[ií]o|reto|racha|recompensa|\bXP\b|ranking|tablero)/i;
-  if (!GAMIFICACION.test(htmlSinComentarios))
+  if (!GAMIFICACION.test(codigoOva))
     warn(rel,
       'No se detectan elementos de gamificación (puntos, misiones, insignias, barra de progreso…), que deben estar en Contenido y Actividades.',
       'Agrega gamificación en las secciones Contenido y Actividades: por ejemplo puntos, misiones, insignias o una barra de progreso.');
 
   // E5) Controles de voz propios: elens.js ya aporta accesibilidad/voz.
-  if (/speechSynthesis|SpeechSynthesisUtterance/.test(htmlSinComentarios))
+  if (/speechSynthesis|SpeechSynthesisUtterance/.test(codigoOva))
     warn(rel,
       'El OVA trae su propia lectura por voz (speechSynthesis), que se duplica con el plugin de accesibilidad elens.js.',
-      'Quita los botones/controles de voz propios: la lectura por voz ya la aporta el plugin elens.js.');
+      'Quita los botones/controles de voz propios (por ejemplo un archivo js/speech.js): la lectura por voz ya la aporta el plugin elens.js.');
 
   // (Nota) No validamos "position: fixed" de forma determinista: el layout base
   // estándar (barra lateral + header móvil) lo usa legítimamente. Distinguir una
   // barra flotante de gamificación de la navegación base requiere análisis visual
   // (Nivel B), no de texto. Queda fuera del Nivel A para no dar falsos positivos.
 
-  // E6) Cuestionario de evaluación con al menos 5 preguntas (parse de quizData).
-  const quizMatch = html.match(/(?:const|let|var)\s+quizData\s*=\s*(\[[\s\S]*?\])\s*;/);
-  if (quizMatch) {
-    // Contamos objetos de primer nivel de forma tolerante (cuenta de "pregunta"/"question").
-    const preguntas = (quizMatch[1].match(/\b(?:pregunta|question)\s*:/gi) || []).length;
+  // E6) Cuestionario de evaluación con al menos 5 preguntas.
+  // El quiz puede estar inline (index.html) o en un js/ del OVA (ej: js/quiz.js);
+  // por eso miramos codigoOva. Contamos las claves de pregunta de forma tolerante.
+  if (/\bquizData\b/.test(codigoOva)) {
+    const preguntas = (codigoOva.match(/\b(?:pregunta|question)\s*:/gi) || []).length;
     if (preguntas > 0 && preguntas < 5)
       warn(rel,
         `La autoevaluación tiene solo ${preguntas} pregunta(s). Se recomiendan al menos 5.`,
-        'Amplía el arreglo quizData del index.html hasta tener 5 o más preguntas.');
+        'Amplía el arreglo quizData (en index.html o en js/quiz.js) hasta tener 5 o más preguntas.');
   } else {
     warn(rel,
       'No se encontró la autoevaluación (el arreglo "quizData") en la sección de evaluación.',
-      'Implementa el cuestionario con un arreglo quizData de al menos 5 preguntas. Puedes guiarte por el _template.');
+      'Implementa el cuestionario con un arreglo quizData de al menos 5 preguntas (inline o en js/quiz.js). Puedes guiarte por el _template.');
   }
 
   // === REGLAS DE ESTILO — SEGUNDO LOTE (estructura y diseño de secciones) ===
