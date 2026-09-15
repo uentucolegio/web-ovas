@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Autoevaluación: Evaluación del Progreso (con retroalimentación)</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+  --accent:#2563eb; --good:#16a34a; --bad:#dc2626; --info:#0ea5e9;
+}
+body{
+  margin:0; font-family:Inter,system-ui,Arial;
+  background:linear-gradient(180deg,#eef6ff 0%, #f8fafc 100%);
+  color:var(--ink); padding:24px;
+}
+.container{max-width:940px; margin:0 auto;}
+.card{
+  background:var(--card); border-radius:16px; padding:24px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+h1{font-size:22px; color:var(--accent); margin-bottom:10px;}
+.lead{color:var(--muted); font-size:14px; margin-bottom:20px;}
+.q{margin-bottom:22px; padding:12px; border-radius:10px; background:#fbfdff; border:1px solid #eef2ff;}
+.q h3{font-size:16px; margin-bottom:8px;}
+.q label{display:block; margin-bottom:6px; cursor:pointer;}
+.q input[type="text"]{
+  width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px;
+  font-family:inherit; margin-top:6px;
+}
+.btns{display:flex; gap:12px; margin-top:12px; align-items:center;}
+button{
+  padding:10px 16px; border:none; border-radius:8px; cursor:pointer;
+  font-weight:700; color:#fff; background:var(--accent);
+}
+button.secondary{background:#e2e8f0; color:var(--ink);}
+.feedback{margin-top:10px; padding:10px; border-radius:8px; display:none;}
+.feedback.ok{background:#ecfdf5; border:1px solid #bbf7d0; color:var(--good); display:block;}
+.feedback.bad{background:#fff1f2; border:1px solid #fecaca; color:var(--bad); display:block;}
+.feedback.info{background:#eff6ff; border:1px solid #bfdbfe; color:var(--info); display:block;}
+.score{font-weight:800; margin-top:8px;}
+.small{font-size:13px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>Autoevaluación: Evaluación del Progreso en el Aprendizaje</h1>
+    <div class="lead">Responde las preguntas. Al pulsar <b>Calificar</b> verás la retroalimentación específica por pregunta.</div>
+
+    <form id="quiz">
+      <!-- 1 -->
+      <div class="q" data-answer="b" data-feedback-correct="Correcto. La evaluación del progreso busca acompañar y mejorar el proceso de aprendizaje, no solo medir un producto final." data-feedback-wrong="No exactamente. Aunque la calificación es parte del sistema, la evaluación del progreso se centra en mejorar el proceso, no solo en calificar.">
+        <h3>1️⃣ ¿Cuál es el propósito principal de la evaluación del progreso?</h3>
+        <label><input type="radio" name="q1" value="a"> Calificar los productos finales del estudiante.</label>
+        <label><input type="radio" name="q1" value="b"> Analizar y mejorar el proceso de aprendizaje continuamente.</label>
+        <label><input type="radio" name="q1" value="c"> Medir solo el conocimiento teórico del estudiante.</label>
+        <div class="feedback" id="fb-q1"></div>
+      </div>
+
+      <!-- 2 -->
+      <div class="q" data-answer="c" data-feedback-correct="Bien: la evaluación formativa acompaña el proceso y sirve para ajustar la enseñanza y el aprendizaje." data-feedback-wrong="No. La evaluación formativa no se realiza únicamente al final; acompaña el proceso para mejorarlo.">
+        <h3>2️⃣ Una evaluación formativa se caracteriza por:</h3>
+        <label><input type="radio" name="q2" value="a"> Realizarse únicamente al final del curso.</label>
+        <label><input type="radio" name="q2" value="b"> Ser cuantitativa y centrada en la nota.</label>
+        <label><input type="radio" name="q2" value="c"> Acompañar el proceso de aprendizaje para mejorar.</label>
+        <div class="feedback" id="fb-q2"></div>
+      </div>
+
+      <!-- 3 -->
+      <div class="q" data-answer="falso" data-feedback-correct="Correcto. La evaluación del progreso incluye la participación activa del estudiante (auto/coevaluación)." data-feedback-wrong="Incorrecto. No debe ser exclusiva del docente: la autoevaluación y la coevaluación son partes importantes.">
+        <h3>3️⃣ (V/F) La evaluación del progreso solo debe realizarla el docente.</h3>
+        <label><input type="radio" name="q3" value="verdadero"> Verdadero</label>
+        <label><input type="radio" name="q3" value="falso"> Falso</label>
+        <div class="feedback" id="fb-q3"></div>
+      </div>
+
+      <!-- 4 -->
+      <div class="q" data-answer="a" data-feedback-correct="Exacto. El diario de progreso fomenta la autorreflexión sobre el propio aprendizaje." data-feedback-wrong="No. Un examen final no promueve la reflexión continua sobre el proceso; el diario sí.">
+        <h3>4️⃣ ¿Cuál de las siguientes estrategias fomenta la autorreflexión?</h3>
+        <label><input type="radio" name="q4" value="a"> Diario de progreso.</label>
+        <label><input type="radio" name="q4" value="b"> Examen final.</label>
+        <label><input type="radio" name="q4" value="c"> Evaluación numérica estandarizada.</label>
+        <div class="feedback" id="fb-q4"></div>
+      </div>
+
+      <!-- 5 -->
+      <div class="q" data-answer="b" data-feedback-correct="Correcto. Evaluación continua significa acompañar y valorar periódicamente el aprendizaje." data-feedback-wrong="No. La evaluación continua implica revisiones regulares a lo largo del proceso, no solo al inicio.">
+        <h3>5️⃣ ¿Qué significa una evaluación continua?</h3>
+        <label><input type="radio" name="q5" value="a"> Que se hace solo al inicio del proceso.</label>
+        <label><input type="radio" name="q5" value="b"> Que se realiza regularmente para acompañar el aprendizaje.</label>
+        <label><input type="radio" name="q5" value="c"> Que mide únicamente la participación.</label>
+        <div class="feedback" id="fb-q5"></div>
+      </div>
+
+      <!-- 6 -->
+      <div class="q" data-answer="a" data-feedback-correct="Verdadero. Una evaluación completa incluye conocimientos, habilidades y valores." data-feedback-wrong="Falso no sería correcto: una buena evaluación del progreso debe mirar más que solo conocimientos.">
+        <h3>6️⃣ (V/F) Una buena evaluación del progreso debe incluir aspectos cognitivos, habilidades y valores.</h3>
+        <label><input type="radio" name="q6" value="a"> Verdadero</label>
+        <label><input type="radio" name="q6" value="b"> Falso</label>
+        <div class="feedback" id="fb-q6"></div>
+      </div>
+
+      <!-- 7 -->
+      <div class="q" data-answer="c" data-feedback-correct="Bien: el portafolio permite ver evidencias a lo largo del tiempo y analizar la evolución." data-feedback-wrong="No. Aunque una lista de chequeo ayuda, el portafolio es la herramienta que muestra la evolución acumulada." >
+        <h3>7️⃣ ¿Qué herramienta permite al estudiante ver su evolución a lo largo del tiempo?</h3>
+        <label><input type="radio" name="q7" value="a"> Prueba objetiva.</label>
+        <label><input type="radio" name="q7" value="b"> Lista de chequeo.</label>
+        <label><input type="radio" name="q7" value="c"> Portafolio de evidencias.</label>
+        <div class="feedback" id="fb-q7"></div>
+      </div>
+
+      <!-- 8 -->
+      <div class="q" data-answer="b" data-feedback-correct="Correcto. La autoevaluación fortalece la autorregulación y autonomía." data-feedback-wrong="No. Su propósito no es fomentar la competencia entre compañeros, sino la autorregulación del propio aprendiz.">
+        <h3>8️⃣ La autoevaluación promueve principalmente:</h3>
+        <label><input type="radio" name="q8" value="a"> La competencia entre compañeros.</label>
+        <label><input type="radio" name="q8" value="b"> La autorregulación y la autonomía.</label>
+        <label><input type="radio" name="q8" value="c"> La memorización de contenidos.</label>
+        <div class="feedback" id="fb-q8"></div>
+      </div>
+
+      <!-- 9 (abierta) -->
+      <div class="q" data-answer="abierta" data-feedback-correct="Muy bien. Esa es una característica clave: una evaluación del progreso debe ser formativa, reflexiva o continua (entre otras)." data-feedback-wrong="Intenta una respuesta que indique que la evaluación del progreso es formativa, continua, reflexiva o individualizada.">
+        <h3>9️⃣ Escribe una característica esencial de una buena evaluación del progreso:</h3>
+        <input type="text" name="q9" placeholder="Ej: formativa, reflexiva...">
+        <div class="feedback" id="fb-q9"></div>
+      </div>
+
+      <!-- 10 (abierta) -->
+      <div class="q" data-answer="abierta" data-feedback-correct="Perfecto. Las estrategias como diario de progreso, portafolio o rúbrica son ejemplos válidos y útiles." data-feedback-wrong="Intenta mencionar una estrategia práctica: diario de progreso, portafolio, rúbrica, autoevaluación, checklist, etc.">
+        <h3>🔟 Menciona una estrategia que podrías usar para evaluar tu propio aprendizaje.</h3>
+        <input type="text" name="q10" placeholder="Ej: diario reflexivo, rúbrica, portafolio...">
+        <div class="feedback" id="fb-q10"></div>
+      </div>
+    </form>
+
+    <div class="btns">
+      <button id="checkBtn">Calificar</button>
+      <button class="secondary" id="resetBtn" type="button">Reiniciar</button>
+      <div class="small" id="info">Cada pregunta de opción vale 1 punto. Cada pregunta abierta vale 0.5 puntos (evaluada automáticamente por extensión).</div>
+    </div>
+
+    <div class="score" id="result" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+const totalQuestions = document.querySelectorAll('.q').length;
+const optionQuestions = Array.from(document.querySelectorAll('.q')).filter(q => q.dataset.answer!=='abierta').length;
+const openQuestions = totalQuestions - optionQuestions;
+
+document.getElementById('checkBtn').addEventListener('click', () => {
+  let correct = 0;
+  // Evitar volver a calificar varias veces
+  document.getElementById('checkBtn').disabled = true;
+
+  document.querySelectorAll('.q').forEach((q, idx) => {
+    const ans = q.dataset.answer; // 'a'/'b'/'c'/'verdadero'/'falso'/'abierta'
+    const fbEl = q.querySelector('.feedback');
+    fbEl.style.display = 'none';
+    fbEl.className = 'feedback';
+
+    if (ans === 'abierta') {
+      const input = q.querySelector('input[type="text"]');
+      const val = (input.value || '').trim();
+      // Criterio simple: dar medio punto si la respuesta tiene >3 caracteres y al menos una palabra significativa
+      if (val.length > 3) {
+        correct += 0.5;
+        fbEl.textContent = q.dataset.feedbackCorrect || q.dataset.feedbackCorrect === undefined ? q.dataset.feedbackCorrect || 'Buena respuesta.' : '';
+        fbEl.classList.add('ok');
+      } else {
+        fbEl.textContent = q.dataset.feedbackWrong || 'Respuesta demasiado corta. Intenta ser más específico.';
+        fbEl.classList.add('bad');
+      }
+      fbEl.style.display = 'block';
+    } else {
+      // Preguntas de opción
+      const name = q.querySelector('input')?.name;
+      const selected = document.querySelector(`input[name="${name}"]:checked`);
+      if (!selected) {
+        fbEl.textContent = '⚠️ No respondiste esta pregunta. ' + (q.dataset.feedbackWrong || '');
+        fbEl.classList.add('bad');
+        fbEl.style.display = 'block';
+      } else if (selected.value === ans) {
+        correct += 1;
+        fbEl.textContent = q.dataset.feedbackCorrect || 'Correcto.';
+        fbEl.classList.add('ok');
+        fbEl.style.display = 'block';
+      } else {
+        fbEl.textContent = q.dataset.feedbackWrong || 'Incorrecto.';
+        fbEl.classList.add('bad');
+        fbEl.style.display = 'block';
+      }
+    }
+
+    // Mostrar la retroalimentación detallada ya aplicada.
+  });
+
+  // Bloquear inputs tras calificar (evita cambiar respuestas)
+  document.querySelectorAll('#quiz input').forEach(i => i.disabled = true);
+
+  const maxScore = optionQuestions + openQuestions * 0.5;
+  const pct = Math.round((correct / maxScore) * 100);
+  const resultEl = document.getElementById('result');
+  resultEl.textContent = `Puntuación: ${correct.toFixed(1)} / ${maxScore}  —  ${pct}%`;
+
+  // Mensaje general
+  let general = '';
+  if (pct >= 90) general = '🌟 Excelente trabajo. Demuestras buen dominio del tema.';
+  else if (pct >= 70) general = '👍 Buen trabajo, pero revisa las retroalimentaciones para mejorar.';
+  else general = '📘 Revisa las explicaciones por pregunta y vuelve a intentarlo para mejorar tu comprensión.';
+  resultEl.textContent += ' — ' + general;
+});
+
+// Reiniciar completamente
+document.getElementById('resetBtn').addEventListener('click', () => {
+  // Habilitar botones e inputs
+  document.getElementById('checkBtn').disabled = false;
+  document.querySelectorAll('#quiz input').forEach(i => {
+    i.disabled = false;
+    if (i.type === 'radio') i.checked = false;
+    else if (i.type === 'text') i.value = '';
+  });
+  document.querySelectorAll('.feedback').forEach(f => {
+    f.style.display = 'none';
+    f.className = 'feedback';
+    f.textContent = '';
+  });
+  document.getElementById('result').textContent = '';
+});
+</script>
+</body>
+</html>

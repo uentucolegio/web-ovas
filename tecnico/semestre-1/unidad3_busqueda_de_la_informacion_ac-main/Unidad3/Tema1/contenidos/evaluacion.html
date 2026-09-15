@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluación interactiva - Fuentes de información</title>
+  <style>
+    :root {
+      --bg1: #f0fdf4;
+      --bg2: #f9fbff;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #064e3b;
+      --primary2: #166534;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --line: #d1fae5;
+      --soft: #f0fdf4;
+      --shadow: 0 12px 30px rgba(15, 23, 42, .08);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #064e3b, #16a34a 55%, #4ade80);
+      color: white;
+      border-radius: 30px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero:after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 220px;
+      height: 220px;
+      background: rgba(255, 255, 255, .12);
+      border-radius: 50%;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4vw, 2.7rem)
+    }
+
+    .hero p {
+      margin: 0;
+      line-height: 1.6;
+      max-width: 860px
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0 26px;
+      align-items: center;
+    }
+
+    .pill {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+      color: var(--primary2);
+    }
+
+    .progress {
+      flex: 1;
+      min-width: 220px;
+      background: #e5eefc;
+      border-radius: 999px;
+      height: 16px;
+      overflow: hidden;
+      border: 1px solid #cfe0ff;
+    }
+
+    .progress>div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+      transition: width .35s ease;
+    }
+
+    .question {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      font-size: .85rem;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+    }
+
+    p {
+      line-height: 1.6
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .option {
+      display: block;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .option:hover {
+      transform: translateY(-1px);
+      background: #f8fbff
+    }
+
+    .option.correct {
+      border-color: #86efac;
+      background: #ecfdf5
+    }
+
+    .option.incorrect {
+      border-color: #fca5a5;
+      background: #fef2f2
+    }
+
+    .option input {
+      margin-right: 10px
+    }
+
+    .tf-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .tf-btn {
+      border: none;
+      padding: 12px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      background: #f0fdf4;
+      color: #064e3b;
+    }
+
+    .tf-btn.selected {
+      background: #bfdbfe
+    }
+
+    .tf-btn.correct {
+      background: #dcfce7;
+      color: #166534
+    }
+
+    .tf-btn.incorrect {
+      background: #fee2e2;
+      color: #991b1b
+    }
+
+    .drag-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+      align-items: start;
+      margin-top: 8px;
+    }
+
+    .drag-bank,
+    .dropzones {
+      background: #f0fdf4;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .drag-item {
+      background: #fff;
+      border: 1px solid #d1fae5;
+      border-left: 5px solid #10b981;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: grab;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .04);
+    }
+
+    .dropzones {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .dropzone {
+      min-height: 150px;
+      background: #fff;
+      border: 2px dashed #b7c7df;
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .dropzone.over {
+      background: #eff6ff;
+      border-color: #60a5fa
+    }
+
+    .dropzone h4 {
+      margin: 0 0 8px;
+      color: #1e3a8a
+    }
+
+    .dropzone small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 8px
+    }
+
+    .sequence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 0;
+      min-height: 64px;
+      padding: 12px;
+      background: #f0fdf4;
+      border: 1px dashed #10b981;
+      border-radius: 16px;
+    }
+
+    .sortable {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .sort-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: grab;
+      font-weight: 700;
+    }
+
+    .feedback {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      display: none;
+      font-weight: 700;
+    }
+
+    .feedback.show {
+      display: block
+    }
+
+    .feedback.ok {
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0
+    }
+
+    .feedback.bad {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa
+    }
+
+    .footer-actions {
+      position: sticky;
+      bottom: 10px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 26px;
+    }
+
+    button.main,
+    button.secondary {
+      border: none;
+      cursor: pointer;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    button.main {
+      background: var(--primary);
+      color: #fff
+    }
+
+    button.secondary {
+      background: #eaf1ff;
+      color: #1e3a8a
+    }
+
+    .result {
+      margin-top: 24px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .result.show {
+      display: block
+    }
+
+    .big-score {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #1d4ed8;
+      margin-bottom: 8px;
+    }
+
+    .note {
+      color: var(--muted)
+    }
+
+    @media (max-width:900px) {
+      .drag-layout {
+        grid-template-columns: 1fr
+      }
+
+      .dropzones {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Evaluación fuentes de información</h1>
+      <p>
+        Responde 5 preguntas sobre fuentes de información, criterios de evaluación y actualización tecnológica.
+        Encontrarás preguntas de opción múltiple, verdadero o falso y ejercicios prácticos de arrastrar y soltar.
+      </p>
+    </section>
+
+    <div class="toolbar">
+      <div class="pill">Total de preguntas: 5</div>
+      <div class="pill">Modalidades: múltiple, V/F, arrastrar y soltar</div>
+      <div class="progress">
+        <div id="progressBar"></div>
+      </div>
+    </div>
+
+    <section class="question" id="q1" data-type="multiple" data-points="1">
+      <span class="badge">Pregunta 1 · Opción múltiple</span>
+      <h2>¿Cuál de las siguientes opciones corresponde a una <strong>fuente primaria</strong> en el contexto
+        tecnológico?</h2>
+      <div class="options">
+        <label class="option"><input type="radio" name="q1opt" value="a"> Un blog que resume varias herramientas de
+          programación.</label>
+        <label class="option"><input type="radio" name="q1opt" value="b"> La documentación oficial de un framework o
+          lenguaje.</label>
+        <label class="option"><input type="radio" name="q1opt" value="c"> Un portal que agrupa cursos de diferentes
+          plataformas.</label>
+        <label class="option"><input type="radio" name="q1opt" value="d"> Una enciclopedia técnica.</label>
+      </div>
+      <div class="feedback" id="fb-q1"></div>
+    </section>
+
+    <section class="question" id="q2" data-type="truefalse" data-points="1">
+      <span class="badge">Pregunta 2 · Verdadero o Falso</span>
+      <h2>“La actualidad de una fuente es importante porque en tecnología los contenidos pueden quedar obsoletos
+        rápidamente.”</h2>
+      <div class="tf-buttons">
+        <button type="button" class="tf-btn" data-q="q2" data-value="verdadero">Verdadero</button>
+        <button type="button" class="tf-btn" data-q="q2" data-value="falso">Falso</button>
+      </div>
+      <div class="feedback" id="fb-q2"></div>
+    </section>
+
+    <section class="question" id="q3" data-type="drag-classify" data-points="1">
+      <span class="badge">Pregunta 3 · Arrastrar y soltar</span>
+      <h2>Clasifica cada recurso en la categoría correcta</h2>
+      <p>Arrastra cada elemento a su tipo de fuente.</p>
+
+      <div class="drag-layout">
+        <div class="drag-bank" id="dragBank">
+          <div class="drag-item" draggable="true" data-match="primaria">Repositorio original en GitHub</div>
+          <div class="drag-item" draggable="true" data-match="secundaria">Manual técnico escrito por un experto</div>
+          <div class="drag-item" draggable="true" data-match="terciaria">Base de datos bibliográfica</div>
+          <div class="drag-item" draggable="true" data-match="emergente">Foro de Stack Overflow</div>
+        </div>
+        <div class="dropzones" style="grid-template-columns:1fr;">
+          <div class="dropzone" data-zone="primaria">
+            <h4>Fuente primaria</h4>
+          </div>
+          <div class="dropzone" data-zone="secundaria">
+            <h4>Fuente secundaria</h4>
+          </div>
+          <div class="dropzone" data-zone="terciaria">
+            <h4>Fuente terciaria</h4>
+          </div>
+          <div class="dropzone" data-zone="emergente">
+            <h4>Fuente emergente</h4>
+          </div>
+        </div>
+      </div>
+
+      <div class="feedback" id="fb-q3"></div>
+    </section>
+
+    <section class="question" id="q4" data-type="multiple" data-points="1">
+      <span class="badge">Pregunta 4 · Opción múltiple</span>
+      <h2>¿Cuál criterio de evaluación responde a la pregunta: <em>“¿Quién es el autor o la institución detrás de la
+          fuente?”</em>?</h2>
+      <div class="options">
+        <label class="option"><input type="radio" name="q4opt" value="a"> Relevancia</label>
+        <label class="option"><input type="radio" name="q4opt" value="b"> Objetividad</label>
+        <label class="option"><input type="radio" name="q4opt" value="c"> Autoridad</label>
+        <label class="option"><input type="radio" name="q4opt" value="d"> Actualidad</label>
+      </div>
+      <div class="feedback" id="fb-q4"></div>
+    </section>
+
+    <section class="question" id="q5" data-type="drag-sequence" data-points="1">
+      <span class="badge">Pregunta 5 · Arrastrar y soltar</span>
+      <h2>Ordena la secuencia lógica del aprendizaje autónomo al usar fuentes de información</h2>
+      <p>Organiza los pasos desde el inicio hasta la incorporación del conocimiento.</p>
+      <div class="sequence" id="sequenceDrop"></div>
+      <div class="sortable" id="sequenceBank">
+        <div class="sort-item" draggable="true" data-step="4">Incorporar la información al conocimiento y habilidades
+        </div>
+        <div class="sort-item" draggable="true" data-step="2">Buscar dónde encontrar la información</div>
+        <div class="sort-item" draggable="true" data-step="3">Evaluar la calidad de la fuente</div>
+        <div class="sort-item" draggable="true" data-step="1">Identificar qué información se necesita</div>
+      </div>
+      <div class="feedback" id="fb-q5"></div>
+    </section>
+
+    <div class="footer-actions">
+      <button class="main" id="gradeBtn">Calificar evaluación</button>
+      <button class="secondary" id="resetBtn">Reiniciar</button>
+    </div>
+
+    <section class="result" id="resultBox">
+      <div class="big-score" id="scoreText"></div>
+      <p id="resultMsg"></p>
+      <p class="note">Esta evaluación se basa en el contenido trabajado previamente sobre tipos de fuentes de
+        información, criterios de calidad y actualización tecnológica.</p>
+    </section>
+  </div>
+
+  <script>
+    let selectedTF = {};
+    let dragged = null;
+
+    const correctAnswers = {
+      q1: "b",
+      q2: "verdadero",
+      q4: "c"
+    };
+
+    function updateProgress() {
+      let done = 0;
+      if (document.querySelector('input[name="q1opt"]:checked')) done++;
+      if (selectedTF.q2) done++;
+      if (document.querySelectorAll('#q3 .dropzone .drag-item').length === 4) done++;
+      if (document.querySelector('input[name="q4opt"]:checked')) done++;
+      if (document.querySelectorAll('#sequenceDrop .sort-item').length === 4) done++;
+      document.getElementById('progressBar').style.width = (done / 5 * 100) + '%';
+    }
+
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const q = btn.dataset.q;
+        document.querySelectorAll(`.tf-btn[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTF[q] = btn.dataset.value;
+        updateProgress();
+      });
+    });
+
+    function bindDragItems() {
+      document.querySelectorAll('.drag-item,.sort-item').forEach(item => {
+        item.addEventListener('dragstart', () => {
+          dragged = item;
+          setTimeout(() => item.style.opacity = '.45', 0);
+        });
+        item.addEventListener('dragend', () => {
+          item.style.opacity = '1';
+          dragged = null;
+          updateProgress();
+        });
+      });
+    }
+    bindDragItems();
+
+    document.querySelectorAll('.dropzone,#dragBank,#sequenceDrop,#sequenceBank').forEach(zone => {
+      zone.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (zone.classList.contains('dropzone')) zone.classList.add('over');
+      });
+      zone.addEventListener('dragleave', () => {
+        if (zone.classList.contains('dropzone')) zone.classList.remove('over');
+      });
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        if (zone.classList.contains('dropzone')) zone.classList.remove('over');
+        if (dragged) {
+          if (zone.id === 'sequenceDrop' || zone.id === 'sequenceBank') {
+            zone.appendChild(dragged);
+          } else if (zone.classList.contains('dropzone') || zone.id === 'dragBank') {
+            zone.appendChild(dragged);
+          }
+        }
+        updateProgress();
+      });
+    });
+
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+      input.addEventListener('change', updateProgress);
+    });
+
+    function feedback(id, ok, text) {
+      const el = document.getElementById(id);
+      el.className = 'feedback show ' + (ok ? 'ok' : 'bad');
+      el.textContent = text;
+    }
+
+    function markMultiple(questionId, inputName, correctValue) {
+      let ok = false;
+      const selected = document.querySelector(`input[name="${inputName}"]:checked`);
+      document.querySelectorAll(`#${questionId} .option`).forEach(opt => {
+        opt.classList.remove('correct', 'incorrect');
+        const val = opt.querySelector('input').value;
+        if (val === correctValue) opt.classList.add('correct');
+        if (selected && selected.value === val && selected.value !== correctValue) {
+          opt.classList.add('incorrect');
+        }
+      });
+      if (selected && selected.value === correctValue) ok = true;
+      return ok;
+    }
+
+    function gradeTF() {
+      const buttons = document.querySelectorAll('.tf-btn[data-q="q2"]');
+      let ok = selectedTF.q2 === correctAnswers.q2;
+      buttons.forEach(btn => {
+        btn.classList.remove('correct', 'incorrect');
+        if (btn.dataset.value === correctAnswers.q2) btn.classList.add('correct');
+        if (selectedTF.q2 && btn.dataset.value === selectedTF.q2 && selectedTF.q2 !== correctAnswers.q2) {
+          btn.classList.add('incorrect');
+        }
+      });
+      return ok;
+    }
+
+    function gradeDragClassify() {
+      const items = document.querySelectorAll('#q3 .dropzone .drag-item');
+      if (items.length !== 4) return false;
+      let good = 0;
+      items.forEach(item => {
+        const zone = item.parentElement.dataset.zone;
+        if (item.dataset.match === zone) good++;
+      });
+      return good === 4;
+    }
+
+    function gradeSequence() {
+      const items = [...document.querySelectorAll('#sequenceDrop .sort-item')];
+      if (items.length !== 4) return false;
+      const order = items.map(i => Number(i.dataset.step));
+      return JSON.stringify(order) === JSON.stringify([1, 2, 3, 4]);
+    }
+
+    document.getElementById('gradeBtn').addEventListener('click', () => {
+      let score = 0;
+
+      const q1ok = markMultiple('q1', 'q1opt', correctAnswers.q1);
+      feedback('fb-q1', q1ok, q1ok
+        ? 'Correcto. La documentación oficial es una fuente primaria porque ofrece información directa y original.'
+        : 'Incorrecto. La respuesta correcta es la documentación oficial de un framework o lenguaje.');
+
+      if (q1ok) score++;
+
+      const q2ok = gradeTF();
+      feedback('fb-q2', q2ok, q2ok
+        ? 'Correcto. En tecnología la vigencia de la información es clave.'
+        : 'Incorrecto. Era verdadero, porque muchas herramientas y prácticas cambian rápidamente.');
+      if (q2ok) score++;
+
+      const q3ok = gradeDragClassify();
+      feedback('fb-q3', q3ok, q3ok
+        ? 'Excelente. Clasificaste correctamente los cuatro tipos de fuentes.'
+        : 'Revisa la clasificación. Recuerda: GitHub original = primaria, manual técnico = secundaria, base de datos = terciaria, Stack Overflow = emergente.');
+      if (q3ok) score++;
+
+      const q4ok = markMultiple('q4', 'q4opt', correctAnswers.q4);
+      feedback('fb-q4', q4ok, q4ok
+        ? 'Correcto. La autoridad analiza quién produce la información y su trayectoria.'
+        : 'Incorrecto. La respuesta correcta es autoridad.');
+      if (q4ok) score++;
+
+      const q5ok = gradeSequence();
+      feedback('fb-q5', q5ok, q5ok
+        ? 'Muy bien. Ese es el orden lógico del uso autónomo de fuentes de información.'
+        : 'El orden esperado es: identificar la necesidad, buscar la fuente, evaluar su calidad e incorporar el conocimiento.');
+      if (q5ok) score++;
+
+      const resultBox = document.getElementById('resultBox');
+      const scoreText = document.getElementById('scoreText');
+      const resultMsg = document.getElementById('resultMsg');
+
+      scoreText.textContent = `Puntaje: ${score} / 5`;
+
+      let msg = '';
+      if (score === 5) {
+        msg = '¡Excelente desempeño! Comprendes muy bien la clasificación y evaluación de fuentes de información.';
+      } else if (score >= 3) {
+        msg = 'Buen trabajo. Tienes una comprensión adecuada, aunque conviene reforzar algunos conceptos.';
+      } else {
+        msg = 'Necesitas repasar el contenido. Enfócate en los tipos de fuentes y en los criterios de evaluación.';
+      }
+
+      resultMsg.textContent = msg;
+      resultBox.classList.add('show');
+      updateProgress();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      document.querySelectorAll('.option').forEach(o => o.classList.remove('correct', 'incorrect'));
+      document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected', 'correct', 'incorrect'));
+      selectedTF = {};
+
+      document.querySelectorAll('#q3 .drag-item').forEach(item => document.getElementById('dragBank').appendChild(item));
+      document.querySelectorAll('#q5 .sort-item').forEach(item => document.getElementById('sequenceBank').appendChild(item));
+
+      document.querySelectorAll('.feedback').forEach(f => {
+        f.className = 'feedback';
+        f.textContent = '';
+      });
+
+      document.getElementById('resultBox').classList.remove('show');
+      document.getElementById('progressBar').style.width = '0%';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+
+</html>

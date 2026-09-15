@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Actividad: Reflexión continua (Drag & Drop)</title>
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+      --accent:#2563eb; --good:#16a34a; --bad:#dc2626;
+    }
+    body{
+      margin:0; font-family:Inter, system-ui, Arial;
+      background:linear-gradient(180deg,#eef6ff 0%, #f8fafc 100%);
+      color:var(--ink); padding:24px;
+    }
+    .container{max-width:940px; margin:0 auto;}
+    .card{background:var(--card); border-radius:16px; padding:24px; box-shadow:0 8px 24px rgba(0,0,0,.08);}
+    h1{font-size:22px; color:var(--accent); margin-bottom:10px;}
+    .lead{color:var(--muted); font-size:14px; margin-bottom:20px;}
+    .q{margin-bottom:30px;}
+    .q h3{font-size:16px; margin-bottom:10px;}
+    .dropzone{
+      min-height:46px; border:2px dashed #cbd5e1; border-radius:10px; padding:10px;
+      display:flex; align-items:center; justify-content:center;
+      background:#f1f5f9; margin-bottom:12px; transition:all .25s ease;
+    }
+    .dropzone.filled{background:#ecfdf5; border-color:#34d399;}
+    .option{
+      display:inline-block; background:#fff; border:1px solid #cbd5e1; padding:8px 12px;
+      border-radius:8px; margin:4px; cursor:grab; font-size:14px;
+      box-shadow:0 2px 6px rgba(0,0,0,.08); transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .option:hover{transform:scale(1.05); box-shadow:0 4px 12px rgba(0,0,0,.15);}
+    .option:active{cursor:grabbing;}
+    .feedback{margin-top:6px; font-size:14px; display:none;}
+    .feedback.ok{color:var(--good); display:block; font-weight:600;}
+    .feedback.bad{color:var(--bad); display:block; font-weight:600;}
+    .controls{margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;}
+    button{padding:10px 16px; border:none; border-radius:8px; cursor:pointer; font-weight:700; color:#fff; background:var(--accent);}
+    button.secondary{background:#e2e8f0; color:var(--ink);}
+    #result{font-weight:800; margin-left:auto;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Actividad: Reflexión continua</h1>
+      <div class="lead">Arrastra la opción correcta a cada definición sobre la <b>reflexión continua</b>.</div>
+
+      <!-- Preguntas -->
+      <div class="q" data-answer="Diario Reflexivo">
+        <h3>1) Estrategia que consiste en escribir sobre lo que se aprendió, pensó y sintió en clases:</h3>
+        <div class="dropzone"></div>
+        <div id="opts1">
+          <div class="option" draggable="true">Diario reflexivo</div>
+          <div class="option" draggable="true">Técnica del semáforo</div>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="q" data-answer="Rúbricas de Autoevaluación">
+        <h3>2) Herramienta que permite valorar el propio desempeño con criterios claros:</h3>
+        <div class="dropzone"></div>
+        <div id="opts2">
+          <div class="option" draggable="true">Rúbricas de autoevaluación</div>
+          <div class="option" draggable="true">Mapas mentales reflexivos</div>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="q" data-answer="Técnica del Semáforo">
+        <h3>3) Estrategia visual que clasifica aprendizajes en: rojo, amarillo y verde:</h3>
+        <div class="dropzone"></div>
+        <div id="opts3">
+          <div class="option" draggable="true">Técnica del semáforo</div>
+          <div class="option" draggable="true">Metacognición</div>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="q" data-answer="Mapas Mentales Reflexivos">
+        <h3>4) Representación gráfica para reflexionar sobre aprendizajes y conexiones:</h3>
+        <div class="dropzone"></div>
+        <div id="opts4">
+          <div class="option" draggable="true">Mapas mentales reflexivos</div>
+          <div class="option" draggable="true">Espacios de diálogo</div>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="q" data-answer="Metacognición">
+        <h3>5) Habilidad de pensar sobre cómo pensamos y qué estrategias usamos al aprender:</h3>
+        <div class="dropzone"></div>
+        <div id="opts5">
+          <div class="option" draggable="true">Metacognición</div>
+          <div class="option" draggable="true">Diario reflexivo</div>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <!-- Controles -->
+      <div class="controls">
+        <button id="checkBtn">Calificar</button>
+        <button class="secondary" id="resetBtn">Reiniciar</button>
+        <div id="result"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let dragged = null;
+
+    function setDragEvents(){
+      const options = document.querySelectorAll('.option');
+      options.forEach(opt=>{
+        opt.addEventListener('dragstart', e=>{
+          dragged = opt;
+          setTimeout(()=> opt.style.display='none',0);
+        });
+        opt.addEventListener('dragend', e=>{
+          dragged.style.display='inline-block';
+          dragged = null;
+        });
+      });
+    }
+
+    setDragEvents();
+
+    const dropzones = document.querySelectorAll('.dropzone');
+    dropzones.forEach(zone=>{
+      zone.addEventListener('dragover', e=> e.preventDefault());
+      zone.addEventListener('drop', e=>{
+        e.preventDefault();
+        if(zone.children.length===0 && dragged){
+          zone.appendChild(dragged);
+          zone.classList.add('filled');
+        }
+      });
+    });
+
+    document.getElementById('checkBtn').addEventListener('click', ()=>{
+      let correct=0;
+      const qs=document.querySelectorAll('.q');
+      qs.forEach(q=>{
+        const ans=q.dataset.answer;
+        const dropped=q.querySelector('.dropzone .option');
+        const fb=q.querySelector('.feedback');
+        fb.classList.remove('ok','bad'); fb.style.display='none';
+        if(dropped){
+          if(dropped.textContent===ans){
+            fb.textContent="✅ Correcto"; fb.classList.add('ok');
+            correct++;
+          }else{
+            fb.textContent="❌ Incorrecto. Respuesta correcta: "+ans;
+            fb.classList.add('bad');
+          }
+        }else{
+          fb.textContent="⚠️ No respondiste esta pregunta. Respuesta correcta: "+ans;
+          fb.classList.add('bad');
+        }
+        fb.style.display='block';
+      });
+      const total=qs.length;
+      const pct=Math.round((correct/total)*100);
+      document.getElementById('result').textContent=`Puntuación: ${correct}/${total} — ${pct}%`;
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      document.querySelectorAll('.dropzone').forEach(z=>{
+        z.innerHTML=''; z.classList.remove('filled');
+      });
+      // Resetear las opciones bajo cada pregunta
+      document.getElementById('opts1').innerHTML='<div class="option" draggable="true">Diario Reflexivo</div><div class="option" draggable="true">Técnica del Semáforo</div>';
+      document.getElementById('opts2').innerHTML='<div class="option" draggable="true">Rúbricas de Autoevaluación</div><div class="option" draggable="true">Mapas Mentales Reflexivos</div>';
+      document.getElementById('opts3').innerHTML='<div class="option" draggable="true">Técnica del Semáforo</div><div class="option" draggable="true">Metacognición</div>';
+      document.getElementById('opts4').innerHTML='<div class="option" draggable="true">Mapas Mentales Reflexivos</div><div class="option" draggable="true">Espacios de Diálogo</div>';
+      document.getElementById('opts5').innerHTML='<div class="option" draggable="true">Metacognición</div><div class="option" draggable="true">Diario Reflexivo</div>';
+      document.querySelectorAll('.feedback').forEach(f=>{f.textContent=''; f.style.display='none';});
+      document.getElementById('result').textContent='';
+      setDragEvents();
+    });
+  </script>
+</body>
+</html>
