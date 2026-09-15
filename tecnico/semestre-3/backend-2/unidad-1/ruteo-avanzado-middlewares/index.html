@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Ruteo Avanzado y Middlewares</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .badge-earned {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .middleware-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .middleware-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">¡Bienvenido al mundo del Ruteo Avanzado! 🚀</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Imagina que estás organizando una fiesta enorme 🎉. Tienes cientos de invitados, cada uno con necesidades diferentes: unos quieren música, otros comida, otros simplemente conversar. Si intentas atender a todos al mismo tiempo sin organización, ¡será un caos! 😅
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el desarrollo backend pasa algo similar. Cuando tu API crece y empieza a recibir miles de solicitudes, necesitas herramientas especiales para organizar el flujo de información. Aquí es donde entran en juego el <strong>ruteo avanzado</strong> y los <strong>middlewares</strong> 🛠️.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Anteriormente aprendiste sobre la arquitectura por capas, que es como tener diferentes departamentos en una empresa. Ahora vamos a dar el siguiente paso: aprenderás a organizar las rutas de tu API como un experto 🏗️, a validar datos antes de que lleguen a tu sistema 🔒, a registrar eventos importantes para monitorear todo lo que sucede 📊, y a manejar errores de forma profesional cuando algo sale mal 🚑.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al finalizar este OVA, serás capaz de construir APIs robustas y escalables que cualquier empresa querrá tener. ¡Vamos a convertirte en un maestro del backend! 🚀 <span class="text-xl">🎯</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje 🎯</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Comprender el funcionamiento del sistema de ruteo avanzado en aplicaciones backend y su importancia para la organización de una API REST.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Implementar middlewares para realizar procesos de validación, registro de eventos (logging) y control de solicitudes antes de su procesamiento por los controladores.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Diseñar un mecanismo centralizado de manejo de errores que permita responder de forma consistente ante situaciones excepcionales durante la ejecución de la aplicación.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- SISTEMA DE PUNTOS Y PROGRESO -->
+                    <div class="mb-6 p-4 bg-gradient-to-r from-green-100 to-teal-100 rounded-xl border border-green-300">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-3">
+                            <div class="flex items-center gap-3 mb-2 sm:mb-0">
+                                <span class="text-2xl">⭐</span>
+                                <span class="font-bold text-green-800">Puntos: <span id="total-puntos">0</span></span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🏆</span>
+                                <span class="font-bold text-green-800">Nivel: <span id="nivel-actual">Principiante</span></span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-white rounded-full h-4 border border-green-300">
+                            <div id="progress-bar" class="progress-bar bg-green-500 h-4 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p class="text-sm text-green-700 mt-2 text-center">Progreso: <span id="progreso-texto">0</span>%</p>
+                    </div>
+
+                    <!-- ACORDEÓN 1: Del ruteo básico al avanzado -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🗺️ Del ruteo básico al ruteo avanzado</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Cuando empezamos a programar, es normal poner todas las rutas en un solo archivo. Funciona para proyectos pequeños, pero imagina tener 100 rutas diferentes en un solo documento... ¡sería imposible encontrar algo! 😰</p>
+                                
+                                <div class="mt-4 p-4 bg-blue-50 border border-blue-300 rounded-lg">
+                                    <p class="text-sm text-blue-800 font-semibold mb-2">💡 <strong>Analogía:</strong></p>
+                                    <p class="text-slate-600 text-sm">Piensa en el ruteo avanzado como organizar un supermercado. No pones todos los productos en una sola estantería. Tienes secciones: frutas, lácteos, carnes, etc. Cada sección tiene sus productos relacionados organizados. ¡Lo mismo haces con tus rutas! 🏪</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">Una <strong>ruta</strong> tiene tres componentes principales:</p>
+                                
+                                <div class="overflow-x-auto">
+                                    <table class="w-full border-collapse border border-green-300 rounded-lg overflow-hidden">
+                                        <thead class="bg-green-100">
+                                            <tr>
+                                                <th class="border border-green-300 p-3 text-left text-green-800">Elemento</th>
+                                                <th class="border border-green-300 p-3 text-left text-green-800">Ejemplo</th>
+                                                <th class="border border-green-300 p-3 text-left text-green-800">¿Qué significa?</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="bg-white">
+                                                <td class="border border-green-300 p-3 font-semibold">Método HTTP</td>
+                                                <td class="border border-green-300 p-3"><code class="bg-slate-100 px-2 py-1 rounded">GET</code></td>
+                                                <td class="border border-green-300 p-3">La operación a realizar (consultar, crear, actualizar, eliminar)</td>
+                                            </tr>
+                                            <tr class="bg-green-50">
+                                                <td class="border border-green-300 p-3 font-semibold">URL</td>
+                                                <td class="border border-green-300 p-3"><code class="bg-slate-100 px-2 py-1 rounded">/usuarios</code></td>
+                                                <td class="border border-green-300 p-3">La dirección del recurso</td>
+                                            </tr>
+                                            <tr class="bg-white">
+                                                <td class="border border-green-300 p-3 font-semibold">Controlador</td>
+                                                <td class="border border-green-300 p-3"><code class="bg-slate-100 px-2 py-1 rounded">obtenerUsuarios</code></td>
+                                                <td class="border border-green-300 p-3">La función que procesa la solicitud</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Quiz rápido -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 1: Identifica la ruta</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">¿Qué operación realiza esta ruta? <code class="bg-slate-100 px-2 py-1 rounded">POST /usuarios</code></p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="verificarRuta(1, this)" class="quiz-route-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Consultar usuarios</button>
+                                        <button onclick="verificarRuta(2, this)" class="quiz-route-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Crear nuevo usuario</button>
+                                        <button onclick="verificarRuta(3, this)" class="quiz-route-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Actualizar usuario</button>
+                                        <button onclick="verificarRuta(4, this)" class="quiz-route-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Eliminar usuario</button>
+                                    </div>
+                                    <p id="ruta-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2: ¿Por qué organizar las rutas? -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🏗️ ¿Por qué organizar las rutas?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Organizar tus rutas no es solo cuestión de estética, ¡es cuestión de supervivencia en proyectos grandes! 🎯</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <div class="middleware-card p-4 bg-gradient-to-br from-green-50 to-green-100 border border-green-300 rounded-lg">
+                                        <span class="text-3xl">📖</span>
+                                        <h4 class="font-bold text-green-800 mt-2">Mejor legibilidad</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Encuentra cualquier ruta en segundos, no en horas.</p>
+                                    </div>
+                                    <div class="middleware-card p-4 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg">
+                                        <span class="text-3xl">🔗</span>
+                                        <h4 class="font-bold text-blue-800 mt-2">Menos acoplamiento</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Los módulos son independientes y fáciles de modificar.</p>
+                                    </div>
+                                    <div class="middleware-card p-4 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-300 rounded-lg">
+                                        <span class="text-3xl">♻️</span>
+                                        <h4 class="font-bold text-purple-800 mt-2">Reutilización de código</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Usa el mismo código en diferentes partes del proyecto.</p>
+                                    </div>
+                                    <div class="middleware-card p-4 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-300 rounded-lg">
+                                        <span class="text-3xl">👥</span>
+                                        <h4 class="font-bold text-orange-800 mt-2">Trabajo en equipo</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Varios programadores pueden trabajar sin conflictos.</p>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Arrastrar y soltar (simulado con clicks) -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 2: Ordena las ventajas</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">Haz clic en las ventajas en orden de importancia (de mayor a menor):</p>
+                                    <div id="ventajas-container" class="space-y-2">
+                                        <div onclick="seleccionarVentaja(this, 1)" class="ventaja-item p-3 bg-white border-2 border-slate-300 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">👥 Trabajo en equipo</div>
+                                        <div onclick="seleccionarVentaja(this, 2)" class="ventaja-item p-3 bg-white border-2 border-slate-300 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">📖 Mejor legibilidad</div>
+                                        <div onclick="seleccionarVentaja(this, 3)" class="ventaja-item p-3 bg-white border-2 border-slate-300 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">🔗 Menos acoplamiento</div>
+                                        <div onclick="seleccionarVentaja(this, 4)" class="ventaja-item p-3 bg-white border-2 border-slate-300 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">♻️ Reutilización de código</div>
+                                    </div>
+                                    <div id="ventajas-seleccionadas" class="mt-3 p-3 bg-white border border-green-300 rounded-lg min-h-[60px]">
+                                        <p class="text-sm text-slate-500 italic">Haz clic en las ventajas arriba para ordenarlas aquí...</p>
+                                    </div>
+                                    <button onclick="verificarVentajas()" class="mt-3 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">Verificar orden</button>
+                                    <p id="ventajas-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3: ¿Qué es un middleware? -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🛡️ ¿Qué es un middleware?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Un <strong>middleware</strong> es como un guardia de seguridad 🛡️ que está entre la solicitud del cliente y tu controlador. Puede revisar, modificar o rechazar la solicitud antes de que llegue a su destino final.</p>
+                                
+                                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                                    <p class="text-sm text-yellow-800 font-semibold mb-2">💡 <strong>Analogía del aeropuerto:</strong></p>
+                                    <p class="text-slate-600 text-sm">Cuando viajas en avión, pasas por varios controles: check-in, seguridad, migración. Cada uno es un "middleware" que verifica algo antes de dejarte abordar. ¡Express hace lo mismo con las solicitudes HTTP! ✈️</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">Los middlewares pueden hacer muchas cosas:</p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                                    <div class="p-3 bg-red-50 border border-red-300 rounded-lg text-center">
+                                        <span class="text-2xl">🔐</span>
+                                        <p class="text-sm font-semibold text-red-800 mt-1">Autenticación</p>
+                                    </div>
+                                    <div class="p-3 bg-blue-50 border border-blue-300 rounded-lg text-center">
+                                        <span class="text-2xl">✅</span>
+                                        <p class="text-sm font-semibold text-blue-800 mt-1">Validación</p>
+                                    </div>
+                                    <div class="p-3 bg-green-50 border border-green-300 rounded-lg text-center">
+                                        <span class="text-2xl">📝</span>
+                                        <p class="text-sm font-semibold text-green-800 mt-1">Logging</p>
+                                    </div>
+                                    <div class="p-3 bg-purple-50 border border-purple-300 rounded-lg text-center">
+                                        <span class="text-2xl">⏱️</span>
+                                        <p class="text-sm font-semibold text-purple-800 mt-1">Control de tiempo</p>
+                                    </div>
+                                    <div class="p-3 bg-orange-50 border border-orange-300 rounded-lg text-center">
+                                        <span class="text-2xl">🚫</span>
+                                        <p class="text-sm font-semibold text-orange-800 mt-1">Control de acceso</p>
+                                    </div>
+                                    <div class="p-3 bg-teal-50 border border-teal-300 rounded-lg text-center">
+                                        <span class="text-2xl">📊</span>
+                                        <p class="text-sm font-semibold text-teal-800 mt-1">Métricas</p>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Identificar middleware -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 3: Identifica el middleware</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">¿Qué middleware necesitarías para verificar que un usuario tenga permiso de administrador?</p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="verificarMiddleware(1, this)" class="quiz-middleware-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Validación de datos</button>
+                                        <button onclick="verificarMiddleware(2, this)" class="quiz-middleware-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Control de acceso</button>
+                                        <button onclick="verificarMiddleware(3, this)" class="quiz-middleware-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Logging</button>
+                                        <button onclick="verificarMiddleware(4, this)" class="quiz-middleware-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Autenticación</button>
+                                    </div>
+                                    <p id="middleware-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4: Tipos de middlewares -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🔧 Tipos de middlewares en Express</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">En Express.js, los middlewares se clasifican según cuándo se ejecutan:</p>
+                                
+                                <div class="space-y-4 mt-4">
+                                    <div class="p-4 bg-white border-l-4 border-blue-500 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-blue-800">1. Middleware a nivel de aplicación 🌐</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Se ejecutan para TODAS las rutas de tu aplicación. Útil para logging global, manejo de errores, etc.</p>
+                                        <div class="code-block mt-2">
+                                            <pre>app.use((req, res, next) => {
+  console.log('Solicitud recibida:', req.url);
+  next();
+});</pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-white border-l-4 border-green-500 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-green-800">2. Middleware a nivel de router 🛣️</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Se ejecutan solo para rutas específicas. Perfecto para validar datos de un módulo en particular.</p>
+                                        <div class="code-block mt-2">
+                                            <pre>router.use(validarDatos);
+router.get('/usuarios', obtenerUsuarios);</pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-white border-l-4 border-purple-500 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-purple-800">3. Middleware a nivel de ruta 📍</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Se ejecutan solo para una ruta específica. Ideal para validaciones muy específicas.</p>
+                                        <div class="code-block mt-2">
+                                            <pre>app.get('/usuarios', 
+  autenticar, 
+  autorizarAdmin, 
+  obtenerUsuarios
+);</pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Clasificar middlewares -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 4: Clasifica el middleware</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">¿Qué tipo de middleware usarías para registrar TODAS las solicitudes que llegan a tu API?</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button onclick="verificarClasificacion(1, this)" class="quiz-clasif-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Nivel aplicación</button>
+                                        <button onclick="verificarClasificacion(2, this)" class="quiz-clasif-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Nivel router</button>
+                                        <button onclick="verificarClasificacion(3, this)" class="quiz-clasif-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Nivel ruta</button>
+                                    </div>
+                                    <p id="clasif-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 5: Manejo centralizado de errores -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🚑 Manejo centralizado de errores</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Cuando algo sale mal en tu aplicación, necesitas manejarlo de forma profesional. El manejo centralizado de errores te permite responder de forma consistente ante cualquier situación excepcional 🚑.</p>
+                                
+                                <div class="mt-4 p-4 bg-red-50 border border-red-300 rounded-lg">
+                                    <p class="text-sm text-red-800 font-semibold mb-2">⚠️ <strong>¿Por qué es importante?</strong></p>
+                                    <p class="text-slate-600 text-sm">Imagina que cada ruta maneja los errores de forma diferente. Un usuario podría recibir mensajes de error confusos o, peor aún, información sensible del servidor. ¡El manejo centralizado soluciona esto! 🔒</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">Un middleware de error en Express tiene 4 parámetros en lugar de 3:</p>
+                                
+                                <div class="code-block mt-2">
+                                    <pre>app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Algo salió mal',
+    mensaje: err.message
+  });
+});</pre>
+                                </div>
+
+                                <p class="mb-4 mt-4">Las mejores prácticas incluyen:</p>
+                                
+                                <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                    <li>🔒 Nunca expongas información sensible en producción</li>
+                                    <li>📝 Registra todos los errores para análisis posterior</li>
+                                    <li>🎯 Proporciona mensajes de error claros para el usuario</li>
+                                    <li>🔄 Usa códigos de estado HTTP apropiados (400, 401, 403, 404, 500, etc.)</li>
+                                </ul>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Código de error -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 5: El código correcto</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">¿Qué código de estado HTTP deberías devolver cuando un usuario intenta acceder a un recurso que no existe?</p>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        <button onclick="verificarError(400, this)" class="quiz-error-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">400</button>
+                                        <button onclick="verificarError(401, this)" class="quiz-error-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">401</button>
+                                        <button onclick="verificarError(403, this)" class="quiz-error-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">403</button>
+                                        <button onclick="verificarError(404, this)" class="quiz-error-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">404</button>
+                                    </div>
+                                    <p id="error-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                                <!-- INSIGNIA FINAL -->
+                                <div id="insignia-final" class="mt-6 p-4 bg-gradient-to-r from-yellow-100 to-orange-100 border border-yellow-400 rounded-lg hidden">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <span class="text-4xl">🏅</span>
+                                        <div>
+                                            <p class="font-bold text-yellow-800">¡Insignia desbloqueada!</p>
+                                            <p class="text-sm text-yellow-700">Maestro del Ruteo y Middlewares</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas ✍️</h2>
+                
+                <!-- SISTEMA DE PUNTOS DE ACTIVIDADES -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border border-purple-300">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">⭐</span>
+                            <span class="font-bold text-purple-800">Puntos actividades: <span id="puntos-actividades">0</span>/100</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🎖️</span>
+                            <span id="insignias-actividades" class="font-bold text-purple-800">0 insignias</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔍 Actividad 1: Análisis de rutas</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Analiza una API REST existente (puede ser un proyecto que hayas desarrollado anteriormente) e identifica todas las rutas que están definidas en un solo archivo. Clasifica estas rutas por recurso (usuarios, productos, pedidos, etc.) y crea un diagrama de cómo las organizarías usando ruteo avanzado.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Un diagrama o documento que muestre la organización propuesta de rutas, con al menos 3 grupos de rutas diferentes.
+                            </p>
+                        </div>
+                        <button onclick="completarActividad(1, 30)" class="mt-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">✅ Marcar como completada (+30 pts)</button>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🛡️ Actividad 2: Implementación de middleware de validación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Crea un middleware de Express que valide que el cuerpo de una solicitud POST contenga los campos obligatorios "nombre" y "email". El middleware debe rechazar la solicitud con un código 400 si faltan estos campos, y pasar al siguiente middleware si están presentes.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Código JavaScript del middleware de validación funcional, con pruebas de funcionamiento.
+                            </p>
+                        </div>
+                        <button onclick="completarActividad(2, 35)" class="mt-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">✅ Marcar como completada (+35 pts)</button>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🚑 Actividad 3: Manejo centralizado de errores</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Implementa un middleware de manejo de errores centralizado en una aplicación Express. Este middleware debe: (1) registrar el error en consola, (2) devolver una respuesta JSON con un mensaje apropiado, (3) usar diferentes códigos de estado según el tipo de error (400 para errores de validación, 401 para no autenticado, 403 para no autorizado, 404 para no encontrado, 500 para errores del servidor).
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Código del middleware de errores con al menos 4 tipos de errores diferentes manejados.
+                            </p>
+                        </div>
+                        <button onclick="completarActividad(3, 35)" class="mt-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">✅ Marcar como completada (+35 pts)</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación final ✔️</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">¡Demuestra lo que has aprendido! Selecciona la respuesta correcta para cada pregunta. 🎯</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar 📖</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Guía oficial de Routing en Express</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial para comprender la definición y organización de rutas, métodos HTTP y parámetros en aplicaciones desarrolladas con Express.js.</p>
+                            <a href="https://expressjs.com/es/guide/routing/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Guía de Routing en Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Guía oficial de Middleware en Express</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial sobre el funcionamiento, implementación y uso de middlewares durante el procesamiento de solicitudes en aplicaciones Express.js.</p>
+                            <a href="https://expressjs.com/es/guide/using-middleware/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR Guía de Middleware en Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de Morgan</h3>
+                            <p class="text-slate-600 mb-2">Documentación de referencia para implementar el registro de solicitudes HTTP (logging) mediante el middleware Morgan en aplicaciones Node.js y Express.js.</p>
+                            <a href="https://github.com/expressjs/morgan" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR Documentación de Morgan" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía 📚</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Arias-Orezano, J., Reyna-Barreto, R., & Mamani-Apaza, J. (2021). <i>Arquitectura de software: Principios de mantenibilidad y evolución.</i> Revista de Ingeniería de Software.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Express.js Foundation. (2024). <i>Express - Node.js web application framework.</i> Recuperado de <a href="https://expressjs.com/" class="text-green-700 underline break-all" target="_blank">https://expressjs.com/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Fielding, R. T. (2000). <i>Architectural Styles and the Design of Network-based Software Architectures.</i> University of California, Irvine.
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito principal del ruteo avanzado en una API REST?",
+                options: ["Mejorar el rendimiento de la base de datos", "Organizar las rutas por responsabilidad funcional para facilitar el mantenimiento", "Reducir el número de endpoints en la API", "Eliminar la necesidad de middlewares"],
+                correct: 1
+            },
+            {
+                question: "¿Qué es un middleware en Express.js?",
+                options: ["Una función que se ejecuta después del controlador", "Una función que se ejecuta entre la recepción de la solicitud y la generación de la respuesta", "Un tipo de base de datos", "Una herramienta de testing"],
+                correct: 1
+            },
+            {
+                question: "¿Cuántos parámetros tiene un middleware de error en Express?",
+                options: ["2 parámetros", "3 parámetros", "4 parámetros (err, req, res, next)", "5 parámetros"],
+                correct: 2
+            },
+            {
+                question: "¿Qué código de estado HTTP deberías usar cuando un recurso no existe?",
+                options: ["400 Bad Request", "401 Unauthorized", "403 Forbidden", "404 Not Found"],
+                correct: 3
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un uso típico de un middleware?",
+                options: ["Validación de datos", "Autenticación de usuarios", "Ejecución de consultas SQL directas", "Logging de solicitudes"],
+                correct: 2
+            },
+            {
+                question: "¿Qué tipo de middleware se ejecuta para TODAS las rutas de la aplicación?",
+                options: ["Middleware a nivel de ruta", "Middleware a nivel de router", "Middleware a nivel de aplicación", "Middleware de error"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es la ventaja principal de organizar las rutas por recurso?",
+                options: ["Reduce el tamaño de los archivos", "Facilita el trabajo en equipo y el mantenimiento del código", "Elimina la necesidad de bases de datos", "Aumenta la velocidad de la API"],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+            
+            if (pct >= 60) {
+                result.textContent += ' 🎉 ¡Excelente trabajo!';
+            } else {
+                result.textContent += ' 💪 ¡Sigue practicando!';
+            }
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // Sistema de puntos y progreso
+        let totalPuntos = 0;
+        let misionesCompletadas = 0;
+        const totalMisiones = 5;
+
+        function actualizarPuntos(puntos) {
+            totalPuntos += puntos;
+            document.getElementById('total-puntos').textContent = totalPuntos;
+            
+            misionesCompletadas++;
+            const progreso = (misionesCompletadas / totalMisiones) * 100;
+            document.getElementById('progress-bar').style.width = progreso + '%';
+            document.getElementById('progreso-texto').textContent = Math.round(progreso);
+            
+            // Actualizar nivel
+            if (progreso >= 100) {
+                document.getElementById('nivel-actual').textContent = 'Experto';
+                document.getElementById('insignia-final').classList.remove('hidden');
+            } else if (progreso >= 60) {
+                document.getElementById('nivel-actual').textContent = 'Intermedio';
+            } else if (progreso >= 30) {
+                document.getElementById('nivel-actual').textContent = 'Principiante+';
+            }
+        }
+
+        function mostrarFeedback(elementoId, mensaje, esCorrecto) {
+            const feedback = document.getElementById(elementoId);
+            feedback.classList.remove('hidden');
+            feedback.textContent = mensaje;
+            feedback.className = `mt-3 text-sm font-semibold ${esCorrecto ? 'text-green-700' : 'text-red-600'}`;
+        }
+
+        // Misión 1: Identifica la ruta
+        function verificarRuta(opcion, boton) {
+            const esCorrecto = opcion === 2;
+            document.querySelectorAll('.quiz-route-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('ruta-feedback', '¡Excelente! 🎉 POST se usa para crear recursos. (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('ruta-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Misión 2: Ventajas (simulado)
+        let ventajasSeleccionadas = [];
+        function seleccionarVentaja(elemento, id) {
+            if (ventajasSeleccionadas.length < 4) {
+                ventajasSeleccionadas.push(id);
+                elemento.classList.add('opacity-50', 'cursor-not-allowed');
+                elemento.onclick = null;
+                
+                const contenedor = document.getElementById('ventajas-seleccionadas');
+                if (ventajasSeleccionadas.length === 1) {
+                    contenedor.innerHTML = '';
+                }
+                contenedor.innerHTML += `<div class="p-2 bg-green-100 border border-green-300 rounded mb-1">${elemento.textContent}</div>`;
+            }
+        }
+
+        function verificarVentajas() {
+            if (ventajasSeleccionadas.length === 4) {
+                mostrarFeedback('ventajas-feedback', '¡Perfecto! Has ordenado todas las ventajas. (+10 pts) 🎉', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('ventajas-feedback', 'Selecciona las 4 ventajas primero 💪', false);
+            }
+        }
+
+        // Misión 3: Identifica el middleware
+        function verificarMiddleware(opcion, boton) {
+            const esCorrecto = opcion === 2;
+            document.querySelectorAll('.quiz-middleware-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('middleware-feedback', '¡Correcto! 🎉 El control de acceso verifica permisos. (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('middleware-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Misión 4: Clasifica el middleware
+        function verificarClasificacion(opcion, boton) {
+            const esCorrecto = opcion === 1;
+            document.querySelectorAll('.quiz-clasif-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('clasif-feedback', '¡Excelente! 🎉 Nivel de aplicación afecta a todas las rutas. (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('clasif-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Misión 5: Código de error
+        function verificarError(opcion, boton) {
+            const esCorrecto = opcion === 404;
+            document.querySelectorAll('.quiz-error-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('error-feedback', '¡Perfecto! 🎉 404 significa "Not Found". (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('error-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Sistema de actividades
+        let puntosActividades = 0;
+        let actividadesCompletadas = 0;
+        const actividades = [1, 2, 3];
+        const actividadesEstado = {1: false, 2: false, 3: false};
+
+        function completarActividad(id, puntos) {
+            if (!actividadesEstado[id]) {
+                actividadesEstado[id] = true;
+                actividadesCompletadas++;
+                puntosActividades += puntos;
+                document.getElementById('puntos-actividades').textContent = puntosActividades;
+                document.getElementById('insignias-actividades').textContent = actividadesCompletadas;
+                
+                alert(`¡Actividad ${id} completada! +${puntos} puntos ⭐`);
+            } else {
+                alert('Esta actividad ya fue completada ✅');
+            }
+        }
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

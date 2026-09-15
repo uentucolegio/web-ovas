@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Acceso Avanzado a Datos</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .badge-earned {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .relation-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .relation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">¡Más allá de CRUD! 🚀</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Cuando empezamos a programar, las operaciones CRUD (Crear, Leer, Actualizar y Eliminar) son como nuestro primer set de herramientas básicas. Funcionan perfecto cuando estamos aprendiendo, pero imagina que intentas construir una casa entera usando solo un martillo... ¡no sería suficiente! 🏠🔨
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el mundo real, las aplicaciones necesitan hacer cosas más sofisticadas: buscar productos específicos en una tienda con miles de artículos, mostrar solo los 10 resultados más relevantes, o asegurar que cuando alguien compra un producto, el inventario se actualice y el pedido se registre correctamente. ¡Todo al mismo tiempo! 🛒💳
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Aquí es donde entran las técnicas avanzadas de acceso a datos. No se trata solo de guardar y recuperar información, sino de hacerlo de forma inteligente, eficiente y segura. Vamos a aprender cómo conectar datos entre sí, filtrar información como un experto, manejar grandes volúmenes de datos sin que tu aplicación se congele, y proteger la integridad de la información cuando varias cosas suceden a la vez.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al finalizar, serás capaz de construir APIs que manejan datos como un profesional, listas para escalar y enfrentar cualquier desafío del mundo real. ¡Vamos a convertirte en un maestro del acceso a datos! 🚀 <span class="text-xl">🎯</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje 🎯</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Comprender y aplicar técnicas avanzadas de acceso a datos en una API REST mediante el manejo de relaciones entre entidades, filtros de consulta, paginación y transacciones simples.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🏗️</span>
+                        <span>Integrar estas técnicas dentro de una arquitectura por capas que favorezca la mantenibilidad, escalabilidad y confiabilidad de las aplicaciones backend.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- SISTEMA DE PUNTOS Y PROGRESO -->
+                    <div class="mb-6 p-4 bg-gradient-to-r from-green-100 to-teal-100 rounded-xl border border-green-300">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-3">
+                            <div class="flex items-center gap-3 mb-2 sm:mb-0">
+                                <span class="text-2xl">⭐</span>
+                                <span class="font-bold text-green-800">Puntos: <span id="total-puntos">0</span></span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🏆</span>
+                                <span class="font-bold text-green-800">Nivel: <span id="nivel-actual">Principiante</span></span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-white rounded-full h-4 border border-green-300">
+                            <div id="progress-bar" class="progress-bar bg-green-500 h-4 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p class="text-sm text-green-700 mt-2 text-center">Progreso: <span id="progreso-texto">0</span>%</p>
+                    </div>
+
+                    <!-- ACORDEÓN 1: Filtros de consulta -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🔍 Filtros de consulta: encuentra lo que necesitas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Imagina que entras a una biblioteca con millones de libros y quieres encontrar algo específico. ¿Recorrerías todos los libros uno por uno? ¡Por supuesto que no! Usarías el catálogo para filtrar por autor, género o año. En bases de datos es lo mismo 📚.</p>
+                                
+                                <div class="mt-4 p-4 bg-blue-50 border border-blue-300 rounded-lg">
+                                    <p class="text-sm text-blue-800 font-semibold mb-2">💡 <strong>Analogía:</strong></p>
+                                    <p class="text-slate-600 text-sm">Los filtros son como el buscador de Netflix. No ves todas las películas existentes, solo las que coinciden con tus criterios: "comedia", "2023", "menos de 2 horas". ¡Eso es un filtro en acción! 🎬</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">En una API REST, los filtros se implementan mediante parámetros en la URL:</p>
+                                
+                                <div class="code-block mt-2">
+                                    <pre>GET /productos?categoria=laptops&precioMax=3500&disponible=true</pre>
+                                </div>
+
+                                <p class="mb-4 mt-4">Los operadores de filtro más comunes son:</p>
+                                
+                                <div class="grid grid-cols-2 gap-3 mt-4">
+                                    <div class="p-3 bg-green-50 border border-green-300 rounded-lg text-center">
+                                        <span class="text-2xl">=</span>
+                                        <p class="text-sm font-semibold text-green-800 mt-1">Igual a</p>
+                                    </div>
+                                    <div class="p-3 bg-blue-50 border border-blue-300 rounded-lg text-center">
+                                        <span class="text-2xl">≠</span>
+                                        <p class="text-sm font-semibold text-blue-800 mt-1">Diferente de</p>
+                                    </div>
+                                    <div class="p-3 bg-purple-50 border border-purple-300 rounded-lg text-center">
+                                        <span class="text-2xl">&gt;</span>
+                                        <p class="text-sm font-semibold text-purple-800 mt-1">Mayor que</p>
+                                    </div>
+                                    <div class="p-3 bg-orange-50 border border-orange-300 rounded-lg text-center">
+                                        <span class="text-2xl">&lt;</span>
+                                        <p class="text-sm font-semibold text-orange-800 mt-1">Menor que</p>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Quiz de filtros -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 1: Construye el filtro</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">¿Qué URL usarías para obtener productos con precio menor a 1000?</p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="verificarFiltro(1, this)" class="quiz-filtro-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">GET /productos?precio=1000</button>
+                                        <button onclick="verificarFiltro(2, this)" class="quiz-filtro-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">GET /productos?precio&lt;1000</button>
+                                        <button onclick="verificarFiltro(3, this)" class="quiz-filtro-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">GET /productos?precioMax=1000</button>
+                                        <button onclick="verificarFiltro(4, this)" class="quiz-filtro-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">GET /productos?precioMin=1000</button>
+                                    </div>
+                                    <p id="filtro-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2: Relaciones entre entidades -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🔗 Relaciones entre entidades: conectando los datos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">En el mundo real, los datos no viven aislados. Un cliente tiene pedidos, cada pedido tiene productos, y cada producto pertenece a una categoría. Estas conexiones son las <strong>relaciones</strong> 🔗.</p>
+                                
+                                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                                    <p class="text-sm text-yellow-800 font-semibold mb-2">💡 <strong>Analogía:</strong></p>
+                                    <p class="text-slate-600 text-sm">Piensa en las redes sociales. Tú (usuario) tienes amigos (relación), publicas fotos (relación), y cada foto tiene likes (relación). ¡Todo está conectado! 📱👥</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">Los tipos de relaciones más comunes son:</p>
+                                
+                                <div class="space-y-3 mt-4">
+                                    <div class="relation-card p-4 bg-gradient-to-r from-green-50 to-green-100 border border-green-300 rounded-lg">
+                                        <h4 class="font-bold text-green-800">1️⃣ Uno a Uno (1:1)</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Cada registro de una tabla se relaciona con máximo un registro de otra tabla. Ejemplo: Una persona y su documento de identidad.</p>
+                                    </div>
+                                    
+                                    <div class="relation-card p-4 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-300 rounded-lg">
+                                        <h4 class="font-bold text-blue-800">2️⃣ Uno a Muchos (1:N)</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Un registro de una tabla se relaciona con muchos registros de otra. Ejemplo: Un cliente tiene muchos pedidos.</p>
+                                    </div>
+                                    
+                                    <div class="relation-card p-4 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-300 rounded-lg">
+                                        <h4 class="font-bold text-purple-800">3️⃣ Muchos a Muchos (N:M)</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Muchos registros de una tabla se relacionan con muchos de otra. Ejemplo: Estudiantes y cursos (un estudiante toma muchos cursos, un curso tiene muchos estudiantes).</p>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Identificar relación -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 2: Identifica la relación</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">¿Qué tipo de relación existe entre "Autores" y "Libros" (un autor puede escribir varios libros, un libro tiene un autor)?</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button onclick="verificarRelacion(1, this)" class="quiz-relacion-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Uno a Uno</button>
+                                        <button onclick="verificarRelacion(2, this)" class="quiz-relacion-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Uno a Muchos</button>
+                                        <button onclick="verificarRelacion(3, this)" class="quiz-relacion-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Muchos a Muchos</button>
+                                    </div>
+                                    <p id="relacion-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3: Paginación -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>📄 Paginación: manejando grandes volúmenes</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">¿Alguna vez has buscado algo en Google y visto "página 1 de 10" al final? ¡Eso es paginación! 📄 En lugar de enviar 10,000 resultados de golpe, envías 20 o 50 a la vez. Es más rápido y consume menos recursos.</p>
+                                
+                                <div class="mt-4 p-4 bg-red-50 border border-red-300 rounded-lg">
+                                    <p class="text-sm text-red-800 font-semibold mb-2">⚠️ <strong>¿Por qué es importante?</strong></p>
+                                    <p class="text-slate-600 text-sm">Sin paginación, tu API podría enviar megabytes de datos en una sola respuesta. El navegador se congelaría, el servidor se saturaría, y el usuario se iría frustrado. ¡La paginación salva el día! 🦸‍♂️</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">Los parámetros de paginación más usados son:</p>
+                                
+                                <div class="code-block mt-2">
+                                    <pre>GET /productos?page=1&limit=20</pre>
+                                </div>
+
+                                <p class="mb-4 mt-4">Donde:</p>
+                                <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                    <li><strong>page</strong>: número de página (empezando desde 1)</li>
+                                    <li><strong>limit</strong>: cantidad de registros por página</li>
+                                </ul>
+
+                                <p class="mb-4 mt-4">Para calcular el offset (desplazamiento):</p>
+                                
+                                <div class="code-block mt-2">
+                                    <pre>offset = (page - 1) * limit</pre>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Calculadora de paginación -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 3: Calcula el offset</strong></p>
+                                    <p class="text-slate-600 text-sm mb-3">Si estás en la página 3 y quieres 10 registros por página, ¿cuál es el offset?</p>
+                                    <div class="flex gap-2 items-center">
+                                        <input type="number" id="offset-input" class="p-2 border-2 border-slate-300 rounded-lg w-24" placeholder="Tu respuesta">
+                                        <button onclick="verificarOffset()" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">Verificar</button>
+                                    </div>
+                                    <p id="offset-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4: Transacciones simples -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🔒 Transacciones: protegiendo la integridad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Imagina que transfieres dinero de tu cuenta a la de un amigo. ¿Qué pasaría si el sistema debita tu cuenta pero, por un error, nunca acredita la cuenta de tu amigo? ¡Tu dinero desaparecería! 😱 Las transacciones evitan esto.</p>
+                                
+                                <div class="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="text-sm text-green-800 font-semibold mb-2">💡 <strong>Analogía:</strong></p>
+                                    <p class="text-slate-600 text-sm">Una transacción es como un paquete "todo o nada". O todas las operaciones se completan con éxito, o ninguna se aplica. Es como comprar en línea: o pagas y recibes el producto, o no pasa nada y te devuelven el dinero. 💳📦</p>
+                                </div>
+
+                                <p class="mb-4 mt-4">Las propiedades ACID de las transacciones:</p>
+                                
+                                <div class="grid grid-cols-2 gap-3 mt-4">
+                                    <div class="p-3 bg-red-50 border border-red-300 rounded-lg text-center">
+                                        <span class="text-2xl">A</span>
+                                        <p class="text-sm font-semibold text-red-800 mt-1">Atomicidad</p>
+                                        <p class="text-xs text-slate-600">Todo o nada</p>
+                                    </div>
+                                    <div class="p-3 bg-blue-50 border border-blue-300 rounded-lg text-center">
+                                        <span class="text-2xl">C</span>
+                                        <p class="text-sm font-semibold text-blue-800 mt-1">Consistencia</p>
+                                        <p class="text-xs text-slate-600">Datos válidos</p>
+                                    </div>
+                                    <div class="p-3 bg-green-50 border border-green-300 rounded-lg text-center">
+                                        <span class="text-2xl">I</span>
+                                        <p class="text-sm font-semibold text-green-800 mt-1">Aislamiento</p>
+                                        <p class="text-xs text-slate-600">Sin interferencia</p>
+                                    </div>
+                                    <div class="p-3 bg-purple-50 border border-purple-300 rounded-lg text-center">
+                                        <span class="text-2xl">D</span>
+                                        <p class="text-sm font-semibold text-purple-800 mt-1">Durabilidad</p>
+                                        <p class="text-xs text-slate-600">Permanencia</p>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVIDAD INTERACTIVA: Quiz ACID -->
+                                <div class="mt-6 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 <strong>Misión 4: ¿Qué significa A en ACID?</strong></p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="verificarACID(1, this)" class="quiz-acid-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Autenticación</button>
+                                        <button onclick="verificarACID(2, this)" class="quiz-acid-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Atomicidad</button>
+                                        <button onclick="verificarACID(3, this)" class="quiz-acid-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Autorización</button>
+                                        <button onclick="verificarACID(4, this)" class="quiz-acid-btn p-2 bg-white border-2 border-slate-300 rounded-lg hover:bg-green-50 transition-colors text-sm">Algoritmo</button>
+                                    </div>
+                                    <p id="acid-feedback" class="mt-3 text-sm font-semibold hidden"></p>
+                                </div>
+
+                                <!-- INSIGNIA FINAL -->
+                                <div id="insignia-final" class="mt-6 p-4 bg-gradient-to-r from-yellow-100 to-orange-100 border border-yellow-400 rounded-lg hidden">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <span class="text-4xl">🏅</span>
+                                        <div>
+                                            <p class="font-bold text-yellow-800">¡Insignia desbloqueada!</p>
+                                            <p class="text-sm text-yellow-700">Maestro del Acceso a Datos</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas ✍️</h2>
+                
+                <!-- SISTEMA DE PUNTOS DE ACTIVIDADES -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border border-purple-300">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">⭐</span>
+                            <span class="font-bold text-purple-800">Puntos actividades: <span id="puntos-actividades">0</span>/100</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🎖️</span>
+                            <span id="insignias-actividades" class="font-bold text-purple-800">0 insignias</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔍 Actividad 1: Diseño de filtros</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Diseña un sistema de filtros para una API de productos de una tienda virtual. Debe permitir filtrar por: categoría, rango de precios (mínimo y máximo), disponibilidad y calificación mínima. Documenta los endpoints con sus parámetros y ejemplos de uso.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Documentación de al menos 3 endpoints con filtros combinados.
+                            </p>
+                        </div>
+                        <button onclick="completarActividad(1, 30)" class="mt-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">✅ Marcar como completada (+30 pts)</button>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔗 Actividad 2: Modelado de relaciones</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Crea un diagrama entidad-relación para un sistema de gestión de una biblioteca. Debe incluir al menos las entidades: Libros, Autores, Categorías, Usuarios y Préstamos. Identifica y documenta todas las relaciones entre estas entidades (1:1, 1:N, N:M).
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Diagrama ER con al menos 5 entidades y 4 relaciones documentadas.
+                            </p>
+                        </div>
+                        <button onclick="completarActividad(2, 35)" class="mt-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">✅ Marcar como completada (+35 pts)</button>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔒 Actividad 3: Implementación de transacción</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Implementa una transacción simple en tu API para el proceso de compra: (1) verificar stock del producto, (2) descontar del inventario, (3) crear el pedido, (4) registrar el pago. Si alguna operación falla, ninguna debe aplicarse. Usa el patrón de arquitectura por capas.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Código funcional de la transacción con manejo de errores.
+                            </p>
+                        </div>
+                        <button onclick="completarActividad(3, 35)" class="mt-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">✅ Marcar como completada (+35 pts)</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación final ✔️</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">¡Demuestra lo que has aprendido! Selecciona la respuesta correcta para cada pregunta. 🎯</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar 📖</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de Sequelize</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial para implementar el ORM Sequelize y gestionar modelos, consultas, relaciones y operaciones con bases de datos en aplicaciones Node.js.</p>
+                            <a href="https://sequelize.org/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Sequelize" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de PostgreSQL</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial para consultar las funcionalidades, comandos SQL y características del sistema de gestión de bases de datos PostgreSQL.</p>
+                            <a href="https://www.postgresql.org/docs/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR PostgreSQL" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Herramienta para diagramación de arquitectura y flujos</h3>
+                            <p class="text-slate-600 mb-2">Herramienta visual para crear diagramas que representen la arquitectura de aplicaciones, relaciones entre componentes y flujos de procesamiento de información.</p>
+                            <a href="https://app.diagrams.net/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR Pagination" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía 📚</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MongoDB Inc. (2024). <i>MongoDB Manual - Aggregation Pipeline.</i> Recuperado de <a href="https://www.mongodb.com/docs/manual/core/aggregation-pipeline/" class="text-green-700 underline break-all" target="_blank">https://www.mongodb.com/docs/manual/core/aggregation-pipeline/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PostgreSQL Global Development Group. (2024). <i>PostgreSQL Documentation - Performance Tips.</i> Recuperado de <a href="https://www.postgresql.org/docs/current/performance-tips.html" class="text-green-700 underline break-all" target="_blank">https://www.postgresql.org/docs/current/performance-tips.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Richardson, L., & Ruby, S. (2008). <i>RESTful Web APIs.</i> O'Reilly Media.
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito principal de la paginación en una API REST?",
+                options: ["Mejorar el diseño visual de la aplicación", "Reducir la carga de datos enviados en cada respuesta y mejorar el rendimiento", "Aumentar la seguridad de la API", "Eliminar la necesidad de filtros"],
+                correct: 1
+            },
+            {
+                question: "¿Qué tipo de relación existe entre un cliente y sus pedidos?",
+                options: ["Uno a Uno (1:1)", "Uno a Muchos (1:N)", "Muchos a Muchos (N:M)", "Sin relación"],
+                correct: 1
+            },
+            {
+                question: "¿Qué significa la 'A' en las propiedades ACID de las transacciones?",
+                options: ["Autenticación", "Atomicidad - todas las operaciones se completan o ninguna", "Autorización", "Algoritmo"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la fórmula correcta para calcular el offset en paginación?",
+                options: ["offset = page * limit", "offset = (page + 1) * limit", "offset = (page - 1) * limit", "offset = page / limit"],
+                correct: 2
+            },
+            {
+                question: "¿Qué parámetro usarías para filtrar productos con precio mayor a 500?",
+                options: ["GET /productos?precio=500", "GET /productos?precioMax=500", "GET /productos?precioMin=500", "GET /productos?precio>500"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál de las siguientes NO es una propiedad ACID?",
+                options: ["Atomicidad", "Consistencia", "Aislamiento", "Autenticación"],
+                correct: 3
+            },
+            {
+                question: "¿Qué tipo de relación existe entre estudiantes y cursos (un estudiante toma muchos cursos, un curso tiene muchos estudiantes)?",
+                options: ["Uno a Uno (1:1)", "Uno a Muchos (1:N)", "Muchos a Muchos (N:M)", "Sin relación"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+            
+            if (pct >= 60) {
+                result.textContent += ' 🎉 ¡Excelente trabajo!';
+            } else {
+                result.textContent += ' 💪 ¡Sigue practicando!';
+            }
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // Sistema de puntos y progreso
+        let totalPuntos = 0;
+        let misionesCompletadas = 0;
+        const totalMisiones = 4;
+
+        function actualizarPuntos(puntos) {
+            totalPuntos += puntos;
+            document.getElementById('total-puntos').textContent = totalPuntos;
+            
+            misionesCompletadas++;
+            const progreso = (misionesCompletadas / totalMisiones) * 100;
+            document.getElementById('progress-bar').style.width = progreso + '%';
+            document.getElementById('progreso-texto').textContent = Math.round(progreso);
+            
+            // Actualizar nivel
+            if (progreso >= 100) {
+                document.getElementById('nivel-actual').textContent = 'Experto';
+                document.getElementById('insignia-final').classList.remove('hidden');
+            } else if (progreso >= 75) {
+                document.getElementById('nivel-actual').textContent = 'Avanzado';
+            } else if (progreso >= 50) {
+                document.getElementById('nivel-actual').textContent = 'Intermedio';
+            } else if (progreso >= 25) {
+                document.getElementById('nivel-actual').textContent = 'Principiante+';
+            }
+        }
+
+        function mostrarFeedback(elementoId, mensaje, esCorrecto) {
+            const feedback = document.getElementById(elementoId);
+            feedback.classList.remove('hidden');
+            feedback.textContent = mensaje;
+            feedback.className = `mt-3 text-sm font-semibold ${esCorrecto ? 'text-green-700' : 'text-red-600'}`;
+        }
+
+        // Misión 1: Filtros
+        function verificarFiltro(opcion, boton) {
+            const esCorrecto = opcion === 2;
+            document.querySelectorAll('.quiz-filtro-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('filtro-feedback', '¡Excelente! 🎉 &lt; significa "menor que". (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('filtro-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Misión 2: Relaciones
+        function verificarRelacion(opcion, boton) {
+            const esCorrecto = opcion === 2;
+            document.querySelectorAll('.quiz-relacion-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('relacion-feedback', '¡Correcto! 🎉 Un autor tiene muchos libros. (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('relacion-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Misión 3: Offset
+        function verificarOffset() {
+            const input = document.getElementById('offset-input');
+            const valor = parseInt(input.value);
+            const esCorrecto = valor === 20;
+            
+            input.classList.remove('border-green-500', 'border-red-500');
+            input.classList.add(esCorrecto ? 'border-green-500' : 'border-red-500');
+            
+            if (esCorrecto) {
+                mostrarFeedback('offset-feedback', '¡Perfecto! 🎉 (3-1)*10 = 20. (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('offset-feedback', 'La fórmula es (page-1)*limit. Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Misión 4: ACID
+        function verificarACID(opcion, boton) {
+            const esCorrecto = opcion === 2;
+            document.querySelectorAll('.quiz-acid-btn').forEach(btn => {
+                btn.classList.remove('bg-green-200', 'bg-red-200');
+                btn.classList.add('bg-white');
+            });
+            boton.classList.remove('bg-white');
+            boton.classList.add(esCorrecto ? 'bg-green-200' : 'bg-red-200');
+            
+            if (esCorrecto) {
+                mostrarFeedback('acid-feedback', '¡Excelente! 🎉 A = Atomicidad. (+10 pts)', true);
+                actualizarPuntos(10);
+            } else {
+                mostrarFeedback('acid-feedback', '¡Casi! Inténtalo de nuevo 💪', false);
+            }
+        }
+
+        // Sistema de actividades
+        let puntosActividades = 0;
+        let actividadesCompletadas = 0;
+        const actividadesEstado = {1: false, 2: false, 3: false};
+
+        function completarActividad(id, puntos) {
+            if (!actividadesEstado[id]) {
+                actividadesEstado[id] = true;
+                actividadesCompletadas++;
+                puntosActividades += puntos;
+                document.getElementById('puntos-actividades').textContent = puntosActividades;
+                document.getElementById('insignias-actividades').textContent = actividadesCompletadas;
+                
+                alert(`¡Actividad ${id} completada! +${puntos} puntos ⭐`);
+            } else {
+                alert('Esta actividad ya fue completada ✅');
+            }
+        }
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
