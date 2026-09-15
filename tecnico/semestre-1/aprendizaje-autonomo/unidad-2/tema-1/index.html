@@ -231,7 +231,12 @@ Esa es la importancia del pensamiento crítico y reflexivo en el aprendizaje aut
       </section>
       <section id="evaluacion" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
-        <iframe class="ova-embed" src="contenidos/evaluacion.html" loading="lazy" scrolling="no" style="width:100%; border:0; min-height:600px;" onload="resizeEmbed(this)"></iframe>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <p class="text-slate-600 mb-6">Comprueba lo que aprendiste en este OVA. Selecciona la respuesta correcta para cada pregunta.</p>
+          <div id="quiz-evaluacion"></div>
+          <button id="btn-evaluacion" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+          <div id="res-evaluacion" class="mt-4 text-lg font-bold"></div>
+        </div>
       </section>
       <section id="recursos" class="content-pane">
 <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
@@ -364,6 +369,46 @@ Esa es la importancia del pensamiento crítico y reflexivo en el aprendizaje aut
       links.forEach(function(l){ l.addEventListener('click', function(){ show(l.getAttribute('data-target')); }); });
       if(sel) sel.addEventListener('change', function(e){ show(e.target.value); });
       window.addEventListener('resize', function(){ document.querySelectorAll('.content-pane.active .ova-embed').forEach(window.resizeEmbed); });
+    })();
+  </script>
+  <script>
+    (function(){
+      function renderQuiz(data, contId, btnId, resId){
+        var cont = document.getElementById(contId); if(!cont) return;
+        data.forEach(function(item, index){
+          var div = document.createElement('div'); div.className = 'mb-6';
+          var ops = item.options.map(function(opt, i){
+            return '<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="'+index+'" data-option="'+i+'"><span class="font-medium text-green-700 mr-2">'+String.fromCharCode(65+i)+'.</span> '+opt+'</div>';
+          }).join('');
+          div.innerHTML = '<p class="font-semibold text-slate-800 mb-3">'+(index+1)+'. '+item.question+'</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">'+ops+'</div><div class="quiz-fb mt-2 text-sm" data-fb="'+index+'"></div>';
+          cont.appendChild(div);
+        });
+        cont.querySelectorAll('.quiz-option').forEach(function(opt){
+          opt.addEventListener('click', function(){
+            var q = this.getAttribute('data-question');
+            cont.querySelectorAll('[data-question="'+q+'"]').forEach(function(o){ o.classList.remove('selected'); });
+            this.classList.add('selected');
+          });
+        });
+        var btn = document.getElementById(btnId);
+        if(btn) btn.addEventListener('click', function(){
+          var score = 0;
+          data.forEach(function(item, index){
+            var sel = cont.querySelector('.quiz-option.selected[data-question="'+index+'"]');
+            var ok = sel && parseInt(sel.getAttribute('data-option'),10) === item.correct;
+            if(ok) score++;
+            var fb = cont.querySelector('[data-fb="'+index+'"]');
+            if(fb){ fb.textContent = (ok ? '\u2705 Correcto. ' : '\u274c Incorrecto. ') + (item.explain || '');
+              fb.className = 'quiz-fb mt-2 text-sm p-2 rounded ' + (ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'); }
+          });
+          var res = document.getElementById(resId);
+          var pct = Math.round(score / data.length * 100);
+          res.textContent = 'Obtuviste ' + score + ' de ' + data.length + ' (' + pct + '%)';
+          res.className = 'mt-4 text-lg font-bold ' + (pct >= 60 ? 'text-green-700' : 'text-red-600');
+        });
+      }
+      var quizData = [{"question": "¿Qué es el pensamiento crítico?", "options": ["Una técnica para memorizar grandes cantidades de datos rápidamente.", "La capacidad de analizar, evaluar y cuestionar la información y las ideas de manera lógica y razonada.", "Un método para repetir lo que dice la mayoría sin cuestionarlo.", "Un estilo de aprendizaje basado únicamente en la intuición."], "correct": 1, "explain": "El pensamiento crítico es la capacidad de analizar, evaluar y cuestionar información e ideas de forma lógica y razonada, no solo memorizar."}, {"question": "¿Cuál de las siguientes pares son características del pensamiento crítico?", "options": ["Claridad y precisión.", "Memorización y rapidez.", "Conformismo y dogmatismo.", "Pasividad y aceptación."], "correct": 0, "explain": "Claridad y precisión son rasgos del pensamiento crítico: formular ideas comprensibles y basarlas en información exacta."}, {"question": "¿En qué se diferencia principalmente el pensamiento crítico del pensamiento reflexivo?", "options": ["El pensamiento crítico es emocional; el reflexivo es siempre lógico.", "No hay diferencia: ambos son exactamente iguales.", "El pensamiento crítico evalúa información externa; el reflexivo examina las propias ideas y procesos.", "El pensamiento reflexivo busca respuestas rápidas; el crítico busca ignorarlas."], "correct": 2, "explain": "El pensamiento crítico analiza información y argumentos externos; el pensamiento reflexivo examina las propias ideas, acciones y aprendizajes."}, {"question": "¿Cuál de las siguientes NO es una práctica del pensamiento crítico?", "options": ["Analizar la evidencia antes de aceptar una afirmación.", "Formular preguntas que profundicen en el tema.", "Comparar diferentes fuentes para contrastar información.", "Aceptar sin cuestionar lo que dice la figura de autoridad."], "correct": 3, "explain": "Depender totalmente de la autoridad (sin cuestionarla) no es una característica del pensamiento crítico, que fomenta la autonomía intelectual."}, {"question": "¿Cuál de estas estrategias ayuda más directamente a practicar el pensamiento crítico?", "options": ["Formular preguntas poderosas sobre lo que se estudia.", "Memorizar definiciones sin relacionarlas.", "Repetir en voz alta lo que dicen los libros sin analizar.", "Evitar discutir ideas para no generar conflicto."], "correct": 0, "explain": "Formular preguntas poderosas (qué, por qué, cómo, qué pasa si...) es una estrategia central para activar el pensamiento crítico."}, {"question": "¿Qué debes revisar primero para evaluar la credibilidad de una fuente informativa?", "options": ["El tamaño de la letra del artículo.", "Si el autor tiene muchos seguidores en redes sociales.", "Quién es el autor, la fecha y las evidencias citadas.", "Si el artículo usa colores llamativos."], "correct": 2, "explain": "Evaluar la credibilidad de las fuentes (autor, fecha, evidencia) es una práctica de pensamiento crítico esencial para evitar información incorrecta."}, {"question": "¿Cuál es un beneficio directo del pensamiento crítico en el aprendizaje autónomo?", "options": ["Evitar evaluar alternativas y seleccionar la primera opción.", "Tomar decisiones informadas basadas en evidencias y análisis.", "Depender únicamente de opiniones de internet sin verificar.", "Ignorar el contexto en la toma de decisiones."], "correct": 1, "explain": "El pensamiento crítico facilita la toma de decisiones informadas, porque permite evaluar opciones con evidencias y argumentos sólidos."}, {"question": "¿Cuál de estas acciones es un ejemplo claro de pensamiento crítico aplicado por un estudiante?", "options": ["Copiar un texto sin entenderlo para entregarlo rápido.", "Repetir exactamente lo que dice la primera página que aparece en el buscador.", "Comparar varias fuentes, evaluar evidencias y justificar la elección metodológica en un proyecto.", "Evitar preguntar dudas para no parecer inseguro."], "correct": 2, "explain": "Un ejemplo de pensamiento crítico en práctica es desarrollar un proyecto personal donde se investigan fuentes, se elige metodología y se justifican las decisiones tomadas."}, {"question": "Si en un debate alguien dice “No escuches a ese autor, es cobarde y no sabe de lo que habla”, ¿qué error lógico presenta?", "options": ["Una prueba empírica.", "Una falacia ad hominem (atacar a la persona en vez del argumento).", "Una evidencia válida y bien fundada.", "Un argumento lógico y objetivo."], "correct": 1, "explain": "Identificar una falacia ad hominem (ataque a la persona en lugar del argumento) es una habilidad de pensamiento crítico para detectar razonamientos inválidos."}, {"question": "Tras ver el video recomendado sobre pensamiento crítico, la mejor acción para reforzar el aprendizaje es:", "options": ["Formular preguntas sobre el contenido, resumir las ideas principales y aplicar una estrategia práctica.", "Guardar el video y no volver a verlo ni reflexionar sobre él.", "Compartir el enlace sin entender ni comentar lo visto.", "Creer que con ver el video una vez ya se domina el pensamiento crítico."], "correct": 0, "explain": "Después de ver material sobre pensamiento crítico, procede reflexionar, formular preguntas y aplicar lo aprendido; no basta con sólo consumir el contenido."}];
+      renderQuiz(quizData, "quiz-evaluacion", "btn-evaluacion", "res-evaluacion");
     })();
   </script>
   <script src="https://elens.ecodestudio.dev/elens.js"></script>

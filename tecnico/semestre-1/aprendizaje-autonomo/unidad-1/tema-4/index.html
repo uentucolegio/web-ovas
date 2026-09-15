@@ -220,11 +220,21 @@ Al final, Sofía no solo entregó una página web  funcional: también ganó con
       </section>
       <section id="actividades" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
-        <iframe class="ova-embed" src="contenidos/actividades1.html" loading="lazy" scrolling="no" style="width:100%; border:0; min-height:600px;" onload="resizeEmbed(this)"></iframe>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <p class="text-slate-600 mb-6">Pon en práctica lo aprendido: selecciona una respuesta por pregunta y pulsa «Calificar».</p>
+          <div id="quiz-actividades"></div>
+          <button id="btn-actividades" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Calificar actividad</button>
+          <div id="res-actividades" class="mt-4 text-lg font-bold"></div>
+        </div>
       </section>
       <section id="evaluacion" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
-        <iframe class="ova-embed" src="contenidos/evaluacion.html" loading="lazy" scrolling="no" style="width:100%; border:0; min-height:600px;" onload="resizeEmbed(this)"></iframe>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <p class="text-slate-600 mb-6">Comprueba lo que aprendiste en este OVA. Selecciona la respuesta correcta para cada pregunta.</p>
+          <div id="quiz-evaluacion"></div>
+          <button id="btn-evaluacion" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+          <div id="res-evaluacion" class="mt-4 text-lg font-bold"></div>
+        </div>
       </section>
       <section id="recursos" class="content-pane">
 <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
@@ -306,6 +316,48 @@ Al final, Sofía no solo entregó una página web  funcional: también ganó con
       links.forEach(function(l){ l.addEventListener('click', function(){ show(l.getAttribute('data-target')); }); });
       if(sel) sel.addEventListener('change', function(e){ show(e.target.value); });
       window.addEventListener('resize', function(){ document.querySelectorAll('.content-pane.active .ova-embed').forEach(window.resizeEmbed); });
+    })();
+  </script>
+  <script>
+    (function(){
+      function renderQuiz(data, contId, btnId, resId){
+        var cont = document.getElementById(contId); if(!cont) return;
+        data.forEach(function(item, index){
+          var div = document.createElement('div'); div.className = 'mb-6';
+          var ops = item.options.map(function(opt, i){
+            return '<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="'+index+'" data-option="'+i+'"><span class="font-medium text-green-700 mr-2">'+String.fromCharCode(65+i)+'.</span> '+opt+'</div>';
+          }).join('');
+          div.innerHTML = '<p class="font-semibold text-slate-800 mb-3">'+(index+1)+'. '+item.question+'</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">'+ops+'</div><div class="quiz-fb mt-2 text-sm" data-fb="'+index+'"></div>';
+          cont.appendChild(div);
+        });
+        cont.querySelectorAll('.quiz-option').forEach(function(opt){
+          opt.addEventListener('click', function(){
+            var q = this.getAttribute('data-question');
+            cont.querySelectorAll('[data-question="'+q+'"]').forEach(function(o){ o.classList.remove('selected'); });
+            this.classList.add('selected');
+          });
+        });
+        var btn = document.getElementById(btnId);
+        if(btn) btn.addEventListener('click', function(){
+          var score = 0;
+          data.forEach(function(item, index){
+            var sel = cont.querySelector('.quiz-option.selected[data-question="'+index+'"]');
+            var ok = sel && parseInt(sel.getAttribute('data-option'),10) === item.correct;
+            if(ok) score++;
+            var fb = cont.querySelector('[data-fb="'+index+'"]');
+            if(fb){ fb.textContent = (ok ? '\u2705 Correcto. ' : '\u274c Incorrecto. ') + (item.explain || '');
+              fb.className = 'quiz-fb mt-2 text-sm p-2 rounded ' + (ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'); }
+          });
+          var res = document.getElementById(resId);
+          var pct = Math.round(score / data.length * 100);
+          res.textContent = 'Obtuviste ' + score + ' de ' + data.length + ' (' + pct + '%)';
+          res.className = 'mt-4 text-lg font-bold ' + (pct >= 60 ? 'text-green-700' : 'text-red-600');
+        });
+      }
+      var quizDataAct = [{"question": "¿Qué significa gestionar los recursos para el aprendizaje?", "options": ["Guardar todos los materiales sin analizarlos.", "Identificar, evaluar, organizar y usar estratégicamente medios y herramientas para el aprendizaje.", "Utilizar solo recursos digitales modernos.", "Depender únicamente del profesor como fuente."], "correct": 1, "explain": "Gestionar recursos implica identificar, evaluar, organizar y usar estratégicamente medios y herramientas para aprender."}, {"question": "¿Cuáles son las principales categorías de recursos educativos?", "options": ["Libros y apuntes.", "Plataformas educativas y podcasts.", "Docentes y compañeros de estudio.", "Físicos, digitales, humanos y organizativos."], "correct": 3, "explain": "Las categorías principales son: recursos físicos, digitales, humanos y organizativos."}];
+      renderQuiz(quizDataAct, "quiz-actividades", "btn-actividades", "res-actividades");
+      var quizData = [{"question": "¿Qué significa la gestión de recursos para el aprendizaje?", "options": ["Memorizar contenidos sin apoyo externo.", "Identificar, organizar y utilizar estratégicamente los recursos disponibles para aprender.", "Depender únicamente de los docentes para guiar el aprendizaje.", "Usar solo materiales impresos y físicos."], "correct": 1, "explain": "La gestión de recursos para el aprendizaje consiste en identificar, organizar y usar estratégicamente recursos físicos, digitales, humanos y organizativos."}, {"question": "¿Cuál de los siguientes es un recurso físico?", "options": ["Plataforma educativa en línea.", "Tutor académico.", "Libro de texto impreso.", "Calendario académico digital."], "correct": 2, "explain": "Los recursos físicos incluyen libros, manuales, artículos impresos, equipos y materiales necesarios para actividades académicas."}, {"question": "¿Cuál es un ejemplo de recurso digital para el aprendizaje?", "options": ["Biblioteca virtual de la universidad.", "Un grupo de estudio con compañeros.", "Una agenda física de tareas.", "Una herramienta de laboratorio presencial."], "correct": 0, "explain": "Los recursos digitales incluyen plataformas educativas, bibliotecas virtuales, MOOCs, software y aplicaciones para el aprendizaje."}, {"question": "¿Qué se considera un recurso humano en el aprendizaje?", "options": ["Una aplicación de notas.", "Un libro impreso.", "Una plataforma MOOC.", "Un tutor o experto académico."], "correct": 3, "explain": "Los recursos humanos incluyen tutores, docentes, compañeros y comunidades que brindan apoyo y retroalimentación."}, {"question": "¿Qué es un recurso organizativo?", "options": ["Un podcast educativo.", "Un calendario académico estructurado.", "Un libro de referencia.", "Una comunidad de aprendizaje en línea."], "correct": 1, "explain": "Los recursos organizativos incluyen calendarios, planes de estudio, horarios y herramientas para planificar tareas."}, {"question": "¿Qué implica la evaluación crítica de los recursos?", "options": ["Guardar todos los materiales sin analizarlos.", "Escoger recursos al azar.", "Analizar su calidad, relevancia y actualidad.", "Utilizar solo los recursos recomendados por un docente."], "correct": 2, "explain": "Seleccionar críticamente los recursos implica evaluar su calidad, actualidad y relevancia frente a los objetivos de estudio."}, {"question": "¿Cuál de las siguientes es una estrategia de organización eficiente de recursos?", "options": ["Clasificar materiales en carpetas digitales y usar etiquetas.", "Acumular todos los archivos en una sola carpeta.", "Evitar el uso de herramientas digitales.", "Guardar recursos sin nombres específicos."], "correct": 0, "explain": "La organización eficiente de recursos implica clasificarlos y almacenarlos de forma clara para acceder fácilmente cuando se necesiten."}, {"question": "¿Qué acción corresponde a la optimización del tiempo y recursos?", "options": ["Estudiar sin plan previo.", "Usar solo recursos improvisados.", "Dedicar tiempo solo a las materias favoritas.", "Crear un cronograma con tiempos asignados y prioridades."], "correct": 3, "explain": "Optimizar tiempo y recursos incluye elaborar cronogramas, listas priorizadas y una adecuada asignación de tiempos de estudio."}, {"question": "¿Qué ventaja ofrece el uso estratégico de recursos digitales?", "options": ["Limitar el acceso a la información disponible.", "Acceder a información actualizada y materiales interactivos.", "Sustituir totalmente la interacción con docentes.", "Evitar tutoriales y videos educativos."], "correct": 1, "explain": "El uso estratégico de recursos digitales permite acceder a información actualizada, tutoriales, videos y actividades interactivas."}, {"question": "¿Cuál es el beneficio de participar en redes colaborativas de aprendizaje?", "options": ["Compartir recursos y experiencias en un entorno de colaboración.", "Aislarse del trabajo en equipo.", "Sustituir los planes organizativos individuales.", "Evitar la retroalimentación de otros estudiantes."], "correct": 0, "explain": "Participar en redes colaborativas permite compartir experiencias, recursos y fomentar el aprendizaje autónomo y cooperativo."}];
+      renderQuiz(quizData, "quiz-evaluacion", "btn-evaluacion", "res-evaluacion");
     })();
   </script>
   <script src="https://elens.ecodestudio.dev/elens.js"></script>

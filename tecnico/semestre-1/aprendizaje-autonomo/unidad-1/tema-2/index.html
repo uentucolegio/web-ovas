@@ -225,11 +225,21 @@ body {
       </section>
       <section id="actividades" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
-        <iframe class="ova-embed" src="contenidos/actividades1.html" loading="lazy" scrolling="no" style="width:100%; border:0; min-height:600px;" onload="resizeEmbed(this)"></iframe>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <p class="text-slate-600 mb-6">Pon en práctica lo aprendido: selecciona una respuesta por pregunta y pulsa «Calificar».</p>
+          <div id="quiz-actividades"></div>
+          <button id="btn-actividades" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Calificar actividad</button>
+          <div id="res-actividades" class="mt-4 text-lg font-bold"></div>
+        </div>
       </section>
       <section id="evaluacion" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
-        <iframe class="ova-embed" src="contenidos/evaluacion.html" loading="lazy" scrolling="no" style="width:100%; border:0; min-height:600px;" onload="resizeEmbed(this)"></iframe>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <p class="text-slate-600 mb-6">Comprueba lo que aprendiste en este OVA. Selecciona la respuesta correcta para cada pregunta.</p>
+          <div id="quiz-evaluacion"></div>
+          <button id="btn-evaluacion" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+          <div id="res-evaluacion" class="mt-4 text-lg font-bold"></div>
+        </div>
       </section>
       <section id="recursos" class="content-pane">
 <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
@@ -321,6 +331,48 @@ body {
       links.forEach(function(l){ l.addEventListener('click', function(){ show(l.getAttribute('data-target')); }); });
       if(sel) sel.addEventListener('change', function(e){ show(e.target.value); });
       window.addEventListener('resize', function(){ document.querySelectorAll('.content-pane.active .ova-embed').forEach(window.resizeEmbed); });
+    })();
+  </script>
+  <script>
+    (function(){
+      function renderQuiz(data, contId, btnId, resId){
+        var cont = document.getElementById(contId); if(!cont) return;
+        data.forEach(function(item, index){
+          var div = document.createElement('div'); div.className = 'mb-6';
+          var ops = item.options.map(function(opt, i){
+            return '<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="'+index+'" data-option="'+i+'"><span class="font-medium text-green-700 mr-2">'+String.fromCharCode(65+i)+'.</span> '+opt+'</div>';
+          }).join('');
+          div.innerHTML = '<p class="font-semibold text-slate-800 mb-3">'+(index+1)+'. '+item.question+'</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">'+ops+'</div><div class="quiz-fb mt-2 text-sm" data-fb="'+index+'"></div>';
+          cont.appendChild(div);
+        });
+        cont.querySelectorAll('.quiz-option').forEach(function(opt){
+          opt.addEventListener('click', function(){
+            var q = this.getAttribute('data-question');
+            cont.querySelectorAll('[data-question="'+q+'"]').forEach(function(o){ o.classList.remove('selected'); });
+            this.classList.add('selected');
+          });
+        });
+        var btn = document.getElementById(btnId);
+        if(btn) btn.addEventListener('click', function(){
+          var score = 0;
+          data.forEach(function(item, index){
+            var sel = cont.querySelector('.quiz-option.selected[data-question="'+index+'"]');
+            var ok = sel && parseInt(sel.getAttribute('data-option'),10) === item.correct;
+            if(ok) score++;
+            var fb = cont.querySelector('[data-fb="'+index+'"]');
+            if(fb){ fb.textContent = (ok ? '\u2705 Correcto. ' : '\u274c Incorrecto. ') + (item.explain || '');
+              fb.className = 'quiz-fb mt-2 text-sm p-2 rounded ' + (ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'); }
+          });
+          var res = document.getElementById(resId);
+          var pct = Math.round(score / data.length * 100);
+          res.textContent = 'Obtuviste ' + score + ' de ' + data.length + ' (' + pct + '%)';
+          res.className = 'mt-4 text-lg font-bold ' + (pct >= 60 ? 'text-green-700' : 'text-red-600');
+        });
+      }
+      var quizDataAct = [{"question": "¿Cuál corresponde al conocimiento procedimental?", "options": ["Reconocer mis fortalezas y debilidades.", "Decidir usar mapas conceptuales para un tema complejo.", "Saber cómo aplicar una estrategia de lectura crítica.", "Memorizar fórmulas sin analizarlas."], "correct": 2, "explain": "El conocimiento procedimental es saber cómo aplicar una estrategia."}, {"question": "Verdadero o Falso: La fase de autorreflexión consiste en establecer metas iniciales.", "options": ["Verdadero", "Falso"], "correct": 1, "explain": "La fase de autorreflexión no es establecer metas, sino evaluar resultados y planear mejoras."}, {"question": "¿Qué estrategia fomenta directamente la metacognición?", "options": ["Memorizar listas de datos extensos.", "Resolver ejercicios sin evaluar los resultados.", "Usar un diario de aprendizaje para registrar avances y dificultades.", "Copiar apuntes mecánicamente."], "correct": 2, "explain": "Un diario de aprendizaje favorece la reflexión sobre avances y dificultades."}];
+      renderQuiz(quizDataAct, "quiz-actividades", "btn-actividades", "res-actividades");
+      var quizData = [{"question": "¿Qué significa metacognición?", "options": ["Memorizar sin razonar sobre lo aprendido.", "Reflexionar sobre cómo se piensa y aprende.", "Aplicar estrategias sin cuestionar resultados.", "Repetir ejercicios mecánicamente."], "correct": 1, "explain": "La metacognición es reflexionar sobre los propios procesos de pensamiento y aprendizaje."}, {"question": "¿Cuál ejemplo corresponde al conocimiento condicional?", "options": ["Reconocer mis fortalezas y debilidades.", "Conocer los pasos de un algoritmo.", "Decidir usar mapas conceptuales para un tema complejo.", "Memorizar fórmulas sin analizarlas."], "correct": 2, "explain": "El conocimiento condicional implica saber cuándo y por qué aplicar una estrategia."}, {"question": "¿Qué se realiza en la fase de planificación?", "options": ["Definir metas y elegir estrategias adecuadas.", "Implementar directamente lo planificado.", "Evaluar los resultados después de estudiar.", "Evitar organizar el tiempo disponible."], "correct": 0, "explain": "En la fase de planificación se definen metas y se seleccionan estrategias."}, {"question": "¿Qué estrategia fomenta la metacognición?", "options": ["Estudiar sin reflexionar.", "Memorizar listados extensos.", "Seguir instrucciones sin adaptación.", "Usar un diario de aprendizaje para registrar avances."], "correct": 3, "explain": "Un diario de aprendizaje permite reflexionar sobre avances, errores y estrategias."}, {"question": "¿Por qué es esencial en la educación técnica profesional?", "options": ["Porque permite memorizar códigos sin analizarlos.", "Porque facilita la adaptación continua a nuevas tecnologías.", "Porque evita la práctica autónoma.", "Porque elimina la necesidad de reflexionar."], "correct": 1, "explain": "La metacognición ayuda a adaptarse a nuevas tecnologías y a resolver problemas autónomamente."}, {"question": "¿Qué aspecto pertenece a la autorregulación del aprendizaje?", "options": ["Repetir tareas de memoria sin análisis.", "Confiar solo en instrucciones externas.", "Monitorear el progreso y ajustar estrategias.", "Evitar establecer objetivos."], "correct": 2, "explain": "La autorregulación incluye supervisar y ajustar estrategias mientras se aprende."}, {"question": "¿Qué se hace en la fase de evaluación de la autorregulación?", "options": ["Analizar resultados y proponer mejoras.", "Evitar revisar errores.", "Iniciar el aprendizaje sin planear.", "Memorizar únicamente lo visto en clase."], "correct": 0, "explain": "La fase de evaluación consiste en valorar si las metas se cumplieron y cómo mejorar."}, {"question": "¿Qué ejemplo representa conocimiento declarativo?", "options": ["Saber cuándo aplicar una fórmula.", "Elegir estrategias según el contexto.", "Regular la concentración durante el estudio.", "Recordar la definición de un concepto."], "correct": 3, "explain": "El conocimiento declarativo implica saber qué son las cosas (conceptos, definiciones)."}, {"question": "¿Cuál factor personal favorece la autorregulación?", "options": ["Evitar reflexionar sobre errores.", "Seguir instrucciones sin cuestionar.", "Tener motivación y establecer objetivos.", "Rechazar nuevas estrategias."], "correct": 2, "explain": "La motivación es un factor clave para la autorregulación, pues impulsa a mantener metas."}, {"question": "¿Cuáles son los componentes principales de la metacognición?", "options": ["Conocimiento y regulación.", "Memorización y repetición.", "Atención y esfuerzo físico.", "Ensayo y error sin reflexión."], "correct": 0, "explain": "La metacognición se divide en conocimiento (saber sobre procesos cognitivos) y regulación (controlarlos)."}];
+      renderQuiz(quizData, "quiz-evaluacion", "btn-evaluacion", "res-evaluacion");
     })();
   </script>
   <script src="https://elens.ecodestudio.dev/elens.js"></script>

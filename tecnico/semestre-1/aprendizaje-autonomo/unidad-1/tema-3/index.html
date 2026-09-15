@@ -221,7 +221,12 @@ body {
       </section>
       <section id="actividades" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
-        <iframe class="ova-embed" src="contenidos/actividades1.html" loading="lazy" scrolling="no" style="width:100%; border:0; min-height:600px;" onload="resizeEmbed(this)"></iframe>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <p class="text-slate-600 mb-6">Pon en práctica lo aprendido: selecciona una respuesta por pregunta y pulsa «Calificar».</p>
+          <div id="quiz-actividades"></div>
+          <button id="btn-actividades" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Calificar actividad</button>
+          <div id="res-actividades" class="mt-4 text-lg font-bold"></div>
+        </div>
       </section>
       <section id="evaluacion" class="content-pane">
         <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
@@ -297,6 +302,46 @@ body {
       links.forEach(function(l){ l.addEventListener('click', function(){ show(l.getAttribute('data-target')); }); });
       if(sel) sel.addEventListener('change', function(e){ show(e.target.value); });
       window.addEventListener('resize', function(){ document.querySelectorAll('.content-pane.active .ova-embed').forEach(window.resizeEmbed); });
+    })();
+  </script>
+  <script>
+    (function(){
+      function renderQuiz(data, contId, btnId, resId){
+        var cont = document.getElementById(contId); if(!cont) return;
+        data.forEach(function(item, index){
+          var div = document.createElement('div'); div.className = 'mb-6';
+          var ops = item.options.map(function(opt, i){
+            return '<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="'+index+'" data-option="'+i+'"><span class="font-medium text-green-700 mr-2">'+String.fromCharCode(65+i)+'.</span> '+opt+'</div>';
+          }).join('');
+          div.innerHTML = '<p class="font-semibold text-slate-800 mb-3">'+(index+1)+'. '+item.question+'</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">'+ops+'</div><div class="quiz-fb mt-2 text-sm" data-fb="'+index+'"></div>';
+          cont.appendChild(div);
+        });
+        cont.querySelectorAll('.quiz-option').forEach(function(opt){
+          opt.addEventListener('click', function(){
+            var q = this.getAttribute('data-question');
+            cont.querySelectorAll('[data-question="'+q+'"]').forEach(function(o){ o.classList.remove('selected'); });
+            this.classList.add('selected');
+          });
+        });
+        var btn = document.getElementById(btnId);
+        if(btn) btn.addEventListener('click', function(){
+          var score = 0;
+          data.forEach(function(item, index){
+            var sel = cont.querySelector('.quiz-option.selected[data-question="'+index+'"]');
+            var ok = sel && parseInt(sel.getAttribute('data-option'),10) === item.correct;
+            if(ok) score++;
+            var fb = cont.querySelector('[data-fb="'+index+'"]');
+            if(fb){ fb.textContent = (ok ? '\u2705 Correcto. ' : '\u274c Incorrecto. ') + (item.explain || '');
+              fb.className = 'quiz-fb mt-2 text-sm p-2 rounded ' + (ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'); }
+          });
+          var res = document.getElementById(resId);
+          var pct = Math.round(score / data.length * 100);
+          res.textContent = 'Obtuviste ' + score + ' de ' + data.length + ' (' + pct + '%)';
+          res.className = 'mt-4 text-lg font-bold ' + (pct >= 60 ? 'text-green-700' : 'text-red-600');
+        });
+      }
+      var quizData = [{"question": "¿Cuál es el propósito principal de la planificación del aprendizaje?", "options": ["Memorizar contenidos sin reflexionar.", "Reducir el tiempo de estudio sin medir resultados.", "Definir qué se desea aprender, cómo hacerlo y cómo evaluar los logros.", "Estudiar sin establecer prioridades."], "correct": 2, "explain": "La planificación consiste en definir qué aprender, cómo hacerlo y cómo evaluar los logros."}, {"question": "Verdadero o Falso: El diagnóstico inicial consiste en identificar fortalezas y debilidades antes de comenzar un plan de aprendizaje.", "options": ["Verdadero", "Falso"], "correct": 0, "explain": "El diagnóstico inicial busca identificar fortalezas y debilidades antes de iniciar el plan."}, {"question": "¿Cuál de estas opciones corresponde a un objetivo SMART?", "options": ["“Voy a estudiar más cuando tenga tiempo libre.”", "“Aprenderé programación web en dos meses dedicando 2 horas diarias.”", "“Mejoraré en matemáticas algún día.”", "“Estudiar lo que pueda, sin plan fijo.”"], "correct": 1, "explain": "Un objetivo SMART debe ser específico, medible, alcanzable, relevante y temporalizado."}, {"question": "¿Qué estrategia de planificación se relaciona con el uso de calendarios, agendas y listas de tareas?", "options": ["Selección adecuada de recursos.", "Priorización de tareas.", "Gestión del tiempo.", "Diseño del ambiente de aprendizaje."], "correct": 2, "explain": "La gestión del tiempo implica el uso de calendarios, agendas y listas de tareas."}, {"question": "¿Qué estrategia consiste en crear un espacio libre de distracciones y con recursos adecuados?", "options": ["Establecimiento de objetivos SMART.", "Priorización de tareas.", "Resolución de problemas.", "Diseño de un ambiente de aprendizaje óptimo."], "correct": 3, "explain": "El diseño de un ambiente de aprendizaje óptimo implica crear un espacio físico y virtual libre de distracciones."}];
+      renderQuiz(quizData, "quiz-actividades", "btn-actividades", "res-actividades");
     })();
   </script>
   <script src="https://elens.ecodestudio.dev/elens.js"></script>
