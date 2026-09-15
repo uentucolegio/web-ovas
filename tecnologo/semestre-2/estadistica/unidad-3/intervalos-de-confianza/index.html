@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Intervalos de Confianza</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .acc-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            h2 { font-size: 1.5rem !important; } h3 { font-size: 1.25rem !important; } h4 { font-size: 1.125rem !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .content-pane p { text-align: justify; }
+
+        /* Tarjetas institucionales */
+        .card-institucional { background: white; border: 1px solid #cbd5e1; border-left: 4px solid #15803d; border-radius: 0.75rem; }
+        .card-institucional-alt { background: white; border: 1px solid #cbd5e1; border-left: 4px solid #1d4ed8; border-radius: 0.75rem; }
+        .hero-institucional { background: linear-gradient(135deg, #15803d 0%, #166534 55%, #b45309 100%); }
+        .score-chip { background: #15803d; color: white; border-radius: 9999px; padding: 4px 14px; font-weight: 700; font-size: 0.85rem; display: inline-block; }
+        .badge-chip { background: #fde68a; color: #78350f; border: 1px solid #b45309; border-radius: 9999px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+
+        /* Acordeón */
+        .acc-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .acc-btn .acc-icon { transition: transform 0.3s; display: inline-block; }
+        .acc-btn.acc-open .acc-icon { transform: rotate(45deg); }
+
+        /* Inputs V/F y validación */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        .chk-input { transition: all 0.25s ease; }
+        .chk-input.correct { border-color: #22c55e !important; border-width: 3px; background-color: #f0fdf4; animation: bounce 0.3s ease-in-out; }
+        .chk-input.wrong { border-color: #ef4444 !important; border-width: 3px; background-color: #fef2f2; animation: shake 0.3s ease-in-out; }
+
+        /* Opciones tipo juego (selección múltiple) */
+        .game-option { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, background 0.2s; border: 2px solid #cbd5e1; }
+        .game-option:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #15803d; }
+        .game-option.correct { background: #dcfce7 !important; border-color: #15803d !important; }
+        .game-option.wrong { background: #fee2e2 !important; border-color: #dc2626 !important; animation: shake 0.3s; }
+        .game-option.disabled { pointer-events: none; opacity: 0.65; }
+
+        /* Simulador Cazador de Intervalos */
+        .caza-track { position: relative; height: 22px; background: #f1f5f9; border-radius: 6px; }
+        .caza-bar { position: absolute; top: 3px; height: 16px; border-radius: 8px; transition: left 0.3s ease, width 0.3s ease; }
+        .caza-bar.hit { background: #4ade80; border: 2px solid #15803d; }
+        .caza-bar.miss { background: #fca5a5; border: 2px solid #dc2626; }
+        .caza-mu-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: repeating-linear-gradient(to bottom, #166534 0, #166534 4px, transparent 4px, transparent 8px); z-index: 5; pointer-events: none; }
+
+        /* Botones de selector dinámico (precisión) */
+        .dyn-btn { cursor: pointer; transition: all 0.25s; border: 2px solid #cbd5e1; background: white; }
+        .dyn-btn:hover { border-color: #15803d; }
+        .dyn-btn.active-dyn { background: #15803d; color: white; border-color: #15803d; }
+
+        .conf-radio-card { cursor: pointer; transition: all 0.2s; border: 2px solid #cbd5e1; }
+        .conf-radio-card.active-conf { background: #dcfce7; border-color: #15803d; }
+    </style>
+</head>
+<body class="bg-slate-50">
+<div class="flex min-h-screen flex-col">
+<div class="flex flex-1">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+        <div class="p-4">
+            <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 hover:shadow-green-400 transition-shadow">
+                <img src="img/logo.webp" alt="Logo" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+        </div>
+        <nav class="mt-6 flex-1">
+            <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+        <!-- Mobile header -->
+        <div class="md:hidden mb-6 flex flex-col items-center">
+            <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg mb-2">
+                <img src="img/logo.webp" alt="Logo" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+            <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                <option value="introduccion">🚀 Introducción</option>
+                <option value="objetivos">🎯 Objetivos</option>
+                <option value="contenido">📚 Contenido</option>
+                <option value="actividades">✍️ Actividades</option>
+                <option value="evaluacion">✔️ Evaluación</option>
+                <option value="recursos">📖 Recursos</option>
+                <option value="bibliografia">📚 Bibliografía</option>
+            </select>
+        </div>
+
+        <!-- ══════════════════════ INTRODUCCIÓN ══════════════════════ -->
+        <div id="introduccion" class="content-pane active">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Intervalos de Confianza</h2>
+
+            <p class="text-slate-700 leading-relaxed mb-4">
+                En el tema anterior de esta unidad aprendiste a estimar un parámetro de la población usando un solo número: si una muestra de peticiones a un servidor daba un tiempo promedio de 185 ms, esa era tu estimación puntual del tiempo promedio real. Pero seguramente sospechaste algo: ese número casi nunca es exacto. Si tomaras otra muestra, te daría un valor un poco distinto. Entonces surge la pregunta clave de esta guía: <strong>¿qué tan confiable es esa estimación?</strong>
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                Los <strong>intervalos de confianza</strong> responden exactamente eso. En lugar de dar un solo número, entregan un <em>rango</em> de valores donde muy probablemente está el verdadero valor del parámetro, junto con un nivel de confianza que indica qué tan seguros estamos. En vez de decir "el tiempo promedio es 185 ms", vas a aprender a decir "estamos 95 % seguros de que el tiempo promedio está entre 178 ms y 192 ms". Esta segunda forma es mucho más honesta, porque reconoce la incertidumbre propia de trabajar con muestras.
+            </p>
+
+            <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                <p class="text-green-800">
+                    <span class="text-xl">✨</span> Piensa en las encuestas electorales: nunca dicen "42 % de intención de voto" a secas, sino "42 %, con un margen de error de 3 %". Ese margen es, precisamente, la mitad de un intervalo de confianza. Hoy vas a aprender a construir e interpretar esa misma herramienta, aplicada al mundo del desarrollo de software. <span class="text-xl">🚀</span>
+                </p>
+            </div>
+
+            <div class="mt-8 hero-institucional rounded-xl p-6 text-white">
+                <h3 class="text-lg font-bold mb-2 text-center">🎯 Pregunta detonante</h3>
+                <p class="text-sm opacity-90 text-center mb-4">Una empresa mide el tiempo de apertura de su app en una muestra de usuarios y reporta: <strong>"Estamos 95 % seguros de que el tiempo promedio está entre 1.8 y 2.2 segundos."</strong></p>
+                <div class="bg-white/10 rounded-lg p-4 text-sm text-center max-w-2xl mx-auto">
+                    <p>¿Significa eso que hay un 95 % de probabilidad de que el tiempo real esté en ese rango? ¿O significa otra cosa? 🤔</p>
+                    <p class="font-bold mt-2">Descúbrelo en la sección de Contenido — ahí resolverás esa trampa que confunde hasta a periodistas. 👇</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ OBJETIVOS ══════════════════════ -->
+        <div id="objetivos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+            <ul class="space-y-4">
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">🔍</span><span><strong>Comprender</strong> por qué una estimación por intervalo es más informativa que una estimación puntual, reconociendo la existencia del error de muestreo.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">📐</span><span><strong>Interpretar</strong> correctamente el significado de un intervalo de confianza y de su nivel de confianza (por ejemplo, 95 %).</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">🧩</span><span><strong>Identificar</strong> los componentes de un intervalo de confianza: estimación puntual, margen de error y límites inferior y superior.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">🛠️</span><span><strong>Construir</strong> intervalos de confianza para la media y para la proporción de una población en casos sencillos.</span></li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-600"><span class="text-2xl mr-3">⚖️</span><span><strong>Reconocer</strong> qué factores hacen que un intervalo sea más ancho o más estrecho (tamaño de la muestra y nivel de confianza) y aplicarlos a situaciones del desarrollo de software.</span></li>
+            </ul>
+        </div>
+
+        <!-- ══════════════════════ CONTENIDO ══════════════════════ -->
+        <div id="contenido" class="content-pane">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800">Desarrollo del Contenido</h2>
+                <span id="contenido-score-chip" class="score-chip">🧭 Puntos de exploración: 0</span>
+            </div>
+
+            <!-- PESTAÑAS PRINCIPALES -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button id="btn-tab-porque" onclick="showMainTab('tab-porque')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-700 bg-green-700 text-white transition-all shadow-sm">Del valor único al rango</button>
+                <button id="btn-tab-confianza" onclick="showMainTab('tab-confianza')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Nivel de confianza</button>
+                <button id="btn-tab-construccion" onclick="showMainTab('tab-construccion')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Construir el intervalo</button>
+                <button id="btn-tab-precision" onclick="showMainTab('tab-precision')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">¿Qué lo hace preciso?</button>
+                <button id="btn-tab-aplicaciones" onclick="showMainTab('tab-aplicaciones')" class="main-tab-btn px-4 py-3 text-sm sm:text-base font-semibold rounded-full border-2 border-green-200 bg-white text-slate-600 hover:text-green-700 transition-all shadow-sm">Aplicaciones</button>
+            </div>
+
+            <!-- ══ TAB 1: DEL VALOR ÚNICO AL RANGO ══ -->
+            <div id="tab-porque" class="main-tab-content bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <h4 class="font-bold text-green-800 text-lg">El problema de la estimación puntual</h4>
+                    <p>La estimación puntual usa el estadístico de la muestra (como la media x̄) para estimar el parámetro de la población (como la media μ). Es útil, pero tiene una debilidad importante: da un único número sin indicar cuánto podría alejarse del valor real.</p>
+                    <p>Imagina que dos equipos miden el tiempo de respuesta de un servidor. El equipo A toma una muestra y obtiene x̄ = 185 ms. El equipo B toma otra muestra distinta y obtiene x̄ = 191 ms. ¿Quién tiene razón? <strong>Los dos</strong>: cada muestra da una estimación ligeramente diferente por el azar del muestreo. Esa diferencia se llama <strong>error de muestreo</strong>, y la estimación puntual no lo refleja.</p>
+
+                    <div class="card-institucional p-5">
+                        <h4 class="font-bold text-green-800 mb-2">📌 Definición: Intervalo de confianza</h4>
+                        <p class="text-sm">Un <strong>intervalo de confianza</strong> es un rango de valores, construido a partir de una muestra, dentro del cual se estima que se encuentra el verdadero valor del parámetro de la población, con un determinado nivel de confianza. Tiene la forma:</p>
+                        <p class="text-center font-mono text-lg bg-slate-50 rounded p-3 mt-3 border border-slate-200">estimación puntual ± margen de error</p>
+                    </div>
+
+                    <h4 class="font-bold text-green-800 text-lg">Componentes de un intervalo de confianza</h4>
+                    <p>Todo intervalo de confianza tiene tres elementos que conviene identificar con claridad: la <strong>estimación puntual</strong> (el centro), el <strong>margen de error (E)</strong> (lo que se suma y resta) y los <strong>límites</strong> inferior y superior.</p>
+
+                    <!-- SVG: anatomía del intervalo -->
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <h4 class="font-bold text-slate-700 mb-3 text-center">🧭 Anatomía de un intervalo de confianza</h4>
+                        <div class="overflow-x-auto">
+                            <svg viewBox="0 0 600 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-2xl mx-auto block" style="min-width:340px">
+                                <defs>
+                                    <marker id="arrIC" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+                                        <polygon points="0 0,9 3,0 6" fill="#166534"/>
+                                    </marker>
+                                </defs>
+                                <line x1="60" y1="90" x2="540" y2="90" stroke="#cbd5e1" stroke-width="3"/>
+                                <circle cx="120" cy="90" r="7" fill="#166534"/>
+                                <circle cx="300" cy="90" r="9" fill="#15803d"/>
+                                <circle cx="480" cy="90" r="7" fill="#166534"/>
+                                <line x1="140" y1="90" x2="290" y2="90" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrIC)"/>
+                                <line x1="460" y1="90" x2="310" y2="90" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrIC)"/>
+                                <text x="120" y="130" text-anchor="middle" font-family="Poppins,sans-serif" font-size="13" font-weight="700" fill="#166534">178 ms</text>
+                                <text x="120" y="148" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" fill="#64748b">Límite inferior</text>
+                                <text x="300" y="55" text-anchor="middle" font-family="Poppins,sans-serif" font-size="14" font-weight="700" fill="#15803d">x̄ = 185 ms</text>
+                                <text x="300" y="130" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" fill="#64748b">Estimación puntual</text>
+                                <text x="480" y="130" text-anchor="middle" font-family="Poppins,sans-serif" font-size="13" font-weight="700" fill="#166534">192 ms</text>
+                                <text x="480" y="148" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" fill="#64748b">Límite superior</text>
+                                <text x="215" y="75" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12" font-weight="600" fill="#b45309">− E</text>
+                                <text x="385" y="75" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12" font-weight="600" fill="#b45309">+ E</text>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 text-center italic mt-1">Figura 1. Anatomía de un intervalo de confianza: la estimación puntual en el centro, más y menos el margen de error, define los límites. Elaboración propia.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead><tr class="bg-green-800 text-white"><th class="p-3 text-left rounded-tl-lg">Componente</th><th class="p-3 text-left">Símbolo</th><th class="p-3 text-left rounded-tr-lg">Ejemplo</th></tr></thead>
+                            <tbody>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3 font-semibold">Estimación puntual</td><td class="p-3 font-mono">x̄</td><td class="p-3">185 ms</td></tr>
+                                <tr class="bg-white border-b border-slate-200"><td class="p-3 font-semibold">Margen de error</td><td class="p-3 font-mono">E</td><td class="p-3">7 ms</td></tr>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3 font-semibold">Límite inferior</td><td class="p-3 font-mono">x̄ − E</td><td class="p-3">178 ms</td></tr>
+                                <tr class="bg-white"><td class="p-3 font-semibold">Límite superior</td><td class="p-3 font-mono">x̄ + E</td><td class="p-3">192 ms</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center italic">Tabla 1. Componentes de un intervalo de confianza con un ejemplo numérico.</p>
+
+                    <!-- Mini-reto -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-5">
+                        <h4 class="font-bold text-amber-800 mb-3">⚡ Mini-reto: ¿qué es el error de muestreo?</h4>
+                        <p class="text-sm mb-3">El equipo A obtuvo x̄ = 185 ms y el equipo B obtuvo x̄ = 191 ms con muestras distintas del mismo servidor. ¿Por qué ocurre esa diferencia?</p>
+                        <div id="mini-reto-1" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="false" onclick="responderMiniReto(this, false, 1)">Uno de los dos equipos midió mal o hizo trampa.</div>
+                            <div class="game-option rounded-lg p-3 text-sm bg-white" data-correct="true" onclick="responderMiniReto(this, true, 1)">Cada muestra es distinta por azar; es el error de muestreo, no un error humano.</div>
+                        </div>
+                        <p id="mini-reto-1-fb" class="text-sm mt-3 font-medium"></p>
+                    </div>
+
+                    <!-- RECURSO EXTERNO id="recurso-ext-1"
+                         Tema: video explicativo sobre intervalos de confianza para principiantes
+                         Buscar: "intervalos de confianza explicación fácil estadística" -->
+                    <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-3 flex-wrap">
+                            <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                        </div>
+                        <p class="text-green-800 font-semibold mb-1">Video explicativo: ¿qué es un intervalo de confianza?</p>
+                        <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"intervalos de confianza explicación fácil estadística"</em></p>
+                        <a href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                            <span>▶️</span> Ver recurso
+                        </a>
+                        <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                            <p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p>
+                            <p class="text-green-700 text-xs mb-2">Busca el video y dile esto a tu agente de IA en el chat:</p>
+                            <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 2: NIVEL DE CONFIANZA ══ -->
+            <div id="tab-confianza" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <h4 class="font-bold text-green-800 text-lg">¿Qué significa realmente el 95 %?</h4>
+                    <p>El <strong>nivel de confianza</strong> (comúnmente 90 %, 95 % o 99 %) indica qué tan seguro es el <em>método</em> que usamos para construir el intervalo. Un nivel del 95 % significa lo siguiente: si tomáramos muchísimas muestras diferentes y construyéramos un intervalo con cada una, aproximadamente el 95 % de esos intervalos contendría el verdadero valor del parámetro.</p>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-5">
+                        <h4 class="font-bold text-red-800 mb-2">🚫 Cuidado con una confusión muy común</h4>
+                        <p class="text-sm">El 95 % <strong>NO</strong> significa "hay 95 % de probabilidad de que el parámetro esté en este intervalo específico". El parámetro es un valor fijo: o está dentro, o no está. Lo que tiene 95 % de éxito es el <em>método</em>: de cada 100 intervalos construidos así, unos 95 acertarían.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead><tr class="bg-green-800 text-white"><th class="p-3 text-left rounded-tl-lg">Nivel de confianza</th><th class="p-3 text-left">Se equivoca (aprox.)</th><th class="p-3 text-left rounded-tr-lg">Interpretación</th></tr></thead>
+                            <tbody>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3 font-semibold">90 %</td><td class="p-3">1 de cada 10</td><td class="p-3 text-xs">Más estrecho, pero menos seguro</td></tr>
+                                <tr class="bg-white border-b border-slate-200"><td class="p-3 font-semibold">95 %</td><td class="p-3">1 de cada 20</td><td class="p-3 text-xs">El más usado: buen equilibrio</td></tr>
+                                <tr class="bg-slate-50"><td class="p-3 font-semibold">99 %</td><td class="p-3">1 de cada 100</td><td class="p-3 text-xs">Muy seguro, pero más ancho</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center italic">Tabla 2. Niveles de confianza más frecuentes y su interpretación.</p>
+
+                    <!-- SIMULADOR: CAZADOR DE INTERVALOS -->
+                    <div class="hero-institucional rounded-xl p-5 text-white">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                            <h4 class="font-bold text-lg">🕵️ Misión: Cazador de Intervalos</h4>
+                            <span id="caza-badge" class="badge-chip hidden">🏅 ¡Interpretación desbloqueada!</span>
+                        </div>
+                        <p class="text-sm opacity-90 mb-4">El tiempo real de respuesta de TODAS las peticiones a un servidor (μ, desconocido en la vida real) es de <strong>185 ms</strong>, con σ = 40 ms. Cada clic simula tomar una muestra de n = 100 peticiones y construir un intervalo de confianza. Elige un nivel de confianza y comprueba cuántos intervalos "atrapan" el valor real.</p>
+
+                        <div class="flex flex-wrap gap-2 mb-4" id="caza-conf-selector">
+                            <label class="conf-radio-card px-4 py-2 rounded-full text-sm font-semibold bg-white/90 text-slate-700" data-conf="90"><input type="radio" name="caza-conf" value="90" class="mr-1">90 %</label>
+                            <label class="conf-radio-card active-conf px-4 py-2 rounded-full text-sm font-semibold bg-white/90 text-slate-700" data-conf="95"><input type="radio" name="caza-conf" value="95" class="mr-1" checked>95 %</label>
+                            <label class="conf-radio-card px-4 py-2 rounded-full text-sm font-semibold bg-white/90 text-slate-700" data-conf="99"><input type="radio" name="caza-conf" value="99" class="mr-1">99 %</label>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3 mb-4">
+                            <button onclick="cazarIntervalo()" class="bg-white text-green-800 font-bold py-2 px-6 rounded-lg hover:bg-amber-100 transition-colors">🎯 Tomar muestra y construir intervalo</button>
+                            <button onclick="resetCaza()" class="bg-white/20 text-white font-bold py-2 px-5 rounded-lg hover:bg-white/30 transition-colors">Reiniciar</button>
+                        </div>
+
+                        <p class="text-center text-sm mb-2">Aciertos: <strong id="caza-tally">0 / 0 (—)</strong> — el valor real μ = 185 ms es la línea punteada del centro.</p>
+                        <div class="relative bg-white/10 rounded-lg p-3">
+                            <div class="caza-mu-line"></div>
+                            <div id="caza-rows" class="space-y-2"></div>
+                            <p id="caza-rows-empty" class="text-xs text-center opacity-75 py-4">Aún no has tomado ninguna muestra. ¡Haz clic arriba! 👆</p>
+                        </div>
+                        <p id="caza-conclusion" class="text-sm bg-white/10 rounded-lg p-3 mt-4 hidden"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 3: CONSTRUCCIÓN ══ -->
+            <div id="tab-construccion" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="flex gap-2 mb-5 border-b border-slate-200 flex-wrap">
+                    <button onclick="showSub('con','media')" id="con-tab-media" class="sub-tab-con px-4 py-2 rounded-t-lg text-sm font-semibold border-b-2 border-green-700 text-green-800 bg-green-50">Intervalo para la media</button>
+                    <button onclick="showSub('con','proporcion')" id="con-tab-proporcion" class="sub-tab-con px-4 py-2 rounded-t-lg text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-green-700">Intervalo para la proporción</button>
+                </div>
+
+                <!-- CON: MEDIA -->
+                <div id="con-media" class="sub-con space-y-5 text-slate-700">
+                    <p>Cuando la muestra es grande (n ≥ 30), el intervalo de confianza para la media poblacional μ se construye así:</p>
+                    <p class="text-center font-mono text-lg bg-slate-50 rounded p-3 border border-slate-200">x̄ ± z · (s / √n)</p>
+                    <p class="text-sm">donde x̄ es la media muestral, s es la desviación estándar de la muestra, n es el tamaño de la muestra y z es el <strong>valor crítico</strong>, que depende del nivel de confianza.</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead><tr class="bg-green-800 text-white"><th class="p-3 text-left rounded-tl-lg">Nivel de confianza</th><th class="p-3 text-left rounded-tr-lg">Valor crítico z</th></tr></thead>
+                            <tbody>
+                                <tr class="bg-slate-50 border-b border-slate-200"><td class="p-3">90 %</td><td class="p-3 font-mono">1.645</td></tr>
+                                <tr class="bg-white border-b border-slate-200"><td class="p-3">95 %</td><td class="p-3 font-mono">1.96</td></tr>
+                                <tr class="bg-slate-50"><td class="p-3">99 %</td><td class="p-3 font-mono">2.576</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center italic">Tabla 3. Valores críticos z para los niveles de confianza más usados.</p>
+
+                    <div class="card-institucional p-5">
+                        <h4 class="font-bold text-green-800 mb-2">Ejemplo 1 — Tiempo de respuesta</h4>
+                        <p class="text-sm mb-2">Una muestra de n = 100 peticiones a un servidor dio x̄ = 185 ms con s = 40 ms. Construir el intervalo de confianza del 95 %.</p>
+                        <p class="text-sm font-mono bg-slate-50 rounded p-2 border border-slate-200">E = 1.96 · (40 / √100) = 1.96 · 4 = 7.84 ms</p>
+                        <p class="text-sm mt-2 text-green-700">185 ± 7.84 → <strong>(177.16 ms, 192.84 ms)</strong>. Interpretación: con 95 % de confianza, el tiempo promedio real está entre 177.16 y 192.84 ms.</p>
+                    </div>
+
+                    <!-- CALCULADORA MEDIA -->
+                    <div class="bg-slate-50 rounded-xl p-5 border-2 border-green-300">
+                        <h4 class="font-bold text-slate-700 mb-3">🧮 Calculadora — Intervalo para la media</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                            <div><label class="text-xs text-slate-600 mb-1 block">Media muestral (x̄)</label><input type="number" id="cm-xbar" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="ej: 220"></div>
+                            <div><label class="text-xs text-slate-600 mb-1 block">Desv. estándar (s)</label><input type="number" id="cm-s" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="ej: 32"></div>
+                            <div><label class="text-xs text-slate-600 mb-1 block">Tamaño muestra (n)</label><input type="number" id="cm-n" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="ej: 64"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4" id="cm-conf-selector">
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-conf="90" onclick="seleccionarConf('cm', 90, this)">90 %</button>
+                            <button class="dyn-btn active-dyn px-4 py-2 rounded-full text-sm font-semibold" data-conf="95" onclick="seleccionarConf('cm', 95, this)">95 %</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-conf="99" onclick="seleccionarConf('cm', 99, this)">99 %</button>
+                        </div>
+                        <button onclick="calcularMedia()" class="bg-green-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-800 transition-colors">Calcular intervalo</button>
+                        <div id="cm-resultado" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+
+                <!-- CON: PROPORCIÓN -->
+                <div id="con-proporcion" class="sub-con hidden space-y-5 text-slate-700">
+                    <p>Cuando queremos estimar una proporción (por ejemplo, el porcentaje de usuarios satisfechos), el intervalo se construye así:</p>
+                    <p class="text-center font-mono text-lg bg-slate-50 rounded p-3 border border-slate-200">p̂ ± z · √( p̂(1 − p̂) / n )</p>
+                    <p class="text-sm">donde p̂ es la proporción muestral, n es el tamaño de la muestra y z es el mismo valor crítico de la tabla anterior.</p>
+
+                    <div class="card-institucional-alt p-5">
+                        <h4 class="font-bold text-blue-800 mb-2">Ejemplo 2 — Usuarios satisfechos</h4>
+                        <p class="text-sm mb-2">En una muestra de n = 400 usuarios, 344 se declararon satisfechos. Construir el intervalo de confianza del 95 %.</p>
+                        <p class="text-sm font-mono bg-slate-50 rounded p-2 border border-slate-200">p̂ = 344/400 = 0.86 &nbsp;→&nbsp; E = 1.96 · √(0.86·0.14/400) ≈ 0.034</p>
+                        <p class="text-sm mt-2 text-blue-700">0.86 ± 0.034 → <strong>(82.6 %, 89.4 %)</strong>. Interpretación: con 95 % de confianza, entre el 82.6 % y el 89.4 % de todos los usuarios están satisfechos.</p>
+                    </div>
+
+                    <!-- CALCULADORA PROPORCIÓN -->
+                    <div class="bg-slate-50 rounded-xl p-5 border-2 border-blue-300">
+                        <h4 class="font-bold text-slate-700 mb-3">🧮 Calculadora — Intervalo para la proporción</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                            <div><label class="text-xs text-slate-600 mb-1 block">Elementos con la característica</label><input type="number" id="cp-exitos" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="ej: 375"></div>
+                            <div><label class="text-xs text-slate-600 mb-1 block">Tamaño de la muestra (n)</label><input type="number" id="cp-n" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="ej: 500"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4" id="cp-conf-selector">
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-conf="90" onclick="seleccionarConf('cp', 90, this)">90 %</button>
+                            <button class="dyn-btn active-dyn px-4 py-2 rounded-full text-sm font-semibold" data-conf="95" onclick="seleccionarConf('cp', 95, this)">95 %</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-conf="99" onclick="seleccionarConf('cp', 99, this)">99 %</button>
+                        </div>
+                        <button onclick="calcularProporcion()" class="bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 transition-colors">Calcular intervalo</button>
+                        <div id="cp-resultado" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 4: PRECISIÓN ══ -->
+            <div id="tab-precision" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-5 text-slate-700">
+                    <h4 class="font-bold text-green-800 text-lg">¿Qué hace que un intervalo sea más preciso?</h4>
+                    <p>Un intervalo más estrecho es más preciso, porque acota mejor el valor del parámetro. Dos factores determinan su ancho:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="card-institucional p-5">
+                            <h4 class="font-bold text-green-800 mb-1">📈 Tamaño de la muestra (n)</h4>
+                            <p class="text-sm">Mientras más grande sea la muestra, más estrecho y preciso será el intervalo: al aumentar n, el margen de error disminuye porque dividimos por √n.</p>
+                        </div>
+                        <div class="card-institucional-alt p-5">
+                            <h4 class="font-bold text-blue-800 mb-1">🔒 Nivel de confianza</h4>
+                            <p class="text-sm">Si exigimos más confianza (de 95 % a 99 %), el intervalo se hace más ancho: para estar más seguros de "atrapar" el parámetro, hay que abrir más el rango.</p>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border-l-4 border-amber-600 rounded-r-lg p-4">
+                        <p class="text-sm"><strong>Regla práctica:</strong> más datos → intervalo más estrecho (mejor). Más confianza exigida → intervalo más ancho. El reto del analista es encontrar el equilibrio adecuado.</p>
+                    </div>
+
+                    <!-- SIMULADOR DE PRECISIÓN -->
+                    <div class="bg-slate-50 rounded-xl p-5 border-2 border-green-300">
+                        <h4 class="font-bold text-slate-700 mb-3">🎛️ Simulador — Mueve n y el nivel de confianza</h4>
+                        <p class="text-sm text-slate-600 mb-4">Datos fijos: x̄ = 185 ms, s = 40 ms. Elige el tamaño de muestra y el nivel de confianza para ver cómo cambia el ancho del intervalo.</p>
+
+                        <p class="text-xs font-semibold text-slate-600 mb-1">Tamaño de la muestra (n)</p>
+                        <div class="flex flex-wrap gap-2 mb-4" id="prec-n-selector">
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-n="20" onclick="seleccionarPrecN(20, this)">n = 20</button>
+                            <button class="dyn-btn active-dyn px-4 py-2 rounded-full text-sm font-semibold" data-n="50" onclick="seleccionarPrecN(50, this)">n = 50</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-n="100" onclick="seleccionarPrecN(100, this)">n = 100</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-n="200" onclick="seleccionarPrecN(200, this)">n = 200</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-n="500" onclick="seleccionarPrecN(500, this)">n = 500</button>
+                        </div>
+
+                        <p class="text-xs font-semibold text-slate-600 mb-1">Nivel de confianza</p>
+                        <div class="flex flex-wrap gap-2 mb-5" id="prec-conf-selector">
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-conf="90" onclick="seleccionarPrecConf(90, this)">90 %</button>
+                            <button class="dyn-btn active-dyn px-4 py-2 rounded-full text-sm font-semibold" data-conf="95" onclick="seleccionarPrecConf(95, this)">95 %</button>
+                            <button class="dyn-btn px-4 py-2 rounded-full text-sm font-semibold" data-conf="99" onclick="seleccionarPrecConf(99, this)">99 %</button>
+                        </div>
+
+                        <div class="hero-institucional rounded-xl p-5 text-white">
+                            <p class="text-sm opacity-90 mb-1">Margen de error: <strong id="prec-margen">±6.58 ms</strong></p>
+                            <p class="text-sm opacity-90 mb-3">Intervalo resultante: <strong id="prec-intervalo">(178.42 ms, 191.58 ms)</strong></p>
+                            <div class="bg-white/20 rounded-full h-6 relative overflow-hidden">
+                                <div id="prec-bar" class="bg-white h-6 rounded-full absolute transition-all duration-300" style="left:40%;width:20%;"></div>
+                            </div>
+                            <p class="text-xs opacity-80 mt-2 text-center">Ancho visual del intervalo (a escala) — muévete entre las opciones para comparar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB 5: APLICACIONES ══ -->
+            <div id="tab-aplicaciones" class="main-tab-content hidden bg-white border-2 border-green-300 rounded-xl p-5">
+                <div class="space-y-3 text-slate-700">
+                    <h4 class="font-bold text-green-800 text-lg mb-2">Aplicaciones en el desarrollo de software</h4>
+                    <p class="mb-3 text-sm">Haz clic en cada tarjeta para expandirla:</p>
+
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-rendimiento')">
+                            ⚡ Pruebas de rendimiento <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-rendimiento" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Reportar el tiempo de respuesta como un intervalo ("entre 178 y 193 ms con 95 % de confianza") es más honesto y útil que un solo número.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-encuestas')">
+                            😊 Encuestas de satisfacción <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-encuestas" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">El porcentaje de usuarios satisfechos siempre se acompaña de un margen de error, igual que las encuestas electorales.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-ab')">
+                            🧪 Pruebas A/B <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-ab" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Al comparar dos versiones de una app, los intervalos de confianza de cada una permiten decidir si la diferencia observada es real o puede deberse al azar.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-sla')">
+                            📋 Monitoreo y SLA <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-sla" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">Los acuerdos de nivel de servicio usan intervalos para garantizar rangos de disponibilidad y tiempos de respuesta.</div></div>
+                    </div>
+                    <div>
+                        <button type="button" class="acc-btn w-full flex justify-between items-center p-4 bg-green-50 border-2 border-green-200 rounded-lg font-semibold text-green-800" onclick="toggleAcc(this,'panel-ml')">
+                            🤖 Machine learning <span class="acc-icon ml-2 text-xl">＋</span>
+                        </button>
+                        <div id="panel-ml" class="acc-panel"><div class="bg-white border-2 border-t-0 border-green-200 rounded-b-lg p-4 text-sm">La precisión de un modelo se reporta con intervalos de confianza para saber qué tan estable es su desempeño.</div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════ ACTIVIDADES ══════════════════════ -->
+        <div id="actividades" class="content-pane">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800">Actividades prácticas</h2>
+                <span id="act-score-chip" class="score-chip">🏅 Puntaje: 0 / 9</span>
+            </div>
+
+            <!-- ACTIVIDAD 1 -->
+            <div class="bg-white border-l-4 border-green-700 rounded-lg shadow-sm p-6 mb-8">
+                <h3 class="text-xl font-bold text-slate-700 mb-2">🕵️ Misión 1 — Intérprete de Intervalos</h3>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm text-slate-700">
+                    Una empresa reporta: <strong>"El tiempo promedio de carga de la app es de 2.3 segundos, con un intervalo de confianza del 95 % de (2.1, 2.5) segundos."</strong>
+                </div>
+                <p class="text-slate-600 mb-3 text-sm">1. A partir de esa afirmación, completa cada valor (en segundos):</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                    <div><label class="text-xs text-slate-600 mb-1 block">Estimación puntual</label><input type="number" step="0.01" id="act1-estimacion" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Margen de error</label><input type="number" step="0.01" id="act1-margen" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Límite inferior</label><input type="number" step="0.01" id="act1-inferior" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Límite superior</label><input type="number" step="0.01" id="act1-superior" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                </div>
+
+                <p class="text-slate-600 mb-3 text-sm">2. Una encuesta dice que el 70 % de los usuarios recomienda la app, con un margen de error del 4 %. ¿Entre qué dos valores está la proporción real? (en %)</p>
+                <div class="grid grid-cols-2 gap-3 mb-5 max-w-xs">
+                    <div><label class="text-xs text-slate-600 mb-1 block">Mínimo (%)</label><input type="number" step="0.1" id="act1-rango-inf" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Máximo (%)</label><input type="number" step="0.1" id="act1-rango-sup" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                </div>
+
+                <p class="text-slate-600 mb-3 text-sm">3. Verdadero o falso: <em>"Un intervalo del 99 % siempre es más estrecho que uno del 95 %."</em></p>
+                <input type="text" id="act1-vf" maxlength="1" placeholder="V/F" class="chk-input w-16 h-12 text-center border-2 border-slate-300 rounded-lg font-bold text-lg uppercase mb-5">
+
+                <div class="flex gap-4">
+                    <button onclick="verificarActividad1()" class="bg-green-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-800 transition-colors">Verificar Misión 1</button>
+                    <button onclick="reiniciarActividad1()" class="bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors">Reiniciar</button>
+                </div>
+                <div id="act1-feedback" class="mt-4 text-sm font-medium"></div>
+            </div>
+
+            <!-- ACTIVIDAD 2 -->
+            <div class="bg-white border-l-4 border-blue-700 rounded-lg shadow-sm p-6 mb-8">
+                <h3 class="text-xl font-bold text-slate-700 mb-2">🧮 Misión 2 — Constructor de Intervalos</h3>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3 text-sm text-slate-700">
+                    <strong>Ejercicio A.</strong> Una muestra de n = 64 peticiones a una API tiene x̄ = 220 ms y s = 32 ms. Construye el intervalo del 95 % (z = 1.96).
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-5 max-w-lg">
+                    <div><label class="text-xs text-slate-600 mb-1 block">Margen E (ms)</label><input type="number" step="0.01" id="act2a-e" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Límite inf. (ms)</label><input type="number" step="0.01" id="act2a-inf" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Límite sup. (ms)</label><input type="number" step="0.01" id="act2a-sup" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3 text-sm text-slate-700">
+                    <strong>Ejercicio B.</strong> De una muestra de 500 usuarios, 375 activaron las notificaciones. Construye el intervalo del 95 % para la proporción (en %).
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-5 max-w-lg">
+                    <div><label class="text-xs text-slate-600 mb-1 block">Margen E (%)</label><input type="number" step="0.1" id="act2b-e" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Límite inf. (%)</label><input type="number" step="0.1" id="act2b-inf" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                    <div><label class="text-xs text-slate-600 mb-1 block">Límite sup. (%)</label><input type="number" step="0.1" id="act2b-sup" class="chk-input w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm text-center"></div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3 text-sm text-slate-700">
+                    <strong>Ejercicio C.</strong> Con los mismos datos del Ejercicio A, ahora al 99 % (z = 2.576). Comparado con el intervalo del 95 %, el nuevo intervalo es:
+                </div>
+                <div id="act2c-options" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-val="mas-estrecho" onclick="seleccionarAct2c(this,'mas-estrecho')">Más estrecho</div>
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-val="mas-ancho" onclick="seleccionarAct2c(this,'mas-ancho')">Más ancho</div>
+                    <div class="game-option rounded-lg p-3 text-sm text-center bg-white" data-val="igual" onclick="seleccionarAct2c(this,'igual')">Igual de ancho</div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="verificarActividad2()" class="bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 transition-colors">Verificar Misión 2</button>
+                    <button onclick="reiniciarActividad2()" class="bg-slate-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-600 transition-colors">Reiniciar</button>
+                </div>
+                <div id="act2-feedback" class="mt-4 text-sm font-medium"></div>
+            </div>
+
+            <!-- ACTIVIDAD 3 -->
+            <div class="bg-white border-l-4 border-amber-600 rounded-lg shadow-sm p-6">
+                <h3 class="text-xl font-bold text-slate-700 mb-2">🏆 Reto final — Analista de Confianza</h3>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3 text-sm text-slate-700">
+                    Un equipo mide el tiempo de respuesta de dos versiones de su servidor. La versión A da un intervalo del 95 % de (180, 200) ms y la versión B da (150, 175) ms. ¿Puede afirmarse que la versión B es más rápida?
+                </div>
+                <div id="act3a-options" class="grid grid-cols-1 gap-3 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-val="a" onclick="seleccionarAct3(this,'act3a','a')">No, nunca se puede comparar intervalos entre sí.</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-val="b" onclick="seleccionarAct3(this,'act3a','b')">Sí, hay buena evidencia de que B es más rápida: los intervalos no se solapan (no comparten ningún valor en común).</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-val="c" onclick="seleccionarAct3(this,'act3a','c')">No se puede saber nada a partir de intervalos de confianza.</div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3 text-sm text-slate-700">
+                    Una empresa quiere estimar la satisfacción de sus usuarios con un margen de error pequeño. ¿Encuestar a 100 usuarios o a 1000 dará un intervalo más estrecho y preciso?
+                </div>
+                <div id="act3b-options" class="grid grid-cols-1 gap-3 mb-5">
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-val="a" onclick="seleccionarAct3(this,'act3b','a')">100 usuarios, porque una muestra pequeña siempre es más precisa.</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-val="b" onclick="seleccionarAct3(this,'act3b','b')">1000 usuarios, porque un n mayor reduce el margen de error al dividir entre √n.</div>
+                    <div class="game-option rounded-lg p-3 text-sm bg-white" data-val="c" onclick="seleccionarAct3(this,'act3b','c')">Da lo mismo, el tamaño de la muestra no afecta la precisión.</div>
+                </div>
+
+                <div class="mt-5">
+                    <p class="text-slate-600 mb-2 text-sm font-semibold">Reflexión para tu cuaderno (no se califica):</p>
+                    <p class="text-slate-600 mb-3 text-sm">¿Por qué una empresa seria nunca debería reportar solo la estimación puntual (un único número) sin su intervalo de confianza? ¿Qué información estaría ocultando?</p>
+                    <textarea id="act3-reflexion" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Escribe aquí tu reflexión..."></textarea>
+                </div>
+
+                <div id="act3-badges" class="mt-5 flex flex-wrap gap-2"></div>
+                <div id="act3-feedback" class="mt-4 text-sm font-medium"></div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ EVALUACIÓN ══════════════════════ -->
+        <div id="evaluacion" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                <div id="quiz-container"></div>
+                <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ RECURSOS ══════════════════════ -->
+        <div id="recursos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+            <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre intervalos de confianza:</p>
+            <ul class="space-y-4">
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Video — Intervalos de confianza explicados fácil</h3>
+                        <p class="text-slate-600 mb-2">Búsqueda en video sobre la interpretación y el cálculo de intervalos de confianza</p>
+                        <a href="https://www.youtube.com/results?search_query=intervalos+de+confianza+explicado+facil" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr1.png" alt="QR Video intervalos de confianza" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Recurso interactivo — Educaplay</h3>
+                        <p class="text-slate-600 mb-2">Plataforma de actividades interactivas de repaso sobre estadística</p>
+                        <a href="https://es.educaplay.com" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr2.png" alt="QR Recurso interactivo Educaplay" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ══════════════════════ BIBLIOGRAFÍA ══════════════════════ -->
+        <div id="bibliografia" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+            <div class="space-y-4">
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Cadena Lozano, J. B. (2024). <em>Estadística descriptiva y probabilidad para los negocios</em>. Editorial CESA.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Lind, D. A., Marchal, W. G., y Wathen, S. A. (2019). <em>Estadística aplicada a los negocios y la economía</em> (17.ª ed.). McGraw-Hill Education.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Mendenhall, W., Beaver, R. J., y Beaver, B. M. (2015). <em>Introducción a la probabilidad y estadística</em> (14.ª ed.). Cengage Learning.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Triola, M. F. (2018). <em>Estadística</em> (12.ª ed.). Pearson Educación.</span></div>
+                <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-700"><span class="block text-slate-700">Walpole, R. E., Myers, R. H., Myers, S. L., y Ye, K. (2012). <em>Probabilidad y estadística para ingeniería y ciencias</em> (9.ª ed.). Pearson Educación.</span></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- FOOTER FIJO EN TODAS LAS PÁGINAS -->
+<footer class="w-full py-6 border-t-2 border-slate-200 text-center bg-white md:ml-64 md:w-[calc(100%-16rem)]">
+    <p class="text-slate-600 font-medium">Creado por:</p>
+    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+</footer>
+
+</div>
+
+<script>
+/* ==================== NAVEGACIÓN ==================== */
+document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = this.dataset.target;
+        document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+        this.classList.add('active');
+    });
+});
+document.getElementById('mobile-nav').addEventListener('change', function() {
+    document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById(this.value).classList.add('active');
+});
+
+/* ==================== PESTAÑAS DE CONTENIDO ==================== */
+function showMainTab(tabId) {
+    document.querySelectorAll('.main-tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.main-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-green-700', 'text-white', 'border-green-700');
+        btn.classList.add('bg-white', 'text-slate-600', 'border-green-200');
+    });
+    document.getElementById(tabId).classList.remove('hidden');
+    const btn = document.getElementById('btn-' + tabId);
+    btn.classList.add('bg-green-700', 'text-white', 'border-green-700');
+    btn.classList.remove('bg-white', 'text-slate-600', 'border-green-200');
+}
+
+function showSub(prefix, tab) {
+    document.querySelectorAll(`.sub-${prefix}`).forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll(`.sub-tab-${prefix}`).forEach(btn => {
+        btn.classList.remove('border-green-700', 'text-green-800', 'bg-green-50');
+        btn.classList.add('border-transparent', 'text-slate-500');
+    });
+    document.getElementById(`${prefix}-${tab}`).classList.remove('hidden');
+    const ab = document.getElementById(`${prefix}-tab-${tab}`);
+    ab.classList.add('border-green-700', 'text-green-800', 'bg-green-50');
+    ab.classList.remove('border-transparent', 'text-slate-500');
+}
+
+/* ==================== ACORDEÓN (Aplicaciones) ==================== */
+function toggleAcc(btn, panelId) {
+    const panel = document.getElementById(panelId);
+    const isOpen = btn.classList.contains('acc-open');
+    document.querySelectorAll('.acc-panel').forEach(p => p.style.maxHeight = null);
+    document.querySelectorAll('.acc-btn').forEach(b => b.classList.remove('acc-open'));
+    if (!isOpen) {
+        btn.classList.add('acc-open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+    }
+}
+
+/* ==================== PUNTAJE DE CONTENIDO ==================== */
+const Z_TABLE = { 90: 1.645, 95: 1.96, 99: 2.576 };
+let contenidoScore = 0;
+const contenidoLogros = new Set();
+function sumarContenido(id, pts) {
+    if (contenidoLogros.has(id)) return;
+    contenidoLogros.add(id);
+    contenidoScore += pts;
+    document.getElementById('contenido-score-chip').textContent = `🧭 Puntos de exploración: ${contenidoScore}`;
+}
+
+function responderMiniReto(el, esCorrecta, num) {
+    const contenedor = document.getElementById('mini-reto-' + num);
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    const fb = document.getElementById('mini-reto-' + num + '-fb');
+    if (esCorrecta) {
+        el.classList.add('correct');
+        fb.textContent = '✅ ¡Correcto! La variación entre muestras es normal y se llama error de muestreo.';
+        fb.className = 'text-sm mt-3 font-medium text-green-700';
+        sumarContenido('mini-reto-1', 2);
+    } else {
+        el.classList.add('wrong');
+        fb.textContent = '❌ No es eso. Ambos equipos midieron bien: la diferencia es solo el azar del muestreo.';
+        fb.className = 'text-sm mt-3 font-medium text-red-600';
+    }
+}
+
+/* ==================== CAZADOR DE INTERVALOS ==================== */
+const CAZA_MU = 185, CAZA_SIGMA = 40, CAZA_N = 100;
+const CAZA_SE = CAZA_SIGMA / Math.sqrt(CAZA_N);
+const CAZA_AXIS_MIN = 155, CAZA_AXIS_MAX = 215;
+let cazaTotal = 0, cazaAciertos = 0;
+
+function randNormal() {
+    let u = 1 - Math.random(), v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+function cazaPct(val) {
+    const p = ((val - CAZA_AXIS_MIN) / (CAZA_AXIS_MAX - CAZA_AXIS_MIN)) * 100;
+    return Math.min(Math.max(p, 0), 100);
+}
+
+function cazarIntervalo() {
+    const conf = parseInt(document.querySelector('input[name="caza-conf"]:checked').value, 10);
+    const z = Z_TABLE[conf];
+    const xbar = CAZA_MU + randNormal() * CAZA_SE;
+    const E = z * CAZA_SE;
+    const lo = xbar - E, hi = xbar + E;
+    const hit = (CAZA_MU >= lo && CAZA_MU <= hi);
+
+    cazaTotal++;
+    if (hit) cazaAciertos++;
+
+    document.getElementById('caza-rows-empty').classList.add('hidden');
+    const pctLo = cazaPct(lo), pctHi = cazaPct(hi);
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 text-xs';
+    row.innerHTML = `<span class="w-6 flex-shrink-0 opacity-80">#${cazaTotal}</span>
+        <div class="caza-track flex-1">
+            <div class="caza-bar ${hit ? 'hit' : 'miss'}" style="left:${pctLo}%;width:${Math.max(pctHi - pctLo, 1)}%;"></div>
+        </div>
+        <span class="w-6 flex-shrink-0 text-center">${hit ? '✅' : '❌'}</span>`;
+    document.getElementById('caza-rows').appendChild(row);
+
+    const pct = Math.round((cazaAciertos / cazaTotal) * 100);
+    document.getElementById('caza-tally').textContent = `${cazaAciertos} / ${cazaTotal} (${pct}%)`;
+
+    const concl = document.getElementById('caza-conclusion');
+    if (cazaTotal >= 15) {
+        concl.classList.remove('hidden');
+        concl.textContent = `Con ${cazaTotal} muestras, el ${pct}% de tus intervalos atrapó el valor real (μ = 185 ms). Cuanto más repitas el experimento, más se acercará ese porcentaje al ${conf}% que elegiste — así se interpreta correctamente el nivel de confianza.`;
+        if (cazaTotal >= 15) {
+            sumarContenido('caza-badge', 3);
+            document.getElementById('caza-badge').classList.remove('hidden');
+        }
+    } else if (cazaTotal >= 3) {
+        concl.classList.remove('hidden');
+        concl.textContent = `Llevas ${cazaTotal} muestras. Sigue tomando más para ver cómo el porcentaje de aciertos se acerca al ${conf}% elegido.`;
+    }
+}
+function resetCaza() {
+    cazaTotal = 0; cazaAciertos = 0;
+    document.getElementById('caza-rows').innerHTML = '';
+    document.getElementById('caza-rows-empty').classList.remove('hidden');
+    document.getElementById('caza-tally').textContent = '0 / 0 (—)';
+    document.getElementById('caza-conclusion').classList.add('hidden');
+}
+document.querySelectorAll('input[name="caza-conf"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('#caza-conf-selector .conf-radio-card').forEach(l => l.classList.remove('active-conf'));
+        this.closest('.conf-radio-card').classList.add('active-conf');
+    });
+});
+
+/* ==================== CALCULADORAS (Construcción) ==================== */
+const confSeleccionada = { cm: 95, cp: 95 };
+function seleccionarConf(prefix, conf, btn) {
+    confSeleccionada[prefix] = conf;
+    document.querySelectorAll(`#${prefix}-conf-selector .dyn-btn`).forEach(b => b.classList.remove('active-dyn'));
+    btn.classList.add('active-dyn');
+}
+
+function calcularMedia() {
+    const xbar = parseFloat(document.getElementById('cm-xbar').value);
+    const s = parseFloat(document.getElementById('cm-s').value);
+    const n = parseFloat(document.getElementById('cm-n').value);
+    const out = document.getElementById('cm-resultado');
+    if (isNaN(xbar) || isNaN(s) || isNaN(n) || n <= 0 || s < 0) {
+        out.classList.remove('hidden');
+        out.innerHTML = `<p class="text-red-600 text-sm">⚠️ Ingresa valores numéricos válidos en los tres campos.</p>`;
+        return;
+    }
+    const z = Z_TABLE[confSeleccionada.cm];
+    const E = z * (s / Math.sqrt(n));
+    const lo = xbar - E, hi = xbar + E;
+    out.classList.remove('hidden');
+    out.innerHTML = `
+        <div class="card-institucional p-4">
+            <p class="text-sm font-mono">E = ${z} · (${s} / √${n}) = ${E.toFixed(2)}</p>
+            <p class="text-sm mt-2 text-green-700 font-semibold">Intervalo (${confSeleccionada.cm}%): (${lo.toFixed(2)}, ${hi.toFixed(2)})</p>
+            <p class="text-xs text-slate-600 mt-1">Con ${confSeleccionada.cm}% de confianza, el valor real de la media poblacional está entre ${lo.toFixed(2)} y ${hi.toFixed(2)}.</p>
+        </div>`;
+    sumarContenido('calc-media', 2);
+}
+
+function calcularProporcion() {
+    const exitos = parseFloat(document.getElementById('cp-exitos').value);
+    const n = parseFloat(document.getElementById('cp-n').value);
+    const out = document.getElementById('cp-resultado');
+    if (isNaN(exitos) || isNaN(n) || n <= 0 || exitos < 0 || exitos > n) {
+        out.classList.remove('hidden');
+        out.innerHTML = `<p class="text-red-600 text-sm">⚠️ Verifica que los elementos con la característica no superen el tamaño de la muestra.</p>`;
+        return;
+    }
+    const z = Z_TABLE[confSeleccionada.cp];
+    const p = exitos / n;
+    const E = z * Math.sqrt((p * (1 - p)) / n);
+    const lo = Math.max(p - E, 0) * 100, hi = Math.min(p + E, 1) * 100;
+    out.classList.remove('hidden');
+    out.innerHTML = `
+        <div class="card-institucional-alt p-4">
+            <p class="text-sm font-mono">p̂ = ${exitos}/${n} = ${p.toFixed(3)} &nbsp;→&nbsp; E = ${z} · √(${p.toFixed(3)}·${(1-p).toFixed(3)}/${n}) ≈ ${(E*100).toFixed(2)}%</p>
+            <p class="text-sm mt-2 text-blue-700 font-semibold">Intervalo (${confSeleccionada.cp}%): (${lo.toFixed(2)}%, ${hi.toFixed(2)}%)</p>
+            <p class="text-xs text-slate-600 mt-1">Con ${confSeleccionada.cp}% de confianza, la proporción real está entre ${lo.toFixed(2)}% y ${hi.toFixed(2)}%.</p>
+        </div>`;
+    sumarContenido('calc-prop', 2);
+}
+
+/* ==================== SIMULADOR DE PRECISIÓN ==================== */
+let precN = 50, precConf = 95;
+const PREC_XBAR = 185, PREC_S = 40;
+function seleccionarPrecN(n, btn) {
+    precN = n;
+    document.querySelectorAll('#prec-n-selector .dyn-btn').forEach(b => b.classList.remove('active-dyn'));
+    btn.classList.add('active-dyn');
+    actualizarPrecision();
+    sumarContenido('precision-sim', 2);
+}
+function seleccionarPrecConf(conf, btn) {
+    precConf = conf;
+    document.querySelectorAll('#prec-conf-selector .dyn-btn').forEach(b => b.classList.remove('active-dyn'));
+    btn.classList.add('active-dyn');
+    actualizarPrecision();
+    sumarContenido('precision-sim', 2);
+}
+function actualizarPrecision() {
+    const z = Z_TABLE[precConf];
+    const E = z * (PREC_S / Math.sqrt(precN));
+    const lo = PREC_XBAR - E, hi = PREC_XBAR + E;
+    document.getElementById('prec-margen').textContent = `±${E.toFixed(2)} ms`;
+    document.getElementById('prec-intervalo').textContent = `(${lo.toFixed(2)} ms, ${hi.toFixed(2)} ms)`;
+    const maxE = Z_TABLE[99] * (PREC_S / Math.sqrt(20));
+    const anchoPct = Math.min((E / maxE) * 90, 95);
+    const leftPct = (100 - anchoPct) / 2;
+    document.getElementById('prec-bar').style.width = anchoPct + '%';
+    document.getElementById('prec-bar').style.left = leftPct + '%';
+}
+
+/* ==================== ACTIVIDAD 1 ==================== */
+function marcarCampo(id, esCorrecto) {
+    const el = document.getElementById(id);
+    el.classList.remove('correct', 'wrong');
+    el.classList.add(esCorrecto ? 'correct' : 'wrong');
+    return esCorrecto;
+}
+function cercaDe(valor, esperado, tol) {
+    return !isNaN(valor) && Math.abs(valor - esperado) <= tol;
+}
+let act1Hecho = false;
+function verificarActividad1() {
+    const estimacion = parseFloat(document.getElementById('act1-estimacion').value);
+    const margen = parseFloat(document.getElementById('act1-margen').value);
+    const inferior = parseFloat(document.getElementById('act1-inferior').value);
+    const superior = parseFloat(document.getElementById('act1-superior').value);
+    const rangoInf = parseFloat(document.getElementById('act1-rango-inf').value);
+    const rangoSup = parseFloat(document.getElementById('act1-rango-sup').value);
+    const vf = (document.getElementById('act1-vf').value || '').trim().toUpperCase();
+
+    let correctos = 0, total = 6;
+    correctos += marcarCampo('act1-estimacion', cercaDe(estimacion, 2.3, 0.05)) ? 1 : 0;
+    correctos += marcarCampo('act1-margen', cercaDe(margen, 0.2, 0.05)) ? 1 : 0;
+    correctos += marcarCampo('act1-inferior', cercaDe(inferior, 2.1, 0.05)) ? 1 : 0;
+    correctos += marcarCampo('act1-superior', cercaDe(superior, 2.5, 0.05)) ? 1 : 0;
+    correctos += marcarCampo('act1-rango-inf', cercaDe(rangoInf, 66, 0.5)) ? 1 : 0;
+    correctos += marcarCampo('act1-rango-sup', cercaDe(rangoSup, 74, 0.5)) ? 1 : 0;
+    const vfOk = vf === 'F';
+    marcarCampo('act1-vf', vfOk);
+
+    const fb = document.getElementById('act1-feedback');
+    if (correctos === total && vfOk) {
+        fb.className = 'mt-4 text-sm font-medium text-green-700';
+        fb.textContent = '✅ ¡Misión 1 completa! Interpretas los intervalos de confianza correctamente. (99 % siempre es MÁS ANCHO que 95 %, nunca más estrecho.)';
+        if (!act1Hecho) { act1Hecho = true; sumarActividad(3); }
+    } else {
+        fb.className = 'mt-4 text-sm font-medium text-amber-700';
+        fb.textContent = `Revisa los campos en rojo (${correctos}/${total} correctos en la primera parte). Pista: el intervalo del 99 % SIEMPRE es más ancho que el del 95 %, nunca más estrecho.`;
+    }
+}
+function reiniciarActividad1() {
+    ['act1-estimacion','act1-margen','act1-inferior','act1-superior','act1-rango-inf','act1-rango-sup','act1-vf'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('correct', 'wrong');
+    });
+    document.getElementById('act1-feedback').textContent = '';
+}
+
+/* ==================== ACTIVIDAD 2 ==================== */
+let act2cSeleccion = null;
+function seleccionarAct2c(el, val) {
+    document.querySelectorAll('#act2c-options .game-option').forEach(o => o.classList.remove('correct','wrong'));
+    act2cSeleccion = val;
+    document.querySelectorAll('#act2c-options .game-option').forEach(o => o.style.outline = '');
+    el.style.outline = '3px solid #15803d';
+}
+let act2Hecho = false;
+function verificarActividad2() {
+    const eA = parseFloat(document.getElementById('act2a-e').value);
+    const infA = parseFloat(document.getElementById('act2a-inf').value);
+    const supA = parseFloat(document.getElementById('act2a-sup').value);
+    const eB = parseFloat(document.getElementById('act2b-e').value);
+    const infB = parseFloat(document.getElementById('act2b-inf').value);
+    const supB = parseFloat(document.getElementById('act2b-sup').value);
+
+    let ok = 0, total = 7;
+    ok += marcarCampo('act2a-e', cercaDe(eA, 7.84, 0.1)) ? 1 : 0;
+    ok += marcarCampo('act2a-inf', cercaDe(infA, 212.16, 0.1)) ? 1 : 0;
+    ok += marcarCampo('act2a-sup', cercaDe(supA, 227.84, 0.1)) ? 1 : 0;
+    ok += marcarCampo('act2b-e', cercaDe(eB, 3.8, 0.3)) ? 1 : 0;
+    ok += marcarCampo('act2b-inf', cercaDe(infB, 71.2, 0.5)) ? 1 : 0;
+    ok += marcarCampo('act2b-sup', cercaDe(supB, 78.8, 0.5)) ? 1 : 0;
+
+    document.querySelectorAll('#act2c-options .game-option').forEach(o => o.classList.remove('correct','wrong','disabled'));
+    const cCorrecta = act2cSeleccion === 'mas-ancho';
+    if (act2cSeleccion) {
+        document.querySelectorAll('#act2c-options .game-option').forEach(o => {
+            o.classList.add('disabled');
+            if (o.dataset.val === 'mas-ancho') o.classList.add('correct');
+            else if (o.dataset.val === act2cSeleccion) o.classList.add('wrong');
+        });
+        ok += cCorrecta ? 1 : 0;
+    }
+
+    const fb = document.getElementById('act2-feedback');
+    if (ok === total) {
+        fb.className = 'mt-4 text-sm font-medium text-blue-700';
+        fb.textContent = '✅ ¡Misión 2 completa! Construyes intervalos de confianza para medias y proporciones sin problema.';
+        if (!act2Hecho) { act2Hecho = true; sumarActividad(3); }
+    } else {
+        fb.className = 'mt-4 text-sm font-medium text-amber-700';
+        fb.textContent = `Revisa los campos marcados (${ok}/${total} correctos). Repasa las fórmulas en la pestaña "Construir el intervalo" si lo necesitas.`;
+    }
+}
+function reiniciarActividad2() {
+    ['act2a-e','act2a-inf','act2a-sup','act2b-e','act2b-inf','act2b-sup'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('correct', 'wrong');
+    });
+    act2cSeleccion = null;
+    document.querySelectorAll('#act2c-options .game-option').forEach(o => { o.classList.remove('correct','wrong','disabled'); o.style.outline=''; });
+    document.getElementById('act2-feedback').textContent = '';
+}
+
+/* ==================== ACTIVIDAD 3 ==================== */
+const act3Correctas = { act3a: 'b', act3b: 'b' };
+const act3Resueltas = new Set();
+function seleccionarAct3(el, grupo, val) {
+    const contenedor = document.getElementById(grupo + '-options');
+    contenedor.querySelectorAll('.game-option').forEach(o => o.classList.add('disabled'));
+    const esCorrecta = val === act3Correctas[grupo];
+    if (esCorrecta) {
+        el.classList.add('correct');
+    } else {
+        el.classList.add('wrong');
+        contenedor.querySelectorAll('.game-option').forEach(o => { if (o.dataset.val === act3Correctas[grupo]) o.classList.add('correct'); });
+    }
+    if (!act3Resueltas.has(grupo)) {
+        act3Resueltas.add(grupo);
+        if (esCorrecta) sumarActividad(1.5);
+        actualizarBadgesAct3();
+    }
+}
+function actualizarBadgesAct3() {
+    const cont = document.getElementById('act3-badges');
+    cont.innerHTML = '';
+    if (act3Resueltas.size >= 2) {
+        const b = document.createElement('span');
+        b.className = 'badge-chip';
+        b.textContent = '🏆 ¡Analista de Confianza desbloqueado!';
+        cont.appendChild(b);
+    }
+}
+
+/* ==================== PUNTAJE GLOBAL DE ACTIVIDADES ==================== */
+let actScore = 0;
+function sumarActividad(pts) {
+    actScore = Math.min(actScore + pts, 9);
+    document.getElementById('act-score-chip').textContent = `🏅 Puntaje: ${actScore.toFixed(1).replace('.0','')} / 9`;
+}
+
+/* ==================== EVALUACIÓN (QUIZ) ==================== */
+const quizData = [
+    {
+        question: "¿Qué es un intervalo de confianza?",
+        options: [
+            "Un único número que representa exactamente el parámetro poblacional",
+            "Un rango de valores, construido a partir de una muestra, donde se estima que está el parámetro con cierto nivel de confianza",
+            "El error que comete siempre un encuestador",
+            "El tamaño mínimo que debe tener una muestra"
+        ],
+        correct: 1
+    },
+    {
+        question: "En un intervalo de confianza x̄ ± E, ¿qué representa E?",
+        options: ["La media muestral", "El tamaño de la muestra", "El margen de error", "El nivel de confianza"],
+        correct: 2
+    },
+    {
+        question: "Un intervalo del 95 % de confianza significa que...",
+        options: [
+            "Hay 95 % de probabilidad de que el parámetro esté en ese intervalo específico",
+            "Si repitiéramos el muestreo muchas veces, aproximadamente el 95 % de los intervalos construidos así contendrían el verdadero parámetro",
+            "El 95 % de los datos de la muestra son correctos",
+            "El parámetro cambia el 95 % de las veces"
+        ],
+        correct: 1
+    },
+    {
+        question: "Si aumentas el tamaño de la muestra (n), manteniendo todo lo demás igual, el intervalo de confianza se vuelve...",
+        options: ["Más ancho", "Más estrecho", "No cambia", "Depende del color de la muestra"],
+        correct: 1
+    },
+    {
+        question: "Si pasas de un nivel de confianza del 95 % a uno del 99 %, el intervalo se vuelve...",
+        options: ["Más estrecho", "Más ancho", "Exactamente igual", "Desaparece"],
+        correct: 1
+    },
+    {
+        question: "Una muestra da x̄ = 100, s = 20, n = 25. Usando z = 1.96 (95 %), ¿cuál es el intervalo de confianza aproximado?",
+        options: ["(96, 104)", "(92.16, 107.84)", "(80, 120)", "(99, 101)"],
+        correct: 1
+    },
+    {
+        question: "Al comparar los intervalos de confianza de dos versiones de una app en una prueba A/B, si los intervalos NO se solapan, esto sugiere que...",
+        options: [
+            "Las dos versiones son idénticas",
+            "Hay evidencia de que existe una diferencia real entre ambas versiones",
+            "El experimento está mal hecho",
+            "Hay que aumentar el nivel de confianza al 100 %"
+        ],
+        correct: 1
+    }
+];
+
+const quizContainer = document.getElementById('quiz-container');
+quizData.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.classList.add('mb-6');
+    div.innerHTML = `
+        <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+            ${item.options.map((opt, i) => `
+                <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                     data-question="${index}" data-option="${i}">
+                    <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                </div>
+            `).join('')}
+        </div>
+    `;
+    quizContainer.appendChild(div);
+});
+
+document.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        const q = this.dataset.question;
+        document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+    });
+});
+
+document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+    let score = 0;
+    quizData.forEach((item, index) => {
+        const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+        if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+    });
+    const result = document.getElementById('quiz-result');
+    const pct = Math.round((score / quizData.length) * 100);
+    result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+    result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+});
+
+/* ==================== INICIALIZACIÓN ==================== */
+actualizarPrecision();
+</script>
+
+<!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
