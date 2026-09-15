@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Técnicas de Levantamiento de Información</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+            main.flex-1 {
+                margin-left: 16rem;
+            }
+        }
+
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body,
+            html,
+            main,
+            .accordion-panel,
+            .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+
+            pre {
+                overflow-x: auto;
+                max-width: 100%;
+            }
+
+            h2 {
+                font-size: 1.5rem !important;
+            }
+
+            h3 {
+                font-size: 1.25rem !important;
+            }
+
+            h4 {
+                font-size: 1.125rem !important;
+            }
+
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+
+            .speech-controls {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .speech-controls button {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.75rem;
+            }
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-link.active,
+        .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .content-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quiz-option:hover {
+            background-color: #f0fdf4;
+        }
+
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .accordion-btn {
+            cursor: pointer;
+        }
+
+        .accordion-panel {
+            transition: all 0.3s ease;
+        }
+
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA (Aesthetics)
+           ============================================= */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(220, 252, 231, 0.5);
+        }
+
+        .pulse-soft {
+            animation: softPulse 2s infinite;
+        }
+
+        @keyframes softPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        .match-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .match-selected {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+
+        .match-correct {
+            border-color: #16a34a;
+            background-color: #dcfce7;
+            color: #15803d;
+            cursor: default;
+        }
+
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+
+        .confetti-pop {
+            animation: pop 0.4s ease-out;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;"
+                    class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;"
+                    class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🚀¡Bienvenido a la Misión Analista!</h2>
+
+                <div class="flex flex-col lg:flex-row gap-6 items-center mb-6">
+                    <div class="w-full lg:w-2/3">
+                        <p class="text-slate-700 leading-relaxed mb-4">
+                        Alguna vez te has preguntado cómo los creadores de software saben exactamente qué
+                            programar? 💻 ¡No es por arte de magia! Antes de escribir una sola línea de código, existe
+                            una fase crucial llamada <strong class="text-green-700">levantamiento de
+                                información</strong>.
+                        </p>
+                        <p class="text-slate-700 leading-relaxed mb-4">
+                            Imagina que eres un detective. Tu misión no es atrapar a un villano, sino entender cómo
+                            funciona una organización, qué problemas tienen los usuarios del día a día y qué necesitan
+                            realmente para hacer su vida más fácil con la tecnología.
+                        </p>
+                        <p class="text-slate-700 leading-relaxed mb-4">
+                            Para lograrlo, no puedes usar una sola técnica. Debes ser versátil: conversar cara a cara
+                            con las personas, enviar encuestas masivas, observar cómo trabajan en tiempo real y
+                            desempolvar antiguos manuales y documentos. ¡La combinación de estas técnicas te dará el
+                            mapa exacto para construir una solución perfecta! 🗺️
+                        </p>
+                    </div>
+                    <div class="w-full lg:w-1/3 text-center">
+                        <img src="img/Levantar_Informacion.png" alt="Levantamiento de Información"
+                            class="w-full max-w-sm mx-auto rounded-2xl shadow-xl hover:shadow-green-200 transition-shadow duration-300"
+                            loading="lazy">
+                    </div>
+                </div>
+
+                <div
+                    class="p-5 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-r-xl shadow-sm mb-6">
+                    <p class="text-green-800 font-medium flex items-center">
+                        <span class="text-2xl mr-3">✨</span>
+                        <span>Al terminar este recorrido, tendrás los superpoderes necesarios para elegir las mejores
+                            herramientas de recolección de datos y diseñar tus propios cuestionarios profesionales. ¡Tu
+                            camino como analista estrella comienza aquí!</span>
+                    </p>
+                </div>
+
+                <!-- Info adicional de valor / Curiosidad -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center mb-2">💡 ¿Sabías qué?</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Según estudios de la industria del software, más del <strong class="text-red-500">45% de los
+                            proyectos tecnológicos fallan</strong> o superan su presupuesto inicial no por mala
+                        programación, sino por requerimientos mal definidos y falta de entendimiento de lo que los
+                        usuarios realmente necesitaban. ¡Hacer un buen levantamiento de información ahorra millones y
+                        evita frustraciones! 🛡️
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+                        <span class="text-3xl mr-4">🕵️‍♂️</span>
+                        <p class="text-slate-700">Reconocer las distintas técnicas de levantamiento de información utilizadas en el análisis: entrevistas, encuestas, observación y revisión documental.</p>
+                    </div>
+                    <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+                        <span class="text-3xl mr-4">🎯</span>
+                        <p class="text-slate-700">Seleccionar la técnica más adecuada de acuerdo con el tipo de actor, el contexto organizacional, el tipo de información requerida y el propósito del análisis.</p>
+                    </div>
+                    <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+                        <span class="text-3xl mr-4">✍️</span>
+                        <p class="text-slate-700">Diseñar instrumentos básicos de recolección de datos (guías de entrevista, cuestionarios, formatos de observación y fichas) con criterios de claridad, ética y respeto.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+
+                <!-- Tablero de Gamificación Local del Contenido -->
+                <div
+                    class="mb-6 p-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-2xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center text-2xl shadow-md shadow-green-600/30">
+                            🕵️</div>
+                        <div>
+                            <p class="text-xs text-slate-400">Rango de Analista</p>
+                            <h4 id="user-level" class="font-bold text-green-400">Investigador Novato 🔎</h4>
+                        </div>
+                    </div>
+
+                    <div class="w-full sm:w-1/3 flex flex-col gap-1">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Progreso de Misiones</span>
+                            <span id="missions-completed-text">0 / 8 misiones</span>
+                        </div>
+                        <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                            <div id="missions-progress-bar" class="bg-green-500 h-full progress-bar-inner"
+                                style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="text-center">
+                            <span class="text-xs text-slate-400 block">Puntaje</span>
+                            <span id="score-counter"
+                                class="text-2xl font-bold text-yellow-400 flex items-center gap-1 justify-center">0
+                                <span class="text-lg">⭐</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- Acordeón 1 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-1">
+                            <span>🔍 3.1. ¿Qué es el Levantamiento de Información?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    El <strong>levantamiento de información</strong> es el proceso mediante el cual
+                                    recolectamos datos, opiniones, evidencias, documentos, procedimientos y necesidades
+                                    relacionadas con un problema o un sistema de información en una organización.
+                                </p>
+                                <p class="mb-4">
+                                    No consiste solo en ir y preguntarle a los usuarios "qué software quieren". ¡Eso
+                                    sería un error grave! Se trata de comprender el contexto completo, identificar
+                                    necesidades reales que los usuarios a veces no pueden expresar con facilidad, y
+                                    contrastar la información.
+                                </p>
+
+                                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg my-4 text-sm">
+                                    <h4 class="font-bold text-emerald-800 mb-2">📌 Preguntas Clave a Responder:</h4>
+                                    <p class="mb-2">El analista actúa como un investigador resolviendo un misterio,
+                                        buscando responder:</p>
+                                    <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                        <li>¿Qué procesos se desean mejorar y quiénes participan?</li>
+                                        <li>¿Qué datos se registran y qué decisiones se toman con ellos?</li>
+                                        <li>¿Qué problemas y restricciones se presentan actualmente?</li>
+                                        <li>¿Qué documentos respaldan los procesos actuales?</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Elemento Interactivo 1 -->
+                                <div id="m1-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-3 flex items-center gap-1">🎮 Misión
+                                        1: Revela las Preguntas de Fuego</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Haz click en cada una de las 3 tarjetas de
+                                        sospecha para revelar por qué son críticas al iniciar un proyecto. ¡Consigue 10
+                                        ⭐ al completar!</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div id="m1-card-1" onclick="completeM1Card(1)"
+                                            class="p-4 bg-white border-2 border-slate-200 rounded-xl text-center match-card py-6">
+                                            <span class="text-2xl block mb-2">❓</span>
+                                            <span class="font-bold text-sm text-slate-700 block mb-1">¿Quiénes
+                                                participan?</span>
+                                            <p id="m1-desc-1" class="text-xs text-slate-500 hidden mt-2">Permite mapear
+                                                a los "Stakeholders" o actores clave. Si olvidas a un actor, ¡tu sistema
+                                                no se adaptará a ellos!</p>
+                                        </div>
+                                        <div id="m1-card-2" onclick="completeM1Card(2)"
+                                            class="p-4 bg-white border-2 border-slate-200 rounded-xl text-center match-card py-6">
+                                            <span class="text-2xl block mb-2">⚠️</span>
+                                            <span class="font-bold text-sm text-slate-700 block mb-1">¿Qué restricciones
+                                                hay?</span>
+                                            <p id="m1-desc-2" class="text-xs text-slate-500 hidden mt-2">Muestra el
+                                                límite del sistema (presupuesto, hardware antiguo, leyes de privacidad o
+                                                internet inestable).</p>
+                                        </div>
+                                        <div id="m1-card-3" onclick="completeM1Card(3)"
+                                            class="p-4 bg-white border-2 border-slate-200 rounded-xl text-center match-card py-6">
+                                            <span class="text-2xl block mb-2">💡</span>
+                                            <span class="font-bold text-sm text-slate-700 block mb-1">¿Qué se hace
+                                                hoy?</span>
+                                            <p id="m1-desc-3" class="text-xs text-slate-500 hidden mt-2">Ayuda a
+                                                entender la base funcional del negocio antes de proponer cambios
+                                                radicales sin sentido.</p>
+                                        </div>
+                                    </div>
+                                    <div id="m1-feedback" class="mt-4 text-center hidden">
+                                        <span
+                                            class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full inline-block">🎉
+                                            ¡Misión Completada! Sumaste 10 ⭐ y entendiste el punto de partida.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-2">
+                            <span>🛡️ 3.2. Importancia de las Técnicas y la Triangulación</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    Cada técnica de levantamiento tiene un superpoder único: la entrevista indaga en
+                                    sentimientos e ideas complejas, la encuesta alcanza a multitudes, la observación
+                                    muestra la verdad operativa, y los documentos revelan el marco formal.
+                                </p>
+                                <p class="mb-4">
+                                    Para evitar engaños, malas interpretaciones o información a medias, los mejores
+                                    analistas aplican la <strong class="text-green-700">Triangulación de
+                                        Información</strong>. Esto consiste en contrastar tres fuentes básicas: lo que
+                                    la gente dice (entrevistas/encuestas), lo que la gente hace en la realidad
+                                    (observación), y lo que dicen las reglas escritas (revisión documental).
+                                </p>
+
+                                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg my-4 text-sm">
+                                    <h4 class="font-bold text-indigo-800 mb-2">⭐ Curiosidad Metodológica:</h4>
+                                    <p class="text-slate-700">
+                                        El término "triangulación" proviene de la navegación y la topografía, donde se
+                                        usaban tres puntos de referencia conocidos para ubicar con precisión milimétrica
+                                        la posición de un barco o un terreno en el mapa. ¡En ingeniería de software nos
+                                        da precisión en los requerimientos!
+                                    </p>
+                                </div>
+
+                                <!-- Elemento Interactivo 2 -->
+                                <div id="m2-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-2 flex items-center gap-1">🎮 Misión
+                                        2: El Triángulo de la Verdad</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Haz click en los 3 vértices del triángulo
+                                        interactivo para descubrir cómo se contrastan las evidencias. ¡Consigue 10 ⭐!
+                                    </p>
+
+                                    <div class="flex flex-col items-center justify-center p-4">
+                                        <div
+                                            class="relative w-64 h-56 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200">
+                                            <!-- Triángulo visual -->
+                                            <div
+                                                class="absolute w-0 h-0 border-l-[80px] border-l-transparent border-r-[80px] border-r-transparent border-b-[140px] border-b-green-200 opacity-60">
+                                            </div>
+
+                                            <!-- Vértice 1: Lo que dicen -->
+                                            <button id="m2-btn-1" onclick="completeM2Node(1)"
+                                                class="absolute top-4 bg-white border-2 border-slate-300 hover:border-green-500 text-xs font-bold py-2 px-3 rounded-full shadow-sm">
+                                                🗣️ Lo que dicen (Entrevistas)
+                                            </button>
+
+                                            <!-- Vértice 2: Lo que hacen -->
+                                            <button id="m2-btn-2" onclick="completeM2Node(2)"
+                                                class="absolute bottom-6 left-2 bg-white border-2 border-slate-300 hover:border-green-500 text-xs font-bold py-2 px-3 rounded-full shadow-sm">
+                                                👁️ Lo que hacen (Observación)
+                                            </button>
+
+                                            <!-- Vértice 3: Lo formal -->
+                                            <button id="m2-btn-3" onclick="completeM2Node(3)"
+                                                class="absolute bottom-6 right-2 bg-white border-2 border-slate-300 hover:border-green-500 text-xs font-bold py-2 px-3 rounded-full shadow-sm">
+                                                📄 Lo formal (Documentos)
+                                            </button>
+
+                                            <!-- Centro de la Verdad -->
+                                            <div id="m2-center"
+                                                class="absolute hidden bg-green-500 text-white font-bold text-xs p-2 rounded-lg text-center shadow-lg pulse-soft">
+                                                🎯 ¡VERDAD TRIANGULADA!
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel de descripción del vértice clicado -->
+                                        <div id="m2-desc-panel"
+                                            class="mt-4 p-3 bg-white border border-slate-200 rounded-lg text-center text-xs text-slate-600 min-h-[40px] w-full">
+                                            Selecciona un vértice para ver cómo aporta al análisis.
+                                        </div>
+                                    </div>
+
+                                    <div id="m2-feedback" class="mt-4 text-center hidden">
+                                        <span
+                                            class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full inline-block">🎉
+                                            ¡Excelente! La triangulación evita que programes basándote en rumores o
+                                            manuales obsoletos. ¡+10 ⭐!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-3">
+                            <span>💬 3.3. La Entrevista: Conversación con Propósito</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <div class="flex flex-col lg:flex-row gap-4 items-start mb-4">
+                                    <div class="w-full lg:w-2/3">
+                                        <p class="mb-3">
+                                            La <strong>entrevista</strong> es un diálogo cara a cara planificado.
+                                            Permite profundizar en los problemas de usuarios específicos, sus emociones,
+                                            expectativas y las complejas reglas de negocio de su área.
+                                        </p>
+                                        <p class="mb-3">
+                                            Existen tres tipos:
+                                        </p>
+                                        <ul class="list-disc list-inside space-y-1 mb-4 text-sm">
+                                            <li><strong>Estructurada:</strong> Cuestionario rígido. Ideal para comparar
+                                                opiniones de varios actores en las mismas condiciones.</li>
+                                            <li><strong>Semiestructurada:</strong> Guía de preguntas flexibles. La más
+                                                recomendada porque permite explorar temas emergentes.</li>
+                                            <li><strong>Abierta:</strong> Conversación totalmente libre. Útil en fases
+                                                muy iniciales de exploración.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="w-full lg:w-1/3 text-center">
+                                        <img src="img/entrevista.png" alt="Entrevista"
+                                            class="w-full max-w-xs mx-auto rounded-xl shadow-md border" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg my-4 text-sm text-amber-900">
+                                    <h4 class="font-bold mb-1">💡 Consejo del Analista Senior:</h4>
+                                    <p>Escucha un 80% y habla un 20%. No induzcas las respuestas. Preguntas abiertas
+                                        como <em>"¿Qué pasa cuando el sistema se cae?"</em> revelan más que un simple
+                                        <em>"¿Verdad que el sistema es malo?"</em>.
+                                    </p>
+                                </div>
+
+                                <!-- Elemento Interactivo 3 -->
+                                <div id="m3-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-3 flex items-center gap-1">🎮 Misión
+                                        3: El Dilema del Analista Novato</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Vas a entrevistar a <strong>Doña
+                                            Martha</strong>, jefa del almacén. Elige la mejor pregunta inicial para
+                                        entender sus necesidades reales sin confundirla. ¡Gana 15 ⭐!</p>
+
+                                    <div
+                                        class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-3 mb-4">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-xl flex-shrink-0">
+                                            👵</div>
+                                        <div>
+                                            <h5 class="font-bold text-xs text-slate-700">Doña Martha (Jefa de Almacén)
+                                            </h5>
+                                            <p class="text-xs text-slate-600 italic">"Hola joven analista. Dígame, ¿qué
+                                                quiere saber del almacén? Yo manejo todo el inventario, pero no entiendo
+                                                mucho de tecnología."</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <button onclick="checkM3Answer(1)"
+                                            class="w-full text-left p-3 border-2 border-slate-200 rounded-xl bg-white text-xs hover:border-green-300 transition-colors">
+                                            <strong>Opción A:</strong> "Hola Doña Martha. ¿Qué estructura de base de
+                                            datos relacional prefiere para el inventario, y cree que deberíamos usar
+                                            endpoints REST en NodeJS o implementar GraphQL?"
+                                        </button>
+                                        <button onclick="checkM3Answer(2)"
+                                            class="w-full text-left p-3 border-2 border-slate-200 rounded-xl bg-white text-xs hover:border-green-300 transition-colors">
+                                            <strong>Opción B:</strong> "Hola Doña Martha. Cuénteme cómo hace hoy para
+                                            registrar cuando entra mercancía nueva al almacén, y qué problemas se le
+                                            presentan con más frecuencia en ese proceso."
+                                        </button>
+                                        <button onclick="checkM3Answer(3)"
+                                            class="w-full text-left p-3 border-2 border-slate-200 rounded-xl bg-white text-xs hover:border-green-300 transition-colors">
+                                            <strong>Opción C:</strong> "Hola Doña Martha. Vengo a que me diga
+                                            exactamente cómo quiere que diseñe los botones del nuevo programa para que
+                                            después no se queje."
+                                        </button>
+                                    </div>
+
+                                    <div id="m3-feedback"
+                                        class="mt-4 p-3 rounded-lg text-xs font-bold hidden text-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-4">
+                            <span>📊 3.4. La Encuesta: Datos a Gran Escala</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <div class="flex flex-col lg:flex-row gap-4 items-start mb-4">
+                                    <div class="w-full lg:w-2/3">
+                                        <p class="mb-3">
+                                            La <strong>encuesta</strong> es ideal para obtener datos cuantificables de
+                                            muchas personas de forma rápida. Es perfecta para identificar tendencias,
+                                            patrones de satisfacción y opiniones generales de clientes o estudiantes.
+                                        </p>
+                                        <p class="mb-3">
+                                            Los tipos de preguntas clave son:
+                                        </p>
+                                        <ul class="list-disc list-inside space-y-1 mb-3 text-sm">
+                                            <li><strong>Cerradas:</strong> Opciones definidas (e.g. Sí/No). Fáciles de
+                                                graficar.</li>
+                                            <li><strong>Escala:</strong> Miden niveles de acuerdo o satisfacción (e.g.
+                                                Escala del 1 al 5).</li>
+                                            <li><strong>Selección múltiple:</strong> Permiten elegir una o varias
+                                                alternativas de una lista.</li>
+                                            <li><strong>Abiertas:</strong> Opinión libre. Difícil de tabular pero aporta
+                                                valiosa opinión cualitativa.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="w-full lg:w-1/3 text-center">
+                                        <img src="img/encuesta.png" alt="Encuesta"
+                                            class="w-full max-w-xs mx-auto rounded-xl shadow-md border" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <!-- Elemento Interactivo 4 -->
+                                <div id="m4-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-2 flex items-center gap-1">🎮 Misión
+                                        4: Constructor de Encuestas</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Clasifica las preguntas de la encuesta
+                                        haciendo click en la pregunta y luego en el tipo correspondiente. ¡Completa todo
+                                        y gana 15 ⭐!</p>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <!-- Preguntas a clasificar -->
+                                        <div class="space-y-2">
+                                            <p class="text-xs font-bold text-slate-600">Preguntas del analista:</p>
+                                            <div id="m4-q-1" onclick="selectM4Question(1)"
+                                                class="p-2.5 bg-white border border-slate-300 rounded-lg text-xs match-card">
+                                                1. "¿Qué opina de la velocidad actual del sistema de notas?"
+                                            </div>
+                                            <div id="m4-q-2" onclick="selectM4Question(2)"
+                                                class="p-2.5 bg-white border border-slate-300 rounded-lg text-xs match-card">
+                                                2. "¿Usa la aplicación desde su dispositivo móvil? (Sí / No)"
+                                            </div>
+                                            <div id="m4-q-3" onclick="selectM4Question(3)"
+                                                class="p-2.5 bg-white border border-slate-300 rounded-lg text-xs match-card">
+                                                3. "Califique del 1 al 5 la facilidad para enviar una tarea."
+                                            </div>
+                                        </div>
+
+                                        <!-- Categorías destino -->
+                                        <div class="space-y-3">
+                                            <p class="text-xs font-bold text-slate-600">Categorías de preguntas:</p>
+                                            <button onclick="selectM4Category('Cerrada')"
+                                                class="w-full p-3 bg-white border-2 border-dashed border-slate-300 text-xs font-bold rounded-lg text-left hover:border-green-500">
+                                                📁 Pregunta Cerrada
+                                                <span id="m4-cat-cerrada"
+                                                    class="block text-[10px] text-slate-500 font-normal mt-1">Vacío</span>
+                                            </button>
+                                            <button onclick="selectM4Category('Escala')"
+                                                class="w-full p-3 bg-white border-2 border-dashed border-slate-300 text-xs font-bold rounded-lg text-left hover:border-green-500">
+                                                📊 Pregunta de Escala
+                                                <span id="m4-cat-escala"
+                                                    class="block text-[10px] text-slate-500 font-normal mt-1">Vacío</span>
+                                            </button>
+                                            <button onclick="selectM4Category('Abierta')"
+                                                class="w-full p-3 bg-white border-2 border-dashed border-slate-300 text-xs font-bold rounded-lg text-left hover:border-green-500">
+                                                ✍️ Pregunta Abierta
+                                                <span id="m4-cat-abierta"
+                                                    class="block text-[10px] text-slate-500 font-normal mt-1">Vacío</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="m4-feedback" class="mt-4 text-center hidden">
+                                        <span
+                                            class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full inline-block">🎉
+                                            ¡Increíble! Has clasificado correctamente todas las preguntas. ¡+15
+                                            ⭐!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-5">
+                            <span>👁️ 3.5. La Observación: Ver para Creer</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <div class="flex flex-col lg:flex-row gap-4 items-start mb-4">
+                                    <div class="w-full lg:w-2/3">
+                                        <p class="mb-3">
+                                            La <strong>observación</strong> consiste en presenciar directamente cómo se
+                                            realiza un proceso en el lugar de trabajo. A veces, las personas omiten
+                                            pasos o detalles en las entrevistas porque los tienen automatizados, o
+                                            porque hacen "atajos" no aprobados oficialmente.
+                                        </p>
+                                        <p class="mb-3">
+                                            Tipos de observación:
+                                        </p>
+                                        <ul class="list-disc list-inside space-y-1 mb-4 text-sm">
+                                            <li><strong>Directa:</strong> El analista mira de forma pasiva, registrando
+                                                cada paso sin intervenir.</li>
+                                            <li><strong>Participante:</strong> El analista interviene o asiste para
+                                                comprender los dolores del proceso.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="w-full lg:w-1/3 text-center">
+                                        <img src="img/observacion.png" alt="Observación"
+                                            class="w-full max-w-xs mx-auto rounded-xl shadow-md border" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <!-- Elemento Interactivo 5 -->
+                                <div id="m5-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-2 flex items-center gap-1">🎮 Misión
+                                        5: Ojo de Halcón</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Lee la discrepancia que encontraste al
+                                        observar a los operarios en la bodega y selecciona la conclusión del analista.
+                                        ¡Gana 15 ⭐!</p>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs">
+                                            <p class="font-bold text-red-800">📄 Lo que dice el manual:</p>
+                                            <p class="text-slate-600">"El operario debe ingresar al sistema web, digitar
+                                                el código de 12 dígitos de la caja de repuestos, presionar 'Registrar' y
+                                                esperar la impresión automática de la etiqueta."</p>
+                                        </div>
+                                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-xs">
+                                            <p class="font-bold text-green-800">👁️ Lo que observaste realmente:</p>
+                                            <p class="text-slate-600">"Los operarios tienen un papel con códigos QR
+                                                impresos pegados a la pared. Pasan un lector de barras portátil genérico
+                                                y luego digitan a mano solo los últimos 3 números en el sistema Excel
+                                                porque la red se cae."</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <button onclick="checkM5Answer(1)"
+                                            class="w-full text-left p-3 border border-slate-200 rounded-lg bg-white text-xs hover:border-green-300">
+                                            <strong>Opción A:</strong> Los operarios son indisciplinados y no les gusta
+                                            seguir las reglas de la empresa.
+                                        </button>
+                                        <button onclick="checkM5Answer(2)"
+                                            class="w-full text-left p-3 border border-slate-200 rounded-lg bg-white text-xs hover:border-green-300">
+                                            <strong>Opción B:</strong> El sistema web de 12 dígitos es lento o poco
+                                            práctico y la inestabilidad de la red obliga a usar Excel. La solución debe
+                                            integrar códigos QR/lector directo rápido.
+                                        </button>
+                                    </div>
+
+                                    <div id="m5-feedback"
+                                        class="mt-4 p-3 rounded-lg text-xs font-bold hidden text-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 6 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-6">
+                            <span>📄 3.6. La Revisión Documental: El Historial Formal</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-6"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <div class="flex flex-col lg:flex-row gap-4 items-start mb-4">
+                                    <div class="w-full lg:w-2/3">
+                                        <p class="mb-3">
+                                            La <strong>revisión documental</strong> consiste en analizar manuales de
+                                            procedimientos, reportes administrativos, formatos físicos o digitales y
+                                            regulaciones legales. Aporta las reglas formales de la organización, los
+                                            campos de datos requeridos y los reportes esperados.
+                                        </p>
+                                        <p class="mb-3">
+                                            Ayuda a evitar la duplicidad de campos o a pasar por alto requisitos
+                                            legales, pero siempre se debe corroborar que los manuales estén vigentes y
+                                            no desactualizados.
+                                        </p>
+                                    </div>
+                                    <div class="w-full lg:w-1/3 text-center">
+                                        <img src="img/documental.png" alt="Revisión Documental"
+                                            class="w-full max-w-xs mx-auto rounded-xl shadow-md border" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <!-- Elemento Interactivo 6 -->
+                                <div id="m6-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-2 flex items-center gap-1">🎮 Misión
+                                        6: Arqueólogo de Datos</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Encuentra los campos clave de este recibo de
+                                        caja antiguo haciendo click en los elementos resaltados. ¡Gana 15 ⭐!</p>
+
+                                    <div
+                                        class="bg-white p-6 rounded-xl border border-slate-300 max-w-sm mx-auto shadow-sm text-xs font-mono">
+                                        <div class="text-center border-b pb-2 mb-3">
+                                            <p class="font-bold">TIENDA TECNO-ÚTIL</p>
+                                            <p class="text-[10px] text-slate-400">Nit: 800.123.456-1</p>
+                                        </div>
+
+                                        <div class="flex justify-between mb-2">
+                                            <span>No: <button id="m6-btn-1" onclick="clickInvoiceField(1)"
+                                                    class="bg-yellow-100 hover:bg-green-100 px-1 rounded font-bold text-slate-700">#9872-X</button></span>
+                                            <span>Fecha: <button id="m6-btn-2" onclick="clickInvoiceField(2)"
+                                                    class="bg-yellow-100 hover:bg-green-100 px-1 rounded font-bold text-slate-700">12/07/2026</button></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <p>Cliente: <button id="m6-btn-3" onclick="clickInvoiceField(3)"
+                                                    class="bg-yellow-100 hover:bg-green-100 px-1 rounded font-bold text-slate-700">Pedro
+                                                    Pérez</button></p>
+                                        </div>
+
+                                        <div class="border-t border-b py-2 mb-2">
+                                            <div class="flex justify-between text-[10px] font-bold text-slate-400">
+                                                <span>Item</span>
+                                                <span>Total</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>1x Teclado Gamer</span>
+                                                <span>$45.000</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-right">
+                                            <p class="font-bold">Total: <button id="m6-btn-4"
+                                                    onclick="clickInvoiceField(4)"
+                                                    class="bg-yellow-100 hover:bg-green-100 px-1 rounded font-bold text-slate-700">$45.000</button>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div id="m6-details-box"
+                                        class="mt-4 p-2 bg-white border border-slate-200 rounded text-center text-xs text-slate-500">
+                                        Haz click en los campos en amarillo del recibo para extraer los metadatos.
+                                    </div>
+
+                                    <div id="m6-feedback" class="mt-4 text-center hidden">
+                                        <span
+                                            class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full inline-block">🎉
+                                            ¡Excelente escaneo! Has identificado todos los metadatos de entrada
+                                            indispensables. ¡+15 ⭐!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 7 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-7">
+                            <span>⚖️ 3.7. y 3.8. Comparación y Selección de Técnicas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-7"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    Aquí tienes una comparación rápida de las técnicas según lo definido en la guía de
+                                    aprendizaje:
+                                </p>
+
+                                <div class="overflow-x-auto my-4">
+                                    <table class="min-w-full bg-white border border-slate-200 text-sm">
+                                        <thead>
+                                            <tr class="bg-green-600 text-white text-left font-bold">
+                                                <th class="p-3 border">Técnica</th>
+                                                <th class="p-3 border">Principal Utilidad</th>
+                                                <th class="p-3 border">Cuándo Usarla</th>
+                                                <th class="p-3 border">Producto Esperado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b">
+                                                <td class="p-3 border font-semibold">Entrevista</td>
+                                                <td class="p-3 border text-slate-600">Profundizar en necesidades,
+                                                    problemas y reglas.</td>
+                                                <td class="p-3 border text-slate-600">Cuando se requiere información
+                                                    detallada de actores clave.</td>
+                                                <td class="p-3 border text-slate-600 text-xs font-mono">Guía de
+                                                    entrevista, acta o resumen.</td>
+                                            </tr>
+                                            <tr class="border-b bg-slate-50">
+                                                <td class="p-3 border font-semibold">Encuesta</td>
+                                                <td class="p-3 border text-slate-600">Obtener datos de muchas personas.
+                                                </td>
+                                                <td class="p-3 border text-slate-600">Cuando se necesita conocer
+                                                    tendencias generales.</td>
+                                                <td class="p-3 border text-slate-600 text-xs font-mono">Cuestionario y
+                                                    análisis de respuestas.</td>
+                                            </tr>
+                                            <tr class="border-b">
+                                                <td class="p-3 border font-semibold">Observación</td>
+                                                <td class="p-3 border text-slate-600">Comprender el proceso real.</td>
+                                                <td class="p-3 border text-slate-600">Cuando se desea verificar el
+                                                    trabajo en la práctica.</td>
+                                                <td class="p-3 border text-slate-600 text-xs font-mono">Formato de
+                                                    observación y evidencias.</td>
+                                            </tr>
+                                            <tr class="border-b bg-slate-50">
+                                                <td class="p-3 border font-semibold">Revisión documental</td>
+                                                <td class="p-3 border text-slate-600">Analizar documentos y registros
+                                                    existentes.</td>
+                                                <td class="p-3 border text-slate-600">Cuando se requiere conocer normas
+                                                    y reportes actuales.</td>
+                                                <td class="p-3 border text-slate-600 text-xs font-mono">Ficha de
+                                                    revisión documental.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Elemento Interactivo 7 -->
+                                <div id="m7-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-2 flex items-center gap-1">🎮 Misión
+                                        7: El Consultor de Proyectos</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Empareja el caso real de la empresa con la
+                                        técnica de levantamiento más idónea. ¡Consigue 20 ⭐!</p>
+
+                                    <div class="space-y-4">
+                                        <div
+                                            class="p-3 bg-white border border-slate-200 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <span class="font-medium text-slate-700">🏢 Caso 1: Queremos saber qué
+                                                opinan los 800 clientes externos del supermercado sobre la rapidez del
+                                                checkout.</span>
+                                            <select id="m7-sel-1"
+                                                class="border p-1 bg-white rounded font-bold text-green-700 text-xs">
+                                                <option value="">Selecciona...</option>
+                                                <option value="entrevista">Entrevista</option>
+                                                <option value="encuesta">Encuesta</option>
+                                                <option value="observacion">Observación</option>
+                                                <option value="documental">Revisión Documental</option>
+                                            </select>
+                                        </div>
+
+                                        <div
+                                            class="p-3 bg-white border border-slate-200 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <span class="font-medium text-slate-700">👨‍💼 Caso 2: Necesitamos hablar
+                                                con el Gerente Financiero para entender reglas de impuestos del
+                                                negocio.</span>
+                                            <select id="m7-sel-2"
+                                                class="border p-1 bg-white rounded font-bold text-green-700 text-xs">
+                                                <option value="">Selecciona...</option>
+                                                <option value="entrevista">Entrevista</option>
+                                                <option value="encuesta">Encuesta</option>
+                                                <option value="observacion">Observación</option>
+                                                <option value="documental">Revisión Documental</option>
+                                            </select>
+                                        </div>
+
+                                        <div
+                                            class="p-3 bg-white border border-slate-200 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <span class="font-medium text-slate-700">⚙️ Caso 3: Sospechamos que los
+                                                operarios omiten pasos de seguridad y queremos comprobar el flujo físico
+                                                de la mercancía.</span>
+                                            <select id="m7-sel-3"
+                                                class="border p-1 bg-white rounded font-bold text-green-700 text-xs">
+                                                <option value="">Selecciona...</option>
+                                                <option value="entrevista">Entrevista</option>
+                                                <option value="encuesta">Encuesta</option>
+                                                <option value="observacion">Observación</option>
+                                                <option value="documental">Revisión Documental</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="checkM7Selections()"
+                                        class="mt-4 bg-green-600 text-white font-bold py-1.5 px-4 rounded-lg hover:bg-green-700 transition-colors text-xs">
+                                        Validar Consultoría
+                                    </button>
+
+                                    <div id="m7-feedback"
+                                        class="mt-4 p-3 rounded-lg text-xs font-bold hidden text-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 8 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-8">
+                            <span>🛡️ 3.9. Registro Ético de la Información</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-8"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    El analista maneja datos privados de personas e información confidencial de las
+                                    empresas. Por esto, el levantamiento de información debe realizarse siempre con una
+                                    base ética muy firme.
+                                </p>
+                                <p class="mb-4">
+                                    Los principios éticos fundamentales son:
+                                </p>
+                                <ul class="list-disc list-inside space-y-1.5 mb-4 text-sm text-slate-600">
+                                    <li><strong>Autorización:</strong> Siempre pide permiso antes de entrevistar, grabar
+                                        u observar.</li>
+                                    <li><strong>Transparencia:</strong> Explica claramente el propósito académico o del
+                                        proyecto.</li>
+                                    <li><strong>Confidencialidad:</strong> No compartas contraseñas, salarios u
+                                        opiniones privadas que puedan perjudicar al empleado.</li>
+                                    <li><strong>Fidelidad:</strong> Registra exactamente lo que te digan, sin
+                                        distorsionar opiniones.</li>
+                                </ul>
+
+                                <!-- Elemento Interactivo 8 -->
+                                <div id="m8-container" class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 class="text-sm text-green-800 font-bold mb-3 flex items-center gap-1">🎮 Misión
+                                        8: El Guardian de la Ética</h4>
+                                    <p class="text-xs text-slate-500 mb-4">Un compañero te dice: <em>"Pásame la
+                                            grabación de voz de la entrevista con Carlos de inventario. Dijo cosas
+                                            chistosas de su jefe y quiero mostrárselas a los chicos de desarrollo."</em>
+                                        ¿Qué decides hacer? ¡Gana 10 ⭐!</p>
+
+                                    <div class="space-y-3">
+                                        <button onclick="checkM8Answer(1)"
+                                            class="w-full text-left p-3 border border-slate-200 rounded-lg bg-white text-xs hover:border-green-300">
+                                            <strong>Opción A:</strong> Compartírsela porque total, "el audio no saldrá
+                                            de la oficina de desarrollo" y es bueno divertirse.
+                                        </button>
+                                        <button onclick="checkM8Answer(2)"
+                                            class="w-full text-left p-3 border border-slate-200 rounded-lg bg-white text-xs hover:border-green-300">
+                                            <strong>Opción B:</strong> Negarte respetuosamente y explicar que firmaste
+                                            un compromiso de confidencialidad y el audio es exclusivo para análisis.
+                                        </button>
+                                    </div>
+
+                                    <div id="m8-feedback"
+                                        class="mt-4 p-3 rounded-lg text-xs font-bold hidden text-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 9 -->
+                    <div class="mb-4">
+                        <button type="button"
+                            class="w-full flex justify-between items-center p-4 bg-green-50 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left"
+                            data-target="#panel-subtema-9">
+                            <span>💼 3.10. Ejemplo Aplicado</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-9"
+                        class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    Para ver cómo funciona esto en la práctica, analicemos un caso de la vida real en
+                                    una escuela:
+                                </p>
+                                <div class="bg-green-50 border border-green-200 p-5 rounded-xl space-y-4 text-xs">
+                                    <p class="font-bold text-sm text-green-800">📋 Caso de seguimiento a estudiantes con
+                                        actividades pendientes:</p>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="p-3 bg-white rounded border">
+                                            <p class="font-bold text-green-700">🎙️ Técnica 1: Entrevista</p>
+                                            <p class="text-slate-500 mb-1"><strong>Actor:</strong> Coordinador Académico
+                                            </p>
+                                            <p class="text-slate-600 font-sans">Preguntas sobre cómo se detectan los
+                                                retrasos de notas y qué reportes necesitan para enviar notificaciones.
+                                            </p>
+                                        </div>
+                                        <div class="p-3 bg-white rounded border">
+                                            <p class="font-bold text-green-700">📊 Técnica 2: Encuesta</p>
+                                            <p class="text-slate-500 mb-1"><strong>Actor:</strong> Estudiantes</p>
+                                            <p class="text-slate-600">Preguntas sobre qué dificultades técnicas les
+                                                impiden entregar o si prefieren alertas de WhatsApp o correos.</p>
+                                        </div>
+                                        <div class="p-3 bg-white rounded border">
+                                            <p class="font-bold text-green-700">👁️ Técnica 3: Observación</p>
+                                            <p class="text-slate-500 mb-1"><strong>Actor:</strong> Docente</p>
+                                            <p class="text-slate-600">Mirar al docente mientras califica, observando qué
+                                                clics manuales repetitivos da para mandar un correo de alerta.</p>
+                                        </div>
+                                        <div class="p-3 bg-white rounded border">
+                                            <p class="font-bold text-green-700">📄 Técnica 4: Revisión Documental</p>
+                                            <p class="text-slate-500 mb-1"><strong>Objeto:</strong> Reportes PDF de
+                                                Moodle</p>
+                                            <p class="text-slate-600">Mapear qué datos de la base de datos de la
+                                                plataforma escolar ya se exportan en el reporte automático.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECURSOS SUGERIDOS EXTERNOS -->
+                    <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                         Tema: Entrevistas en Requerimientos de Software
+                         Buscar: "entrevista requerimientos de software analista de sistemas"
+                    -->
+                    <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹
+                                Recurso sugerido</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳
+                                URL pendiente</span>
+                        </div>
+                        <p class="text-green-800 font-semibold mb-1">Guía práctica de Entrevistas de Requerimientos</p>
+                        <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"entrevista requerimientos de
+                                software analista de sistemas"</em></p>
+                        <a href="#" target="_blank"
+                            class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                            <span>▶️</span> Ver recurso
+                        </a>
+                        <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                            <p class="text-green-800 text-xs font-bold mb-1">🔧 Cómo activar este recurso:</p>
+                            <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de
+                                IA en el chat:</p>
+                            <div
+                                class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL
+                                que encontraste] y ponle el título: [título del recurso]."
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECURSO-EXTERNO id="recurso-ext-2"
+                         Tema: Técnicas de levantamiento de requerimientos
+                         Buscar: "tecnicas de levantamiento de informacion analisis de sistemas"
+                    -->
+                    <div id="recurso-ext-2" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹
+                                Recurso sugerido</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳
+                                URL pendiente</span>
+                        </div>
+                        <p class="text-green-800 font-semibold mb-1">Clase Completa: Técnicas de Levantamiento de
+                            Información</p>
+                        <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"tecnicas de levantamiento de
+                                informacion analisis de sistemas"</em></p>
+                        <a href="#" target="_blank"
+                            class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                            <span>▶️</span> Ver recurso
+                        </a>
+                        <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                            <p class="text-green-800 text-xs font-bold mb-1">🔧 Cómo activar este recurso:</p>
+                            <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de
+                                IA en el chat:</p>
+                            <div
+                                class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                "Encontré un recurso para el recurso-ext-2 del OVA. Actualízalo con esta URL: [la URL
+                                que encontraste] y ponle el título: [título del recurso]."
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">✍️ Centro de Misiones Prácticas</h2>
+                <p class="text-slate-600 mb-6">Completa tus misiones, digita tus propuestas y gana insignias especiales
+                    de analista. ¡Cada misión completada te otorga +20 ⭐!</p>
+
+                <!-- Insignias obtenidas -->
+                <div class="mb-6 p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Tus Medallas Obtener:
+                    </h4>
+                    <div class="flex gap-4 flex-wrap">
+                        <div id="badge-act1"
+                            class="flex items-center gap-2 bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-medium transition-all">
+                            <span>🎙️</span> Entrevistador Experto
+                        </div>
+                        <div id="badge-act2"
+                            class="flex items-center gap-2 bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-medium transition-all">
+                            <span>📊</span> Creador de Cuestionarios
+                        </div>
+                        <div id="badge-act3"
+                            class="flex items-center gap-2 bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-medium transition-all">
+                            <span>👁️</span> Investigador de Campo
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">🕵️ Misión 1: Diseño de una Guía de Entrevista
+                        </h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed text-sm">
+                            Selecciona uno de estos sistemas: <em>Citas Médicas, Control de Inventario o Préstamo de
+                                Libros</em>. Identifica un actor, define el objetivo de la entrevista y escribe una guía
+                            con <strong>mínimo 10 preguntas</strong> estructuradas según tu rol (3 de rol, 3 del proceso
+                            actual, 2 de problemas y 2 de mejoras).
+                        </p>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 font-bold mb-2">📝 Tu propuesta o borrador de entrevista:
+                            </p>
+                            <textarea id="act1-text" class="w-full h-32 p-3 border rounded-lg text-xs font-mono"
+                                placeholder="Escribe aquí tu borrador de guía de entrevista..."></textarea>
+                            <button onclick="submitActivity(1)"
+                                class="mt-3 bg-green-600 text-white font-bold py-1.5 px-4 rounded hover:bg-green-700 text-xs transition-colors">
+                                Registrar Borrador y Completar Misión
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">📋 Misión 2: Cuestionario de Encuesta</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed text-sm">
+                            Diseña una encuesta completa con **mínimo 12 preguntas** (4 cerradas, 3 de escala, 3 de
+                            selección múltiple, y 2 abiertas) para identificar problemas y expectativas del usuario
+                            final en tu caso elegido.
+                        </p>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 font-bold mb-2">📝 Tu propuesta de cuestionario:</p>
+                            <textarea id="act2-text" class="w-full h-32 p-3 border rounded-lg text-xs font-mono"
+                                placeholder="Redacta tus 12 preguntas aquí..."></textarea>
+                            <button onclick="submitActivity(2)"
+                                class="mt-3 bg-green-600 text-white font-bold py-1.5 px-4 rounded hover:bg-green-700 text-xs transition-colors">
+                                Registrar Borrador y Completar Misión
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">🔍 Misión 3: Formato de Observación y Ficha
+                            Documental</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed text-sm">
+                            Elige un proceso simulado y diseña un formato de observación de campo detallando fecha,
+                            actores, herramientas usadas y problemas detectados. Añade una ficha de revisión documental
+                            analizando 2 documentos implicados.
+                        </p>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 font-bold mb-2">📝 Tu formato de campo y ficha documental:
+                            </p>
+                            <textarea id="act3-text" class="w-full h-32 p-3 border rounded-lg text-xs font-mono"
+                                placeholder="Registra tu formato de observación y ficha aquí..."></textarea>
+                            <button onclick="submitActivity(3)"
+                                class="mt-3 bg-green-600 text-white font-bold py-1.5 px-4 rounded hover:bg-green-700 text-xs transition-colors">
+                                Registrar Borrador y Completar Misión
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">✔️ Evaluación de Habilidades</h2>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                    <p class="text-slate-600 mb-6">Comprueba qué tanto has dominado las técnicas de levantamiento.
+                        Selecciona la respuesta correcta de cada una de las 5 preguntas de dificultad progresiva.</p>
+
+                    <!-- Temporizador interactivo opcional -->
+                    <div
+                        class="mb-6 flex items-center justify-between bg-slate-100 p-3 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">⏳</span>
+                            <span class="text-xs font-bold text-slate-700">Reto de Tiempo (Opcional):</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="timer-btn" onclick="startQuizTimer()"
+                                class="bg-green-600 text-white font-bold px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors">
+                                Iniciar con Cronómetro
+                            </button>
+                            <span id="timer-display" class="font-bold text-sm text-red-600 hidden">3:00</span>
+                        </div>
+                    </div>
+
+                    <div id="quiz-container"></div>
+
+                    <button id="submit-quiz-btn"
+                        class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar
+                        evaluación</button>
+
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📖 Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre análisis de
+                    requerimientos de software y levantamiento de información, te recomendamos explorar los siguientes
+                    recursos:</p>
+
+                <ul class="space-y-4">
+                    <!-- Recurso 1 (Estructura intocable de Recursos) -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">IEEE SWEBOK Guide v4.0</h3>
+                            <p class="text-slate-600 mb-2">Guía del Cuerpo de Conocimiento de Ingeniería de Software,
+                                estándar internacional.</p>
+                            <a href="https://www.computer.org/education/bodies-of-knowledge/software-engineering"
+                                target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/qr1.png" alt="QR IEEE SWEBOK Guide v4.0"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 (Estructura intocable de Recursos) -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Análisis y Diseño de Sistemas Modernos</h3>
+                            <p class="text-slate-600 mb-2">Libro de Valacich & George en la tienda educativa Pearson.
+                            </p>
+                            <a href="https://www.pearson.com/en-us/subject-catalog/p/modern-systems-analysis-and-design/P200000003292"
+                                target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/qr2.png" alt="QR Análisis y Diseño de Sistemas Modernos"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            IEEE Computer Society. (2024). <i>Guía del cuerpo de conocimiento de ingeniería de software
+                                (SWEBOK Guide)</i>, versión 4.0. IEEE Computer Society.<br>
+                            <a href="https://www.computer.org/education/bodies-of-knowledge/software-engineering"
+                                class="text-green-700 underline break-all text-sm"
+                                target="_blank">https://www.computer.org/education/bodies-of-knowledge/software-engineering</a>
+                        </span>
+                    </div>
+
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Sommerville, I. (2016). <i>Ingeniería de software</i> (10.ª ed.). Pearson.<br>
+                            <a href="https://www.pearson.com/en-us/subject-catalog/p/software-engineering/P200000003284"
+                                class="text-green-700 underline break-all text-sm"
+                                target="_blank">https://www.pearson.com/en-us/subject-catalog/p/software-engineering/P200000003284</a>
+                        </span>
+                    </div>
+
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Valacich, J. S., & George, J. F. (2021). <i>Análisis y diseño de sistemas modernos</i> (9.ª
+                            ed.). Pearson.<br>
+                            <a href="https://www.pearson.com/en-us/subject-catalog/p/modern-systems-analysis-and-design/P200000003292"
+                                class="text-green-700 underline break-all text-sm"
+                                target="_blank">https://www.pearson.com/en-us/subject-catalog/p/modern-systems-analysis-and-design/P200000003292</a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                    CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function () {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito principal del levantamiento de información en el análisis de requerimientos?",
+                options: [
+                    "Escribir directamente el código fuente del sistema en el servidor de producción.",
+                    "Configurar el diseño final de los colores e imágenes de la interfaz móvil.",
+                    "Comprender la situación actual, las necesidades de los usuarios y el contexto organizacional antes de proponer una solución tecnológica.",
+                    "Hacer contratos comerciales de compra de computadoras para la organización."
+                ],
+                correct: 2
+            },
+            {
+                question: "Si necesitas recolectar la opinión, frecuencia de uso y nivel de satisfacción de un grupo amplio de 350 estudiantes sobre una plataforma educativa de forma rápida y cuantificable, la técnica recomendada es:",
+                options: [
+                    "La encuesta.",
+                    "La entrevista abierta.",
+                    "La observación participante.",
+                    "La revisión documental."
+                ],
+                correct: 0
+            },
+            {
+                question: "Al observar el trabajo de un cajero notas que, a pesar de que el manual formal dice que digita las facturas en la base de datos, en la realidad anota los códigos en un cuaderno porque la red falla constantemente. ¿Qué concepto clave se evidencia aquí?",
+                options: [
+                    "Que el cajero no sabe usar una computadora moderna.",
+                    "La discrepancia o diferencia entre el proceso formal (documentos) y el proceso real (práctica observada).",
+                    "Que los manuales son inútiles y deben borrarse.",
+                    "La necesidad de cambiar al cajero por una persona más calificada."
+                ],
+                correct: 1
+            },
+            {
+                question: "En una entrevista semiestructurada, el analista de requerimientos debe:",
+                options: [
+                    "Seguir estrictamente una lista cerrada de preguntas sin modificar una sola palabra.",
+                    "Llevar preguntas base preparadas, pero con la flexibilidad de formular preguntas adicionales basadas en las respuestas del entrevistado.",
+                    "Dejar que el entrevistado hable libremente de cualquier tema personal sin guiar la conversación.",
+                    "Evitar tomar notas o registrar información para no molestar a la persona entrevistada."
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Por qué es valiosa la 'triangulación de información' en el levantamiento de requerimientos?",
+                options: [
+                    "Porque permite contrastar y verificar lo que dicen los usuarios con lo que realmente hacen y con lo que dictan las normas formales, mejorando la precisión.",
+                    "Porque obliga al analista a entrevistar exactamente a tres personas del mismo departamento.",
+                    "Porque ayuda a dividir el tiempo de desarrollo en tres fases idénticas de programación.",
+                    "Porque descarta la ética del proceso al enfocarse solo en tres puntos fijos."
+                ],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6', 'p-4', 'bg-slate-50', 'rounded-lg', 'border', 'border-slate-100');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 gap-2.5 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 bg-white rounded-lg p-3 cursor-pointer transition-all text-xs"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-bold text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function () {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            clearInterval(timerInterval); // detiene el timer si estaba corriendo
+            let score = 0;
+            let unanswered = false;
+
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected) {
+                    if (parseInt(selected.dataset.option) === item.correct) {
+                        score++;
+                    }
+                } else {
+                    unanswered = true;
+                }
+            });
+
+            if (unanswered) {
+                if (!confirm("Tienes preguntas sin responder. ¿Estás seguro de que deseas finalizar la evaluación?")) {
+                    return;
+                }
+            }
+
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} respuestas correctas (${pct}%)`;
+
+            if (pct >= 60) {
+                result.className = "mt-4 text-lg font-bold text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200 confetti-pop";
+                result.innerHTML = `🎉 ¡Felicitaciones! Aprobaste con un <strong>${pct}%</strong> (${score}/${quizData.length} correctas). ¡Eres un gran analista!`;
+                // Sumar puntos de evaluación
+                addPoints(30, 'eval');
+            } else {
+                result.className = "mt-4 text-lg font-bold text-red-600 bg-red-50 p-3 rounded-lg text-center border border-red-200";
+                result.innerHTML = `💪 ¡Inténtalo de nuevo! Obtuviste <strong>${pct}%</strong>. Te sugerimos repasar los acordeones de contenido antes de reintentar.`;
+            }
+        });
+
+        // Timer del Quiz
+        let timerInterval;
+        function startQuizTimer() {
+            const display = document.getElementById('timer-display');
+            const btn = document.getElementById('timer-btn');
+            btn.disabled = true;
+            btn.className = "bg-slate-300 text-slate-500 font-bold px-3 py-1 rounded text-xs cursor-not-allowed";
+            display.classList.remove('hidden');
+
+            let secondsLeft = 180; // 3 minutos
+
+            timerInterval = setInterval(() => {
+                secondsLeft--;
+                const min = Math.floor(secondsLeft / 60);
+                const sec = secondsLeft % 60;
+                display.textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ ¡El tiempo ha terminado! La evaluación se enviará automáticamente.");
+                    document.getElementById('submit-quiz-btn').click();
+                }
+            }, 1000);
+        }
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS (Gamificación)
+         ============================================= -->
+    <script>
+        // Sistema de puntos global
+        let totalScore = 0;
+        let completedMissions = new Set();
+        let currentRank = "Investigador Novato 🔎";
+
+        function updateGlobalDashboard() {
+            document.getElementById('score-counter').innerHTML = `${totalScore} <span class="text-lg">⭐</span>`;
+            document.getElementById('missions-completed-text').textContent = `${completedMissions.size} / 11 misiones`;
+
+            const pct = Math.min(Math.round((completedMissions.size / 11) * 100), 100);
+            document.getElementById('missions-progress-bar').style.width = `${pct}%`;
+
+            // Rangos
+            if (totalScore >= 120) {
+                currentRank = "Analista de Élite 🏆";
+            } else if (totalScore >= 80) {
+                currentRank = "Investigador Senior 🕵️‍♂️";
+            } else if (totalScore >= 40) {
+                currentRank = "Analista Junior 🛠️";
+            } else {
+                currentRank = "Investigador Novato 🔎";
+            }
+            document.getElementById('user-level').textContent = currentRank;
+        }
+
+        function addPoints(points, missionId) {
+            if (!completedMissions.has(missionId)) {
+                completedMissions.add(missionId);
+                totalScore += points;
+                updateGlobalDashboard();
+            }
+        }
+
+        // Misión 1 (Preguntas de Fuego)
+        let clickedM1Cards = new Set();
+        function completeM1Card(id) {
+            document.getElementById(`m1-desc-${id}`).classList.remove('hidden');
+            document.getElementById(`m1-card-${id}`).classList.add('border-green-500', 'bg-green-50');
+            clickedM1Cards.add(id);
+            if (clickedM1Cards.size === 3) {
+                document.getElementById('m1-feedback').classList.remove('hidden');
+                addPoints(10, 'm1');
+            }
+        }
+
+        // Misión 2 (Triángulo de la Verdad)
+        let clickedM2Nodes = new Set();
+        const m2Descriptions = {
+            1: "🗣️ Entrevistas: Dan la perspectiva personal, opiniones y deseos del usuario clave.",
+            2: "👁️ Observación: Muestra el proceso en tiempo real, sacando a la luz atajos manuales e interrupciones.",
+            3: "📄 Documentos: Brindan las reglas legales, campos de datos históricos y estructuras formales."
+        };
+        function completeM2Node(id) {
+            clickedM2Nodes.add(id);
+            document.getElementById(`m2-btn-${id}`).classList.remove('border-slate-300');
+            document.getElementById(`m2-btn-${id}`).classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+
+            document.getElementById('m2-desc-panel').textContent = m2Descriptions[id];
+
+            if (clickedM2Nodes.size === 3) {
+                document.getElementById('m2-center').classList.remove('hidden');
+                document.getElementById('m2-feedback').classList.remove('hidden');
+                addPoints(10, 'm2');
+            }
+        }
+
+        // Misión 3 (El Dilema del Analista Novato)
+        function checkM3Answer(op) {
+            const feedback = document.getElementById('m3-feedback');
+            feedback.classList.remove('hidden');
+            if (op === 2) {
+                feedback.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-green-100 text-green-800";
+                feedback.textContent = "🎉 ¡Excelente elección! Doña Martha te contará el flujo real sin enredarse en tecnicismos que no domina. Sumaste +15 ⭐.";
+                addPoints(15, 'm3');
+            } else if (op === 1) {
+                feedback.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-red-100 text-red-800";
+                feedback.textContent = "💪 Casi. Evita el lenguaje técnico con usuarios que no son informáticos. Doña Martha no sabe qué es GraphQL y se sentirá abrumada.";
+            } else {
+                feedback.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-red-100 text-red-800";
+                feedback.textContent = "💪 Inténtalo de nuevo. Preguntar agresivamente 'cómo diseñar botones' suele dar requerimientos deficientes y malhumora al usuario.";
+            }
+        }
+
+        // Misión 4 (Constructor de Encuestas)
+        let selectedM4Q = null;
+        function selectM4Question(id) {
+            // Quitar clase seleccionada anterior
+            [1, 2, 3].forEach(i => document.getElementById(`m4-q-${i}`).classList.remove('match-selected'));
+
+            selectedM4Q = id;
+            document.getElementById(`m4-q-${id}`).classList.add('match-selected');
+        }
+
+        let m4Matches = { Cerrada: null, Escala: null, Abierta: null };
+        function selectM4Category(cat) {
+            if (!selectedM4Q) {
+                alert("Primero selecciona una pregunta de la izquierda.");
+                return;
+            }
+
+            // Validar emparejamiento
+            // Q1 -> Abierta
+            // Q2 -> Cerrada
+            // Q3 -> Escala
+            let correct = false;
+            if (selectedM4Q === 1 && cat === 'Abierta') correct = true;
+            if (selectedM4Q === 2 && cat === 'Cerrada') correct = true;
+            if (selectedM4Q === 3 && cat === 'Escala') correct = true;
+
+            if (correct) {
+                m4Matches[cat] = selectedM4Q;
+                const catSpan = document.getElementById(`m4-cat-${cat.toLowerCase()}`);
+                const qText = document.getElementById(`m4-q-${selectedM4Q}`).textContent.trim();
+
+                catSpan.textContent = `Asignada: ${qText}`;
+                catSpan.className = "block text-[10px] text-green-700 font-bold mt-1";
+
+                document.getElementById(`m4-q-${selectedM4Q}`).onclick = null;
+                document.getElementById(`m4-q-${selectedM4Q}`).className = "p-2.5 border rounded-lg text-xs match-correct";
+
+                selectedM4Q = null;
+
+                // Validar si terminó
+                if (m4Matches.Cerrada && m4Matches.Escala && m4Matches.Abierta) {
+                    document.getElementById('m4-feedback').classList.remove('hidden');
+                    addPoints(15, 'm4');
+                }
+            } else {
+                alert("❌ Clasificación incorrecta. Lee la pregunta con atención e inténtalo de nuevo.");
+            }
+        }
+
+        // Misión 5 (Ojo de Halcón)
+        function checkM5Answer(op) {
+            const feedback = document.getElementById('m5-feedback');
+            feedback.classList.remove('hidden');
+            if (op === 2) {
+                feedback.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-green-100 text-green-800";
+                feedback.textContent = "🎉 ¡Brillante! Captaste que los empleados buscan atajos porque el sistema formal falla o es lento. Ese es el dolor real que tu software debe curar. ¡+15 ⭐!";
+                addPoints(15, 'm5');
+            } else {
+                feedback.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-red-100 text-red-800";
+                feedback.textContent = "💪 No. Culpar a los operarios es el camino fácil, pero el verdadero analista ve que el proceso de software falla y ellos crean soluciones improvisadas.";
+            }
+        }
+
+        // Misión 6 (Arqueólogo de Datos)
+        let clickedM6Fields = new Set();
+        const m6FieldDescriptions = {
+            1: "🏷️ Consecutivo de Factura: Un campo indispensable para auditar transacciones. Evita duplicaciones de registros.",
+            2: "📅 Fecha de Emisión: Permite organizar reportes cronológicos y validar vigencias de garantías.",
+            3: "👤 Cliente: Vincula la factura a un usuario registrado en la base de datos.",
+            4: "💰 Total de Pago: Campo final calculado. Sirve para arqueos de caja del sistema."
+        };
+        function clickInvoiceField(id) {
+            clickedM6Fields.add(id);
+            document.getElementById(`m6-btn-${id}`).className = "bg-green-600 text-white px-1 rounded font-bold";
+            document.getElementById('m6-details-box').textContent = m6FieldDescriptions[id];
+
+            if (clickedM6Fields.size === 4) {
+                document.getElementById('m6-feedback').classList.remove('hidden');
+                addPoints(15, 'm6');
+            }
+        }
+
+        // Misión 7 (El Consultor de Proyectos)
+        function checkM7Selections() {
+            const sel1 = document.getElementById('m7-sel-1').value;
+            const sel2 = document.getElementById('m7-sel-2').value;
+            const sel3 = document.getElementById('m7-sel-3').value;
+
+            const fb = document.getElementById('m7-feedback');
+            fb.classList.remove('hidden');
+
+            if (sel1 === 'encuesta' && sel2 === 'entrevista' && sel3 === 'observacion') {
+                fb.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-green-100 text-green-800";
+                fb.textContent = "🎉 ¡Perfecto! Encuesta para la multitud de clientes, entrevista detallada con el Gerente Financiero y observación física en bodega. ¡Has seleccionado perfectamente! +20 ⭐.";
+                addPoints(20, 'm7');
+            } else {
+                fb.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-red-100 text-red-800";
+                fb.textContent = "💪 Revisa tus selecciones. Recuerda: multitudes = encuestas, decisiones clave con un solo actor = entrevistas, y flujos físicos o de seguridad = observación.";
+            }
+        }
+
+        // Misión 8 (El Guardian de la Ética)
+        function checkM8Answer(op) {
+            const fb = document.getElementById('m8-feedback');
+            fb.classList.remove('hidden');
+            if (op === 2) {
+                fb.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-green-100 text-green-800";
+                fb.textContent = "🎉 ¡Excelente decisión! La ética profesional genera confianza con los usuarios. Revelar grabaciones privadas rompe las reglas de protección de datos y te descalifica. ¡+10 ⭐!";
+                addPoints(10, 'm8');
+            } else {
+                fb.className = "mt-4 p-3 rounded-lg text-xs font-bold bg-red-100 text-red-800";
+                fb.textContent = "💪 No es la opción correcta. Exponer de forma humorística o privada la opinión de un usuario daña la confianza en el analista y viola las directrices de confidencialidad.";
+            }
+        }
+
+        // Envío de borradores de actividades
+        function submitActivity(num) {
+            const text = document.getElementById(`act${num}-text`).value.trim();
+            if (text.length < 20) {
+                alert("Escribe una propuesta un poco más detallada (mínimo 20 caracteres) para completar la misión.");
+                return;
+            }
+
+            const badge = document.getElementById(`badge-act${num}`);
+            badge.className = "flex items-center gap-2 bg-green-100 text-green-800 border border-green-300 px-3 py-1.5 rounded-full text-xs font-bold transition-all";
+
+            // Sumar puntos
+            addPoints(20, `act${num}`);
+
+            alert(`🎉 ¡Misión ${num} completada! Tu propuesta ha quedado registrada localmente. Ganaste la insignia y sumaste +20 ⭐.`);
+        }
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+
+</html>
