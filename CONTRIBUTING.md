@@ -85,6 +85,11 @@ El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs
    node scripts/validar-ova.mjs
    ```
    Debe decir `✅ Validación OK`. Si marca errores, corrígelos.
+
+   > 🤖 **¿No eres técnico? Deja que un agente de IA lo arregle.** Cuando el validador
+   > encuentra problemas, al final imprime un bloque **"PARA CORREGIR CON UN AGENTE DE IA"**
+   > con un texto por cada OVA. **Copia el bloque de tu OVA y pégalo en tu agente de IA**: él
+   > hará los cambios. Luego vuelve a correr `node scripts/validar-ova.mjs` para confirmar.
 6. Crea una **rama**, haz commit y abre un **Pull Request** a `main`. Completa la lista de verificación del PR.
 7. El validador automático corre solo. Cuando pase y un responsable apruebe, se fusiona.
 
