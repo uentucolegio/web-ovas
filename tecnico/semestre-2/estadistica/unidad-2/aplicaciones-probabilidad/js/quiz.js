@@ -1,56 +1,60 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const questions = [
-        { q: "La probabilidad empírica se calcula como:", opts: ["Casos favorables entre casos posibles", "Veces que ocurrió el evento entre el total de repeticiones", "P(A) · P(B)", "1 menos la probabilidad teórica"], ans: 1 },
-        { q: "La ley de los grandes números establece que la probabilidad empírica:", opts: ["Siempre es igual a la teórica desde la primera repetición", "Se aleja más de la teórica cuantas más repeticiones hay", "Se acerca al valor teórico cuando aumenta el número de repeticiones", "No tiene relación con la probabilidad teórica"], ans: 2 },
-        { q: "Si un dado se lanza 600 veces y el 6 sale 150 veces, la probabilidad empírica de sacar 6 es:", opts: ["1/6 ≈ 0.167", "150/600 = 0.25", "6/600 = 0.01", "600/150 = 4"], ans: 1 },
-        { q: "En un sistema con componentes en serie, la probabilidad de que el sistema completo funcione es:", opts: ["La suma de las confiabilidades individuales", "El producto de las confiabilidades individuales", "El promedio de las confiabilidades", "Siempre igual a 1"], ans: 1 },
-        { q: "En un sistema con respaldo (en paralelo), el sistema falla solo si:", opts: ["Falla cualquiera de los componentes", "Fallan todos los componentes a la vez", "Falla el componente principal únicamente", "Nunca puede fallar"], ans: 1 },
-        { q: "Usar el complemento para calcular 'al menos un fallo' significa calcular:", opts: ["P(ningún fallo) directamente", "1 − P(ningún fallo)", "P(fallo) + P(no fallo)", "P(fallo) · P(no fallo)"], ans: 1 },
-        { q: "En la tabla de retención de un videojuego, P(siguió jugando | completó tutorial) = 0.70 y P(siguió | no completó) = 0.20. Esto indica que completar el tutorial y seguir jugando son eventos:", opts: ["Independientes", "Mutuamente excluyentes", "Dependientes", "Iguales"], ans: 2 },
-        { q: "Al lanzar dos dados y sumar sus caras, el valor con mayor probabilidad de ocurrir es:", opts: ["2", "7", "12", "Todos son igual de probables"], ans: 1 },
-        { q: "Una distribución de probabilidad es:", opts: ["La probabilidad de un solo evento calculada una vez", "La asignación de probabilidad a todos los valores posibles de una variable, vista en conjunto", "Solo aplica a monedas y dados", "Un sinónimo de probabilidad condicional"], ans: 1 },
-        { q: "Si tres microservicios independientes funcionan cada uno con probabilidad 0.99, la probabilidad de que al menos uno falle es aproximadamente:", opts: ["0.01", "0.03", "0.99", "0.97"], ans: 1 }
+    const quizData = [
+        { question: "La probabilidad empírica se calcula como:", options: ["Casos favorables entre casos posibles", "Veces que ocurrió el evento entre el total de repeticiones", "P(A) · P(B)", "1 menos la probabilidad teórica"], correct: 1 },
+        { question: "La ley de los grandes números establece que la probabilidad empírica:", options: ["Siempre es igual a la teórica desde la primera repetición", "Se aleja más de la teórica cuantas más repeticiones hay", "Se acerca al valor teórico cuando aumenta el número de repeticiones", "No tiene relación con la probabilidad teórica"], correct: 2 },
+        { question: "En un sistema con componentes en serie, la probabilidad de que el sistema completo funcione es:", options: ["La suma de las confiabilidades individuales", "El producto de las confiabilidades individuales", "El promedio de las confiabilidades", "Siempre igual a 1"], correct: 1 },
+        { question: "En un sistema con respaldo (en paralelo), el sistema falla solo si:", options: ["Falla cualquiera de los componentes", "Fallan todos los componentes a la vez", "Falla el componente principal únicamente", "Nunca puede fallar"], correct: 1 },
+        { question: "En la tabla de retención de un videojuego, P(siguió jugando | completó tutorial) = 0.70 y P(siguió | no completó) = 0.20. Esto indica que completar el tutorial y seguir jugando son eventos:", options: ["Independientes", "Mutuamente excluyentes", "Dependientes", "Iguales"], correct: 2 },
+        { question: "Si tres microservicios independientes funcionan cada uno con probabilidad 0.99, la probabilidad de que al menos uno falle es aproximadamente:", options: ["0.01", "0.03", "0.99", "0.97"], correct: 1 }
     ];
 
+    const quizContainer = document.getElementById('quiz-container');
+
     function buildQuiz() {
-        const container = document.getElementById('quiz-container');
-        container.innerHTML = '';
-        questions.forEach((q, i) => {
+        quizContainer.innerHTML = '';
+        quizData.forEach((item, index) => {
             const div = document.createElement('div');
-            div.className = 'mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200';
-            div.innerHTML = `<p class="font-semibold text-slate-800 mb-3">${i + 1}. ${q.q}</p>
-            <div class="space-y-2">${q.opts.map((o, j) =>
-                `<label class="quiz-option flex items-center p-3 rounded-lg border-2 border-gray-200 cursor-pointer hover:bg-green-50 transition-colors">
-                    <input type="radio" name="q${i}" value="${j}" class="mr-3 accent-green-600">
-                    <span class="text-slate-700">${o}</span></label>`).join('')}</div>
-            <div class="feedback-${i} mt-2 text-sm font-medium hidden"></div>`;
-            container.appendChild(div);
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function () {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
         });
     }
     buildQuiz();
 
     document.getElementById('submit-quiz-btn').addEventListener('click', function () {
         let score = 0;
-        questions.forEach((q, i) => {
-            const sel = document.querySelector(`input[name="q${i}"]:checked`);
-            const fb = document.querySelector(`.feedback-${i}`);
-            if (sel) {
-                const val = parseInt(sel.value);
-                if (val === q.ans) { score++; fb.textContent = '✅ ¡Correcto!'; fb.className = `feedback-${i} mt-2 text-sm font-medium text-green-700`; }
-                else { fb.textContent = `❌ Incorrecto. Respuesta: "${q.opts[q.ans]}"`; fb.className = `feedback-${i} mt-2 text-sm font-medium text-red-700`; }
-                fb.classList.remove('hidden');
-            }
+        quizData.forEach((item, index) => {
+            const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+            if (selected && parseInt(selected.dataset.option) === item.correct) score++;
         });
-        const pct = Math.round((score / questions.length) * 100);
-        document.getElementById('quiz-result').innerHTML =
-            `<div class="p-4 rounded-lg ${pct >= 70 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-            Obtuviste <strong>${score} de ${questions.length}</strong> correctas (${pct}%).
-            ${pct >= 70 ? '🎉 ¡Excelente dominio del tema!' : '📚 Revisa el contenido e inténtalo de nuevo.'}</div>`;
+        const result = document.getElementById('quiz-result');
+        const pct = Math.round((score / quizData.length) * 100);
+        result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+        result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
         document.getElementById('submit-quiz-btn').classList.add('hidden');
         document.getElementById('reset-quiz-btn').classList.remove('hidden');
     });
+
     document.getElementById('reset-quiz-btn').addEventListener('click', function () {
-        document.getElementById('quiz-result').innerHTML = '';
+        document.getElementById('quiz-result').textContent = '';
         document.getElementById('submit-quiz-btn').classList.remove('hidden');
         document.getElementById('reset-quiz-btn').classList.add('hidden');
         buildQuiz();

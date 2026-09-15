@@ -551,22 +551,16 @@
             <div id="evaluacion" class="content-pane max-w-full mx-auto pb-28">
                 <div class="bg-white rounded-2xl shadow-lg border border-green-200 p-6 md:p-8 rounded-r-lg border-l-4 border-green-200 bg-white transition-all duration-300 hover:border-green-500 hover:shadow-md hover:shadow-green-100">
                     <h1 class="text-2xl md:text-3xl font-bold text-green-800 mb-2">Evaluación</h1>
-                    <p class="text-green-600 mb-6">Responde las 10 preguntas y presiona "Enviar respuestas" para ver tu retroalimentación.</p>
+                    <p class="text-green-600 mb-6">Responde las 5 preguntas y presiona "Finalizar evaluación" para ver tu resultado.</p>
 
-                    <form id="quizForm" class="space-y-6">
-                        <!-- Las preguntas se generan con JS -->
-                    </form>
+                    <div id="quiz-container"></div>
 
-                    <div id="alertMsg" class="hidden mt-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm"></div>
-
-                    <button id="submitBtn" type="button"
+                    <button id="submit-quiz-btn" type="button"
                         class="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors duration-200">
-                        Enviar respuestas
+                        Finalizar evaluación
                     </button>
 
-                    <div id="scoreBox" class="hidden mt-6 text-center bg-green-100 border border-green-300 rounded-xl py-4">
-                        <p class="text-green-800 font-bold text-lg" id="scoreText"></p>
-                    </div>
+                    <div id="quiz-result" class="mt-6 text-center text-lg font-bold"></div>
                 </div>
             </div>
             <!-- Recursos -->
@@ -682,16 +676,96 @@
 
     <script src="js/flip-card.js"></script>
     <script src="js/tabs.js"></script>
-    <script src="js/speech.js"></script>
     <script src="js/modal.js"></script>
     <script src="js/activities.js"></script>
-    <script src="js/quiz.js"></script>
     <script src="js/accordion.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/sopaletra.js"></script>
     <script src="js/actividad2.js"></script>
     <script src="js/relaciones-carousel.js"></script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué describe principalmente el modelo entidad-relación?",
+                options: [
+                    "Cómo se almacenan físicamente los datos en un SGBD específico",
+                    "La estructura lógica de la base de datos mediante entidades, atributos y relaciones",
+                    "El lenguaje SQL necesario para consultar la base de datos",
+                    "Las reglas de seguridad y acceso del sistema"
+                ],
+                correct: 1
+            },
+            {
+                question: "En el modelo E-R, ¿qué representa una entidad?",
+                options: [
+                    "Una característica o propiedad de un dato",
+                    "Un conjunto de objetos similares del dominio del problema",
+                    "Una operación que transforma datos",
+                    "Un tipo de relación entre tablas"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Qué tipo de atributo puede dividirse en partes más pequeñas con significado propio?",
+                options: ["Atributo simple", "Atributo compuesto", "Atributo monovaluado", "Atributo derivado"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál de los siguientes es un ejemplo de atributo multivaluado?",
+                options: ["Fecha de nacimiento", "Número de documento", "Números de teléfono de una persona", "Género"],
+                correct: 2
+            },
+            {
+                question: "¿Qué elemento del modelo E-R se dibuja habitualmente como un rombo?",
+                options: ["Entidad", "Atributo", "Relación", "Clave primaria"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-green-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function () {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-6 text-center text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
 </body>
 
 </html>

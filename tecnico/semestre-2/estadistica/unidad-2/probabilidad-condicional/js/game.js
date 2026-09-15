@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateScore() {
-        document.getElementById('game-score').textContent = `Puntaje: ${score} / ${total}`;
+        document.getElementById('game-score').textContent = `Puntos: ${score} / ${total}`;
     }
 
     function updateProgress() {
@@ -102,8 +102,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const pct = total > 0 ? Math.round((score / total) * 100) : 0;
         box.className = `mt-4 pop-in rounded-xl p-5 text-center border-2 ${pct >= 70 ? 'bg-green-50 border-green-600' : 'bg-amber-50 border-amber-500'}`;
         box.innerHTML = `
-            <p class="text-lg font-bold ${pct >= 70 ? 'text-green-800' : 'text-amber-800'}">Juego terminado</p>
-            <p class="text-sm text-slate-600 mt-1">Acertaste ${score} de ${total} casos (${pct}%).</p>`;
+            <p class="text-lg font-bold ${pct >= 70 ? 'text-green-800' : 'text-amber-800'}">Misión terminada</p>
+            <p class="text-sm text-slate-600 mt-1">Acertaste ${score} de ${total} casos (${pct}%) y sumaste ${score} puntos.</p>
+            ${pct >= 70
+                ? '<span class="inline-block mt-3 bg-green-600 text-white text-sm font-bold px-4 py-1.5 rounded-full">🏅 Insignia obtenida: Analista de Dependencias</span>'
+                : '<span class="inline-block mt-3 bg-slate-300 text-slate-700 text-sm font-bold px-4 py-1.5 rounded-full">🔒 Insignia bloqueada — consigue 70% para desbloquearla</span>'}`;
         box.classList.remove('hidden');
         document.getElementById('game-next-btn').classList.add('hidden');
     }
