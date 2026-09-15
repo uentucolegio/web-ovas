@@ -87,6 +87,11 @@ El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs
    node scripts/validar-ova.mjs
    ```
    Debe decir `✅ Validación OK`. Si marca errores, corrígelos.
+
+   > 🤖 **¿No eres técnico? Deja que un agente de IA lo arregle.** Cuando el validador
+   > encuentra problemas, al final imprime un bloque **"PARA CORREGIR CON UN AGENTE DE IA"**
+   > con un texto por cada OVA. **Copia el bloque de tu OVA y pégalo en tu agente de IA**: él
+   > hará los cambios. Luego vuelve a correr `node scripts/validar-ova.mjs` para confirmar.
 6. Crea una **rama**, haz commit y abre un **Pull Request** a `main`. Completa la lista de verificación del PR.
 7. El validador automático corre solo. Cuando pase y un responsable apruebe, se fusiona.
 
@@ -101,6 +106,13 @@ El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs
 
 ## Resumen de lo que el validador comprueba
 
+El validador reporta en **dos niveles**:
+
+- ❌ **Errores** → reglas obligatorias. Si alguna falla, **el PR no se puede fusionar**.
+- ⚠️ **Advertencias** → buenas prácticas de estilo (coherencia visual y didáctica). **No bloquean**, pero conviene revisarlas.
+
+### ❌ Errores (bloquean el PR)
+
 | Regla | Debe cumplirse |
 |---|---|
 | Ruta | `programa/semestre-N/materia/unidad-N/ova/` con slugs válidos |
@@ -110,3 +122,14 @@ El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs
 | Créditos | footer de CINTIA / Universidad de Córdoba |
 | Accesibilidad | plugin `elens.js` presente |
 | QR | locales en `img/`, sin `api.qrserver.com` |
+| Tipografía | usar la fuente institucional **Poppins** |
+| Paleta | usar la identidad visual (verde `green-*` / `slate-*`) |
+
+### ⚠️ Advertencias de estilo (no bloquean)
+
+| Regla | Se recomienda |
+|---|---|
+| Título | que el `<title>` empiece con `OVA: …` |
+| Gamificación | incluir puntos, misiones, insignias o progreso (Contenido y Actividades) |
+| Voz | no duplicar lectura por voz propia (`speechSynthesis`): ya la aporta `elens.js` |
+| Evaluación | cuestionario `quizData` con **≥ 5 preguntas** |
