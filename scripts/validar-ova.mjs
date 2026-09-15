@@ -57,6 +57,22 @@ function encontrarOvas(dir, acc = []) {
   return acc;
 }
 
+/**
+ * Devuelve el trozo de HTML de una sección: desde su id="<sec>" hasta donde
+ * empieza la siguiente sección (o el final). Sirve para revisar el diseño de
+ * una sección concreta (ej: que Objetivos sea una lista y no tarjetas).
+ */
+function contenidoSeccion(html, sec) {
+  const m = new RegExp(`id=["']${sec}["']`).exec(html);
+  if (!m) return '';
+  const rest = html.slice(m.index + 5);
+  const next = /id=["'](introduccion|objetivos|contenido|actividades|evaluacion|recursos|bibliografia)["']/.exec(rest);
+  return next ? html.slice(m.index, m.index + 5 + next.index) : html.slice(m.index);
+}
+
+/** Texto plano de un fragmento HTML (sin etiquetas, espacios colapsados). */
+const aTexto = (frag) => frag.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
 // --- Validación -----------------------------------------------------------
 const ovas = encontrarOvas(ROOT);
 
@@ -202,6 +218,62 @@ for (const dir of ovas) {
       'No se encontró la autoevaluación (el arreglo "quizData") en la sección de evaluación.',
       'Implementa el cuestionario con un arreglo quizData de al menos 5 preguntas. Puedes guiarte por el _template.');
   }
+
+  // === REGLAS DE ESTILO — SEGUNDO LOTE (estructura y diseño de secciones) ===
+  // Trabajamos sobre htmlSinComentarios para no reaccionar a bloques comentados
+  // ni a los ejemplos entre corchetes de las cajas de instrucciones al docente.
+  const secObjetivos = contenidoSeccion(htmlSinComentarios, 'objetivos');
+  const secRecursos  = contenidoSeccion(htmlSinComentarios, 'recursos');
+  const secBiblio    = contenidoSeccion(htmlSinComentarios, 'bibliografia');
+
+  // E7) Orden correcto de las 7 secciones (intro → objetivos → … → bibliografia).
+  const posiciones = SECCIONES
+    .map(s => { const m = new RegExp(`id=["']${s}["']`).exec(html); return m ? m.index : -1; })
+    .filter(i => i >= 0);
+  if (posiciones.some((p, i) => i > 0 && p < posiciones[i - 1]))
+    err(rel,
+      'Las 7 secciones no están en el orden correcto dentro de la página.',
+      `Ordénalas así (de arriba a abajo): ${SECCIONES.join(' → ')}.`);
+
+  // E8) Objetivos como LISTA, no como tarjetas (error común: convertir a cards).
+  if (secObjetivos && !(/<ul/i.test(secObjetivos) && /<li/i.test(secObjetivos)))
+    warn(rel,
+      'La sección Objetivos no usa una lista (<ul> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
+      'Deja los objetivos como lista: <ul class="space-y-4"> con un <li> por objetivo, tal como en _template/index.html.');
+
+  // E9) Objetivos NO centrados (error común: centran el texto de la sección).
+  if (/\btext-center\b/.test(secObjetivos))
+    err(rel,
+      'La sección Objetivos está centrada (usa la clase text-center). Los objetivos deben ir alineados a la izquierda.',
+      'Quita la clase text-center de la sección Objetivos y usa la lista con "flex items-start", como en _template/index.html.');
+
+  // E10) Recursos como LISTA, no como tarjetas.
+  if (secRecursos && !(/<ul/i.test(secRecursos) && /<li/i.test(secRecursos)))
+    warn(rel,
+      'La sección Recursos no usa una lista (<ul> con <li>). Parece que se cambió el diseño de lista a tarjetas.',
+      'Deja los recursos como lista: <ul class="space-y-4"> con un <li> por recurso, tal como en _template/index.html.');
+
+  // E11) Bibliografía con entradas reales (no vacía).
+  const bibTexto = aTexto(secBiblio).replace(/^.*?Bibliograf[íi]a/i, '').trim();
+  if (secBiblio && bibTexto.length < 40)
+    err(rel,
+      'La sección Bibliografía está vacía o casi vacía.',
+      'Agrega al menos una referencia real (autor, año, título y fuente/URL) dentro de la sección Bibliografía.');
+
+  // E12) Sin texto de relleno ni marcadores de la plantilla sin completar.
+  const RELLENO = /(lorem ipsum|\bFIXME\b|\[TODO\]|\bx{4,}\b|\[por completar\]|pendiente de contenido|contenido pendiente)/i;
+  const PLANTILLA = /\[(?:Objetivo \d|Nombre del recurso \d|Descripci[oó]n breve del recurso\]|Apellido\]|T[íi]tulo del libro|Editorial o URL\]|Inicial\]|A[ñn]o\])/i;
+  if (RELLENO.test(htmlSinComentarios) || PLANTILLA.test(htmlSinComentarios))
+    err(rel,
+      'El OVA tiene texto de relleno o marcadores de la plantilla sin completar (ej: "Lorem ipsum", "xxxx", "[Objetivo 1]", "[Apellido]").',
+      'Reemplaza todos esos textos de ejemplo por el contenido real del OVA.');
+
+  // E13) Objetivos redactados con verbos de aprendizaje (taxonomía SOLO). Aproximado.
+  const VERBOS_SOLO = /\b(identificar|reconocer|definir|enumerar|listar|nombrar|describir|comprender|explicar|clasificar|comparar|relacionar|analizar|aplicar|resolver|calcular|implementar|construir|dise[ñn]ar|evaluar|argumentar|justificar|crear|desarrollar|distinguir|interpretar|demostrar|utilizar|emplear|configurar|gestionar|administrar|programar|modelar)\b/i;
+  if (secObjetivos && !VERBOS_SOLO.test(aTexto(secObjetivos)))
+    warn(rel,
+      'Los objetivos no parecen redactarse con un verbo de aprendizaje (taxonomía SOLO).',
+      'Redacta cada objetivo iniciando con un verbo en infinitivo (ej: Identificar…, Explicar…, Aplicar…, Diseñar…).');
 }
 
 // --- Presentación de resultados ------------------------------------------

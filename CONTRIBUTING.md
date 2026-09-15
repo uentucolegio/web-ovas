@@ -124,6 +124,10 @@ El validador reporta en **dos niveles**:
 | QR | locales en `img/`, sin `api.qrserver.com` |
 | Tipografía | usar la fuente institucional **Poppins** |
 | Paleta | usar la identidad visual (verde `green-*` / `slate-*`) |
+| Orden | las 7 secciones en orden: introducción → objetivos → contenido → actividades → evaluación → recursos → bibliografía |
+| Objetivos | alineados a la izquierda (**sin** `text-center`) |
+| Bibliografía | con al menos una referencia real (no vacía) |
+| Sin relleno | sin texto de ejemplo ni marcadores de plantilla sin completar (`Lorem ipsum`, `[Objetivo 1]`, `[Apellido]`…) |
 
 ### ⚠️ Advertencias de estilo (no bloquean)
 
@@ -133,3 +137,6 @@ El validador reporta en **dos niveles**:
 | Gamificación | incluir puntos, misiones, insignias o progreso (Contenido y Actividades) |
 | Voz | no duplicar lectura por voz propia (`speechSynthesis`): ya la aporta `elens.js` |
 | Evaluación | cuestionario `quizData` con **≥ 5 preguntas** |
+| Objetivos (diseño) | mantener el diseño de **lista** (`<ul>`/`<li>`), no convertirlo en tarjetas |
+| Recursos (diseño) | mantener el diseño de **lista** (`<ul>`/`<li>`), no convertirlo en tarjetas |
+| Objetivos (redacción) | redactar cada objetivo con un verbo de aprendizaje (taxonomía SOLO: Identificar, Explicar, Aplicar…) |
