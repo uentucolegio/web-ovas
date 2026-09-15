@@ -99,6 +99,13 @@ El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs
 
 ## Resumen de lo que el validador comprueba
 
+El validador reporta en **dos niveles**:
+
+- ❌ **Errores** → reglas obligatorias. Si alguna falla, **el PR no se puede fusionar**.
+- ⚠️ **Advertencias** → buenas prácticas de estilo (coherencia visual y didáctica). **No bloquean**, pero conviene revisarlas.
+
+### ❌ Errores (bloquean el PR)
+
 | Regla | Debe cumplirse |
 |---|---|
 | Ruta | `programa/semestre-N/materia/unidad-N/ova/` con slugs válidos |
@@ -108,3 +115,14 @@ El CDN de Tailwind (`cdn.tailwindcss.com`) quedó descontinuado y rompe los OVAs
 | Créditos | footer de CINTIA / Universidad de Córdoba |
 | Accesibilidad | plugin `elens.js` presente |
 | QR | locales en `img/`, sin `api.qrserver.com` |
+
+### ⚠️ Advertencias de estilo (no bloquean)
+
+| Regla | Se recomienda |
+|---|---|
+| Tipografía | usar la fuente institucional **Poppins** |
+| Título | que el `<title>` empiece con `OVA: …` |
+| Paleta | usar la identidad visual (verde `green-*` / `slate-*`) |
+| Gamificación | incluir puntos, misiones, insignias o progreso (Contenido y Actividades) |
+| Voz | no duplicar lectura por voz propia (`speechSynthesis`): ya la aporta `elens.js` |
+| Evaluación | cuestionario `quizData` con **≥ 5 preguntas** |
