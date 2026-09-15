@@ -120,14 +120,14 @@ El validador reporta en **dos niveles**:
 | Créditos | footer de CINTIA / Universidad de Córdoba |
 | Accesibilidad | plugin `elens.js` presente |
 | QR | locales en `img/`, sin `api.qrserver.com` |
+| Tipografía | usar la fuente institucional **Poppins** |
+| Paleta | usar la identidad visual (verde `green-*` / `slate-*`) |
 
 ### ⚠️ Advertencias de estilo (no bloquean)
 
 | Regla | Se recomienda |
 |---|---|
-| Tipografía | usar la fuente institucional **Poppins** |
 | Título | que el `<title>` empiece con `OVA: …` |
-| Paleta | usar la identidad visual (verde `green-*` / `slate-*`) |
 | Gamificación | incluir puntos, misiones, insignias o progreso (Contenido y Actividades) |
 | Voz | no duplicar lectura por voz propia (`speechSynthesis`): ya la aporta `elens.js` |
 | Evaluación | cuestionario `quizData` con **≥ 5 preguntas** |

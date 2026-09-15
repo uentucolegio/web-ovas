@@ -142,16 +142,18 @@ for (const dir of ovas) {
       'Reemplaza cada QR por una imagen local guardada en la carpeta img/ (ej: <img src="img/qr-1.png">). Genera esos PNG con la librería de Python "qrcode".');
 
   // === REGLAS DE ESTILO (Nivel A, deterministas) ==========================
-  // Son ADVERTENCIAS: informan buenas prácticas de coherencia visual y
-  // didáctica sin bloquear el PR. Se pueden promover a error en el futuro.
+  // Casi todas son ADVERTENCIAS (informan sin bloquear el PR). Dos ya se
+  // promovieron a ERROR porque los 25 OVAs actuales las cumplen al 100% y son
+  // identidad visual innegociable: E1 (Poppins) y E3 (paleta verde/slate).
+  // El resto puede promoverse a error cuando el repo las cumpla por completo.
 
   // Trabajamos sobre el HTML sin comentarios para no dar falsos positivos.
   const htmlSinComentarios = html.replace(/<!--[\s\S]*?-->/g, '');
 
-  // E1) Tipografía institucional: Poppins.
+  // E1) Tipografía institucional: Poppins (OBLIGATORIA).
   if (!/Poppins/i.test(html))
-    warn(rel,
-      'No se usa la tipografía institucional Poppins. Los OVAs deben verse consistentes entre sí.',
+    err(rel,
+      'No se usa la tipografía institucional Poppins. Es obligatoria para que todos los OVAs se vean consistentes.',
       "Carga la fuente Poppins (Google Fonts) y aplícala al <body> con font-family: 'Poppins', sans-serif.");
 
   // E2) Título del documento con el prefijo "OVA:".
@@ -162,11 +164,11 @@ for (const dir of ovas) {
       `El título de la página no empieza con "OVA:". Actual: ${titulo ? `"${titulo}"` : '(vacío)'}.`,
       'Cambia el <title> para que empiece con "OVA: " seguido del tema. Ejemplo: <title>OVA: ¿Qué es la nube?</title>.');
 
-  // E3) Paleta de marca (verde / slate). Buscamos que use al menos clases verdes.
+  // E3) Paleta de marca (verde / slate) OBLIGATORIA. Exigimos al menos clases verdes.
   if (!/\b(?:text|bg|border|from|to|via)-green-\d{2,3}\b/.test(htmlSinComentarios))
-    warn(rel,
-      'No se detecta la paleta de color institucional (verde / gris slate).',
-      'Usa clases de color de la marca, como text-green-800, bg-green-700 o border-slate-200, para respetar la identidad visual.');
+    err(rel,
+      'No se detecta la paleta de color institucional (verde / gris slate). Es obligatoria para respetar la identidad visual.',
+      'Usa clases de color de la marca, como text-green-800, bg-green-700 o border-slate-200.');
 
   // E4) Gamificación en Contenido y Actividades (obligatoria por CONTRIBUTING).
   const GAMIFICACION = /(gamificaci[oó]n|misi[oó]n|misiones|insignia|medalla|logro|puntos?|nivel(?:es)?|progreso|desaf[ií]o|reto|racha|recompensa|\bXP\b|ranking|tablero)/i;
