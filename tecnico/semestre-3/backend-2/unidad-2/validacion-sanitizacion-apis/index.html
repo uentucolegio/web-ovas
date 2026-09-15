@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Validación y sanitización de datos en APIs</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .stars { color: #fbbf24; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .code-block { background: #1e293b; color: #e2e8f0; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; font-family: monospace; font-size: 0.875rem; }
+        .timer { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<div class="flex min-h-screen">
+
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+        <div class="p-4">
+            <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+        </div>
+        <nav class="mt-6 flex-1">
+            <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+        <div class="md:hidden mb-6 flex flex-col items-center">
+            <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+            <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                <option value="introduccion">🚀 Introducción</option>
+                <option value="objetivos">🎯 Objetivos</option>
+                <option value="contenido">📚 Contenido</option>
+                <option value="actividades">✍️ Actividades</option>
+                <option value="evaluacion">✔️ Evaluación</option>
+                <option value="recursos">📖 Recursos</option>
+                <option value="bibliografia">📚 Bibliografía</option>
+            </select>
+        </div>
+
+        <div id="introduccion" class="content-pane active">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">La frontera segura de una API 🛡️</h2>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                En una aplicación moderna, las API REST son el principal puente de comunicación entre clientes, apps móviles, servicios web y bases de datos. Cada solicitud trae datos: nombres, correos, identificadores, búsquedas, archivos… y, a veces, sorpresas no deseadas.
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                Un error común es pensar que si el formulario se ve bonito, los datos que llegan al servidor también son limpios. Spoiler: no siempre. Un atacante puede usar herramientas como Postman o Insomnia para enviar exactamente lo que tú no esperabas. Por eso la verdadera frontera de seguridad no está en la pantalla del usuario, sino en el servidor.
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                Aquí aprenderás a no confiar ciegamente, a validar antes de aceptar y a sanitizar antes de usar. Será como ponerle un detector de metales a cada dato que entra a tu API.
+            </p>
+            <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                <p class="text-green-800">
+                    <span class="text-xl">✨</span> Cada dato recibido es un desconocido hasta que demuestre ser confiable. Aprende a proteger tu API desde la primera línea de defensa. <span class="text-xl">🚀</span>
+                </p>
+            </div>
+        </div>
+
+        <div id="objetivos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje 🎯</h2>
+            <ul class="space-y-4">
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                    <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                    <span>Comprender la importancia de validar y sanitizar la información recibida por una API REST como parte de una estrategia de seguridad.</span>
+                </li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                    <span class="text-green-700 mr-3 text-2xl">💡</span>
+                    <span>Aplicar buenas prácticas para prevenir vulnerabilidades ocasionadas por entradas de datos no confiables mediante mecanismos de validación, listas blancas y consultas seguras.</span>
+                </li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                    <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                    <span>Integrar procesos de validación y sanitización dentro del flujo de procesamiento de una API REST para mejorar su robustez y confiabilidad.</span>
+                </li>
+            </ul>
+        </div>
+
+        <div id="contenido" class="content-pane">
+            <div class="w-full max-w-8xl mx-auto">
+
+                <div class="mb-6 bg-green-100 border border-green-300 rounded-lg p-4 flex flex-wrap items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🏆</span>
+                        <div>
+                            <p class="font-bold text-green-800">Progreso en el contenido</p>
+                            <div class="w-48 bg-green-200 rounded-full h-2.5 mt-1">
+                                <div id="progress-bar" class="bg-green-600 h-2.5 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 sm:mt-0 text-right">
+                        <p class="text-green-800 font-bold text-lg"><span id="global-points">0</span> puntos</p>
+                        <p class="text-green-700 text-sm">Insignias: <span id="badges-list">ninguna</span></p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                        <span>🎭 Ataques que llegan disfrazados</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-1-contenido" class="content-section">
+                            <p class="mb-4">Antes de defender una API, conviene saber quién ataca. Los datos maliciosos pueden explotar validaciones deficientes de muchas formas. A continuación verás escenarios reales: lee con atención y adivina qué tipo de ataque intenta colarse.</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="attack-card p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:shadow-md transition" data-attack="xss">
+                                    <p class="font-semibold text-green-700 mb-2">Escenario 1</p>
+                                    <p class="text-sm text-slate-600">Un usuario envía su nombre así: <code class="bg-slate-100 px-1 rounded">&lt;script&gt;alert('hackeado')&lt;/script&gt;</code>. Si se guarda y luego se muestra en la web, el navegador ejecuta el código.</p>
+                                    <p class="hidden mt-2 text-sm font-semibold text-green-800 attack-answer"></p>
+                                </div>
+                                <div class="attack-card p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:shadow-md transition" data-attack="sql">
+                                    <p class="font-semibold text-green-700 mb-2">Escenario 2</p>
+                                    <p class="text-sm text-slate-600">Un cliente envía como correo: <code class="bg-slate-100 px-1 rounded">' OR '1'='1</code>. Si se concatena directo a una consulta SQL, puede devolver todos los usuarios.</p>
+                                    <p class="hidden mt-2 text-sm font-semibold text-green-800 attack-answer"></p>
+                                </div>
+                                <div class="attack-card p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:shadow-md transition" data-attack="nosql">
+                                    <p class="font-semibold text-green-700 mb-2">Escenario 3</p>
+                                    <p class="text-sm text-slate-600">En una API con MongoDB, el cuerpo de la petición envía <code class="bg-slate-100 px-1 rounded">{"$gt": ""}</code> para un campo de autenticación y logra pasar el filtro.</p>
+                                    <p class="hidden mt-2 text-sm font-semibold text-green-800 attack-answer"></p>
+                                </div>
+                                <div class="attack-card p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:shadow-md transition" data-attack="command">
+                                    <p class="font-semibold text-green-700 mb-2">Escenario 4</p>
+                                    <p class="text-sm text-slate-600">Una app permite subir archivos y ejecuta un comando del sistema con el nombre del archivo. El atacante envía: <code class="bg-slate-100 px-1 rounded">foto.jpg; rm -rf /</code>.</p>
+                                    <p class="hidden mt-2 text-sm font-semibold text-green-800 attack-answer"></p>
+                                </div>
+                            </div>
+
+                            <div id="attack-feedback" class="hidden mt-4 p-3 rounded-lg font-semibold text-sm"></div>
+
+                            <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-green-800"><span class="font-bold">💡 Recuerda:</span> la validación empieza por reconocer el riesgo. Cada ataque aprovecha que confiamos demasiado en los datos recibidos.</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                        <span>✅ Validación: comprobar antes de aceptar</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-2-contenido" class="content-section">
+                            <p class="mb-4">Validar es decirle a la API: "antes de usar esto, demuéstrame que cumple las reglas". Las reglas dependen del campo: un correo no puede ser igual que una edad, y un precio no puede ser negativo.</p>
+
+                            <div class="bg-white border border-slate-200 rounded-lg p-4 mb-4">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-green-100 text-green-800 font-semibold">
+                                        <tr>
+                                            <th class="p-2 rounded-tl-lg">Campo</th>
+                                            <th class="p-2 rounded-tr-lg">Regla de validación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-slate-700">
+                                        <tr class="border-b border-slate-100"><td class="p-2">Nombre</td><td class="p-2">No vacío y longitud máxima</td></tr>
+                                        <tr class="border-b border-slate-100"><td class="p-2">Correo</td><td class="p-2">Formato válido</td></tr>
+                                        <tr class="border-b border-slate-100"><td class="p-2">Edad</td><td class="p-2">Número entero positivo</td></tr>
+                                        <tr class="border-b border-slate-100"><td class="p-2">Precio</td><td class="p-2">Valor decimal mayor que cero</td></tr>
+                                        <tr><td class="p-2">Estado</td><td class="p-2">Solo valores previamente definidos</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p class="mb-4">Existen distintas técnicas. Tu misión es clasificar cada una. Lee la tarjeta y elige el grupo al que pertenece:</p>
+
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4">
+                                <p id="validation-card" class="font-semibold text-green-800 mb-3 text-center">Haz clic en "Nueva tarjeta" para empezar</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <button class="validation-answer w-full p-2 border rounded-lg hover:bg-green-100 transition" data-group="whitelist">Lista blanca</button>
+                                    <button class="validation-answer w-full p-2 border rounded-lg hover:bg-green-100 transition" data-group="blacklist">Lista negra</button>
+                                    <button class="validation-answer w-full p-2 border rounded-lg hover:bg-green-100 transition" data-group="schema">Esquema JSON</button>
+                                    <button class="validation-answer w-full p-2 border rounded-lg hover:bg-green-100 transition" data-group="regex">Expresión regular</button>
+                                </div>
+                                <button id="new-validation-card" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition">Nueva tarjeta 🎲</button>
+                                <div id="validation-feedback" class="mt-3 text-sm font-semibold"></div>
+                            </div>
+
+                            <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-green-800"><span class="font-bold">💡 Tip:</span> preferir listas blancas y esquemas. Las listas negras son como intentar enumerar todos los trucos de los atacantes: nunca termina.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                        <span>🧼 Sanitización: limpiar antes de utilizar</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-3-contenido" class="content-section">
+                            <p class="mb-4">Un dato puede ser válido funcionalmente y aún así peligroso. Imagina un nombre como <code class="bg-slate-100 px-1 rounded">Juan &lt;script&gt;alert('x')&lt;/script&gt;</code>: pasa la validación de "no vacío", pero al mostrarse ejecuta código. Ahí entra la sanitización.</p>
+
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4">
+                                <p class="font-semibold text-green-800 mb-2">Máquina de limpieza 🧼</p>
+                                <p class="text-sm text-slate-600 mb-2">Escribe una entrada sospechosa y elige qué técnica de sanitización aplicar. Verás el resultado limpio.</p>
+                                <input id="dirty-input" type="text" class="w-full p-2 border rounded-lg mb-3" placeholder="Ej: Hola <script>alert('x')</script> mundo" value="Hola <script>alert('x')</script> mundo">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                                    <button class="sanitize-btn p-2 border rounded hover:bg-green-100" data-method="strip">Eliminar etiquetas HTML</button>
+                                    <button class="sanitize-btn p-2 border rounded hover:bg-green-100" data-method="escape">Escapar caracteres HTML</button>
+                                    <button class="sanitize-btn p-2 border rounded hover:bg-green-100" data-method="trim">Quitar espacios</button>
+                                    <button class="sanitize-btn p-2 border rounded hover:bg-green-100" data-method="lower">Convertir a minúsculas</button>
+                                </div>
+                                <div class="code-block mb-2">
+                                    <span id="sanitized-output" class="text-green-400">El resultado aparecerá aquí...</span>
+                                </div>
+                                <p id="sanitize-feedback" class="text-sm font-semibold"></p>
+                            </div>
+
+                            <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-green-800"><span class="font-bold">💡 Recuerda:</span> validar y sanitizar no se excluyen. El flujo ideal es <strong>validar → sanitizar → usar</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                        <span>🔄 El flujo completo: validar, sanitizar, verificar</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-4-contenido" class="content-section">
+                            <p class="mb-4">Una API robusta repite el ritual cada vez que recibe datos: verifica, limpia y vuelve a verificar. Si algo falla, rechaza la solicitud con un mensaje claro. Si todo está bien, avanza.</p>
+
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4">
+                                <p class="font-semibold text-green-800 mb-3">Ordena el flujo correcto:</p>
+                                <p class="text-sm text-slate-600 mb-3">Haz clic en cada paso en el orden correcto.</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3" id="flow-options">
+                                    <button class="flow-step p-2 bg-white border rounded hover:bg-green-100" data-step="validar">Validar</button>
+                                    <button class="flow-step p-2 bg-white border rounded hover:bg-green-100" data-step="sanitizar">Sanitizar</button>
+                                    <button class="flow-step p-2 bg-white border rounded hover:bg-green-100" data-step="verificar">Verificar</button>
+                                    <button class="flow-step p-2 bg-white border rounded hover:bg-green-100" data-step="usar">Usar dato</button>
+                                </div>
+                                <div id="flow-assembly" class="p-3 bg-white border rounded min-h-[3rem] flex items-center gap-2 flex-wrap"></div>
+                                <button id="flow-reset" class="mt-2 text-sm text-slate-600 underline">Reiniciar orden</button>
+                                <p id="flow-feedback" class="mt-2 text-sm font-semibold"></p>
+                            </div>
+
+                            <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Describe con tus palabras el flujo de validación y sanitización que usarías para registrar un producto en una API de comercio electrónico.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="actividades" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Misiones de campo 🎮</h2>
+            <p class="text-slate-700 mb-6">Completa las misiones para convertirte en un guardián de datos. Cada misión desbloquea conocimiento y puntos.</p>
+
+            <div class="mb-6 bg-blue-50 border border-blue-300 rounded-lg p-4 flex items-center justify-between">
+                <div>
+                    <p class="font-bold text-blue-800">Puntos de misiones</p>
+                    <div class="w-48 bg-blue-200 rounded-full h-2.5 mt-1">
+                        <div id="mission-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-blue-800"><span id="mission-points">0</span> ⭐</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🧮 Misión 1: Calculadora de riesgo</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Una entrada puede ser más o menos peligrosa según su origen, su longitud, el uso de caracteres especiales y su destino. Ajusta los factores y descubre el nivel de riesgo.</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">¿De dónde viene el dato?</label>
+                                <select id="risk-source" class="w-full p-2 border rounded">
+                                    <option value="1">Desde un formulario interno</option>
+                                    <option value="2">Desde un cliente de terceros</option>
+                                    <option value="3">Desde un archivo subido por usuario</option>
+                                    <option value="4">Desde una petición abierta en internet</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué tan largo es?</label>
+                                <select id="risk-length" class="w-full p-2 border rounded">
+                                    <option value="1">Menos de 50 caracteres</option>
+                                    <option value="2">Entre 50 y 200 caracteres</option>
+                                    <option value="3">Entre 200 y 1000 caracteres</option>
+                                    <option value="4">Más de 1000 caracteres o tamaño desconocido</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">¿Incluye caracteres especiales o código?</label>
+                                <select id="risk-chars" class="w-full p-2 border rounded">
+                                    <option value="1">Solo letras y números</option>
+                                    <option value="2">Algunos símbolos como guiones</option>
+                                    <option value="3">Comillas, punto y coma, paréntesis</option>
+                                    <option value="4">Etiquetas HTML, scripts o comandos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">¿A dónde va el dato?</label>
+                                <select id="risk-dest" class="w-full p-2 border rounded">
+                                    <option value="1">Se muestra en pantalla sin consultas</option>
+                                    <option value="2">Se almacena en base de datos con consultas parametrizadas</option>
+                                    <option value="3">Se usa en consulta SQL concatenada</option>
+                                    <option value="4">Se ejecuta en comando del sistema</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="calc-risk" class="mt-4 w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition">Calcular riesgo 📊</button>
+                        <div id="risk-result" class="mt-3 p-3 rounded-lg font-semibold text-sm hidden"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🔎 Misión 2: Inspector de campos</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Lee cada campo y elige si la regla de validación es correcta. Cada respuesta acertada suma puntos.</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                        <div id="inspector-question" class="font-semibold text-slate-800 mb-3">Cargando pregunta...</div>
+                        <div id="inspector-options" class="space-y-2"></div>
+                        <div id="inspector-feedback" class="mt-3 text-sm font-semibold"></div>
+                        <button id="next-inspector" class="mt-3 hidden w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition">Siguiente pregunta ➡️</button>
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🐛 Misión 3: Caza de errores</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Mira los siguientes fragmentos de código y señala qué vulnerabilidad permite cada uno. ¡Solo el ojo experto las encuentra todas!</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4 space-y-4">
+                        <div class="bug-code p-3 bg-white border rounded">
+                            <p class="text-sm font-mono text-slate-700">const query = `SELECT * FROM users WHERE email = '${req.body.email}'`;</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="0" data-answer="sql">SQL Injection</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="0" data-answer="xss">XSS</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="0" data-answer="none">Ninguna</button>
+                            </div>
+                            <p class="bug-feedback mt-2 text-sm font-semibold"></p>
+                        </div>
+                        <div class="bug-code p-3 bg-white border rounded">
+                            <p class="text-sm font-mono text-slate-700">res.send(`Hola, ${req.body.nombre}`);</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="1" data-answer="xss">XSS</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="1" data-answer="sql">SQL Injection</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="1" data-answer="none">Ninguna</button>
+                            </div>
+                            <p class="bug-feedback mt-2 text-sm font-semibold"></p>
+                        </div>
+                        <div class="bug-code p-3 bg-white border rounded">
+                            <p class="text-sm font-mono text-slate-700">exec(`convert ${req.body.filename} output.png`);</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="2" data-answer="command">Command Injection</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="2" data-answer="path">Path Traversal</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="2" data-answer="none">Ninguna</button>
+                            </div>
+                            <p class="bug-feedback mt-2 text-sm font-semibold"></p>
+                        </div>
+                        <div class="bug-code p-3 bg-white border rounded">
+                            <p class="text-sm font-mono text-slate-700">db.users.find({ email: req.body.email });</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="3" data-answer="nosql">NoSQL Injection</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="3" data-answer="sql">SQL Injection</button>
+                                <button class="bug-answer px-3 py-1 bg-white border rounded hover:bg-green-100" data-question="3" data-answer="none">Ninguna</button>
+                            </div>
+                            <p class="bug-feedback mt-2 text-sm font-semibold"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">⏱️ Misión 4: Quiz contra reloj</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Responde el mayor número de preguntas antes de que termine el tiempo. Cada acierto suma, cada error resta un poco de tiempo.</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-bold text-slate-800">Tiempo: <span id="time-attack-timer" class="timer text-red-600 font-mono text-xl">60</span>s</span>
+                            <button id="start-time-attack" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Iniciar ⏱️</button>
+                        </div>
+                        <div id="time-attack-question" class="font-semibold text-slate-800 mb-3">Haz clic en "Iniciar" para comenzar.</div>
+                        <div id="time-attack-options" class="space-y-2"></div>
+                        <div id="time-attack-feedback" class="mt-3 text-sm font-semibold"></div>
+                        <p id="time-attack-score" class="mt-3 text-lg font-bold text-green-700 hidden"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="evaluacion" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <p class="text-slate-600">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div class="mt-2 sm:mt-0 bg-green-100 text-green-800 font-bold px-4 py-2 rounded-lg">
+                        ⏱️ <span id="quiz-timer" class="timer">00:00</span>
+                    </div>
+                </div>
+                <div id="quiz-container"></div>
+                <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+            </div>
+        </div>
+
+        <div id="recursos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+            <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+            <ul class="space-y-4">
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Documentación oficial de Express.js</h3>
+                        <p class="text-slate-600 mb-2">Guía oficial del framework Node.js para construir aplicaciones web y APIs REST, incluyendo middleware y manejo de rutas.</p>
+                        <a href="https://expressjs.com" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-1.png" alt="QR Documentación oficial de Express.js" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Documentación oficial de OWASP Top 10</h3>
+                        <p class="text-slate-600 mb-2">Lista de las 10 vulnerabilidades más críticas en aplicaciones web, con ejemplos y recomendaciones de mitigación.</p>
+                        <a href="https://owasp.org/www-project-top-ten/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-2.png" alt="QR Documentación oficial de OWASP Top 10" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Documentación oficial de Sequelize</h3>
+                        <p class="text-slate-600 mb-2">Documentación del ORM para Node.js que facilita consultas seguras y validaciones estructuradas a la base de datos.</p>
+                        <a href="https://sequelize.org" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-3.png" alt="QR Documentación oficial de Sequelize" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="bibliografia" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Cevallos Muñoz, F. D. (2022). Propuesta de buenas prácticas de seguridad para creación, transporte y almacenamiento de JSON Web Tokens (Tesis de maestría, Pontificia Universidad Católica del Ecuador, Sede Ambato). (pp. 42-44, 47).<br>
+                        <a href="https://scholar.google.com/scholar?q=Propuesta+de+buenas+pr%C3%A1cticas+de+seguridad+para+creaci%C3%B3n+transporte+y+almacenamiento+de+JSON+Web+Tokens" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Propuesta+de+buenas+pr%C3%A1cticas+de+seguridad+para+creaci%C3%B3n+transporte+y+almacenamiento+de+JSON+Web+Tokens</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Leones Zambrano, W. P., Macías Bazurto, L. M., Pilla Zúñiga, W. I., y Fernández Sánchez, E. G. (2024). Diseño estratégico de APIs escalables y seguras para la integración de sistemas y aplicaciones. Ciencia Latina Revista Científica Multidisciplinar, 8(5), 13395-13408.<br>
+                        <a href="https://scholar.google.com/scholar?q=Dise%C3%B1o+estrat%C3%A9gico+de+APIs+escalables+y+seguras+para+la+integraci%C3%B3n+de+sistemas+y+aplicaciones" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Dise%C3%B1o+estrat%C3%A9gico+de+APIs+escalables+y+seguras+para+la+integraci%C3%B3n+de+sistemas+y+aplicaciones</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Ramírez Patajalo, G. A. (2023). Seguridad en desarrollo web: mejores prácticas para proteger aplicaciones y datos. Dominio de las Ciencias, 9(3), 2219-2229.<br>
+                        <a href="https://scholar.google.com/scholar?q=Seguridad+en+desarrollo+web+mejores+pr%C3%A1cticas+para+proteger+aplicaciones+y+datos" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Seguridad+en+desarrollo+web+mejores+pr%C3%A1cticas+para+proteger+aplicaciones+y+datos</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Ruiz Barea, R. (2023). Protección de APIs REST [Trabajo Fin de Máster, Universitat Oberta de Catalunya]. Repositorio O2 UOC.<br>
+                        <a href="https://scholar.google.com/scholar?q=Protecci%C3%B3n+de+APIs+REST+Ruiz+Barea" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Protecci%C3%B3n+de+APIs+REST+Ruiz+Barea</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+            <p class="text-slate-600 font-medium">Creado por:</p>
+            <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+            <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+        </footer>
+
+    </main>
+</div>
+
+<script>
+    // Navegación
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.dataset.target;
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(target).classList.add('active');
+            this.classList.add('active');
+        });
+    });
+
+    document.getElementById('mobile-nav').addEventListener('change', function() {
+        document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById(this.value).classList.add('active');
+    });
+
+    // Acordeones
+    document.querySelectorAll('.accordion-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const panel = document.querySelector(targetId);
+            const icon = this.querySelector('span:last-child');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                icon.textContent = '➖';
+            } else {
+                panel.classList.add('hidden');
+                icon.textContent = '➕';
+            }
+        });
+    });
+
+    // Gamificación global
+    let globalPoints = 0;
+    const badges = new Set();
+    const completedAccordions = new Set();
+
+    function addPoints(amount) {
+        globalPoints += amount;
+        document.getElementById('global-points').textContent = globalPoints;
+        checkBadges();
+        updateProgress();
+    }
+
+    function checkBadges() {
+        if (globalPoints >= 20 && !badges.has('escudo')) badges.add('escudo');
+        if (globalPoints >= 50 && !badges.has('guardian')) badges.add('guardian');
+        if (globalPoints >= 100 && !badges.has('maestro')) badges.add('maestro');
+        document.getElementById('badges-list').textContent = badges.size === 0 ? 'ninguna' : Array.from(badges).map(b => b === 'escudo' ? '🛡️ Escudo' : b === 'guardian' ? '👑 Guardián' : '🏆 Maestro').join(', ');
+    }
+
+    function updateProgress() {
+        const total = 4;
+        const pct = Math.round((completedAccordions.size / total) * 100);
+        document.getElementById('progress-bar').style.width = pct + '%';
+    }
+
+    function markAccordion(id) {
+        if (!completedAccordions.has(id)) {
+            completedAccordions.add(id);
+            addPoints(10);
+        }
+    }
+
+    // Subtema 1: caza de ataques
+    const attackNames = {
+        'xss': 'XSS (Cross-Site Scripting): inyecta código que se ejecuta en el navegador.',
+        'sql': 'SQL Injection: altera una consulta SQL para acceder o modificar datos.',
+        'nosql': 'NoSQL Injection: manipula operadores de bases de datos NoSQL.',
+        'command': 'Command Injection: ejecuta comandos del sistema operativo.'
+    };
+    document.querySelectorAll('.attack-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const attack = this.dataset.attack;
+            this.querySelector('.attack-answer').textContent = attackNames[attack];
+            this.querySelector('.attack-answer').classList.remove('hidden');
+            this.classList.add('bg-green-100', 'border-green-400');
+            const fb = document.getElementById('attack-feedback');
+            fb.classList.remove('hidden');
+            fb.className = 'mt-4 p-3 rounded-lg font-semibold text-sm bg-green-100 text-green-800';
+            fb.textContent = '¡Bien! Conocer al enemigo es el primer paso para defender la API. +5 puntos';
+            addPoints(5);
+            markAccordion('subtema-1');
+        });
+    });
+
+    // Subtema 2: clasificación de validación
+    const validationCards = [
+        { text: 'Solo permitir correos que terminen en @empresa.com', group: 'whitelist' },
+        { text: 'Bloquear palabras como "DROP", "DELETE" y "INSERT"', group: 'blacklist' },
+        { text: 'Verificar que la edad sea un número entre 1 y 120', group: 'schema' },
+        { text: 'Comprobar que el teléfono tenga el patrón ^[0-9]{10}$', group: 'regex' },
+        { text: 'Aceptar solo los valores "activo" o "inactivo"', group: 'whitelist' },
+        { text: 'Rechazar etiquetas <script> específicamente', group: 'blacklist' },
+        { text: 'Validar con Joi que un objeto tenga campos obligatorios', group: 'schema' },
+        { text: 'Comprobar formato de correo con /^[^\s@]+@[^\s@]+\.[^\s@]+$/', group: 'regex' }
+    ];
+    let currentValidationIndex = -1;
+    let validationOrder = [];
+
+    function shuffleValidation() {
+        validationOrder = [...validationCards].sort(() => Math.random() - 0.5);
+        currentValidationIndex = 0;
+        showValidationCard();
+    }
+
+    function showValidationCard() {
+        if (currentValidationIndex < validationOrder.length) {
+            document.getElementById('validation-card').textContent = validationOrder[currentValidationIndex].text;
+            document.getElementById('validation-feedback').textContent = '';
+        } else {
+            document.getElementById('validation-card').textContent = '¡Has clasificado todas las técnicas! 🎉';
+            document.getElementById('validation-feedback').textContent = 'Excelente trabajo. +10 puntos';
+            addPoints(10);
+            markAccordion('subtema-2');
+        }
+    }
+
+    document.querySelectorAll('.validation-answer').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (currentValidationIndex >= validationOrder.length) return;
+            const selected = this.dataset.group;
+            const correct = validationOrder[currentValidationIndex].group;
+            const fb = document.getElementById('validation-feedback');
+            if (selected === correct) {
+                fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                fb.textContent = '¡Correcto! +5 puntos';
+                addPoints(5);
+                currentValidationIndex++;
+                setTimeout(showValidationCard, 800);
+            } else {
+                fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                fb.textContent = '¡Casi! Piensa si la regla permite lo bueno o bloquea lo malo. 💪';
+            }
+        });
+    });
+
+    document.getElementById('new-validation-card').addEventListener('click', shuffleValidation);
+
+    // Subtema 3: sanitización
+    document.querySelectorAll('.sanitize-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const method = this.dataset.method;
+            const input = document.getElementById('dirty-input').value;
+            let output = input;
+            let fb = document.getElementById('sanitize-feedback');
+            if (method === 'strip') {
+                output = input.replace(/<[^>]*>?/gm, '');
+                fb.className = 'text-green-700 font-semibold';
+                fb.textContent = 'Etiquetas eliminadas. +5 puntos';
+                addPoints(5);
+                markAccordion('subtema-3');
+            } else if (method === 'escape') {
+                output = input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                fb.className = 'text-green-700 font-semibold';
+                fb.textContent = 'Caracteres escapados de forma segura. +5 puntos';
+                addPoints(5);
+                markAccordion('subtema-3');
+            } else if (method === 'trim') {
+                output = input.trim();
+                fb.className = 'text-green-700 font-semibold';
+                fb.textContent = 'Espacios innecesarios eliminados. +3 puntos';
+                addPoints(3);
+            } else if (method === 'lower') {
+                output = input.toLowerCase();
+                fb.className = 'text-green-700 font-semibold';
+                fb.textContent = 'Texto normalizado a minúsculas. +3 puntos';
+                addPoints(3);
+            }
+            document.getElementById('sanitized-output').textContent = output;
+        });
+    });
+
+    // Subtema 4: flujo
+    const correctFlow = ['validar', 'sanitizar', 'verificar', 'usar'];
+    let flowSelected = [];
+    document.querySelectorAll('.flow-step').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (flowSelected.length < 4) {
+                flowSelected.push(this.dataset.step);
+                const span = document.createElement('span');
+                span.className = 'bg-green-200 text-green-900 px-2 py-1 rounded text-xs font-bold uppercase';
+                span.textContent = this.textContent;
+                document.getElementById('flow-assembly').appendChild(span);
+            }
+        });
+    });
+    document.getElementById('flow-reset').addEventListener('click', function() {
+        flowSelected = [];
+        document.getElementById('flow-assembly').innerHTML = '';
+        document.getElementById('flow-feedback').textContent = '';
+    });
+
+    function checkFlow() {
+        const fb = document.getElementById('flow-feedback');
+        if (JSON.stringify(flowSelected) === JSON.stringify(correctFlow)) {
+            fb.className = 'mt-2 text-sm font-semibold text-green-700';
+            fb.textContent = '¡Flujo perfecto! Validar primero, limpiar, verificar que todo esté seguro y usar. +10 puntos';
+            addPoints(10);
+            markAccordion('subtema-4');
+        } else {
+            fb.className = 'mt-2 text-sm font-semibold text-red-600';
+            fb.textContent = 'Orden incorrecto. Recuerda: validar → sanitizar → verificar → usar. 💪';
+            document.getElementById('flow-assembly').classList.add('shake');
+            setTimeout(() => document.getElementById('flow-assembly').classList.remove('shake'), 400);
+        }
+    }
+
+    const flowObserver = new MutationObserver(() => {
+        if (flowSelected.length === 4) checkFlow();
+    });
+    flowObserver.observe(document.getElementById('flow-assembly'), { childList: true });
+
+    // Actividades: gamificación
+    let missionPoints = 0;
+    const completedMissions = new Set();
+
+    function addMissionPoints(amount) {
+        missionPoints += amount;
+        document.getElementById('mission-points').textContent = missionPoints;
+        updateMissionProgress();
+    }
+
+    function markMission(id) {
+        if (!completedMissions.has(id)) {
+            completedMissions.add(id);
+            updateMissionProgress();
+        }
+    }
+
+    function updateMissionProgress() {
+        const pct = Math.round((completedMissions.size / 4) * 100);
+        document.getElementById('mission-progress-bar').style.width = pct + '%';
+    }
+
+    // Misión 1: calculadora de riesgo
+    document.getElementById('calc-risk').addEventListener('click', function() {
+        const source = parseInt(document.getElementById('risk-source').value);
+        const length = parseInt(document.getElementById('risk-length').value);
+        const chars = parseInt(document.getElementById('risk-chars').value);
+        const dest = parseInt(document.getElementById('risk-dest').value);
+        const score = source + length + chars + dest;
+        const res = document.getElementById('risk-result');
+        res.classList.remove('hidden');
+        let level, color, msg;
+        if (score <= 6) { level = 'bajo'; color = 'bg-green-100 text-green-800'; msg = 'Riesgo bajo. Aun así, valida y sanitiza siempre. +5 puntos'; }
+        else if (score <= 10) { level = 'medio'; color = 'bg-yellow-100 text-yellow-800'; msg = 'Riesgo medio. Aplica validación estricta y sanitización. +8 puntos'; }
+        else { level = 'alto'; color = 'bg-red-100 text-red-800'; msg = 'Riesgo alto. Rechaza, valida con whitelist y nunca concatenes datos. +10 puntos'; }
+        res.className = `mt-3 p-3 rounded-lg font-semibold text-sm ${color}`;
+        res.textContent = `Nivel de riesgo: ${level.toUpperCase()}. ${msg}`;
+        addMissionPoints(score <= 6 ? 5 : score <= 10 ? 8 : 10);
+        markMission(1);
+    });
+
+    // Misión 2: inspector de campos
+    const inspectorQuestions = [
+        { q: '¿Qué regla es más segura para validar el campo "estado" con valores fijos?', options: ['Aceptar cualquier texto', 'Usar una lista blanca con los valores permitidos', 'Buscar caracteres prohibidos', 'Confiar en el valor del cliente'], correct: 1 },
+        { q: '¿Qué debes hacer si un correo tiene formato inválido?', options: ['Guardarlo igual', 'Rechazarlo y avisar al usuario', 'Corregirlo automáticamente', 'Concatenarlo a la consulta'], correct: 1 },
+        { q: 'Para evitar SQL Injection, la mejor práctica es:', options: ['Eliminar comillas del input', 'Usar consultas parametrizadas', 'Usar solo listas negras', 'Evitar bases de datos SQL'], correct: 1 },
+        { q: 'Si un campo se mostrará en la web, ¿qué técnica ayuda a evitar XSS?', options: ['Validar que sea un número', 'Escapar caracteres HTML', 'Aumentar la longitud máxima', 'Guardarlo en base de datos'], correct: 1 },
+        { q: '¿Cuál es el orden correcto del flujo seguro?', options: ['Usar → validar → sanitizar', 'Validar → sanitizar → usar', 'Sanitizar → validar → usar', 'Rechazar → usar → validar'], correct: 1 }
+    ];
+    let inspectorIndex = 0;
+
+    function showInspector() {
+        const q = inspectorQuestions[inspectorIndex];
+        document.getElementById('inspector-question').textContent = `${inspectorIndex + 1}. ${q.q}`;
+        const opts = document.getElementById('inspector-options');
+        opts.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left p-2 border rounded hover:bg-green-100 transition inspector-option';
+            btn.textContent = `${String.fromCharCode(65+i)}. ${opt}`;
+            btn.dataset.index = i;
+            btn.addEventListener('click', function() {
+                const fb = document.getElementById('inspector-feedback');
+                if (parseInt(this.dataset.index) === q.correct) {
+                    fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                    fb.textContent = '¡Correcto! +5 puntos';
+                    addMissionPoints(5);
+                    document.getElementById('next-inspector').classList.remove('hidden');
+                    document.querySelectorAll('.inspector-option').forEach(b => b.disabled = true);
+                    if (inspectorIndex === inspectorQuestions.length - 1) {
+                        document.getElementById('next-inspector').textContent = 'Finalizar misión 🏁';
+                        markMission(2);
+                    }
+                } else {
+                    fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                    fb.textContent = 'No es la mejor opción. Revisa las reglas de validación. 💪';
+                }
+            });
+            opts.appendChild(btn);
+        });
+        document.getElementById('inspector-feedback').textContent = '';
+        document.getElementById('next-inspector').classList.add('hidden');
+    }
+
+    document.getElementById('next-inspector').addEventListener('click', function() {
+        inspectorIndex++;
+        if (inspectorIndex < inspectorQuestions.length) {
+            showInspector();
+        } else {
+            document.getElementById('inspector-question').textContent = '¡Misión completada!';
+            document.getElementById('inspector-options').innerHTML = '';
+            document.getElementById('inspector-feedback').textContent = 'Has demostrado que sabes validar como un experto. +10 puntos';
+            addMissionPoints(10);
+            this.classList.add('hidden');
+        }
+    });
+    showInspector();
+
+    // Misión 3: caza de errores
+    const bugAnswers = {
+        '0': 'sql',
+        '1': 'xss',
+        '2': 'command',
+        '3': 'nosql'
+    };
+    const bugNames = { 'sql': 'SQL Injection', 'xss': 'XSS', 'command': 'Command Injection', 'nosql': 'NoSQL Injection' };
+    document.querySelectorAll('.bug-answer').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const q = this.dataset.question;
+            const ans = this.dataset.answer;
+            const correct = bugAnswers[q];
+            const fb = this.parentElement.nextElementSibling;
+            if (ans === correct) {
+                fb.className = 'bug-feedback mt-2 text-sm font-semibold text-green-700';
+                fb.textContent = `¡Correcto! Es ${bugNames[correct]}. +5 puntos`;
+                this.classList.add('bg-green-200');
+                addMissionPoints(5);
+                document.querySelectorAll(`.bug-answer[data-question="${q}"]`).forEach(b => b.disabled = true);
+                if (document.querySelectorAll('.bug-answer:disabled').length === 12) {
+                    markMission(3);
+                    addMissionPoints(10);
+                }
+            } else {
+                fb.className = 'bug-feedback mt-2 text-sm font-semibold text-red-600';
+                fb.textContent = 'No es esa. Mira si el dato se concatena a una consulta, se muestra en pantalla o se ejecuta. 💪';
+                this.classList.add('bg-red-200');
+            }
+        });
+    });
+
+    // Misión 4: quiz contra reloj
+    const timeAttackQuestions = [
+        { q: '¿Validación o sanitización se encarga de eliminar etiquetas HTML?', options: ['Validación', 'Sanitización', 'Autenticación', 'Autorización'], correct: 1 },
+        { q: '¿Qué técnica previene mejor la inyección SQL?', options: ['Listas negras', 'Consultas parametrizadas', 'Eliminar espacios', 'Convertir a mayúsculas'], correct: 1 },
+        { q: 'Una lista blanca permite:', options: ['Solo lo que se define previamente', 'Todo excepto lo prohibido', 'Cualquier texto', 'Solo números'], correct: 0 },
+        { q: 'Si el dato proviene de internet y va a una consulta SQL concatenada, el riesgo es:', options: ['Bajo', 'Medio', 'Alto', 'Ninguno'], correct: 2 },
+        { q: '¿Qué hace la sanitización?', options: ['Rechaza datos inválidos', 'Limpia datos peligrosos', 'Genera tokens', 'Cifra contraseñas'], correct: 1 }
+    ];
+    let timeAttackIndex = 0;
+    let timeAttackScore = 0;
+    let timeAttackInterval;
+    let timeLeft = 60;
+
+    function showTimeAttack() {
+        if (timeLeft <= 0 || timeAttackIndex >= timeAttackQuestions.length) {
+            endTimeAttack();
+            return;
+        }
+        const q = timeAttackQuestions[timeAttackIndex];
+        document.getElementById('time-attack-question').textContent = q.q;
+        const opts = document.getElementById('time-attack-options');
+        opts.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left p-2 border rounded hover:bg-green-100 transition';
+            btn.textContent = `${String.fromCharCode(65+i)}. ${opt}`;
+            btn.addEventListener('click', function() {
+                const fb = document.getElementById('time-attack-feedback');
+                if (i === q.correct) {
+                    fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                    fb.textContent = '¡Correcto! +5 puntos';
+                    timeAttackScore += 5;
+                } else {
+                    fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                    fb.textContent = 'Incorrecto. -3 segundos';
+                    timeLeft -= 3;
+                    document.getElementById('time-attack-timer').textContent = Math.max(0, timeLeft);
+                }
+                timeAttackIndex++;
+                setTimeout(showTimeAttack, 800);
+            });
+            opts.appendChild(btn);
+        });
+    }
+
+    function endTimeAttack() {
+        clearInterval(timeAttackInterval);
+        document.getElementById('time-attack-question').textContent = '¡Tiempo!';
+        document.getElementById('time-attack-options').innerHTML = '';
+        document.getElementById('time-attack-feedback').textContent = '';
+        const scoreEl = document.getElementById('time-attack-score');
+        scoreEl.classList.remove('hidden');
+        scoreEl.textContent = `Puntaje: ${timeAttackScore} puntos`;
+        addMissionPoints(timeAttackScore);
+        markMission(4);
+    }
+
+    document.getElementById('start-time-attack').addEventListener('click', function() {
+        timeLeft = 60;
+        timeAttackIndex = 0;
+        timeAttackScore = 0;
+        document.getElementById('time-attack-score').classList.add('hidden');
+        document.getElementById('time-attack-timer').textContent = timeLeft;
+        showTimeAttack();
+        timeAttackInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('time-attack-timer').textContent = timeLeft;
+            if (timeLeft <= 0) endTimeAttack();
+        }, 1000);
+        this.disabled = true;
+        this.textContent = 'En curso...';
+    });
+
+    // Evaluación
+    const quizData = [
+        {
+            question: "¿Cuál es la regla de oro al recibir datos en una API REST?",
+            options: ["Confiar en el cliente", "Considerar todo dato potencialmente malicioso", "Aceptar cualquier formato", "Validar solo al inicio del día"],
+            correct: 1
+        },
+        {
+            question: "¿Qué técnica de validación es más restrictiva y segura?",
+            options: ["Lista negra", "Lista blanca", "Validación visual", "Validación por tamaño"],
+            correct: 1
+        },
+        {
+            question: "La sanitización de datos se encarga de:",
+            options: ["Rechazar datos inválidos", "Eliminar o transformar elementos peligrosos", "Generar tokens de sesión", "Crear copias de seguridad"],
+            correct: 1
+        },
+        {
+            question: "Para prevenir SQL Injection, la mejor práctica es:",
+            options: ["Eliminar comillas del input", "Usar consultas parametrizadas", "Validar solo correos", "No usar base de datos"],
+            correct: 1
+        },
+        {
+            question: "¿Qué ataque aprovecha que un dato se muestra en el navegador sin tratamiento?",
+            options: ["SQL Injection", "NoSQL Injection", "Cross-Site Scripting (XSS)", "Command Injection"],
+            correct: 2
+        },
+        {
+            question: "¿Cuál es el orden correcto del flujo seguro de datos?",
+            options: ["Usar → validar → sanitizar", "Validar → sanitizar → usar", "Sanitizar → validar → usar", "Rechazar → validar → usar"],
+            correct: 1
+        }
+    ];
+
+    let quizStartTime = Date.now();
+    let quizTimerInterval;
+
+    function updateQuizTimer() {
+        const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const seconds = String(elapsed % 60).padStart(2, '0');
+        document.getElementById('quiz-timer').textContent = `${minutes}:${seconds}`;
+    }
+    quizTimerInterval = setInterval(updateQuizTimer, 1000);
+
+    const quizContainer = document.getElementById('quiz-container');
+    quizData.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.classList.add('mb-6');
+        div.innerHTML = `
+            <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                ${item.options.map((opt, i) => `
+                    <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                         data-question="${index}" data-option="${i}">
+                        <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        quizContainer.appendChild(div);
+    });
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            const q = this.dataset.question;
+            document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+
+    document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+        clearInterval(quizTimerInterval);
+        let score = 0;
+        quizData.forEach((item, index) => {
+            const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+            if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+        });
+        const result = document.getElementById('quiz-result');
+        const pct = Math.round((score / quizData.length) * 100);
+        result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+        result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        if (pct >= 80) {
+            addPoints(20);
+            badges.add('guardian');
+            checkBadges();
+        }
+    });
+</script>
+
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Autenticación y autorización en APIs</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .stars { color: #fbbf24; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .code-block { background: #1e293b; color: #e2e8f0; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; font-family: monospace; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<div class="flex min-h-screen">
+
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+        <div class="p-4">
+            <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+        </div>
+        <nav class="mt-6 flex-1">
+            <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+            <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+        <div class="md:hidden mb-6 flex flex-col items-center">
+            <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+            </div>
+            <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                <option value="introduccion">🚀 Introducción</option>
+                <option value="objetivos">🎯 Objetivos</option>
+                <option value="contenido">📚 Contenido</option>
+                <option value="actividades">✍️ Actividades</option>
+                <option value="evaluacion">✔️ Evaluación</option>
+                <option value="recursos">📖 Recursos</option>
+                <option value="bibliografia">📚 Bibliografía</option>
+            </select>
+        </div>
+
+        <div id="introduccion" class="content-pane active">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Autenticación y autorización: el bouncer digital 🛡️</h2>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                Imagina que entras a tu app favorita de música 🎧. Tú eres tú, nadie más puede escuchar tu playlist privada ni cambiar tu plan de pago. Pero si cualquiera pudiera hacer eso sin verificar quién es, ¡el caos estaría servido! En el mundo del backend, la <strong>autenticación</strong> es como mostrar tu documento en la entrada de un concierto: confirma quién eres. La <strong>autorización</strong> decide si puedes entrar al VIP, al backstage o solo a la zona general 🎫.
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+                En este OVA vas a descubrir cómo proteger una API REST para que cada usuario acceda solo a lo que le corresponde. Aprenderás a construir login, registro, sesiones, tokens JWT y un sistema de roles y permisos que hará tu backend mucho más robusto. ¡Prepárate para convertirte en el guardián de las APIs! 🔐
+            </p>
+            <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                <p class="text-green-800">
+                    <span class="text-xl">✨</span> Al finalizar este OVA serás capaz de diseñar un sistema de acceso seguro: sabrás quién entra y qué puede hacer dentro de tu aplicación. <span class="text-xl">🚀</span>
+                </p>
+            </div>
+        </div>
+
+        <div id="objetivos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+            <ul class="space-y-4">
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                    <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                    <span>Comprender la diferencia entre autenticación y autorización, identificando el papel que desempeña cada proceso en la seguridad de una API REST.</span>
+                </li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                    <span class="text-green-700 mr-3 text-2xl">💡</span>
+                    <span>Analizar el funcionamiento de los mecanismos más utilizados para autenticar usuarios, incluyendo el uso de sesiones y tokens.</span>
+                </li>
+                <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                    <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                    <span>Implementar esquemas básicos de control de acceso mediante roles y permisos para restringir el uso de los recursos de una aplicación.</span>
+                </li>
+            </ul>
+        </div>
+
+        <div id="contenido" class="content-pane">
+            <div class="w-full max-w-8xl mx-auto">
+
+                <div id="game-status" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-green-200">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <span class="text-green-800 font-bold">🏆 Puntos: <span id="global-points">0</span></span>
+                            <span class="mx-2 text-slate-300">|</span>
+                            <span class="text-slate-600">Insignias: <span id="badges-list" class="font-semibold text-yellow-600">ninguna</span></span>
+                        </div>
+                        <div class="w-full sm:w-1/2">
+                            <div class="flex justify-between text-xs text-slate-600 mb-1"><span>Progreso de contenido</span><span id="progress-text">0%</span></div>
+                            <div class="w-full bg-slate-200 rounded-full h-2.5"><div id="progress-bar" class="bg-green-600 h-2.5 rounded-full transition-all" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                        <span>🚪 ¿Por qué una API necesita un guardián?</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-1-contenido" class="content-section">
+                            <p class="mb-4">Una API abierta es como dejar la caja fuerte de un banco con la puerta abierta 🏦. Cada año se reportan miles de filtraciones por APIs mal protegidas. A continuación, activa los riesgos para ver por qué es tan importante controlar el acceso.</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                                <button class="risk-card p-4 bg-red-50 border border-red-200 rounded-lg text-left hover:bg-red-100 transition" data-risk="datos">
+                                    <div class="text-2xl mb-2">🔓</div>
+                                    <h4 class="font-bold text-red-800">Robo de datos</h4>
+                                    <p class="text-sm text-slate-600 hidden mt-2">Un atacante podría leer información privada de otros usuarios.</p>
+                                </button>
+                                <button class="risk-card p-4 bg-orange-50 border border-orange-200 rounded-lg text-left hover:bg-orange-100 transition" data-risk="suplantacion">
+                                    <div class="text-2xl mb-2">🎭</div>
+                                    <h4 class="font-bold text-orange-800">Suplantación</h4>
+                                    <p class="text-sm text-slate-600 hidden mt-2">Alguien podría hacer peticiones como si fuera otro usuario.</p>
+                                </button>
+                                <button class="risk-card p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-left hover:bg-yellow-100 transition" data-risk="destruccion">
+                                    <div class="text-2xl mb-2">💥</div>
+                                    <h4 class="font-bold text-yellow-800">Destrucción</h4>
+                                    <p class="text-sm text-slate-600 hidden mt-2">Sin permisos bien definidos, un usuario podría borrar recursos ajenos.</p>
+                                </button>
+                            </div>
+                            <div id="risk-feedback" class="hidden p-3 rounded-lg font-semibold text-sm"></div>
+
+                            <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Mini-misión: ¿Quién soy? ¿Qué puedo hacer?</p>
+                                <p class="text-slate-600 text-sm">Haz clic en cada riesgo para desbloquear la respuesta. Gana <strong>5 puntos</strong> por cada uno descubierto.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                        <span>🆚 Autenticación vs Autorización</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-2-contenido" class="content-section">
+                            <p class="mb-4">Autenticación = "¿quién eres?" 👤. Autorización = "¿qué puedes hacer?" 🛂. En un concierto, tu documento te identifica; tu entrada define si vas al patio o al VIP. Haz clic en el simulador para ver el flujo completo.</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="min-w-full bg-white border border-green-300 rounded-lg">
+                                    <thead class="bg-green-100">
+                                        <tr><th class="p-3 text-left text-green-800">Autenticación 🔐</th><th class="p-3 text-left text-green-800">Autorización ✅</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-green-200"><td class="p-3">Verifica tu identidad</td><td class="p-3">Determina tus permisos</td></tr>
+                                        <tr class="border-b border-green-200"><td class="p-3">Ocurre al iniciar sesión</td><td class="p-3">Se revisa en cada recurso protegido</td></tr>
+                                        <tr><td class="p-3">Usa credenciales (usuario y contraseña)</td><td class="p-3">Usa roles, permisos o políticas</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-lg mb-4">
+                                <h4 class="font-bold text-indigo-800 mb-3">🎮 Simulador: el club de la API</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">Usuario</label>
+                                        <input id="sim-user" type="text" value="estudiante" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">Contraseña</label>
+                                        <input id="sim-pass" type="password" value="123456" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    </div>
+                                </div>
+                                <button id="sim-auth-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Iniciar sesión</button>
+                                <div id="sim-auth-result" class="mt-3 hidden p-3 rounded-lg text-sm"></div>
+
+                                <div id="sim-actions" class="hidden mt-4">
+                                    <p class="font-semibold mb-2 text-indigo-800">¿Qué intentas hacer?</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button class="sim-action-btn px-3 py-2 bg-white border border-indigo-300 rounded hover:bg-indigo-100" data-action="ver-perfil">Ver mi perfil</button>
+                                        <button class="sim-action-btn px-3 py-2 bg-white border border-indigo-300 rounded hover:bg-indigo-100" data-action="ver-reportes">Ver reportes</button>
+                                        <button class="sim-action-btn px-3 py-2 bg-white border border-indigo-300 rounded hover:bg-indigo-100" data-action="eliminar-usuarios">Eliminar usuarios</button>
+                                    </div>
+                                    <div id="sim-action-result" class="mt-3 p-3 rounded-lg text-sm"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🏆 Logro desbloqueable</p>
+                                <p class="text-slate-600 text-sm">Completa el simulador correctamente para ganar la insignia <strong>"Bouncer de APIs"</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                        <span>🎟️ Sesiones vs Tokens: dos formas de recordar quién eres</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-3-contenido" class="content-section">
+                            <p class="mb-4">¿Cómo sabe el servidor que ya iniciaste sesión? Hay dos grandes estrategias. Con <strong>sesiones</strong> el servidor guarda un ID en memoria o base de datos. Con <strong>tokens</strong> (como JWT) el servidor firma un mensaje y te lo entrega; tú lo envías en cada petición. ¿Cuál elegir? Depende del proyecto.</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <h4 class="font-bold text-blue-800 mb-2">🍪 Sesiones</h4>
+                                    <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+                                        <li>El servidor almacena el estado.</li>
+                                        <li>Rápidas de invalidar (cerrar sesión).</li>
+                                        <li>Ideal para apps monolíticas.</li>
+                                        <li>Requiere compartir estado en múltiples servidores.</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                                    <h4 class="font-bold text-purple-800 mb-2">🪙 Tokens JWT</h4>
+                                    <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+                                        <li>El cliente guarda el token.</li>
+                                        <li>Escalan bien en APIs y microservicios.</li>
+                                        <li>Contienen cabecera, payload y firma.</li>
+                                        <li>Hasta expirar, son válidos (cuidado con robos).</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-slate-800 rounded-lg mb-4">
+                                <h4 class="font-bold text-green-300 mb-2">🧩 Desafío: arma tu JWT</h4>
+                                <p class="text-slate-300 text-sm mb-3">Selecciona las tres partes de un token JWT en orden correcto.</p>
+                                <div class="flex flex-wrap gap-2 mb-3" id="jwt-parts-pool">
+                                    <button class="jwt-part px-3 py-2 bg-white text-slate-800 rounded font-semibold hover:bg-green-100" data-part="payload">Payload</button>
+                                    <button class="jwt-part px-3 py-2 bg-white text-slate-800 rounded font-semibold hover:bg-green-100" data-part="firma">Firma</button>
+                                    <button class="jwt-part px-3 py-2 bg-white text-slate-800 rounded font-semibold hover:bg-green-100" data-part="header">Header</button>
+                                </div>
+                                <div class="code-block min-h-[3rem] flex items-center gap-2" id="jwt-assembly">Tu token aparecerá aquí...</div>
+                                <button id="jwt-check" class="mt-3 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Verificar orden</button>
+                                <button id="jwt-reset" class="mt-3 ml-2 bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-700 transition">Reiniciar</button>
+                                <div id="jwt-feedback" class="mt-3 text-sm font-semibold"></div>
+                            </div>
+
+                            <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">💡 Tip</p>
+                                <p class="text-slate-600 text-sm">Muchas apps modernas combinan ambos: JWT para la API y sesiones para el panel de administración.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                        <span>👥 Roles y permisos: quién manda aquí</span>
+                        <span class="ml-2">➕</span>
+                    </button>
+                </div>
+                <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                    <div class="space-y-6 text-slate-700 leading-relaxed">
+                        <div id="subtema-4-contenido" class="content-section">
+                            <p class="mb-4">Una tienda online no puede permitir que un cliente vea el panel de administración. Ahí entran los <strong>roles</strong> (grupos de usuarios) y los <strong>permisos</strong> (acciones permitidas). Diseñar esto bien evita errores costosos y escándalos de seguridad.</p>
+
+                            <div class="p-4 bg-amber-50 border border-amber-300 rounded-lg mb-4">
+                                <h4 class="font-bold text-amber-800 mb-3">🎮 Constructor de permisos</h4>
+                                <p class="text-sm text-slate-700 mb-3">Arrastra cada acción al rol que debería poder realizarla. (Haz clic en la acción y luego en el rol)</p>
+                                <div class="flex flex-wrap gap-2 mb-3" id="permission-actions">
+                                    <button class="perm-action px-3 py-2 bg-white border border-amber-400 rounded hover:bg-amber-100" data-action="crear-producto">Crear producto</button>
+                                    <button class="perm-action px-3 py-2 bg-white border border-amber-400 rounded hover:bg-amber-100" data-action="ver-pedidos-propios">Ver mis pedidos</button>
+                                    <button class="perm-action px-3 py-2 bg-white border border-amber-400 rounded hover:bg-amber-100" data-action="eliminar-usuarios">Eliminar usuarios</button>
+                                    <button class="perm-action px-3 py-2 bg-white border border-amber-400 rounded hover:bg-amber-100" data-action="ver-reportes-ventas">Ver reportes de ventas</button>
+                                    <button class="perm-action px-3 py-2 bg-white border border-amber-400 rounded hover:bg-amber-100" data-action="actualizar-perfil">Actualizar mi perfil</button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="perm-role p-3 bg-white border-2 border-dashed border-slate-300 rounded-lg min-h-[100px]" data-role="cliente">
+                                        <h5 class="font-bold text-slate-800 mb-2">🛒 Cliente</h5>
+                                        <div class="role-content flex flex-wrap gap-2"></div>
+                                    </div>
+                                    <div class="perm-role p-3 bg-white border-2 border-dashed border-slate-300 rounded-lg min-h-[100px]" data-role="administrador">
+                                        <h5 class="font-bold text-slate-800 mb-2">🛠️ Administrador</h5>
+                                        <div class="role-content flex flex-wrap gap-2"></div>
+                                    </div>
+                                </div>
+                                <button id="perm-check" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Verificar roles</button>
+                                <div id="perm-feedback" class="mt-3 text-sm font-semibold"></div>
+                            </div>
+
+                            <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🛡️ Buena práctica</p>
+                                <p class="text-slate-600 text-sm">Aplica el principio del <strong>mínimo privilegio</strong>: cada usuario debe tener solo los permisos estrictamente necesarios. Menos permisos = menos riesgos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="actividades" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎮 Actividades: misiones del guardián</h2>
+
+            <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-green-200">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <span class="text-green-800 font-bold">⭐ Puntos de misiones: <span id="mission-points">0</span></span>
+                    </div>
+                    <div class="w-full sm:w-1/2">
+                        <div class="flex justify-between text-xs text-slate-600 mb-1"><span>Misiones completadas</span><span id="mission-progress-text">0/3</span></div>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5"><div id="mission-progress-bar" class="bg-yellow-500 h-2.5 rounded-full transition-all" style="width: 0%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🛡️ Misión 1: El escudo del login</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Construye mentalmente el flujo de un login seguro. Completa los pasos en el orden correcto para que el usuario pueda entrar sin exponer su contraseña.</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                        <div id="login-steps-pool" class="flex flex-wrap gap-2 mb-3">
+                            <button class="login-step px-3 py-2 bg-white border border-green-400 rounded hover:bg-green-100" data-step="hash">Hash de la contraseña</button>
+                            <button class="login-step px-3 py-2 bg-white border border-green-400 rounded hover:bg-green-100" data-step="enviar">Enviar credenciales</button>
+                            <button class="login-step px-3 py-2 bg-white border border-green-400 rounded hover:bg-green-100" data-step="verificar">Verificar contra la base de datos</button>
+                            <button class="login-step px-3 py-2 bg-white border border-green-400 rounded hover:bg-green-100" data-step="token">Generar token de sesión</button>
+                        </div>
+                        <div id="login-assembly" class="p-3 bg-white border-2 border-dashed border-slate-300 rounded min-h-[3rem] flex flex-wrap gap-2 items-center text-slate-500 text-sm">Ordena los pasos aquí...</div>
+                        <button id="login-check" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Comprobar</button>
+                        <button id="login-reset" class="mt-3 ml-2 bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-700 transition">Reiniciar</button>
+                        <div id="login-feedback" class="mt-3 text-sm font-semibold"></div>
+                    </div>
+                    <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Captura o descripción del orden correcto del flujo de autenticación.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">🪙 Misión 2: El token secreto</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Explora el simulador de JWT para entender qué datos viajan en un token. Responde las preguntas para desbloquear la insignia del tokenólogo.</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded border border-slate-200">
+                                <p class="font-semibold text-slate-800">Pregunta 1: ¿Qué parte del JWT contiene la firma digital?</p>
+                                <div class="flex gap-2 mt-2 flex-wrap">
+                                    <button class="jwt-q1 px-3 py-1 bg-white border rounded hover:bg-green-100" data-answer="header">Header</button>
+                                    <button class="jwt-q1 px-3 py-1 bg-white border rounded hover:bg-green-100" data-answer="payload">Payload</button>
+                                    <button class="jwt-q1 px-3 py-1 bg-white border rounded hover:bg-green-100" data-answer="signature">Signature</button>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-200">
+                                <p class="font-semibold text-slate-800">Pregunta 2: ¿Qué campo limita el tiempo de vida del token?</p>
+                                <div class="flex gap-2 mt-2 flex-wrap">
+                                    <button class="jwt-q2 px-3 py-1 bg-white border rounded hover:bg-green-100" data-answer="sub">sub</button>
+                                    <button class="jwt-q2 px-3 py-1 bg-white border rounded hover:bg-green-100" data-answer="iat">iat</button>
+                                    <button class="jwt-q2 px-3 py-1 bg-white border rounded hover:bg-green-100" data-answer="exp">exp</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="jwt-mission-feedback" class="mt-3 text-sm font-semibold"></div>
+                    </div>
+                    <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Nota con las dos respuestas correctas y una reflexión sobre por qué el tiempo de expiración importa.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">👥 Misión 3: El guardián de permisos</h3>
+                    <p class="mb-4 text-slate-700 leading-relaxed">Diseña una matriz de roles para una app de biblioteca. Elige qué acciones corresponden a cada rol. ¡Cuidado con dar demasiados privilegios!</p>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                        <p class="font-semibold text-slate-800 mb-2">Asigna las acciones correctas a cada rol:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                            <div>
+                                <h5 class="font-bold text-slate-700">📖 Lector</h5>
+                                <select id="role-lector" class="w-full p-2 border rounded mt-1">
+                                    <option value="">Selecciona...</option>
+                                    <option value="prestar-devolver">Prestar y devolver libros</option>
+                                    <option value="gestionar-todo">Gestionar usuarios y catálogo</option>
+                                    <option value="solo-ver">Solo buscar libros</option>
+                                </select>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-slate-700">🧑‍💼 Bibliotecario</h5>
+                                <select id="role-biblio" class="w-full p-2 border rounded mt-1">
+                                    <option value="">Selecciona...</option>
+                                    <option value="prestar-devolver">Prestar y devolver libros</option>
+                                    <option value="gestionar-todo">Gestionar usuarios y catálogo</option>
+                                    <option value="solo-ver">Solo buscar libros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="role-check" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Verificar matriz</button>
+                        <div id="role-mission-feedback" class="mt-3 text-sm font-semibold"></div>
+                    </div>
+                    <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Captura o descripción de la matriz de roles diseñada.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="evaluacion" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                <div id="quiz-container"></div>
+                <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+            </div>
+        </div>
+
+        <div id="recursos" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+            <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+            <ul class="space-y-4">
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Documentación oficial de JSON Web Token</h3>
+                        <p class="text-slate-600 mb-2">Documentación oficial para comprender el funcionamiento de los JSON Web Tokens (JWT) y su implementación en procesos de autenticación y autorización.</p>
+                        <a href="https://jwt.io" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-1.png" alt="QR JWT.io" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Documentación oficial de bcrypt</h3>
+                        <p class="text-slate-600 mb-2">Documentación oficial para implementar el cifrado y verificación segura de contraseñas mediante la biblioteca bcrypt en aplicaciones Node.js.</p>
+                        <a href="https://github.com/kelektiv/node.bcrypt.js" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-2.png" alt="QR OWASP Authentication Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Documentación oficial de OAuth 2.0</h3>
+                        <p class="text-slate-600 mb-2">Guía oficial sobre el protocolo OAuth 2.0 para implementar mecanismos seguros de autorización y acceso a recursos protegidos.</p>
+                        <a href="https://oauth.net/2/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-3.png" alt="QR Mozilla Developer Network" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+                                <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-700">Guía oficial sobre encabezados HTTP de autorización (MDN)</h3>
+                        <p class="text-slate-600 mb-2">Guía de MDN Web Docs sobre el uso del encabezado HTTP Authorization para enviar credenciales y tokens de autenticación en solicitudes web.</p>
+                        <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Headers/Authorization" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                            <img src="img/qr-recurso-4.png" alt="QR Mozilla Developer Network" class="max-w-full max-h-full object-contain" loading="lazy">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="bibliografia" class="content-pane">
+            <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Cevallos Muñoz, F. D. (2022). Propuesta de buenas prácticas de seguridad para creación, transporte y almacenamiento de JSON Web Tokens (Tesis de maestría, Pontificia Universidad Católica del Ecuador, Sede Ambato).
+                        <a href="https://repositorio.puce.edu.ec/server/api/core/bitstreams/09c7f3a1-0651-4d05-bd2f-1603a3e068b8/content" class="text-green-700 underline break-all" target="_blank">https://repositorio.puce.edu.ec/server/api/core/bitstreams/09c7f3a1-0651-4d05-bd2f-1603a3e068b8/content</a>
+    
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                       Leones Zambrano, W. P., Macías Bazurto, L. M., Pilla Zúñiga, W. I., & Fernández Sánchez, E. G. (2024). Diseño estratégico de APIs escalables y seguras para la integración de sistemas y aplicaciones. Ciencia Latina Revista Científica Multidisciplinar, 8(5), 13395-13408.<br>
+                        <a href="https://scholar.google.com/scholar?q=Dise%C3%B1o+estrat%C3%A9gico+de+APIs+escalables+y+seguras+para+la+integraci%C3%B3n+de+sistemas+y+aplicaciones" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Dise%C3%B1o+estrat%C3%A9gico+de+APIs+escalables+y+seguras+para+la+integraci%C3%B3n+de+sistemas+y+aplicaciones</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        IETF. (2015). <i>JSON Web Token (JWT)</i>. RFC 7519.<br>
+                        <a href="https://tools.ietf.org/html/rfc7519" class="text-green-700 underline break-all" target="_blank">https://tools.ietf.org/html/rfc7519</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Salas González, E. M. (2020). Aplicando seguridad a una API REST con JSON Web Tokens (Trabajo Fin de Máster). Universitat Oberta de Catalunya..<br>
+                        <a href="https://scholar.google.com/scholar?q=Aplicando+seguridad+a+una+API+REST+con+JSON+Web+Tokens" class="text-green-700 underline break-all" target="_blank">https://scholar.google.com/scholar?q=Aplicando+seguridad+a+una+API+REST+con+JSON+Web+Tokens</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+            <p class="text-slate-600 font-medium">Creado por:</p>
+            <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+            <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+        </footer>
+
+    </main>
+</div>
+
+<script>
+    // Navegación
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.dataset.target;
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(target).classList.add('active');
+            this.classList.add('active');
+        });
+    });
+    document.getElementById('mobile-nav').addEventListener('change', function() {
+        document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById(this.value).classList.add('active');
+    });
+
+    // Acordeones
+    document.querySelectorAll('.accordion-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const panel = document.querySelector(targetId);
+            const icon = this.querySelector('span:last-child');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                icon.textContent = '➖';
+            } else {
+                panel.classList.add('hidden');
+                icon.textContent = '➕';
+            }
+        });
+    });
+
+    // Gamificación global
+    let globalPoints = 0;
+    const badges = new Set();
+    const completedAccordions = new Set();
+
+    function addPoints(amount) {
+        globalPoints += amount;
+        document.getElementById('global-points').textContent = globalPoints;
+        checkBadges();
+        updateProgress();
+    }
+
+    function checkBadges() {
+        if (globalPoints >= 20 && !badges.has('bouncer')) {
+            badges.add('bouncer');
+        }
+        if (globalPoints >= 50 && !badges.has('guardian')) {
+            badges.add('guardian');
+        }
+        document.getElementById('badges-list').textContent = badges.size === 0 ? 'ninguna' : Array.from(badges).map(b => b === 'bouncer' ? '🛡️ Bouncer' : '👑 Guardián').join(', ');
+    }
+
+    function updateProgress() {
+        const total = 4;
+        const pct = Math.round((completedAccordions.size / total) * 100);
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('progress-text').textContent = pct + '%';
+    }
+
+    function markAccordion(id) {
+        if (!completedAccordions.has(id)) {
+            completedAccordions.add(id);
+            addPoints(10);
+        }
+    }
+
+    // Acordeón 1: riesgos
+    document.querySelectorAll('.risk-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const risk = this.dataset.risk;
+            this.querySelector('p').classList.remove('hidden');
+            this.classList.add('bg-green-100', 'border-green-400');
+            const fb = document.getElementById('risk-feedback');
+            fb.classList.remove('hidden');
+            fb.className = 'p-3 rounded-lg font-semibold text-sm bg-green-100 text-green-800';
+            fb.textContent = '¡Buena observación! Conocer los riesgos es el primer paso para proteger una API. +5 puntos';
+            addPoints(5);
+            markAccordion('subtema-1');
+        });
+    });
+
+    // Acordeón 2: simulador login
+    const userRoles = {
+        'estudiante': 'cliente',
+        'admin': 'administrador'
+    };
+    let currentRole = null;
+
+    document.getElementById('sim-auth-btn').addEventListener('click', function() {
+        const user = document.getElementById('sim-user').value.trim();
+        const pass = document.getElementById('sim-pass').value;
+        const res = document.getElementById('sim-auth-result');
+        if (user && pass) {
+            currentRole = userRoles[user] || 'cliente';
+            res.classList.remove('hidden');
+            res.className = 'mt-3 p-3 rounded-lg text-sm bg-green-100 text-green-800';
+            res.innerHTML = `✅ Autenticado como <strong>${user}</strong>. Rol detectado: <strong>${currentRole === 'administrador' ? 'administrador' : 'cliente'}</strong>. +10 puntos`;
+            document.getElementById('sim-actions').classList.remove('hidden');
+            addPoints(10);
+            markAccordion('subtema-2');
+        } else {
+            res.classList.remove('hidden');
+            res.className = 'mt-3 p-3 rounded-lg text-sm bg-red-100 text-red-800';
+            res.textContent = '⚠️ Ingresa usuario y contraseña.';
+        }
+    });
+
+    document.querySelectorAll('.sim-action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            const res = document.getElementById('sim-action-result');
+            let allowed = false;
+            if (action === 'ver-perfil') allowed = true;
+            if (action === 'ver-reportes' && currentRole === 'administrador') allowed = true;
+            if (action === 'eliminar-usuarios' && currentRole === 'administrador') allowed = true;
+
+            res.className = 'mt-3 p-3 rounded-lg text-sm ' + (allowed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800');
+            res.innerHTML = allowed ? `✅ Autorizado: puedes ${action.replace('-', ' ')}. +5 puntos` : `⛔ No autorizado: un ${currentRole} no puede ${action.replace('-', ' ')}.`;
+            if (allowed) addPoints(5);
+        });
+    });
+
+    // Acordeón 3: JWT assembly
+    const correctJwtOrder = ['header', 'payload', 'firma'];
+    let jwtSelected = [];
+    document.querySelectorAll('.jwt-part').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (jwtSelected.length < 3) {
+                jwtSelected.push(this.dataset.part);
+                this.classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('jwt-assembly').innerHTML = jwtSelected.map(p => `<span class="bg-green-200 text-green-900 px-2 py-1 rounded text-xs font-bold uppercase">${p}</span>`).join(' <span class="text-slate-400">.</span> ');
+            }
+        });
+    });
+    document.getElementById('jwt-reset').addEventListener('click', function() {
+        jwtSelected = [];
+        document.querySelectorAll('.jwt-part').forEach(b => b.classList.remove('opacity-50', 'cursor-not-allowed'));
+        document.getElementById('jwt-assembly').textContent = 'Tu token aparecerá aquí...';
+        document.getElementById('jwt-feedback').textContent = '';
+    });
+    document.getElementById('jwt-check').addEventListener('click', function() {
+        const fb = document.getElementById('jwt-feedback');
+        if (JSON.stringify(jwtSelected) === JSON.stringify(correctJwtOrder)) {
+            fb.className = 'mt-3 text-sm font-semibold text-green-700';
+            fb.textContent = '¡Excelente! Estructura correcta: Header.Payload.Firma. +10 puntos';
+            addPoints(10);
+            markAccordion('subtema-3');
+        } else {
+            fb.className = 'mt-3 text-sm font-semibold text-red-600';
+            fb.textContent = '¡Casi! El orden correcto es Header, Payload y Firma. Inténtalo de nuevo 💪';
+            document.getElementById('jwt-assembly').classList.add('shake');
+            setTimeout(() => document.getElementById('jwt-assembly').classList.remove('shake'), 400);
+        }
+    });
+
+    // Acordeón 4: permisos
+    let selectedPermAction = null;
+    const correctPermissions = {
+        'cliente': ['ver-pedidos-propios', 'actualizar-perfil'],
+        'administrador': ['crear-producto', 'eliminar-usuarios', 'ver-reportes-ventas', 'ver-pedidos-propios', 'actualizar-perfil']
+    };
+
+    document.querySelectorAll('.perm-action').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.perm-action').forEach(b => b.classList.remove('bg-green-200'));
+            this.classList.add('bg-green-200');
+            selectedPermAction = this.dataset.action;
+        });
+    });
+
+    document.querySelectorAll('.perm-role').forEach(role => {
+        role.addEventListener('click', function() {
+            if (selectedPermAction) {
+                const content = this.querySelector('.role-content');
+                const span = document.createElement('span');
+                span.className = 'px-2 py-1 bg-green-100 text-green-800 rounded text-xs';
+                span.dataset.action = selectedPermAction;
+                span.textContent = selectedPermAction;
+                content.appendChild(span);
+                selectedPermAction = null;
+                document.querySelectorAll('.perm-action').forEach(b => b.classList.remove('bg-green-200'));
+            }
+        });
+    });
+
+    document.getElementById('perm-check').addEventListener('click', function() {
+        const clienteItems = Array.from(document.querySelector('[data-role="cliente"] .role-content').children).map(s => s.dataset.action);
+        const adminItems = Array.from(document.querySelector('[data-role="administrador"] .role-content').children).map(s => s.dataset.action);
+        const fb = document.getElementById('perm-feedback');
+
+        const clienteOk = clienteItems.length === 2 && clienteItems.includes('ver-pedidos-propios') && clienteItems.includes('actualizar-perfil');
+        const adminOk = adminItems.length === 5 && correctPermissions.administrador.every(p => adminItems.includes(p));
+
+        if (clienteOk && adminOk) {
+            fb.className = 'mt-3 text-sm font-semibold text-green-700';
+            fb.textContent = '¡Perfecto! Aplicaste el mínimo privilegio. +15 puntos';
+            addPoints(15);
+            markAccordion('subtema-4');
+        } else {
+            fb.className = 'mt-3 text-sm font-semibold text-red-600';
+            fb.textContent = 'Revisa la asignación: el cliente solo debe ver sus pedidos y actualizar su perfil; el administrador puede todo. 💪';
+        }
+    });
+
+    // Actividades: Misión 1 - login steps
+    const correctLoginSteps = ['enviar', 'hash', 'verificar', 'token'];
+    let loginSteps = [];
+    document.querySelectorAll('.login-step').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (loginSteps.length < 4 && !loginSteps.includes(this.dataset.step)) {
+                loginSteps.push(this.dataset.step);
+                this.classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('login-assembly').innerHTML = loginSteps.map(s => `<span class="px-2 py-1 bg-green-200 text-green-900 rounded text-xs font-bold">${s.replace(/-/g, ' ')}</span>`).join(' <span class="text-slate-400">→</span> ');
+                document.getElementById('login-assembly').classList.remove('text-slate-500');
+            }
+        });
+    });
+    document.getElementById('login-reset').addEventListener('click', function() {
+        loginSteps = [];
+        document.querySelectorAll('.login-step').forEach(b => b.classList.remove('opacity-50', 'cursor-not-allowed'));
+        document.getElementById('login-assembly').innerHTML = 'Ordena los pasos aquí...';
+        document.getElementById('login-assembly').classList.add('text-slate-500');
+        document.getElementById('login-feedback').textContent = '';
+    });
+    document.getElementById('login-check').addEventListener('click', function() {
+        const fb = document.getElementById('login-feedback');
+        if (JSON.stringify(loginSteps) === JSON.stringify(correctLoginSteps)) {
+            fb.className = 'mt-3 text-sm font-semibold text-green-700';
+            fb.textContent = '¡Flujo perfecto! Login seguro completado. +10 puntos';
+            addMissionPoints(10);
+            markMission(1);
+        } else {
+            fb.className = 'mt-3 text-sm font-semibold text-red-600';
+            fb.textContent = 'El orden correcto es: Enviar credenciales → Hash de la contraseña → Verificar contra la BD → Generar token.';
+        }
+    });
+
+    // Actividades: Misión 2 - JWT questions
+    let jwtQ1 = false, jwtQ2 = false;
+    document.querySelectorAll('.jwt-q1').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const fb = document.getElementById('jwt-mission-feedback');
+            if (this.dataset.answer === 'signature') {
+                jwtQ1 = true;
+                this.classList.add('bg-green-200');
+                checkJwtMission();
+            } else {
+                this.classList.add('bg-red-200');
+                fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                fb.textContent = 'La firma digital va en la parte Signature del JWT. 💪';
+            }
+        });
+    });
+    document.querySelectorAll('.jwt-q2').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const fb = document.getElementById('jwt-mission-feedback');
+            if (this.dataset.answer === 'exp') {
+                jwtQ2 = true;
+                this.classList.add('bg-green-200');
+                checkJwtMission();
+            } else {
+                this.classList.add('bg-red-200');
+                fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                fb.textContent = 'El campo exp (expiration) define cuándo expira el token. 💪';
+            }
+        });
+    });
+    function checkJwtMission() {
+        if (jwtQ1 && jwtQ2) {
+            document.getElementById('jwt-mission-feedback').className = 'mt-3 text-sm font-semibold text-green-700';
+            document.getElementById('jwt-mission-feedback').textContent = '¡Token dominado! +10 puntos';
+            addMissionPoints(10);
+            markMission(2);
+        }
+    }
+
+    // Actividades: Misión 3 - roles biblioteca
+    document.getElementById('role-check').addEventListener('click', function() {
+        const lector = document.getElementById('role-lector').value;
+        const biblio = document.getElementById('role-biblio').value;
+        const fb = document.getElementById('role-mission-feedback');
+        if (lector === 'solo-ver' && biblio === 'prestar-devolver') {
+            fb.className = 'mt-3 text-sm font-semibold text-green-700';
+            fb.textContent = '¡Matriz correcta! Respetaste el mínimo privilegio. +10 puntos';
+            addMissionPoints(10);
+            markMission(3);
+        } else {
+            fb.className = 'mt-3 text-sm font-semibold text-red-600';
+            fb.textContent = 'El lector solo debe buscar libros; el bibliotecario presta y devuelve. 💪';
+        }
+    });
+
+    // Gamificación de actividades
+    let missionPoints = 0;
+    const completedMissions = new Set();
+
+    function addMissionPoints(amount) {
+        missionPoints += amount;
+        document.getElementById('mission-points').textContent = missionPoints;
+        updateMissionProgress();
+    }
+
+    function markMission(id) {
+        if (!completedMissions.has(id)) {
+            completedMissions.add(id);
+            updateMissionProgress();
+        }
+    }
+
+    function updateMissionProgress() {
+        const pct = Math.round((completedMissions.size / 3) * 100);
+        document.getElementById('mission-progress-bar').style.width = pct + '%';
+        document.getElementById('mission-progress-text').textContent = completedMissions.size + '/3';
+    }
+
+    // Quiz
+    const quizData = [
+        {
+            question: "¿Qué proceso verifica la identidad de un usuario?",
+            options: ["Autenticación", "Autorización", "Encriptación", "Hashing"],
+            correct: 0
+        },
+        {
+            question: "¿Cuál es la principal diferencia entre sesiones y tokens JWT?",
+            options: ["Las sesiones son más rápidas", "Los tokens almacenan el estado en el cliente, las sesiones en el servidor", "Los tokens no expiran", "Las sesiones no usan cookies"],
+            correct: 1
+        },
+        {
+            question: "En un JWT, ¿qué parte contiene claims como el usuario y la fecha de expiración?",
+            options: ["Header", "Firma", "Payload", "Cookie"],
+            correct: 2
+        },
+        {
+            question: "¿Qué principio recomienda dar a cada usuario solo los permisos necesarios?",
+            options: ["Máximo privilegio", "Mínimo privilegio", "Permiso total", "Privacidad cero"],
+            correct: 1
+        },
+        {
+            question: "Un usuario con rol 'cliente' intenta eliminar a otro usuario. ¿Qué debería ocurrir?",
+            options: ["Autenticación exitosa, autorización exitosa", "Autenticación exitosa, autorización denegada", "Autenticación denegada", "El token se genera automáticamente"],
+            correct: 1
+        }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    quizData.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.classList.add('mb-6');
+        div.innerHTML = `
+            <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                ${item.options.map((opt, i) => `
+                    <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                         data-question="${index}" data-option="${i}">
+                        <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        quizContainer.appendChild(div);
+    });
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            const q = this.dataset.question;
+            document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+
+    document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+        let score = 0;
+        quizData.forEach((item, index) => {
+            const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+            if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+        });
+        const result = document.getElementById('quiz-result');
+        const pct = Math.round((score / quizData.length) * 100);
+        result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+        result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        if (pct >= 80) {
+            addPoints(20);
+            badges.add('guardian');
+            checkBadges();
+        }
+    });
+</script>
+
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
