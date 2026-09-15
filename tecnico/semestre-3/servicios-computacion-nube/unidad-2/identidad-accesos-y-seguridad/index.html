@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Identidad, accesos y seguridad en la nube</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ESTILOS BASE — NO MODIFICAR */
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; } h3 { font-size: 1.25rem !important; } h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* ESTILOS PROPIOS */
+        .tl-card { cursor: pointer; transition: all 0.25s ease; }
+        .tl-card .tl-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, margin 0.35s ease; }
+        .tl-card.open .tl-body { max-height: 220px; margin-top: 0.5rem; }
+        .opt-btn { transition: all 0.2s ease; }
+        .opt-btn.ok  { background-color: #bbf7d0 !important; border-color: #16a34a !important; color:#14532d !important; }
+        .opt-btn.bad { background-color: #fecaca !important; border-color: #dc2626 !important; color:#7f1d1d !important; }
+        #progreso-actividades-bar { transition: width 0.4s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR — NO MODIFICAR -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4"><div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400"><img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy"></div></div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2"><img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy"></div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- INTRODUCCIÓN -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🔐 Identidad, accesos y seguridad en la nube</h2>
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">En 2022, un desarrollador subió por accidente a un repositorio público de GitHub un archivo con las credenciales de su cuenta de AWS. 😰 En menos de doce horas, bots automatizados las detectaron, lanzaron decenas de máquinas virtuales de alta capacidad y acumularon más de <strong>cincuenta mil dólares</strong> en cargos. No hizo nada malicioso; solo no aplicó una práctica básica: nunca guardar credenciales en el código.</p>
+                <p class="text-slate-700 leading-relaxed mb-4">Este tipo de incidentes no es raro. Ocurre porque la nube opera sobre <strong>credenciales digitales</strong> —claves de acceso, tokens, contraseñas— y si caen en las manos equivocadas, el daño puede ser enorme. A diferencia de un servidor físico que hay que robar, las credenciales de la nube se copian sin que te des cuenta. 🕵️</p>
+                <p class="text-slate-700 leading-relaxed mb-4">La buena noticia: los proveedores tienen un sistema para controlar quién puede hacer qué, llamado <strong>IAM</strong> (Identity and Access Management). Entenderlo y aplicar sus principios desde el inicio es una de las habilidades más valiosas de un desarrollador en la nube. 🚀</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg"><p class="text-green-800"><span class="text-xl">✨</span> Al terminar sabrás configurar accesos seguros y proteger las credenciales de tu aplicación. <span class="text-xl">🚀</span></p></div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+            </div>
+
+            <!-- OBJETIVOS -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🧠</span><span>Explicar los conceptos de gestión de identidad y accesos (IAM) en la nube, diferenciando usuarios, roles y políticas.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🛠️</span><span>Aplicar el principio de mínimo privilegio configurando un usuario IAM con permisos limitados.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🧩</span><span>Justificar prácticas de seguridad (protección de credenciales, MFA, rotación de claves) en el diseño de la estructura de permisos de una aplicación.</span></li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+                </ul>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- ACORDEÓN 1 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1"><span>⏱️ Anatomía de una fuga de credenciales</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">¿Y por qué unas simples claves valen tanto para un atacante? Porque una credencial de la nube es, literalmente, <strong>la llave de una tarjeta de crédito con capacidad de cómputo casi ilimitada</strong>. Con ella, alguien puede encender decenas de servidores potentes en tu cuenta para minar criptomonedas o lanzar ataques, y la factura te llega a ti. Y todo ocurre de forma <strong>automática</strong>: no hay una persona vigilando tu repositorio, sino programas que escanean internet sin descanso.</p>
+                                <p class="mb-4">Por eso este tema no va de "asustar", sino de entender un cambio de mentalidad: en la nube, proteger las credenciales es tan importante como escribir buen código. Recorre la línea de tiempo del incidente real de la introducción y verás por qué la velocidad de reacción lo es todo. Toca cada momento. 👇</p>
+                                <div class="mb-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg"><p class="text-sm text-amber-900"><strong>💡 Idea clave:</strong> si expones una credencial, revócala de inmediato en la consola del proveedor y genera una nueva. Borrar el archivo del repositorio no deshace la copia que los bots ya hicieron.</p></div>
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Sigue la fuga minuto a minuto</p>
+                                    <div id="tl-container" class="space-y-2">
+                                        <div class="tl-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="1"><p class="font-bold text-teal-800">🟢 Minuto 0</p><div class="tl-body text-sm text-slate-600">Un desarrollador sube por error un archivo con sus claves de acceso de AWS a un repositorio público de GitHub.</div></div>
+                                        <div class="tl-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="2"><p class="font-bold text-teal-800">🤖 Minuto ~1</p><div class="tl-body text-sm text-slate-600">Bots automáticos que escanean GitHub 24/7 detectan las claves casi al instante. No hace falta que un humano las vea.</div></div>
+                                        <div class="tl-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="3"><p class="font-bold text-teal-800">💸 Hora 1</p><div class="tl-body text-sm text-slate-600">Los atacantes usan las claves para lanzar decenas de servidores potentes (normalmente para minar criptomonedas) a costa de la víctima.</div></div>
+                                        <div class="tl-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="4"><p class="font-bold text-teal-800">🧾 Hora 12</p><div class="tl-body text-sm text-slate-600">La factura del proveedor supera los 50.000 USD. El dueño de la cuenta aún ni se ha enterado.</div></div>
+                                        <div class="tl-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="5"><p class="font-bold text-teal-800">🔁 Después</p><div class="tl-body text-sm text-slate-600">Borrar el archivo del repo NO basta: las claves ya fueron copiadas. Hay que <strong>revocarlas de inmediato</strong> y activar alertas de facturación.</div></div>
+                                    </div>
+                                    <p id="tl-progress" class="mt-4 text-sm font-bold text-teal-800">Momentos revelados: 0 / 5</p>
+                                    <p id="tl-badge" class="mt-2 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Analista de incidentes! Ya sabes por qué nunca se guardan credenciales en el código.</p>
+                                </div>
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: qué es IAM y gestión de identidades y accesos en la nube
+                                     Buscar: "qué es IAM AWS gestión de identidades y accesos español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3"><span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span><span class="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">✅ Disponible</span></div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: qué es IAM (identidades y accesos en la nube)</p>
+                                    <p class="text-slate-600 text-sm mb-4">🎥 Conoce cómo IAM controla quién puede hacer qué en la nube.</p>
+                                    <a href="https://youtu.be/t51vW-BDwF0" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm"><span>▶️</span> Ver recurso</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2"><span>🔑 Construye el mínimo privilegio</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">El <strong>principio de mínimo privilegio</strong> es la regla de oro: cada usuario o servicio recibe <strong>solo los permisos que necesita, y nada más</strong>. Así, si algo es comprometido, el daño queda contenido. 🎯</p>
+                                <p class="mb-4">La razón de fondo es contener el <strong>"radio de impacto"</strong>: si una credencial con permisos mínimos se ve comprometida, el atacante solo puede hacer esa pequeña cosa (leer un bucket), no destruir toda tu infraestructura. Es la diferencia entre perder la llave de un casillero y perder la llave maestra de todo el edificio.</p>
+                                <p class="mb-4">En la práctica, los permisos se escriben en <strong>políticas</strong>: pequeños documentos que declaran tres cosas —un <em>efecto</em> (permitir o denegar), una <em>acción</em> (por ejemplo, "leer objetos de S3") y un <em>recurso</em> (sobre qué bucket exactamente)—. Y cuando quien necesita el permiso es un servicio y no una persona (como una función Lambda), se usan <strong>roles</strong> en lugar de usuarios: así el servicio obtiene permisos temporales automáticamente y no hay que guardar credenciales fijas en el código.</p>
+                                <p class="mb-4">Escenario: tu función Lambda <strong>solo necesita leer imágenes</strong> de un bucket de S3. Decide qué permisos otorgar y cuáles no. Cada decisión correcta suma 25 puntos. 👇</p>
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Otorga solo lo necesario</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="mp-score">0</span> / 100</p>
+                                    <div id="mp-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3"><span>🛡️ ¿Verdadero o falso? Buenas prácticas de seguridad</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Vale la pena entender el <em>porqué</em> de cada práctica, no solo memorizarla. El <strong>MFA</strong> (autenticación de múltiples factores) funciona pidiendo, además de la contraseña, un segundo código que cambia cada pocos segundos y que solo está en tu teléfono; así, aunque alguien robe tu contraseña, no puede entrar. <strong>No guardar credenciales en el código</strong> se resuelve leyéndolas desde variables de entorno o desde un "gestor de secretos", de modo que nunca viajen a un repositorio. <strong>Rotar las claves</strong> periódicamente limita el daño: si una se filtró sin que lo notaras, dejará de servir pronto. Y <strong>reservar la cuenta raíz</strong> solo para lo imprescindible evita poner en juego el control total de la cuenta en el día a día.</p>
+                                <p class="mb-4">Pon a prueba estas prácticas esenciales. 👇</p>
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Verdadero o Falso — seguridad en la nube</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="vf-score">0</span> / 100</p>
+                                    <div id="vf-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ACTIVIDADES -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades</h2>
+                <p class="text-slate-600 mb-4">Completa estas misiones para poner en práctica lo aprendido. Marca cada una al terminarla y observa cómo avanza tu progreso. 🏆</p>
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm"><p class="text-sm font-semibold text-slate-700 mb-2">🏁 Progreso de misiones: <span id="progreso-actividades-texto">0 / 5 completadas</span></p><div class="w-full bg-slate-200 rounded-full h-4"><div id="progreso-actividades-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div></div></div>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔧 Actividad 1: Laboratorio — Crea un usuario IAM con permisos limitados</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">En la consola de AWS (servicio <strong>IAM</strong>) crea un usuario <code>estudiante-lectura-s3</code> con acceso programático y la política <code>AmazonS3ReadOnlyAccess</code>. En CloudShell configura sus credenciales (<code>aws configure --profile estudiante</code>) y prueba: listar buckets (<code>aws s3 ls --profile estudiante</code>) debe funcionar; crear un bucket o listar EC2 debe fallar. Responde: ¿por qué puede leer S3 pero no crear buckets ni ver EC2? ¿Funcionaría este usuario para subir imágenes? ¿Por qué es mejor un usuario limitado que la cuenta raíz?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> capturas del comando exitoso y del fallido + respuestas a las tres preguntas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="1"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Actividad 2: Investigación de incidentes de seguridad</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Investiga dos incidentes reales causados por mala configuración de IAM o credenciales expuestas (busca "AWS credentials exposed GitHub" o "cloud misconfiguration breach"). Para cada uno: ¿qué empresa fue afectada y qué se comprometió? ¿Qué error específico lo causó? ¿Qué práctica de IAM lo habría prevenido?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> un párrafo por incidente + tabla con el error cometido y la práctica correcta correspondiente.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="2"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔍 Actividad 3: Auditoría de un bucket S3</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Toma el bucket S3 que creaste al desplegar tu sitio estático y evalúa su seguridad: ¿cualquiera en internet puede leer sus archivos? ¿Es correcto para un sitio estático? ¿Alguien podría subir archivos sin ser tú? ¿Qué cambiarías si el bucket fuera para imágenes privadas de usuarios? Propón la política IAM que usaría el backend para subir imágenes (solo escritura en ese bucket, nada más).</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> análisis escrito de la configuración actual + política IAM propuesta en formato JSON.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="3"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🗂️ Actividad 4: Diseño de permisos IAM para el proyecto integrador</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Diseña la estructura de permisos del proyecto integrador: ¿qué usuarios IAM crearías (tú, tu compañero, el servidor backend)? ¿qué política asignarías a cada uno y usarías políticas predefinidas o personalizadas? ¿qué servicios usarían roles IAM en lugar de usuarios y por qué? ¿dónde guardarías la cadena de conexión a la base de datos y las claves de API de terceros?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> diagrama o tabla con la estructura IAM del proyecto + justificación de las decisiones.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="4"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 5: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Responde individualmente: ¿qué es IAM y para qué sirve? ¿Cuál es la diferencia entre un usuario y un rol IAM y cuándo usarías cada uno? Explica el principio de mínimo privilegio con un ejemplo. ¿Por qué es peligroso guardar credenciales en el código y qué alternativa existe? ¿Qué es MFA y por qué es clave en la cuenta raíz? Si un desarrollador deja el equipo, ¿qué pasos de IAM seguirías para revocar su acceso?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> respuestas escritas de mínimo 3 líneas por pregunta.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="5"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+                </div>
+            </div>
+
+            <!-- EVALUACIÓN -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que aprendiste. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- RECURSOS -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">AWS IAM Policy Simulator</h3><p class="text-slate-600 mb-2">Herramienta oficial para probar y depurar políticas IAM sin ejecutar operaciones reales: simula si una política permite o deniega una acción. Útil para las Actividades 3 y 4.</p><a href="https://policysim.aws.amazon.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-iam-policy-simulator.png" alt="QR AWS IAM Policy Simulator" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Have I Been Pwned</h3><p class="text-slate-600 mb-2">Servicio gratuito para verificar si un correo ha aparecido en filtraciones de datos conocidas. Educativo para dimensionar el impacto de las brechas.</p><a href="https://haveibeenpwned.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-have-i-been-pwned.png" alt="QR Have I Been Pwned" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">GitGuardian</h3><p class="text-slate-600 mb-2">Herramienta que detecta credenciales y secretos expuestos en repositorios de código; se integra con GitHub y alerta si algo se sube por error.</p><a href="https://www.gitguardian.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-gitguardian.png" alt="QR GitGuardian" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">AWS Security Best Practices</h3><p class="text-slate-600 mb-2">Centro oficial de mejores prácticas de seguridad de AWS: guías, patrones de referencia y listas de verificación para asegurar cuentas y aplicaciones.</p><a href="https://aws.amazon.com/es/architecture/security-identity-compliance/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-aws-security.png" alt="QR AWS Security Best Practices" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+                </ul>
+            </div>
+
+            <!-- BIBLIOGRAFÍA -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Cabezas Granado, L. M. y González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084</a></span></div>
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+                </div>
+            </div>
+
+            <!-- FOOTER — NO MODIFICAR -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Script de navegación — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => { link.addEventListener('click', function(e){ e.preventDefault(); const t=this.dataset.target; document.querySelectorAll('.content-pane').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active')); document.getElementById(t).classList.add('active'); this.classList.add('active'); }); });
+        document.getElementById('mobile-nav').addEventListener('change', function(){ document.querySelectorAll('.content-pane').forEach(p=>p.classList.remove('active')); document.getElementById(this.value).classList.add('active'); });
+        document.querySelectorAll('.accordion-btn').forEach(btn => { btn.addEventListener('click', function(){ const panel=document.querySelector(this.dataset.target); const icon=this.querySelector('span:last-child'); if(panel.classList.contains('hidden')){panel.classList.remove('hidden');icon.textContent='➖';}else{panel.classList.add('hidden');icon.textContent='➕';} }); });
+    </script>
+
+    <!-- QUIZ -->
+    <script>
+        const quizData = [
+            { question: "En el incidente de la fuga de credenciales, ¿por qué borrar el archivo del repositorio NO es suficiente?", options: ["Porque GitHub no permite borrar archivos", "Porque las claves ya fueron copiadas por bots; hay que revocarlas de inmediato", "Porque el archivo se borra solo", "Porque no pasa nada al exponer claves"], correct: 1 },
+            { question: "¿Qué es un usuario IAM?", options: ["Un servidor físico", "Una identidad con credenciales propias a la que se asignan permisos dentro de la cuenta", "Un tipo de base de datos", "Una región de AWS"], correct: 1 },
+            { question: "¿Cuándo usarías un ROL IAM en lugar de un usuario?", options: ["Para que una persona inicie sesión en la consola", "Para que un servicio o aplicación (como una Lambda) asuma permisos temporalmente sin credenciales guardadas", "Nunca, los roles no existen", "Solo para la facturación"], correct: 1 },
+            { question: "El principio de mínimo privilegio significa que...", options: ["todos deben tener acceso de administrador", "cada usuario o servicio recibe solo los permisos que necesita y nada más", "no se asignan permisos a nadie", "los permisos se dan por orden de llegada"], correct: 1 },
+            { question: "¿Cuál es la forma correcta de manejar las credenciales y claves de API en una aplicación?", options: ["Escribirlas directamente en el código fuente", "Subirlas a un repositorio público por si acaso", "Leerlas desde variables de entorno, nunca escribirlas en el código", "Compartirlas por chat con el equipo"], correct: 2 },
+            { question: "¿Para qué sirve el MFA (autenticación de múltiples factores)?", options: ["Para acelerar el inicio de sesión", "Para agregar una segunda verificación además de la contraseña, de modo que robarla no baste para entrar", "Para eliminar las contraseñas por completo", "Para dar permisos de administrador"], correct: 1 }
+        ];
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => { const div=document.createElement('div'); div.classList.add('mb-6'); div.innerHTML = `<p class="font-semibold text-slate-800 mb-3">${index+1}. ${item.question}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">${item.options.map((opt,i)=>`<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="${index}" data-option="${i}"><span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}</div>`).join('')}</div>`; quizContainer.appendChild(div); });
+        document.querySelectorAll('.quiz-option').forEach(opt => { opt.addEventListener('click', function(){ const q=this.dataset.question; document.querySelectorAll(`[data-question="${q}"]`).forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); }); });
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => { let score=0; quizData.forEach((item,index)=>{ const sel=document.querySelector(`.quiz-option.selected[data-question="${index}"]`); if(sel && parseInt(sel.dataset.option)===item.correct) score++; }); const r=document.getElementById('quiz-result'); const pct=Math.round((score/quizData.length)*100); r.textContent=`Obtuviste ${score} de ${quizData.length} (${pct}%)`; r.className=`mt-4 text-lg font-bold ${pct>=60?'text-green-700':'text-red-600'}`; });
+    </script>
+
+    <!-- ACTIVIDADES INTERACTIVAS -->
+    <script>
+        // Juego 1: línea de tiempo de la fuga
+        let tlCount=0; const tlSet=new Set();
+        document.querySelectorAll('.tl-card').forEach(c => { c.addEventListener('click', function(){ const id=this.dataset.tl; this.classList.toggle('open'); if(!tlSet.has(id)){ tlSet.add(id); tlCount++; document.getElementById('tl-progress').textContent=`Momentos revelados: ${tlCount} / 5`; if(tlCount===5) document.getElementById('tl-badge').classList.remove('hidden'); } }); });
+
+        // Helper de juego de opciones
+        function montarJuego(containerId, scoreId, data, puntos) {
+            const cont = document.getElementById(containerId);
+            const done = new Set(); let score = 0;
+            data.forEach((item, index) => { const row=document.createElement('div'); row.className='bg-white p-3 rounded-lg border border-teal-200'; row.innerHTML=`<p class="text-sm text-slate-700 mb-2">🔸 ${item.texto}</p><div class="flex gap-2 flex-wrap">${item.opciones.map((op,i)=>`<button class="opt-btn border-2 border-teal-300 text-teal-700 text-xs font-bold px-3 py-1 rounded-full" data-index="${index}" data-op="${i}">${op}</button>`).join('')}</div>`; cont.appendChild(row); });
+            cont.addEventListener('click', function(e){ if(!e.target.classList.contains('opt-btn')) return; const index=e.target.dataset.index; if(done.has(index)) return; done.add(index); const row=e.target.closest('div.flex'); if(parseInt(e.target.dataset.op)===data[index].correcta){ e.target.classList.add('ok'); score+=puntos; } else { e.target.classList.add('bad'); row.querySelector(`[data-op="${data[index].correcta}"]`).classList.add('ok'); } document.getElementById(scoreId).textContent=score; row.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true); });
+        }
+
+        // Juego 2: mínimo privilegio (Lambda que solo lee imágenes de S3)
+        montarJuego('mp-container', 'mp-score', [
+            { texto:"Permiso para LEER objetos (s3:GetObject) solo en el bucket de imágenes.", opciones:["Otorgar","No otorgar"], correcta:0 },
+            { texto:"Acceso de administrador total a toda la cuenta de AWS.", opciones:["Otorgar","No otorgar"], correcta:1 },
+            { texto:"Permiso para BORRAR objetos (s3:DeleteObject) en todos los buckets.", opciones:["Otorgar","No otorgar"], correcta:1 },
+            { texto:"Permiso para lanzar servidores EC2.", opciones:["Otorgar","No otorgar"], correcta:1 }
+        ], 25);
+
+        // Juego 3: V/F buenas prácticas
+        montarJuego('vf-container', 'vf-score', [
+            { texto:"Nunca se deben guardar credenciales de AWS directamente en el código fuente.", opciones:["Verdadero","Falso"], correcta:0 },
+            { texto:"El MFA agrega una segunda capa de verificación además de la contraseña.", opciones:["Verdadero","Falso"], correcta:0 },
+            { texto:"Usar la cuenta raíz para el trabajo diario es una buena práctica recomendada.", opciones:["Verdadero","Falso"], correcta:1 },
+            { texto:"El principio de mínimo privilegio consiste en dar solo los permisos necesarios y nada más.", opciones:["Verdadero","Falso"], correcta:0 }
+        ], 25);
+
+        // Progreso de misiones
+        const actividadChecks=document.querySelectorAll('.actividad-check');
+        actividadChecks.forEach(chk=>{ chk.addEventListener('change',()=>{ const c=document.querySelectorAll('.actividad-check:checked').length; const t=actividadChecks.length; document.getElementById('progreso-actividades-bar').style.width=Math.round((c/t)*100)+'%'; document.getElementById('progreso-actividades-texto').textContent=`${c} / ${t} completadas`; }); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

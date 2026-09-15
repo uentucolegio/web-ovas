@@ -1,0 +1,27 @@
+name: Validar OVAs
+
+# Corre en cada Pull Request hacia main y en cada push a main.
+# Si el validador encuentra un OVA que no cumple las reglas, el check falla
+# y (con la protección de rama activada) el Pull Request NO se puede fusionar.
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  validar-ovas:
+    name: Reglas de los OVAs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validar que cada OVA cumpla las reglas
+        run: node scripts/validar-ova.mjs

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Arquitectura y despliegue en la nube</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ESTILOS BASE — NO MODIFICAR */
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; } h3 { font-size: 1.25rem !important; } h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* ESTILOS PROPIOS */
+        .deploy-step { transition: all 0.3s ease; opacity: 0.45; }
+        .deploy-step.on { opacity: 1; }
+        .deploy-step.on .ds-box { background-color: #dcfce7; border-color: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.25); transform: translateY(-4px); }
+        .deploy-step .ds-box { transition: all 0.3s ease; }
+        .opt-btn { transition: all 0.2s ease; }
+        .opt-btn.ok  { background-color: #bbf7d0 !important; border-color: #16a34a !important; color:#14532d !important; }
+        .opt-btn.bad { background-color: #fecaca !important; border-color: #dc2626 !important; color:#7f1d1d !important; }
+        #progreso-actividades-bar { transition: width 0.4s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR — NO MODIFICAR -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4"><div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400"><img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy"></div></div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2"><img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy"></div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- INTRODUCCIÓN -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🚀 Arquitectura y despliegue en la nube</h2>
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">Durante las guías anteriores aprendiste a reconocer los servicios de cómputo, almacenamiento, bases de datos y redes que ofrece la nube. Llegó el momento de unir todas esas piezas y hacer algo que quizás solo habías hecho en tu propio computador: <strong>poner una aplicación en funcionamiento para que cualquier persona del mundo pueda usarla</strong>. 🌍</p>
+                <p class="text-slate-700 leading-relaxed mb-4">Piénsalo así: mientras tu proyecto corre en <code>localhost</code>, es como una obra de teatro ensayada en tu sala, con público de una sola persona: tú. 🎭 Desplegar en la nube es abrir el telón en un teatro real, con las puertas abiertas al público. Y para que la función salga bien, cada parte de la aplicación —la que se ve, la que piensa y la que recuerda— tiene que estar montada en el lugar adecuado.</p>
+                <p class="text-slate-700 leading-relaxed mb-4">Aquí vas a repasar cómo se organiza una aplicación web en capas, entender qué significa realmente "desplegar" (en inglés, <em>deploy</em>) y llevar a la práctica el despliegue del frontend y del backend en servicios gratuitos. Es el primer gran paso del proyecto integrador: pasar de "funciona en mi máquina" a "funciona en internet". 💻➡️🌐</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg"><p class="text-green-800"><span class="text-xl">✨</span> Al terminar tendrás tu aplicación viva en internet, con una URL que podrás compartir. <span class="text-xl">🚀</span></p></div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+            </div>
+
+            <!-- OBJETIVOS -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🧠</span><span>Analizar la arquitectura de una aplicación web (frontend, backend y base de datos) para planificar su despliegue en la nube.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🚀</span><span>Desplegar el frontend y el backend de una aplicación web en servicios de la nube, dejándolos accesibles desde internet.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🎯</span><span>Justificar la elección del servicio de despliegue para cada componente según sus características y su costo.</span></li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+                </ul>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- ACORDEÓN 1 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1"><span>🎬 De "localhost" a producción: qué significa desplegar</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Cuando ejecutas tu proyecto en <code>localhost</code>, solo existe mientras tu computador está encendido y solo tú puedes verlo. <strong>Desplegar</strong> (<em>deploy</em>) es poner ese código a correr en un servidor accesible desde internet, de forma permanente y con una URL pública. No es "subir archivos": implica que un servicio mantenga tu aplicación encendida, la reinicie si se cae y la entregue a los usuarios.</p>
+                                <p class="mb-4">Aquí aparece un concepto que usarás toda tu carrera: los <strong>entornos</strong>. El de <strong>desarrollo</strong> es tu <code>localhost</code>, donde experimentas sin miedo a romper nada. El de <strong>producción</strong> (<em>production</em>) es el que usan las personas reales, donde un error sí tiene consecuencias. Muchos equipos añaden un entorno intermedio de pruebas llamado <strong>staging</strong>. Mantenerlos separados evita que un experimento a medio terminar afecte a tus usuarios.</p>
+                                <div class="mb-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg"><p class="text-sm text-amber-900"><strong>💡 Idea clave:</strong> "funciona en mi máquina" no es lo mismo que "funciona en producción". El objetivo del despliegue es cerrar esa brecha: que funcione para cualquiera, en cualquier lugar, siempre.</p></div>
+                                <p class="mb-4">El despliegue moderno además suele ser <strong>continuo</strong> (<em>continuous deployment</em>): conectas tu repositorio de GitHub a la plataforma y, cada vez que subes un cambio con <code>git push</code>, la aplicación se actualiza sola. Recorre el flujo completo 👇</p>
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Sigue el viaje de un despliegue continuo</p>
+                                    <div id="deploy-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4"></div>
+                                    <p id="deploy-desc" class="text-sm bg-white border border-teal-200 rounded-lg p-3 min-h-[3rem]">Presiona <strong>"Siguiente paso"</strong> para iniciar el viaje del despliegue. 🚦</p>
+                                    <div class="flex gap-2 mt-3">
+                                        <button id="deploy-next" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">Siguiente paso ▶️</button>
+                                        <button id="deploy-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold py-2 px-4 rounded-lg transition-colors">Reiniciar 🔄</button>
+                                    </div>
+                                    <p id="deploy-badge" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Ingeniero de despliegue! Ya conoces el flujo de principio a fin.</p>
+                                </div>
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: cómo desplegar una aplicación web en la nube (deploy)
+                                     Buscar: "cómo desplegar una aplicación web en la nube tutorial español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3"><span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span><span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span></div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: cómo desplegar una aplicación web en la nube</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"cómo desplegar una aplicación web en la nube tutorial español"</em></p>
+                                    <a href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed"><span>▶️</span> Ver recurso</a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg"><p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p><p class="text-green-700 text-xs mb-2">Busca el video y dile esto a tu agente de IA en el chat:</p><div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">"Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2"><span>🧩 Cada capa en su lugar: frontend, backend y datos</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La clave del despliegue en la nube es que <strong>cada capa va al servicio que mejor le conviene</strong>, no todas al mismo sitio. El motivo es su naturaleza distinta:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                                    <div class="bg-blue-50 border border-blue-300 rounded-lg p-3"><p class="font-bold text-blue-800">🖼️ Frontend</p><p class="text-sm">Son archivos (HTML/CSS/JS) que se ejecutan en el navegador. Se despliegan en un <strong>hosting estático</strong> (Vercel, Netlify, S3): barato y rapidísimo.</p></div>
+                                    <div class="bg-purple-50 border border-purple-300 rounded-lg p-3"><p class="font-bold text-purple-800">🧠 Backend</p><p class="text-sm">Es un programa que corre <strong>todo el tiempo</strong> esperando peticiones. Se despliega en una PaaS de cómputo (Render, Railway).</p></div>
+                                    <div class="bg-pink-50 border border-pink-300 rounded-lg p-3"><p class="font-bold text-pink-800">🗄️ Base de datos</p><p class="text-sm">Guarda la información de forma persistente. Se usa una <strong>base gestionada</strong> (Neon, RDS) para no administrar el motor a mano.</p></div>
+                                </div>
+                                <p class="mb-4">Una vez desplegados, cada uno vive en su propia URL (por ejemplo, el frontend en <code>mi-app.vercel.app</code> y el backend en <code>mi-api.onrender.com</code>) y se comunican por internet. El frontend le pide datos al backend con <code>fetch</code>, y para que el navegador no bloquee esa comunicación entre dos direcciones distintas, el backend debe permitirla explícitamente con una configuración llamada <strong>CORS</strong>. Es un detalle pequeño que causa muchas dudas la primera vez, así que anótalo.</p>
+                                <p class="mb-4 font-semibold text-teal-800">Practica ubicar cada componente. Cada acierto suma 20 puntos. 👇</p>
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: ¿Dónde despliego cada cosa?</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="place-score">0</span> / 80</p>
+                                    <div id="place-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3"><span>🔐 Variables de entorno: desplegar sin exponer secretos</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Al desplegar un backend aparece un problema real: tu aplicación necesita datos sensibles (la conexión a la base de datos, claves de APIs), pero si los escribes en el código y lo subes a GitHub, quedan expuestos para siempre. La solución son las <strong>variables de entorno</strong>: valores que se configuran en el panel de la plataforma, fuera del código. El programa los lee (por ejemplo, <code>process.env.DATABASE_URL</code>) sin que el valor real aparezca nunca en el repositorio.</p>
+                                <p class="mb-4">Esto tiene una ventaja extra: el <strong>mismo código</strong> puede funcionar en desarrollo y en producción, simplemente cambiando el valor de las variables en cada entorno. Es una práctica tan estándar que casi todas las plataformas de despliegue tienen una sección dedicada a ellas.</p>
+                                <div class="mb-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg"><p class="text-sm text-amber-900"><strong>💡 Idea clave:</strong> si algo es un secreto (contraseñas, claves, tokens), va en variables de entorno, nunca en el código. Y ojo: en el frontend no hay secretos posibles, porque su código es visible para cualquiera que abra el navegador.</p></div>
+                                <p class="mb-4 font-semibold text-teal-800">¿Verdadero o falso? Pon a prueba tu criterio. 👇</p>
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Verdadero o Falso — despliegue y secretos</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="vf-score">0</span> / 100</p>
+                                    <div id="vf-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ACTIVIDADES -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades</h2>
+                <p class="text-slate-600 mb-4">Completa estas misiones para poner en práctica lo aprendido. Marca cada una al terminarla y observa cómo avanza tu progreso. 🏆</p>
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm"><p class="text-sm font-semibold text-slate-700 mb-2">🏁 Progreso de misiones: <span id="progreso-actividades-texto">0 / 5 completadas</span></p><div class="w-full bg-slate-200 rounded-full h-4"><div id="progreso-actividades-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div></div></div>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🌐 Actividad 1: Laboratorio — Despliega tu primer frontend en internet</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Sube un proyecto frontend sencillo (HTML/CSS/JS) a un repositorio de <strong>GitHub</strong>. Crea una cuenta gratuita en <strong>Vercel</strong> o <strong>Netlify</strong>, conecta el repositorio y despliégalo. Abre la URL pública y verifícala. Luego haz un cambio pequeño, haz <code>commit</code> y <code>push</code>, y observa cómo el sitio se actualiza solo. Responde: ¿por qué se actualizó sin que tocaras la plataforma? ¿qué servicio hay detrás del hosting estático? ¿por qué esto no serviría tal cual para un backend Node.js?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> URL pública del sitio + captura del panel de la plataforma + respuestas a las tres preguntas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="1"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧠 Actividad 2: Laboratorio — Despliega un backend en la nube</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Sube a GitHub una API sencilla (por ejemplo, Node.js + Express con una ruta <code>GET /api/saludo</code> que devuelva un JSON). Crea una cuenta en <strong>Render</strong> o <strong>Railway</strong>, crea un "Web Service" conectando el repositorio y configura el comando de inicio (<code>npm start</code>). Si usas datos sensibles, ponlos como variable de entorno. Abre la URL pública seguida de tu ruta. Responde: ¿en qué se diferencia de desplegar el frontend? ¿por qué las variables de entorno son mejores que escribir los datos en el código? ¿qué modelo de servicio (IaaS/PaaS/SaaS) usaste?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> URL pública de la API respondiendo + captura de la respuesta JSON + respuestas escritas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="2"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📐 Actividad 3: Diagrama de arquitectura de despliegue</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Dibuja (draw.io o Excalidraw) el diagrama de despliegue de una aplicación completa, indicando en qué servicio concreto desplegarías cada capa: frontend (hosting estático), backend/API (PaaS o cómputo) y base de datos (gestionada). Muestra el flujo de una petición del usuario: frontend → backend → base de datos y la vuelta.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> diagrama exportado como imagen con una breve justificación de cada elección de servicio.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="3"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔎 Actividad 4: Análisis comparativo de plataformas de despliegue</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Investiga y compara al menos tres plataformas (Vercel, Netlify, Render, Railway). Para cada una: ¿sirve para frontend, backend o ambos? ¿tiene capa gratuita y con qué límites (horas, suspensión por inactividad)? ¿requiere tarjeta de crédito? ¿se integra con GitHub para despliegue continuo?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> tabla comparativa + recomendación fundamentada de qué usar para el frontend y el backend del proyecto integrador.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="4"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 5: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Responde individualmente: ¿qué significa "desplegar" y en qué se diferencia de ejecutar en <code>localhost</code>? ¿qué es un entorno de producción y por qué separarlo del de desarrollo? ¿por qué frontend y backend se despliegan en servicios distintos (con un ejemplo de cada uno)? ¿qué es el despliegue continuo y qué ventaja aporta? ¿qué son las variables de entorno y por qué importan para la seguridad? ¿qué es CORS y cuándo aparecería?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> respuestas escritas de mínimo 3 líneas por pregunta.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="5"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+                </div>
+            </div>
+
+            <!-- EVALUACIÓN -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que aprendiste. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- RECURSOS -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Vercel</h3><p class="text-slate-600 mb-2">Plataforma gratuita para desplegar frontends con integración directa a GitHub y despliegue continuo. Ideal para la Actividad 1.</p><a href="https://vercel.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-vercel.png" alt="QR Vercel" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Netlify</h3><p class="text-slate-600 mb-2">Alternativa a Vercel para publicar sitios estáticos gratis desde un repositorio, con URL pública inmediata.</p><a href="https://www.netlify.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-netlify.png" alt="QR Netlify" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Render</h3><p class="text-slate-600 mb-2">Plataforma para desplegar backends (APIs, servidores Node.js) con capa gratuita. Usada en la Actividad 2.</p><a href="https://render.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-render.png" alt="QR Render" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Railway</h3><p class="text-slate-600 mb-2">Plataforma de despliegue de backends y bases de datos con integración a GitHub y capa gratuita para proyectos de aprendizaje.</p><a href="https://railway.app/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-railway.png" alt="QR Railway" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+                </ul>
+            </div>
+
+            <!-- BIBLIOGRAFÍA -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Cabezas Granado, L. M. y González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084</a></span></div>
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+                </div>
+            </div>
+
+            <!-- FOOTER — NO MODIFICAR -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Script de navegación — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => { link.addEventListener('click', function(e){ e.preventDefault(); const t=this.dataset.target; document.querySelectorAll('.content-pane').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active')); document.getElementById(t).classList.add('active'); this.classList.add('active'); }); });
+        document.getElementById('mobile-nav').addEventListener('change', function(){ document.querySelectorAll('.content-pane').forEach(p=>p.classList.remove('active')); document.getElementById(this.value).classList.add('active'); });
+        document.querySelectorAll('.accordion-btn').forEach(btn => { btn.addEventListener('click', function(){ const panel=document.querySelector(this.dataset.target); const icon=this.querySelector('span:last-child'); if(panel.classList.contains('hidden')){panel.classList.remove('hidden');icon.textContent='➖';}else{panel.classList.add('hidden');icon.textContent='➕';} }); });
+    </script>
+
+    <!-- QUIZ -->
+    <script>
+        const quizData = [
+            { question: "¿Qué significa 'desplegar' (deploy) una aplicación?", options: ["Escribir el código en el editor", "Ponerla a correr en un servidor accesible desde internet, de forma permanente y con URL pública", "Ejecutarla solo en localhost", "Diseñar la interfaz"], correct: 1 },
+            { question: "¿Por qué conviene separar el entorno de desarrollo del de producción?", options: ["Para gastar más dinero", "Para que los experimentos a medio terminar no afecten a los usuarios reales", "Porque lo exige el navegador", "No es necesario separarlos"], correct: 1 },
+            { question: "El frontend (HTML/CSS/JS) se despliega normalmente en:", options: ["Una base de datos", "Un hosting estático (Vercel, Netlify, S3)", "Una función serverless con estado", "Un balanceador de carga"], correct: 1 },
+            { question: "¿Por qué el backend necesita un servicio distinto al del frontend?", options: ["Porque pesa menos", "Porque es un programa que debe estar ejecutándose todo el tiempo esperando peticiones", "Porque no usa internet", "Porque no tiene código"], correct: 1 },
+            { question: "¿Qué es el despliegue continuo?", options: ["Desplegar una sola vez y no volver a tocar", "Que cada push al repositorio actualice la aplicación automáticamente", "Pagar mensualmente por el servidor", "Reiniciar el computador a diario"], correct: 1 },
+            { question: "¿Dónde deben guardarse los datos sensibles (cadena de conexión, claves) al desplegar un backend?", options: ["Escritos directamente en el código", "En variables de entorno configuradas en la plataforma", "En el HTML del frontend", "En un comentario del código"], correct: 1 }
+        ];
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => { const div=document.createElement('div'); div.classList.add('mb-6'); div.innerHTML = `<p class="font-semibold text-slate-800 mb-3">${index+1}. ${item.question}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">${item.options.map((opt,i)=>`<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="${index}" data-option="${i}"><span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}</div>`).join('')}</div>`; quizContainer.appendChild(div); });
+        document.querySelectorAll('.quiz-option').forEach(opt => { opt.addEventListener('click', function(){ const q=this.dataset.question; document.querySelectorAll(`[data-question="${q}"]`).forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); }); });
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => { let score=0; quizData.forEach((item,index)=>{ const sel=document.querySelector(`.quiz-option.selected[data-question="${index}"]`); if(sel && parseInt(sel.dataset.option)===item.correct) score++; }); const r=document.getElementById('quiz-result'); const pct=Math.round((score/quizData.length)*100); r.textContent=`Obtuviste ${score} de ${quizData.length} (${pct}%)`; r.className=`mt-4 text-lg font-bold ${pct>=60?'text-green-700':'text-red-600'}`; });
+    </script>
+
+    <!-- ACTIVIDADES INTERACTIVAS -->
+    <script>
+        // Juego 1: flujo de despliegue continuo (paso a paso)
+        const steps = [
+            { icon:"💻", nombre:"Código local", desc:"Escribes y pruebas tu aplicación en localhost, en tu entorno de desarrollo." },
+            { icon:"⬆️", nombre:"git push", desc:"Subes los cambios a tu repositorio de GitHub con un commit y un push." },
+            { icon:"👀", nombre:"Detección", desc:"La plataforma (Vercel, Render…) detecta automáticamente el nuevo commit en el repositorio." },
+            { icon:"🔨", nombre:"Build", desc:"La plataforma instala las dependencias y construye la aplicación (build)." },
+            { icon:"🌐", nombre:"Publicación", desc:"La nueva versión queda publicada en la URL pública, con HTTPS activado automáticamente. ¡Tus usuarios ya la ven!" }
+        ];
+        const dc = document.getElementById('deploy-container');
+        steps.forEach((s,i)=>{ const d=document.createElement('div'); d.className='deploy-step'; d.dataset.step=i; d.innerHTML=`<div class="ds-box bg-white border-2 border-slate-200 rounded-lg p-3 text-center"><p class="text-2xl">${s.icon}</p><p class="text-xs font-bold text-slate-700">${s.nombre}</p></div>`; dc.appendChild(d); });
+        let stepIdx=-1; const stepNodes=()=>document.querySelectorAll('.deploy-step');
+        document.getElementById('deploy-next').addEventListener('click', function(){ if(stepIdx>=steps.length-1) return; stepIdx++; stepNodes()[stepIdx].classList.add('on'); document.getElementById('deploy-desc').innerHTML=`<strong>${steps[stepIdx].icon} ${steps[stepIdx].nombre}:</strong> ${steps[stepIdx].desc}`; if(stepIdx===steps.length-1) document.getElementById('deploy-badge').classList.remove('hidden'); });
+        document.getElementById('deploy-reset').addEventListener('click', function(){ stepIdx=-1; stepNodes().forEach(n=>n.classList.remove('on')); document.getElementById('deploy-desc').innerHTML='Presiona <strong>"Siguiente paso"</strong> para iniciar el viaje del despliegue. 🚦'; document.getElementById('deploy-badge').classList.add('hidden'); });
+
+        // Helper de juego de opciones
+        function montarJuego(containerId, scoreId, data, puntos) {
+            const cont=document.getElementById(containerId); const done=new Set(); let score=0;
+            data.forEach((item,index)=>{ const row=document.createElement('div'); row.className='bg-white p-3 rounded-lg border border-teal-200'; row.innerHTML=`<p class="text-sm text-slate-700 mb-2">🔸 ${item.texto}</p><div class="flex gap-2 flex-wrap">${item.opciones.map((op,i)=>`<button class="opt-btn border-2 border-teal-300 text-teal-700 text-xs font-bold px-3 py-1 rounded-full" data-index="${index}" data-op="${i}">${op}</button>`).join('')}</div>`; cont.appendChild(row); });
+            cont.addEventListener('click', function(e){ if(!e.target.classList.contains('opt-btn')) return; const index=e.target.dataset.index; if(done.has(index)) return; done.add(index); const row=e.target.closest('div.flex'); if(parseInt(e.target.dataset.op)===data[index].correcta){ e.target.classList.add('ok'); score+=puntos; } else { e.target.classList.add('bad'); row.querySelector(`[data-op="${data[index].correcta}"]`).classList.add('ok'); } document.getElementById(scoreId).textContent=score; row.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true); });
+        }
+
+        // Juego 2: ¿dónde despliego cada cosa?
+        montarJuego('place-container','place-score',[
+            { texto:"Los archivos HTML, CSS y JavaScript que ve el usuario.", opciones:["Hosting estático","PaaS de backend","Base de datos gestionada"], correcta:0 },
+            { texto:"El servidor Node.js con Express que expone la API.", opciones:["Hosting estático","PaaS de backend","Base de datos gestionada"], correcta:1 },
+            { texto:"La información persistente de usuarios y pedidos.", opciones:["Hosting estático","PaaS de backend","Base de datos gestionada"], correcta:2 },
+            { texto:"Las imágenes y archivos estáticos del sitio.", opciones:["Hosting estático","PaaS de backend","Base de datos gestionada"], correcta:0 }
+        ],20);
+
+        // Juego 3: V/F despliegue y secretos
+        montarJuego('vf-container','vf-score',[
+            { texto:"Desplegar es lo mismo que ejecutar la aplicación en localhost.", opciones:["Verdadero","Falso"], correcta:1 },
+            { texto:"Con el despliegue continuo, cada push al repositorio actualiza la aplicación automáticamente.", opciones:["Verdadero","Falso"], correcta:0 },
+            { texto:"Las claves y contraseñas deben ir escritas en el código para que funcionen.", opciones:["Verdadero","Falso"], correcta:1 },
+            { texto:"El frontend no es un lugar seguro para guardar secretos, porque su código es visible.", opciones:["Verdadero","Falso"], correcta:0 }
+        ],25);
+
+        // Progreso de misiones
+        const actividadChecks=document.querySelectorAll('.actividad-check');
+        actividadChecks.forEach(chk=>{ chk.addEventListener('change',()=>{ const c=document.querySelectorAll('.actividad-check:checked').length; const t=actividadChecks.length; document.getElementById('progreso-actividades-bar').style.width=Math.round((c/t)*100)+'%'; document.getElementById('progreso-actividades-texto').textContent=`${c} / ${t} completadas`; }); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

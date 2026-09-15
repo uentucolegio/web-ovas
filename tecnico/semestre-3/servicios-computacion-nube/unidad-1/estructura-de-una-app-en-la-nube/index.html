@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Cómo se estructura una app en la nube</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .hop { transition: all 0.3s ease; opacity: 0.45; }
+        .hop.on { opacity: 1; }
+        .hop.on .hop-box { background-color: #dcfce7; border-color: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.25); transform: translateY(-4px); }
+        .hop .hop-box { transition: all 0.3s ease; }
+        .opt-btn { transition: all 0.2s ease; }
+        .opt-btn.ok  { background-color: #bbf7d0 !important; border-color: #16a34a !important; color:#14532d !important; }
+        .opt-btn.bad { background-color: #fecaca !important; border-color: #dc2626 !important; color:#7f1d1d !important; }
+        #progreso-actividades-bar { transition: width 0.4s ease; }
+        #cap-bar-fill, #load-bar-fill { height: 100%; border-radius: 9999px; transition: width 0.5s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- SIDEBAR — NO MODIFICAR -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- INTRODUCCIÓN -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🏗️ Cómo se estructura una app en la nube</h2>
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Cuando usas una aplicación web, ves una pantalla, haces clic en botones y los datos aparecen casi instantáneamente. 🖥️ Pero detrás de esa experiencia aparentemente simple hay una cadena de componentes que trabajan juntos: un servidor que recibe tu petición, una base de datos que busca la información, una API que empaqueta la respuesta y un frontend que la presenta de forma legible. Esa cadena no vive en un solo computador: en la nube, cada pieza puede estar en un servicio distinto, en una zona distinta, gestionada de forma independiente.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Entender cómo se estructura una aplicación en la nube es una de las habilidades más útiles que puedes desarrollar como programador web. 🧩 No porque tengas que diseñar infraestructuras complejas desde el primer día, sino porque esa comprensión te permite tomar mejores decisiones cuando eliges dónde desplegar tu backend, cómo conectarlo con la base de datos o por qué tu aplicación responde lento en algunos contextos.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Aquí vas a conocer las arquitecturas más comunes con las que se construyen aplicaciones web en la nube y las herramientas con las que los desarrolladores y equipos de infraestructura las gestionan día a día. 🛠️
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800"><span class="text-xl">✨</span> Al terminar vas a poder leer un diagrama de arquitectura cloud y entender qué hace cada pieza. ¡Manos a la obra! <span class="text-xl">🚀</span></p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+            </div>
+
+            <!-- OBJETIVOS -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Describir las arquitecturas básicas de aplicaciones web en la nube, identificando los componentes que conforman una solución típica (frontend, backend, base de datos y red) e interpretando diagramas de arquitectura cloud.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛠️</span>
+                        <span>Reconocer las herramientas con las que los desarrolladores interactúan con los proveedores de nube (consola web, CLI y SDK), como punto de partida para trabajar con estas plataformas.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+                </ul>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🛰️ Sigue el viaje de un clic: la vida de una petición</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Un diagrama de arquitectura es una foto fija, pero una aplicación es <strong>movimiento</strong>. Cuando haces clic en "Ver mi perfil", tu petición hace un viaje relámpago por varios componentes antes de que veas la respuesta. Recórrelo paso a paso 👇</p>
+
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Acompaña la petición de principio a fin</p>
+                                    <div id="hops-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4"></div>
+                                    <p id="hop-desc" class="text-sm bg-white border border-teal-200 rounded-lg p-3 min-h-[3rem]">Presiona <strong>"Siguiente paso"</strong> para iniciar el viaje de la petición. 🚦</p>
+                                    <div class="flex gap-2 mt-3">
+                                        <button id="hop-next" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">Siguiente paso ▶️</button>
+                                        <button id="hop-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold py-2 px-4 rounded-lg transition-colors">Reiniciar 🔄</button>
+                                    </div>
+                                    <p id="hop-badge" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Rastreador de peticiones! Ya conoces la ruta completa.</p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: animación del recorrido de una petición HTTP cliente-servidor-BD
+                                     Buscar: "cómo funciona una petición HTTP cliente servidor base de datos español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">✅ Disponible</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: el recorrido de una petición web (cliente → servidor → base de datos)</p>
+                                    <p class="text-slate-600 text-sm mb-4">🎥 Mira cómo viaja una petición desde el navegador hasta el servidor y de vuelta.</p>
+                                    <a href="https://www.youtube.com/watch?v=SEBRWEJ8dZg" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm"><span>▶️</span> Ver recurso</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>📈 Escalar sin morir: vertical vs horizontal</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Tu app funciona con 10 usuarios. Pero, ¿y si mañana llegan 10.000 de golpe porque se hizo viral? 🚀 Ahí entra el <strong>escalado</strong>, y hay dos formas de hacerlo:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-blue-50 border border-blue-300 rounded-lg p-3">
+                                        <p class="font-bold text-blue-800">⬆️ Escalado vertical</p>
+                                        <p class="text-sm">Hacer más grande el mismo servidor (más CPU, más RAM). Simple, pero tiene un techo físico y un solo punto de fallo.</p>
+                                    </div>
+                                    <div class="bg-purple-50 border border-purple-300 rounded-lg p-3">
+                                        <p class="font-bold text-purple-800">➡️ Escalado horizontal</p>
+                                        <p class="text-sm">Añadir más servidores y repartir el tráfico entre ellos con un balanceador de carga. Es como abrir más cajas en un supermercado. 🛒</p>
+                                    </div>
+                                </div>
+                                <p class="mb-4">Simula un pico de tráfico: llegan usuarios y tú decides cuántos servidores levantar. <strong>Reto: mantén la app en línea con 12.000 usuarios.</strong> 👇</p>
+
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Sobrevive al pico de tráfico</p>
+                                    <div class="mb-2 text-sm"><span class="font-semibold">👥 Usuarios:</span> <span id="load-val" class="font-bold">1.000</span></div>
+                                    <div class="w-full bg-slate-200 rounded-full h-3 mb-3"><div id="load-bar-fill" class="bg-orange-400" style="width:8%"></div></div>
+                                    <div class="mb-2 text-sm"><span class="font-semibold">🖥️ Capacidad (<span id="server-count">1</span> servidor × 3.000):</span> <span id="cap-val" class="font-bold">3.000</span></div>
+                                    <div class="w-full bg-slate-200 rounded-full h-3 mb-3"><div id="cap-bar-fill" class="bg-green-500" style="width:25%"></div></div>
+                                    <div id="scale-status" class="text-center font-bold p-3 rounded-lg bg-green-100 text-green-800 mb-3">✅ App EN LÍNEA</div>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button id="add-load" class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">📈 +3.000 usuarios</button>
+                                        <button id="add-server" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">➕ Añadir servidor</button>
+                                        <button id="scale-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold py-2 px-4 rounded-lg transition-colors">🔄 Reiniciar</button>
+                                    </div>
+                                    <p id="scale-badge" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Maestro del escalado horizontal! Sobreviviste al pico añadiendo servidores.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🧱 Monolito vs microservicios: el gran debate</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Separar una app en capas es un primer paso. El siguiente gran debate de la industria es: ¿un solo bloque grande (<strong>monolito</strong>) o muchos servicios pequeños e independientes (<strong>microservicios</strong>)? 🤔 No hay un ganador absoluto: cada uno tiene ventajas. Netflix usa microservicios; muchas startups exitosas empezaron (y siguieron) con un monolito bien hecho.</p>
+                                <p class="mb-4 font-semibold text-teal-800">Clasifica cada característica: ¿describe a un monolito o a microservicios? Cada acierto suma 10 puntos. 👇</p>
+
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Monolito o microservicios</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="arch-score">0</span> / 60</p>
+                                    <div id="arch-container" class="space-y-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                </div>
+            </div>
+
+            <!-- ACTIVIDADES -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades</h2>
+                <p class="text-slate-600 mb-4">Completa estas misiones para poner en práctica lo aprendido. Marca cada una al terminarla y observa cómo avanza tu progreso. 🏆</p>
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
+                    <p class="text-sm font-semibold text-slate-700 mb-2">🏁 Progreso de misiones: <span id="progreso-actividades-texto">0 / 5 completadas</span></p>
+                    <div class="w-full bg-slate-200 rounded-full h-4"><div id="progreso-actividades-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div></div>
+                </div>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">☁️ Actividad 1: Laboratorio guiado — Tu primer recurso en la nube</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed"><strong>Parte A — Crear la cuenta:</strong> ve a <strong>aws.amazon.com/free</strong> y crea una cuenta gratuita (pide tarjeta para verificar identidad, pero no cobra dentro del free tier; si no tienes tarjeta, usa Google Cloud o solicita AWS Academy a tu docente). Toma captura del panel principal. <strong>Parte B — Explorar la consola:</strong> busca y abre <strong>EC2</strong>, <strong>S3</strong> y <strong>RDS</strong> (sin crear nada) y anota qué gestiona cada servicio; toma captura de cada uno. <strong>Parte C — Cambiar de región:</strong> cambia la región activa a <strong>South America (São Paulo) — sa-east-1</strong>, observa si algo cambia y responde por qué convendría esta región para usuarios en Colombia.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> capturas de las tres partes + respuestas escritas a las preguntas de cada sección.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="1"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📐 Actividad 2: Diagrama de arquitectura de una aplicación conocida</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Elige una app web que uses con frecuencia (red social, streaming, tienda en línea, etc.) e intenta reconstruir su arquitectura en la nube con un diagrama. Propón una arquitectura posible que tenga sentido para ese tipo de app, identificando: capa de frontend (¿dónde vivirían los archivos estáticos?), capa de backend/API (¿en qué tipo de servicio correría?), base de datos (¿relacional o NoSQL? ¿gestionada?) y al menos un componente adicional (CDN, balanceador, caché o cola de mensajes) con justificación.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> diagrama + párrafo de justificación para cada componente elegido.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="2"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧰 Actividad 3: Comparación de herramientas de interacción</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Completa una tabla comparativa de Consola web, CLI y SDK con estos criterios: ¿cómo se accede?, ¿es automatizable?, ¿cuándo conviene usarla?, ¿qué conocimiento previo requiere? y un ejemplo de tarea que harías con cada herramienta. Luego responde: si tuvieras que desplegar tu proyecto web cada vez que haces un cambio, ¿cuál herramienta usarías y por qué?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> tabla completa + respuesta justificada.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="3"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">⌨️ Actividad 4: Laboratorio — Primeros comandos con AWS CloudShell</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Desde la consola de AWS abre <strong>CloudShell</strong> (ícono <code>&gt;_</code> en la barra superior; no requiere instalar nada). Ejecuta y observa el resultado de:</p>
+                        <pre class="bg-slate-800 text-green-300 text-xs p-3 rounded-lg overflow-x-auto mb-2">aws sts get-caller-identity</pre>
+                        <pre class="bg-slate-800 text-green-300 text-xs p-3 rounded-lg overflow-x-auto mb-2">aws ec2 describe-regions --query "Regions[].RegionName" --output table</pre>
+                        <pre class="bg-slate-800 text-green-300 text-xs p-3 rounded-lg overflow-x-auto mb-4">aws s3 ls</pre>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Toma captura de los tres comandos con sus resultados y responde: ¿qué diferencia notaste entre la consola web y la CLI? ¿Para qué tareas sería más útil la CLI? Si quisieras automatizar el despliegue de tu app en cada cambio, ¿usarías consola o CLI? ¿Por qué?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> capturas de los tres comandos + respuestas escritas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="4"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 5: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Responde individualmente: ¿qué problema resuelve la arquitectura de tres capas frente a la monolítica? Describe qué hace cada capa. ¿Para qué sirve un balanceador de carga y cuándo lo necesitarías? ¿Cuál es la diferencia entre usar la consola web y la CLI para crear un servidor? ¿Para qué usarías el SDK de un proveedor en tu código Node.js (ejemplo concreto)? Si tuvieras que desplegar el backend que hiciste en Programación Web I, ¿qué tres componentes de arquitectura en la nube necesitarías como mínimo?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> respuestas escritas de mínimo 3 líneas por pregunta.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="5"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+                </div>
+            </div>
+
+            <!-- EVALUACIÓN -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que aprendiste. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- RECURSOS -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Excalidraw</h3>
+                            <p class="text-slate-600 mb-2">Herramienta gratuita en línea para crear diagramas de arquitectura con estilo de boceto. No requiere registro. Ideal para la Actividad 2.</p>
+                            <a href="https://excalidraw.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/Excalidraw.png" alt="QR Excalidraw" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">draw.io / diagrams.net</h3>
+                            <p class="text-slate-600 mb-2">Editor de diagramas gratuito con plantillas específicas para arquitecturas en la nube (AWS, Azure, GCP) e íconos oficiales de los proveedores.</p>
+                            <a href="https://app.diagrams.net/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/Drawio.png" alt="QR draw.io" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">AWS Architecture Center</h3>
+                            <p class="text-slate-600 mb-2">Biblioteca de diagramas de referencia de arquitecturas reales en AWS. Útil para ver cómo se estructura una app web o un sistema de microservicios en producción.</p>
+                            <a href="https://aws.amazon.com/es/architecture/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/AWS%20Architecture%20Center.png" alt="QR AWS Architecture Center" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">AWS Free Tier</h3>
+                            <p class="text-slate-600 mb-2">Página oficial con todos los servicios del nivel gratuito de AWS, sus límites y duración. Indispensable antes de usar la consola para no generar costos.</p>
+                            <a href="https://aws.amazon.com/es/free/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/AWS%20Free%20Tier.png" alt="QR AWS Free Tier" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">AWS CloudShell</h3>
+                            <p class="text-slate-600 mb-2">Terminal en el navegador integrada en la consola de AWS. No requiere instalación. Usada directamente en la Actividad 4 (requiere cuenta AWS).</p>
+                            <a href="https://console.aws.amazon.com/cloudshell/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/AWS%20CloudShell.png" alt="QR AWS CloudShell" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+                </ul>
+            </div>
+
+            <!-- BIBLIOGRAFÍA -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Cabezas Granado, L. M. y González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084</a></span></div>
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+                </div>
+            </div>
+
+            <!-- FOOTER — NO MODIFICAR -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Script de navegación — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const panel = document.querySelector(this.dataset.target);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) { panel.classList.remove('hidden'); icon.textContent = '➖'; }
+                else { panel.classList.add('hidden'); icon.textContent = '➕'; }
+            });
+        });
+    </script>
+
+    <!-- QUIZ -->
+    <script>
+        const quizData = [
+            {
+                question: "Cuando haces clic en una app web, ¿cuál es el orden típico del recorrido de tu petición?",
+                options: ["Base de datos → backend → usuario", "Usuario → frontend/CDN → backend/API → base de datos y de vuelta", "Usuario → base de datos → frontend", "Solo el navegador, sin servidores"],
+                correct: 1
+            },
+            {
+                question: "¿En qué consiste el escalado HORIZONTAL?",
+                options: ["Hacer más grande un solo servidor (más CPU y RAM)", "Añadir más servidores y repartir el tráfico entre ellos con un balanceador de carga", "Borrar usuarios para reducir la carga", "Cambiar de proveedor de nube"],
+                correct: 1
+            },
+            {
+                question: "¿Qué componente reparte el tráfico entrante entre varias instancias del backend?",
+                options: ["La base de datos", "El balanceador de carga (load balancer)", "El CDN", "La cola de mensajes"],
+                correct: 1
+            },
+            {
+                question: "Una característica típica de una arquitectura de MICROSERVICIOS es:",
+                options: ["Todo el código vive en un solo bloque", "Cada parte se despliega y escala de forma independiente", "Es siempre la mejor opción para proyectos pequeños", "No necesita comunicación entre componentes"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál herramienta usarías para integrar un servicio de nube directamente desde el código de tu app en Node.js?",
+                options: ["La consola web", "El SDK del proveedor", "El balanceador de carga", "El navegador"],
+                correct: 1
+            },
+            {
+                question: "Para alguien que está aprendiendo, ¿cuál es la ruta recomendada para interactuar con la nube?",
+                options: ["SDK → CLI → consola", "Consola web → CLI → SDK", "Solo usar la CLI desde el día uno", "No usar ninguna herramienta"],
+                correct: 1
+            }
+        ];
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>`).join('')}
+                </div>`;
+            quizContainer.appendChild(div);
+        });
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- SCRIPTS DE ACTIVIDADES INTERACTIVAS -->
+    <script>
+        // ---- Juego 1: La vida de una petición ----
+        const hops = [
+            { icon: "👤", nombre: "Usuario", desc: "Haces clic en la app desde tu navegador. Se genera una petición HTTP que sale hacia internet." },
+            { icon: "🌍", nombre: "CDN", desc: "El CDN entrega los archivos estáticos (HTML, CSS, JS, imágenes) desde el servidor más cercano a ti para que carguen rápido." },
+            { icon: "⚖️", nombre: "Balanceador", desc: "El balanceador de carga recibe la petición y la envía a la instancia de backend menos ocupada." },
+            { icon: "🧠", nombre: "Backend/API", desc: "El backend aplica las reglas de negocio, valida los datos y decide qué información se necesita." },
+            { icon: "⚡", nombre: "Caché", desc: "Antes de molestar a la base de datos, se revisa la caché: si el dato ya está guardado, se responde al instante." },
+            { icon: "🗄️", nombre: "Base de datos", desc: "Si no estaba en caché, la base de datos busca la información persistente y la devuelve al backend." },
+            { icon: "✅", nombre: "Respuesta", desc: "El backend arma la respuesta, viaja de vuelta al navegador y ves tu pantalla actualizada. ¡Todo en milisegundos!" }
+        ];
+        const hopsContainer = document.getElementById('hops-container');
+        hops.forEach((h, i) => {
+            const div = document.createElement('div');
+            div.className = 'hop';
+            div.dataset.hop = i;
+            div.innerHTML = `<div class="hop-box bg-white border-2 border-slate-200 rounded-lg p-3 text-center transition-all"><p class="text-2xl">${h.icon}</p><p class="text-xs font-bold text-slate-700">${h.nombre}</p></div>`;
+            hopsContainer.appendChild(div);
+        });
+        let hopIndex = -1;
+        const hopNodes = () => document.querySelectorAll('.hop');
+        document.getElementById('hop-next').addEventListener('click', function() {
+            if (hopIndex >= hops.length - 1) return;
+            hopIndex++;
+            hopNodes()[hopIndex].classList.add('on');
+            document.getElementById('hop-desc').innerHTML = `<strong>${hops[hopIndex].icon} ${hops[hopIndex].nombre}:</strong> ${hops[hopIndex].desc}`;
+            if (hopIndex === hops.length - 1) document.getElementById('hop-badge').classList.remove('hidden');
+        });
+        document.getElementById('hop-reset').addEventListener('click', function() {
+            hopIndex = -1;
+            hopNodes().forEach(n => n.classList.remove('on'));
+            document.getElementById('hop-desc').innerHTML = 'Presiona <strong>"Siguiente paso"</strong> para iniciar el viaje de la petición. 🚦';
+            document.getElementById('hop-badge').classList.add('hidden');
+        });
+
+        // ---- Juego 2: Simulador de escalado ----
+        let load = 1000, servers = 1;
+        const CAP_POR_SERVIDOR = 3000, LOAD_MAX_VIS = 12000;
+        let scaleBadgeShown = false;
+        function renderScale() {
+            const cap = servers * CAP_POR_SERVIDOR;
+            document.getElementById('load-val').textContent = load.toLocaleString('es-CO');
+            document.getElementById('cap-val').textContent = cap.toLocaleString('es-CO');
+            document.getElementById('server-count').textContent = servers;
+            document.getElementById('load-bar-fill').style.width = Math.min(100, (load / LOAD_MAX_VIS) * 100) + '%';
+            document.getElementById('cap-bar-fill').style.width = Math.min(100, (cap / LOAD_MAX_VIS) * 100) + '%';
+            const status = document.getElementById('scale-status');
+            if (load <= cap) {
+                status.className = "text-center font-bold p-3 rounded-lg bg-green-100 text-green-800 mb-3";
+                status.textContent = "✅ App EN LÍNEA";
+                if (!scaleBadgeShown && load >= 12000) { scaleBadgeShown = true; document.getElementById('scale-badge').classList.remove('hidden'); }
+            } else {
+                status.className = "text-center font-bold p-3 rounded-lg bg-red-100 text-red-800 mb-3";
+                status.textContent = "🔥 App SOBRECARGADA — ¡añade más servidores!";
+            }
+        }
+        document.getElementById('add-load').addEventListener('click', () => { load += 3000; renderScale(); });
+        document.getElementById('add-server').addEventListener('click', () => { servers++; renderScale(); });
+        document.getElementById('scale-reset').addEventListener('click', () => { load = 1000; servers = 1; renderScale(); });
+
+        // ---- Juego 3: Monolito vs microservicios ----
+        const archData = [
+            { car: "Todo el código en un solo bloque", correcta: "Monolito" },
+            { car: "Cada parte se despliega y escala por separado", correcta: "Microservicios" },
+            { car: "Más simple para empezar y para proyectos pequeños", correcta: "Monolito" },
+            { car: "Equipos grandes trabajan en paralelo sin pisarse", correcta: "Microservicios" },
+            { car: "Si una parte falla, puede caer todo el sistema", correcta: "Monolito" },
+            { car: "Mayor complejidad de comunicación entre servicios", correcta: "Microservicios" }
+        ];
+        let archScore = 0;
+        const archDone = new Set();
+        const archContainer = document.getElementById('arch-container');
+        archData.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = 'bg-white p-3 rounded-lg border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2';
+            row.innerHTML = `
+                <span class="text-sm text-slate-700">${item.car}</span>
+                <div class="flex gap-2">
+                    <button class="opt-btn border-2 border-blue-300 text-blue-700 text-xs font-bold px-3 py-1 rounded-full" data-index="${index}" data-op="Monolito">Monolito</button>
+                    <button class="opt-btn border-2 border-purple-300 text-purple-700 text-xs font-bold px-3 py-1 rounded-full" data-index="${index}" data-op="Microservicios">Microservicios</button>
+                </div>`;
+            archContainer.appendChild(row);
+        });
+        archContainer.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('opt-btn')) return;
+            const index = e.target.dataset.index;
+            if (archDone.has(index)) return;
+            archDone.add(index);
+            const fila = e.target.closest('div.flex.gap-2');
+            if (e.target.dataset.op === archData[index].correcta) { e.target.classList.add('ok'); archScore += 10; }
+            else { e.target.classList.add('bad'); fila.querySelector(`[data-op="${archData[index].correcta}"]`).classList.add('ok'); }
+            document.getElementById('arch-score').textContent = archScore;
+            fila.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        });
+
+        // ---- Barra de progreso de misiones ----
+        const actividadChecks = document.querySelectorAll('.actividad-check');
+        actividadChecks.forEach(chk => {
+            chk.addEventListener('change', () => {
+                const completadas = document.querySelectorAll('.actividad-check:checked').length;
+                const total = actividadChecks.length;
+                document.getElementById('progreso-actividades-bar').style.width = Math.round((completadas / total) * 100) + '%';
+                document.getElementById('progreso-actividades-texto').textContent = `${completadas} / ${total} completadas`;
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: ¿Qué es la nube? Conceptos y modelos de servicio</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .timeline-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .timeline-card:hover { transform: translateY(-3px); }
+        .timeline-card .tl-event {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, margin 0.35s ease;
+        }
+        .timeline-card.open .tl-event {
+            max-height: 200px;
+            margin-top: 0.5rem;
+        }
+        .opt-btn { transition: all 0.2s ease; }
+        .opt-btn.ok  { background-color: #bbf7d0 !important; border-color: #16a34a !important; color:#14532d !important; }
+        .opt-btn.bad { background-color: #fecaca !important; border-color: #dc2626 !important; color:#7f1d1d !important; }
+        .market-bar-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 9999px;
+            transition: width 1s ease;
+        }
+        #progreso-actividades-bar { transition: width 0.4s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">☁️ ¿Qué es la nube? Conceptos y modelos de servicio</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Piensa por un momento en todo lo que hiciste hoy con tu teléfono o computador: revisaste el correo, escuchaste música en Spotify 🎵, enviaste un mensaje por WhatsApp, quizás subiste una foto a Instagram o abriste un documento en Google Drive. ¿Alguna vez te preguntaste dónde vive toda esa información? 🤔 No está guardada en tu dispositivo, eso es seguro. Está en algún lugar del mundo, en edificios enormes llenos de servidores, funcionando las 24 horas del día para que tú puedas acceder a ella desde cualquier parte con solo tener conexión a internet. 🌐
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Eso es, en términos muy simples, la <strong>computación en la nube</strong>: usar recursos de cómputo, almacenamiento y software a través de internet, sin necesidad de tenerlos físicamente. Y lo fascinante es que este modelo no solo cambia la forma en que las personas usan aplicaciones, sino también la forma en que los desarrolladores las construyen y las empresas las operan. 🚀
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En este curso vas a aprender a trabajar con la nube como desarrollador, no solo como usuario. Pero antes de configurar servidores o desplegar aplicaciones, necesitas entender el terreno: qué es exactamente la nube, cómo está organizada y cuáles son los modelos que existen para usarla. Eso es justo lo que vamos a explorar aquí. 🧭
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al final vas a poder mirar cualquier app que usas a diario y reconocer qué tipo de servicio de nube hay detrás. ¡Vamos a descifrar la nube juntos! <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Identificar el concepto de computación en la nube, sus características fundamentales y los tres modelos de servicio (IaaS, PaaS y SaaS), reconociéndolos en servicios digitales de uso cotidiano.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Seleccionar el modelo de servicio adecuado (IaaS, PaaS o SaaS) según el tipo de problema o solución que se quiera implementar en un proyecto web.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🕰️ ¿De dónde salió la nube? Historia y realidad física</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">La nube no apareció de la nada en 2020. La idea de "usar el cómputo como un servicio público, igual que el agua o la luz" tiene <strong>más de 60 años</strong>. Toca cada tarjeta de la línea de tiempo para descubrir los hitos que construyeron la nube que hoy usas. 👇</p>
+
+                                <!-- Juego: línea de tiempo interactiva -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Viajero del tiempo — revela los 6 hitos de la nube</p>
+                                    <div id="timeline-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div class="timeline-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="1">
+                                            <p class="font-bold text-teal-800">1961 · La idea 💡</p>
+                                            <div class="tl-event text-sm text-slate-600">El científico John McCarthy propone que algún día el cómputo se venderá como un servicio público, igual que la electricidad. Nace el concepto de <em>utility computing</em>.</div>
+                                        </div>
+                                        <div class="timeline-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="2">
+                                            <p class="font-bold text-teal-800">1999 · El pionero SaaS 🌐</p>
+                                            <div class="tl-event text-sm text-slate-600">Salesforce empieza a entregar software de gestión empresarial 100% por internet, sin instalación. Es uno de los primeros grandes SaaS de la historia.</div>
+                                        </div>
+                                        <div class="timeline-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="3">
+                                            <p class="font-bold text-teal-800">2006 · Amazon lo cambia todo 📦</p>
+                                            <div class="tl-event text-sm text-slate-600">Amazon lanza S3 y EC2: por primera vez cualquiera puede alquilar almacenamiento y servidores por horas. Ese mismo año, el CEO de Google populariza el término "cloud computing".</div>
+                                        </div>
+                                        <div class="timeline-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="4">
+                                            <p class="font-bold text-teal-800">2008-2010 · Llegan los rivales ⚔️</p>
+                                            <div class="tl-event text-sm text-slate-600">Google App Engine (2008) y Microsoft Azure (2010) entran a competir. La nube deja de ser cosa de una sola empresa.</div>
+                                        </div>
+                                        <div class="timeline-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="5">
+                                            <p class="font-bold text-teal-800">2014 · Sin servidores 👻</p>
+                                            <div class="tl-event text-sm text-slate-600">AWS lanza Lambda: código que se ejecuta sin que tú administres ningún servidor. Nace el "serverless" masivo (lo verás en la Unidad 2).</div>
+                                        </div>
+                                        <div class="timeline-card bg-white border-2 border-teal-200 rounded-lg p-3" data-tl="6">
+                                            <p class="font-bold text-teal-800">Hoy · Nube + IA 🤖</p>
+                                            <div class="tl-event text-sm text-slate-600">La nube es la base de casi todo: streaming, banca, redes sociales e inteligencia artificial. Entrenar modelos de IA sería imposible sin ella.</div>
+                                        </div>
+                                    </div>
+                                    <p id="tl-progress" class="mt-4 text-sm font-bold text-teal-800">Hitos revelados: 0 / 6</p>
+                                    <p id="tl-badge" class="mt-2 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Historiador de la nube!</p>
+                                </div>
+
+                                <div class="mt-6 p-4 bg-amber-50 border border-amber-300 rounded-lg">
+                                    <p class="font-bold text-amber-800 mb-2">🌊 Dato que sorprende: la nube vive bajo el mar</p>
+                                    <p class="text-sm text-slate-700">Más del <strong>95% del tráfico internacional de internet</strong> viaja por cables de fibra óptica submarinos, no por satélite. Cuando accedes a un servidor en otro continente, tus datos literalmente cruzan el océano por el fondo marino. Y los centros de datos consumen alrededor del <strong>1-2% de toda la electricidad del planeta</strong>. ⚡</p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: recorrido visual por dentro de un centro de datos real
+                                     Estado: ACTIVADO
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">✅ Disponible</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: recorrido por dentro de un centro de datos real</p>
+                                    <p class="text-slate-600 text-sm mb-4">🎥 Mira por dentro un centro de datos y descubre dónde "vive" físicamente la nube.</p>
+                                    <a href="https://www.youtube.com/watch?v=DIIbqPvPqNo" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🛡️ ¿De quién es la culpa? El modelo de responsabilidad compartida</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Cuando trabajas en la nube hay una pregunta clave que casi nadie se hace hasta que algo sale mal: <strong>si hay un fallo o un ataque, ¿de quién es la responsabilidad?</strong> La respuesta está en el <strong>modelo de responsabilidad compartida</strong>, la regla que usan AWS, Azure y Google para dejar claro quién responde por qué. 🔐</p>
+
+                                <p class="mb-4">La idea es simple pero poderosa: <strong>el proveedor asegura la nube; tú aseguras lo que pones dentro de la nube.</strong> Mientras más "gestionado" es el modelo (SaaS), más responsabilidad asume el proveedor. Mientras más control tienes (IaaS), más responsabilidad recae en ti. 👇</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                                    <div class="bg-blue-50 border border-blue-300 rounded-lg p-3 text-center">
+                                        <p class="font-bold text-blue-800">🧱 IaaS</p>
+                                        <p class="text-xs text-slate-600 mt-1">Tú respondes por: sistema operativo, parches, configuración, datos y accesos.</p>
+                                    </div>
+                                    <div class="bg-purple-50 border border-purple-300 rounded-lg p-3 text-center">
+                                        <p class="font-bold text-purple-800">🛠️ PaaS</p>
+                                        <p class="text-xs text-slate-600 mt-1">Tú respondes por: tu código, tus datos y quién accede. El resto lo cuida el proveedor.</p>
+                                    </div>
+                                    <div class="bg-pink-50 border border-pink-300 rounded-lg p-3 text-center">
+                                        <p class="font-bold text-pink-800">📱 SaaS</p>
+                                        <p class="text-xs text-slate-600 mt-1">Tú respondes casi solo por: tus datos y tus contraseñas. Todo lo demás es del proveedor.</p>
+                                    </div>
+                                </div>
+
+                                <p class="text-sm text-slate-500 italic mb-4">💡 Ojo: pase lo que pase, <strong>tus datos y tus contraseñas SIEMPRE son tu responsabilidad</strong>, en los tres modelos.</p>
+
+                                <!-- Juego: quiz de responsabilidad con puntos -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: ¿Proveedor o tú? — decide quién responde</p>
+                                    <p class="text-slate-600 text-sm mb-3">Lee cada situación y elige quién es responsable. Cada acierto suma 20 puntos.</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="resp-score">0</span> / 80</p>
+                                    <div id="resp-container" class="space-y-4"></div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🌌 Más allá de los 3 modelos: el universo "as a Service" y la nube en cifras</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">IaaS, PaaS y SaaS son los tres grandes, pero el "as a Service" (aaS) se ha vuelto una familia enorme. Hoy casi cualquier cosa se ofrece "como servicio". Estos son algunos que te vas a encontrar en tu carrera: 🚀</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-white border-l-4 border-green-400 rounded p-3 shadow-sm">
+                                        <p class="font-bold text-green-700">⚡ FaaS — Function as a Service</p>
+                                        <p class="text-sm text-slate-600">Subes solo una función; se ejecuta cuando se necesita y pagas por ejecución. Es el "serverless". Ej: AWS Lambda.</p>
+                                    </div>
+                                    <div class="bg-white border-l-4 border-green-400 rounded p-3 shadow-sm">
+                                        <p class="font-bold text-green-700">🗄️ DBaaS — Database as a Service</p>
+                                        <p class="text-sm text-slate-600">Una base de datos lista para usar, sin instalarla ni mantenerla. Ej: Amazon RDS (lo verás en la Unidad 2).</p>
+                                    </div>
+                                    <div class="bg-white border-l-4 border-green-400 rounded p-3 shadow-sm">
+                                        <p class="font-bold text-green-700">🔐 IDaaS — Identity as a Service</p>
+                                        <p class="text-sm text-slate-600">Login y gestión de usuarios como servicio. Ej: "Iniciar sesión con Google".</p>
+                                    </div>
+                                    <div class="bg-white border-l-4 border-green-400 rounded p-3 shadow-sm">
+                                        <p class="font-bold text-green-700">🧠 AIaaS — AI as a Service</p>
+                                        <p class="text-sm text-slate-600">Modelos de inteligencia artificial listos para usar vía API, sin entrenarlos tú.</p>
+                                    </div>
+                                </div>
+
+                                <p class="mb-3 font-semibold text-green-800">📊 ¿Y quién domina el mercado de la nube? Adivina primero y luego revela los datos:</p>
+
+                                <!-- Juego: revelar cuota de mercado -->
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Adivina al líder del mercado (cuotas aproximadas de años recientes)</p>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span class="font-semibold">🟠 Amazon Web Services (AWS)</span><span class="reveal-pct font-bold text-slate-400">?</span></div>
+                                            <div class="w-full bg-slate-200 rounded-full h-4"><div class="market-bar-fill bg-orange-400" data-pct="31"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span class="font-semibold">🔵 Microsoft Azure</span><span class="reveal-pct font-bold text-slate-400">?</span></div>
+                                            <div class="w-full bg-slate-200 rounded-full h-4"><div class="market-bar-fill bg-blue-500" data-pct="24"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span class="font-semibold">🟢 Google Cloud</span><span class="reveal-pct font-bold text-slate-400">?</span></div>
+                                            <div class="w-full bg-slate-200 rounded-full h-4"><div class="market-bar-fill bg-green-500" data-pct="11"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span class="font-semibold">⚪ Otros (Alibaba, IBM, Oracle...)</span><span class="reveal-pct font-bold text-slate-400">?</span></div>
+                                            <div class="w-full bg-slate-200 rounded-full h-4"><div class="market-bar-fill bg-slate-400" data-pct="34"></div></div>
+                                        </div>
+                                    </div>
+                                    <button id="reveal-market-btn" class="mt-4 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">🔎 Revelar cuotas de mercado</button>
+                                    <p id="market-note" class="mt-3 text-xs text-slate-500 hidden">Estos tres gigantes (AWS + Azure + Google) concentran cerca de <strong>dos tercios</strong> de todo el mercado mundial de infraestructura en la nube. Por eso a AWS, Azure y GCP se les llama "los tres grandes". 🌍</p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades</h2>
+                <p class="text-slate-600 mb-4">Completa estas misiones para poner en práctica lo aprendido. Marca cada una al terminarla y observa cómo avanza tu progreso. 🏆</p>
+
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
+                    <p class="text-sm font-semibold text-slate-700 mb-2">🏁 Progreso de misiones: <span id="progreso-actividades-texto">0 / 5 completadas</span></p>
+                    <div class="w-full bg-slate-200 rounded-full h-4">
+                        <div id="progreso-actividades-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧪 Actividad 1: Primer contacto con la nube desde Postman</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Cada vez que consumes una API pública estás interactuando con la nube. Abre Postman (o Insomnia, Thunder Client o el navegador) y haz una petición GET a la siguiente URL, que devuelve el clima actual de Montería y no requiere registro:
+                        </p>
+                        <pre class="bg-slate-800 text-green-300 text-xs p-3 rounded-lg overflow-x-auto mb-4">https://api.open-meteo.com/v1/forecast?latitude=8.75&amp;longitude=-75.88&amp;current=temperature_2m,wind_speed_10m</pre>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Observa la respuesta JSON y ubica la temperatura (<code>temperature_2m</code>) y la velocidad del viento (<code>wind_speed_10m</code>). Cambia las coordenadas por las de otra ciudad colombiana y vuelve a ejecutar. Responde: ¿instalaste algo en tu computador? ¿Dónde vive el código que procesó tu petición? ¿Qué modelo de servicio (IaaS, PaaS o SaaS) describe mejor cómo Open-Meteo ofrece este servicio?
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> captura de pantalla de la respuesta en Postman + respuestas escritas a las tres preguntas.
+                            </p>
+                        </div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                            <input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="1"> Marcar actividad como completada ✅
+                        </label>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🗂️ Actividad 2: Clasificación de servicios conocidos</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Investiga los siguientes servicios y clasifícalos en IaaS, PaaS o SaaS según corresponda. Para cada uno, escribe una frase corta que justifique tu elección: Google Drive, Amazon EC2, Heroku, Netflix, Microsoft Azure Virtual Machines, Railway, Zoom y Google App Engine.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> tabla con la clasificación y justificación de cada servicio.
+                            </p>
+                        </div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                            <input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="2"> Marcar actividad como completada ✅
+                        </label>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🎨 Actividad 3: Análisis de caso</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Lee el siguiente caso y responde: <em>una estudiante de diseño gráfico quiere lanzar su portafolio en línea. No sabe nada de servidores, pero sí sabe diseñar y manejar herramientas digitales. Quiere que su sitio esté disponible en internet, que cargue rápido y que no le cueste mucho mantenerlo.</em> ¿Qué modelo de servicio le recomendarías y por qué? ¿Cambiaría tu respuesta si en vez de un portafolio fuera una tienda en línea con inventario y pagos? ¿Qué servicios concretos le sugerirías?
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> respuesta escrita de mínimo un párrafo por pregunta.
+                            </p>
+                        </div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                            <input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="3"> Marcar actividad como completada ✅
+                        </label>
+                    </div>
+
+                    <!-- Actividad 4 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📊 Actividad 4: Comparación entre modelos</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Completa una tabla comparativa de IaaS, PaaS y SaaS con tus propias palabras (no copies definiciones; escribe como si se lo explicaras a un amigo). Para cada modelo indica: qué entrega el proveedor, qué gestiona el usuario, nivel de control del usuario, perfil típico de usuario, ejemplo real, ventaja principal y desventaja principal.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> tabla comparativa completa.
+                            </p>
+                        </div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                            <input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="4"> Marcar actividad como completada ✅
+                        </label>
+                    </div>
+
+                    <!-- Actividad 5 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 5: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Responde individualmente: ¿cuál es la diferencia entre comprar infraestructura propia y usar la nube? Explica con tus palabras qué significa que la nube sea "elástica". ¿Por qué se dice que en SaaS el usuario "no gestiona nada"? ¿Es siempre una ventaja? Un desarrollador backend con Node.js quiere desplegar su API rápidamente sin configurar servidores: ¿qué modelo le conviene y por qué? Menciona dos servicios SaaS que uses a diario y explica por qué encajan en ese modelo.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> respuestas escritas, mínimo 3 líneas por pregunta.
+                            </p>
+                        </div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                            <input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="5"> Marcar actividad como completada ✅
+                        </label>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que aprendiste en este OVA. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">AWS — Tipos de computación en la nube</h3>
+                            <p class="text-slate-600 mb-2">Explicación oficial de AWS sobre IaaS, PaaS y SaaS con ejemplos de sus propios servicios. Útil para contrastar con lo visto en clase.</p>
+                            <a href="https://aws.amazon.com/es/types-of-cloud-computing/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/AWS%20%20Tipos%20de%20computación%20en%20la%20nube.png" alt="QR AWS Tipos de computación en la nube" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Google Cloud Skills Boost</h3>
+                            <p class="text-slate-600 mb-2">Plataforma de laboratorios interactivos y cursos gratuitos de Google Cloud. El módulo "Cloud Computing Fundamentals" cubre estos conceptos con ejercicios en consola real.</p>
+                            <a href="https://cloudskillsboost.google/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/Google%20Cloud%20Skills%20Boost.png" alt="QR Google Cloud Skills Boost" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Microsoft Learn — Conceptos de la nube (Azure)</h3>
+                            <p class="text-slate-600 mb-2">Ruta de aprendizaje interactiva y gratuita de Microsoft. Incluye módulos con preguntas de comprensión al final de cada sección.</p>
+                            <a href="https://learn.microsoft.com/es-es/training/paths/microsoft-azure-fundamentals-describe-cloud-concepts/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/Microsoft%20Learn%20%20Conceptos%20de%20la%20nube%20Azure.png" alt="QR Microsoft Learn conceptos de la nube" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 4 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">AWS Cloud Practitioner Essentials</h3>
+                            <p class="text-slate-600 mb-2">Curso introductorio gratuito de AWS sobre fundamentos de la nube, modelos de servicio y casos de uso. No requiere experiencia previa.</p>
+                            <a href="https://aws.amazon.com/es/training/learn-about/cloud-practitioner/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/AWS%20Cloud%20Practitioner%20Essentials.png" alt="QR AWS Cloud Practitioner Essentials" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br>
+                            <a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA Editorial.<br>
+                            <a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.<br>
+                            <a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cabezas Granado, L. M. y González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br>
+                            <a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084</a>
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "Según la historia de la nube, ¿qué hito ocurrió en 2006 y cambió las reglas del juego?",
+                options: [
+                    "Se inventó el primer computador",
+                    "Amazon lanzó S3 y EC2, permitiendo alquilar servidores y almacenamiento por horas",
+                    "Se creó el primer sitio web",
+                    "Microsoft lanzó Windows"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Por dónde viaja más del 95% del tráfico internacional de internet?",
+                options: ["Por satélites", "Por antenas 5G", "Por cables de fibra óptica submarinos", "Por ondas de radio"],
+                correct: 2
+            },
+            {
+                question: "Según el modelo de responsabilidad compartida, ¿de quién es la responsabilidad de tus datos y contraseñas?",
+                options: [
+                    "Siempre del proveedor de nube",
+                    "Siempre tuya, en cualquier modelo (IaaS, PaaS o SaaS)",
+                    "De nadie, se protegen solos",
+                    "Solo del gobierno"
+                ],
+                correct: 1
+            },
+            {
+                question: "En un modelo IaaS, si un servidor es hackeado porque nunca se instalaron los parches del sistema operativo, ¿de quién es la responsabilidad?",
+                options: [
+                    "Del proveedor, porque él da la infraestructura",
+                    "Del cliente, porque en IaaS él gestiona el sistema operativo y sus actualizaciones",
+                    "De ambos por igual",
+                    "De nadie"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Qué significa FaaS (Function as a Service)?",
+                options: [
+                    "Un tipo de base de datos",
+                    "Subir solo una función que se ejecuta cuando se necesita, sin administrar servidores (serverless)",
+                    "Un servicio de identidad",
+                    "Una red social de programadores"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Qué tres proveedores concentran cerca de dos tercios del mercado mundial de infraestructura en la nube?",
+                options: [
+                    "Facebook, Twitter y TikTok",
+                    "Apple, Samsung y Huawei",
+                    "AWS, Microsoft Azure y Google Cloud",
+                    "Netflix, Spotify y Disney+"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ---- Juego 1: Línea de tiempo (revelar hitos) ----
+        let tlCount = 0;
+        const tlSet = new Set();
+        document.querySelectorAll('.timeline-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const id = this.dataset.tl;
+                this.classList.toggle('open');
+                if (!tlSet.has(id)) {
+                    tlSet.add(id);
+                    tlCount++;
+                    document.getElementById('tl-progress').textContent = `Hitos revelados: ${tlCount} / 6`;
+                    if (tlCount === 6) document.getElementById('tl-badge').classList.remove('hidden');
+                }
+            });
+        });
+
+        // ---- Juego 2: Quiz de responsabilidad compartida ----
+        const respData = [
+            {
+                caso: "En un correo SaaS, un usuario elige una contraseña débil y le roban la cuenta.",
+                opciones: ["Proveedor", "Cliente / usuario"],
+                correcta: 1
+            },
+            {
+                caso: "Un incendio daña un servidor físico en el centro de datos del proveedor.",
+                opciones: ["Proveedor", "Cliente / usuario"],
+                correcta: 0
+            },
+            {
+                caso: "En un servidor IaaS, no se instalaron las actualizaciones del sistema operativo y lo hackearon.",
+                opciones: ["Proveedor", "Cliente / usuario"],
+                correcta: 1
+            },
+            {
+                caso: "Falla el hardware de red físico dentro del centro de datos.",
+                opciones: ["Proveedor", "Cliente / usuario"],
+                correcta: 0
+            }
+        ];
+        let respScore = 0;
+        const respDone = new Set();
+        const respContainer = document.getElementById('resp-container');
+        respData.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = 'bg-white p-3 rounded-lg border border-teal-200';
+            row.innerHTML = `
+                <p class="text-sm text-slate-700 mb-2">🔸 ${item.caso}</p>
+                <div class="flex gap-2 flex-wrap">
+                    ${item.opciones.map((op, i) => `
+                        <button class="opt-btn border-2 border-teal-300 text-teal-700 text-xs font-bold px-3 py-1 rounded-full"
+                                data-index="${index}" data-op="${i}">${op}</button>
+                    `).join('')}
+                </div>
+            `;
+            respContainer.appendChild(row);
+        });
+        respContainer.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('opt-btn')) return;
+            const index = e.target.dataset.index;
+            if (respDone.has(index)) return;
+            respDone.add(index);
+            const elegida = parseInt(e.target.dataset.op);
+            const row = e.target.closest('div.flex');
+            if (elegida === respData[index].correcta) {
+                e.target.classList.add('ok');
+                respScore += 20;
+            } else {
+                e.target.classList.add('bad');
+                // resaltar la correcta
+                row.querySelector(`[data-op="${respData[index].correcta}"]`).classList.add('ok');
+            }
+            document.getElementById('resp-score').textContent = respScore;
+            row.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        });
+
+        // ---- Juego 3: Revelar cuotas de mercado ----
+        document.getElementById('reveal-market-btn').addEventListener('click', function() {
+            document.querySelectorAll('.market-bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.pct + '%';
+            });
+            document.querySelectorAll('.reveal-pct').forEach((span, i) => {
+                const pct = document.querySelectorAll('.market-bar-fill')[i].dataset.pct;
+                span.textContent = '~' + pct + '%';
+                span.classList.remove('text-slate-400');
+                span.classList.add('text-slate-700');
+            });
+            document.getElementById('market-note').classList.remove('hidden');
+            this.disabled = true;
+            this.classList.add('opacity-50', 'cursor-not-allowed');
+        });
+
+        // ---- Barra de progreso de misiones (Actividades) ----
+        const actividadChecks = document.querySelectorAll('.actividad-check');
+        const progresoBar = document.getElementById('progreso-actividades-bar');
+        const progresoTexto = document.getElementById('progreso-actividades-texto');
+        actividadChecks.forEach(chk => {
+            chk.addEventListener('change', () => {
+                const completadas = document.querySelectorAll('.actividad-check:checked').length;
+                const total = actividadChecks.length;
+                const pct = Math.round((completadas / total) * 100);
+                progresoBar.style.width = pct + '%';
+                progresoTexto.textContent = `${completadas} / ${total} completadas`;
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD + Base de Datos | OVA Backend</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen">
+        <!-- Sidebar (Desktop) -->
+        <aside class="hidden md:block w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                 <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">CRUD + Base de Datos</h2>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Piensa en una app de tareas, como una agenda para organizarte en el colegio o en tu casa. Si la app solo te deja ver una pantalla bonita pero no guarda nada, no sirve de mucho. Lo importante es que puedas <strong>agregar tareas</strong>, <strong>verlas cuando quieras</strong>, <strong>cambiar una que esté mal escrita</strong> o <strong>eliminar la que ya terminaste</strong>.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Eso mismo pasa con aplicaciones de notas, tiendas online, redes sociales, sistemas de biblioteca o cualquier app que maneje información. Todas terminan haciendo lo mismo, aunque con nombres diferentes: <strong class="text-green-800">CRUD</strong>.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">💡</span> <strong>CRUD</strong> es el corazón de casi cualquier aplicación que maneje datos. Dominar estos conceptos te permitirá construir desde una simple lista de tareas hasta sistemas complejos de gestión.
+                    </p>
+                </div>
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="introduccion">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-introduccion" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-introduccion" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Comprender el concepto de CRUD y cómo las cuatro operaciones básicas (Create, Read, Update, Delete) se aplican en APIs REST.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💾</span>
+                        <span>Explicar por qué necesitamos guardar datos de forma permanente usando bases de datos y las diferencias entre SQL y NoSQL.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔗</span>
+                        <span>Mapear operaciones CRUD a métodos HTTP (GET, POST, PUT/PATCH, DELETE) y entender cuándo usar cada uno en endpoints REST.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📊</span>
+                        <span>Utilizar códigos de estado HTTP apropiados (200, 201, 400, 404, 500) para comunicar el resultado de cada operación.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">✅</span>
+                        <span>Implementar validaciones de datos para proteger tu API de información inválida o maliciosa desde el cliente.</span>
+                    </li>
+                </ul>
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="objetivos">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-objetivos" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-objetivos" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+                    
+                    <!-- Acordeón 1: ¿Qué es CRUD? -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-que-es-crud">
+                            <span>¿Qué es CRUD?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-que-es-crud" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="crud-definicion" class="content-section">
+                                <p class="mb-4">
+                                    <strong>CRUD</strong> es un acrónimo que representa las cuatro operaciones básicas que se pueden realizar con datos:
+                                </p>
+                                <ul class="list-disc list-inside space-y-2 mb-4">
+                                    <li><strong class="text-green-800">C</strong>reate (Crear): Agregar nuevos registros</li>
+                                    <li><strong class="text-green-800">R</strong>ead (Leer): Consultar registros existentes</li>
+                                    <li><strong class="text-green-800">U</strong>pdate (Actualizar): Modificar registros existentes</li>
+                                    <li><strong class="text-green-800">D</strong>elete (Eliminar): Borrar registros</li>
+                                </ul>
+                                <p class="mb-4">
+                                    Aunque suene simple, este conjunto de acciones está en el corazón de la mayoría de aplicaciones. Piensa en cualquier app que uses:
+                                </p>
+                                
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎯 Empareja cada app con su operación CRUD:</p>
+                                    <div id="matcher-crud-apps"></div>
+                                </div>
+                                
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="crud-definicion">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-crud-definicion" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-crud-definicion" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: CRUD en API REST -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-crud-api">
+                            <span>CRUD en una API REST</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-crud-api" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="crud-api-intro" class="content-section">
+                                <p class="mb-4">
+                                    En una API REST, estas operaciones se mapean a métodos HTTP específicos. La combinación de <strong>método HTTP + ruta</strong> define qué acción se realiza:
+                                </p>
+                                
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="min-w-full bg-white border border-green-300 rounded-lg">
+                                        <thead class="bg-green-100">
+                                            <tr>
+                                                <th class="px-4 py-2 text-left text-green-800 font-bold">Operación</th>
+                                                <th class="px-4 py-2 text-left text-green-800 font-bold">Método HTTP</th>
+                                                <th class="px-4 py-2 text-left text-green-800 font-bold">Endpoint</th>
+                                                <th class="px-4 py-2 text-left text-green-800 font-bold">Descripción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-t">
+                                                <td class="px-4 py-2 font-semibold">Create</td>
+                                                <td class="px-4 py-2"><code class="bg-blue-100 px-2 py-1 rounded">POST</code></td>
+                                                <td class="px-4 py-2"><code class="bg-slate-100 px-2 py-1 rounded">/tareas</code></td>
+                                                <td class="px-4 py-2">Crear una nueva tarea</td>
+                                            </tr>
+                                            <tr class="border-t bg-slate-50">
+                                                <td class="px-4 py-2 font-semibold">Read (todas)</td>
+                                                <td class="px-4 py-2"><code class="bg-green-100 px-2 py-1 rounded">GET</code></td>
+                                                <td class="px-4 py-2"><code class="bg-slate-100 px-2 py-1 rounded">/tareas</code></td>
+                                                <td class="px-4 py-2">Obtener todas las tareas</td>
+                                            </tr>
+                                            <tr class="border-t">
+                                                <td class="px-4 py-2 font-semibold">Read (una)</td>
+                                                <td class="px-4 py-2"><code class="bg-green-100 px-2 py-1 rounded">GET</code></td>
+                                                <td class="px-4 py-2"><code class="bg-slate-100 px-2 py-1 rounded">/tareas/:id</code></td>
+                                                <td class="px-4 py-2">Obtener una tarea específica</td>
+                                            </tr>
+                                            <tr class="border-t bg-slate-50">
+                                                <td class="px-4 py-2 font-semibold">Update</td>
+                                                <td class="px-4 py-2"><code class="bg-yellow-100 px-2 py-1 rounded">PUT/PATCH</code></td>
+                                                <td class="px-4 py-2"><code class="bg-slate-100 px-2 py-1 rounded">/tareas/:id</code></td>
+                                                <td class="px-4 py-2">Actualizar una tarea</td>
+                                            </tr>
+                                            <tr class="border-t">
+                                                <td class="px-4 py-2 font-semibold">Delete</td>
+                                                <td class="px-4 py-2"><code class="bg-red-100 px-2 py-1 rounded">DELETE</code></td>
+                                                <td class="px-4 py-2"><code class="bg-slate-100 px-2 py-1 rounded">/tareas/:id</code></td>
+                                                <td class="px-4 py-2">Eliminar una tarea</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <p class="mb-4">
+                                    Lo importante no es memorizar cada línea, sino entender el principio: <strong class="text-green-800">la ruta habla del recurso y el método habla de la acción</strong>.
+                                </p>
+                                
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="crud-api-intro">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-crud-api-intro" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-crud-api-intro" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="put-vs-patch" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">Diferencia entre PUT y PATCH</h4>
+                                <ul class="list-disc list-inside space-y-2 mb-4">
+                                    <li><strong>PUT:</strong> Reemplaza completamente el recurso (debes enviar todos los campos)</li>
+                                    <li><strong>PATCH:</strong> Actualiza parcialmente el recurso (solo envías los campos que cambiarán)</li>
+                                </ul>
+                                
+                                <div class="mb-4 mt-4">
+                                    <div id="playground-put-patch"></div>
+                                </div>
+                                
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="put-vs-patch">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-put-vs-patch" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-put-vs-patch" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: ¿Por qué necesitamos una Base de Datos? -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-base-datos">
+                            <span>¿Por qué necesitamos una Base de Datos?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-base-datos" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="base-datos-intro" class="content-section">
+                                <p class="mb-4">
+                                    Para que todo esto sea útil, los datos deben guardarse en algún lugar <strong>permanente</strong>. Veamos las opciones:
+                                </p>
+                                
+                                <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg mb-4">
+                                    <h4 class="font-bold text-red-800 mb-2">❌ Guardar en memoria (variables)</h4>
+                                    <pre class="bg-slate-800 text-green-400 p-2 rounded text-sm mb-2"><code>let tareas = [{ id: 1, titulo: "Estudiar" }];</code></pre>
+                                    <p class="text-sm"><strong>Problemas:</strong></p>
+                                    <ul class="list-disc list-inside text-sm space-y-1">
+                                        <li>Al reiniciar el servidor, se pierden todos los datos</li>
+                                        <li>No se puede escalar a múltiples servidores</li>
+                                        <li>Limitado por la memoria RAM disponible</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg mb-4">
+                                    <h4 class="font-bold text-green-800 mb-2">✅ Guardar en una Base de Datos</h4>
+                                    <p class="mb-2">Una base de datos permite almacenar información de forma <strong>permanente, organizada y eficiente</strong>.</p>
+                                </div>
+
+                                <h4 class="font-bold text-green-800 mb-2">Tipos de Bases de Datos:</h4>
+                                
+                                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+                                        <h5 class="font-bold text-blue-800 mb-2">SQL (Relacionales)</h5>
+                                        <p class="text-sm mb-2"><strong>Ejemplos:</strong> MySQL, PostgreSQL, SQLite</p>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li>Datos en tablas con filas y columnas</li>
+                                            <li>Relaciones entre tablas</li>
+                                            <li>Lenguaje: SQL</li>
+                                            <li>Ideal para: Datos estructurados</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-purple-50 p-4 rounded-lg border-2 border-purple-300">
+                                        <h5 class="font-bold text-purple-800 mb-2">NoSQL (No relacionales)</h5>
+                                        <p class="text-sm mb-2"><strong>Ejemplos:</strong> MongoDB, Firebase, Redis</p>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li>Documentos, colecciones, key-value</li>
+                                            <li>Estructura flexible</li>
+                                            <li>Lenguaje: JavaScript/JSON</li>
+                                            <li>Ideal para: Escalabilidad rápida</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎯 Empareja el caso de uso con el tipo de BD:</p>
+                                    <div id="matcher-sql-nosql"></div>
+                                </div>
+
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="base-datos-intro">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-base-datos-intro" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-base-datos-intro" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Códigos de estado HTTP -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-codigos-http">
+                            <span>Códigos de estado HTTP</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-codigos-http" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="codigos-http-intro" class="content-section">
+                                <p class="mb-4">
+                                    Los códigos de estado HTTP son números que el servidor envía al cliente para indicar el resultado de una petición. Son fundamentales para que el frontend sepa qué pasó.
+                                </p>
+
+                                <h4 class="font-bold text-green-800 mb-2">Códigos más importantes para CRUD:</h4>
+
+                                <div class="space-y-3 mb-4">
+                                    <div class="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
+                                        <h5 class="font-bold text-green-800 mb-1">2xx - Éxito</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li><code class="bg-green-100 px-2 py-1 rounded">200 OK</code>: Petición exitosa (GET, PUT, PATCH)</li>
+                                            <li><code class="bg-green-100 px-2 py-1 rounded">201 Created</code>: Recurso creado exitosamente (POST)</li>
+                                            <li><code class="bg-green-100 px-2 py-1 rounded">204 No Content</code>: Éxito sin contenido (DELETE)</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
+                                        <h5 class="font-bold text-yellow-800 mb-1">4xx - Errores del cliente</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li><code class="bg-yellow-100 px-2 py-1 rounded">400 Bad Request</code>: Datos inválidos o faltantes</li>
+                                            <li><code class="bg-yellow-100 px-2 py-1 rounded">401 Unauthorized</code>: No autenticado</li>
+                                            <li><code class="bg-yellow-100 px-2 py-1 rounded">404 Not Found</code>: Recurso no encontrado</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500">
+                                        <h5 class="font-bold text-red-800 mb-1">5xx - Errores del servidor</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li><code class="bg-red-100 px-2 py-1 rounded">500 Internal Server Error</code>: Error no manejado</li>
+                                            <li><code class="bg-red-100 px-2 py-1 rounded">503 Service Unavailable</code>: Servidor no disponible</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎯 Empareja la situación con el código HTTP:</p>
+                                    <div id="matcher-http-codes"></div>
+                                </div>
+
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">❓ Pregunta rápida:</p>
+                                    <div id="choice-http-delete"></div>
+                                </div>
+
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="codigos-http-intro">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-codigos-http-intro" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-codigos-http-intro" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5: Validaciones -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-validaciones">
+                            <span>Validaciones: protegiendo tu API</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-validaciones" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="validaciones-intro" class="content-section">
+                                <p class="mb-4">
+                                    Incluso en proyectos pequeños, es crucial validar los datos que recibes. <strong class="text-red-600">Nunca confíes en lo que envía el cliente</strong>.
+                                </p>
+
+                                <h4 class="font-bold text-green-800 mb-2">Tipos de validaciones:</h4>
+                                <ol class="list-decimal list-inside space-y-2 mb-4">
+                                    <li><strong>Validación de presencia:</strong> ¿El campo existe?</li>
+                                    <li><strong>Validación de tipo:</strong> ¿Es del tipo correcto?</li>
+                                    <li><strong>Validación de formato:</strong> ¿Cumple con el formato esperado?</li>
+                                    <li><strong>Validación de rango:</strong> ¿Está dentro de límites aceptables?</li>
+                                    <li><strong>Validación de negocio:</strong> ¿Cumple con reglas específicas?</li>
+                                </ol>
+
+                                <div class="mb-4 mt-4">
+                                    <div id="playground-validaciones"></div>
+                                </div>
+
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="validaciones-intro">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-validaciones-intro" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-validaciones-intro" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 6: CRUD en memoria -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-crud-memoria">
+                            <span>CRUD en memoria: aprendiendo los fundamentos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-crud-memoria" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="crud-memoria-intro" class="content-section">
+                                <p class="mb-4">
+                                    Para practicar CRUD sin complicarte con base de datos todavía, puedes empezar con un arreglo en memoria. No es "lo final" para un proyecto real, pero es perfecto para aprender cómo se conectan rutas, métodos y datos.
+                                </p>
+
+                                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div class="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
+                                        <h5 class="font-bold text-green-800 mb-2">✅ Ventajas</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li>No necesitas instalar BD</li>
+                                            <li>Enfócate en la lógica CRUD</li>
+                                            <li>Fácil de debuggear</li>
+                                            <li>Transición sencilla después</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
+                                        <h5 class="font-bold text-yellow-800 mb-2">⚠️ Limitaciones</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1">
+                                            <li>Datos se pierden al reiniciar</li>
+                                            <li>No escalable para producción</li>
+                                            <li>Sin persistencia real</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4 mt-4">
+                                    <div id="playground-crud-memoria"></div>
+                                </div>
+
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">✏️ Completa el código de un endpoint CRUD:</p>
+                                    <div id="fill-blank-endpoint"></div>
+                                </div>
+
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🔀 Ordena el flujo de una petición CRUD:</p>
+                                    <div id="sequencer-crud-flow"></div>
+                                </div>
+
+                                <div class="mt-4 mb-4">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">❓ Pregunta rápida:</p>
+                                    <div id="choice-mongodb-mysql"></div>
+                                </div>
+
+                                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="crud-memoria-intro">
+                                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                                        <span class="mr-1">▶️</span> Leer
+                                    </button>
+                                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏸️</span> Pausar
+                                    </button>
+                                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                                        <span class="mr-1">⏹️</span> Detener
+                                    </button>
+                                    <div class="flex items-center ml-2">
+                                        <label for="speech-rate-crud-memoria-intro" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                                        <input type="range" class="speech-rate" id="speech-rate-crud-memoria-intro" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades Propuestas</h2>
+                
+                <!-- Actividad 1: Diseña tu CRUD -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">📝 Actividad 1: Diseña tu CRUD</h3>
+                    <p class="text-slate-700 mb-4">Elige una app: "lista de compras" o "videojuegos favoritos"</p>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-700 mb-4">
+                        <li>Define el recurso principal (ej. <code class="bg-green-100 px-2 py-1 rounded">compras</code> o <code class="bg-green-100 px-2 py-1 rounded">juegos</code>)</li>
+                        <li>Escribe los endpoints CRUD</li>
+                        <li>Escribe 3 campos de tu tabla (ej. <code class="bg-green-100 px-2 py-1 rounded">nombre</code>, <code class="bg-green-100 px-2 py-1 rounded">precio</code>, <code class="bg-green-100 px-2 py-1 rounded">fecha</code>)</li>
+                    </ol>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <p class="text-sm text-green-800 font-semibold mb-2">💡 Ejemplo de solución:</p>
+                        <pre class="bg-slate-800 text-green-400 p-3 rounded text-sm overflow-x-auto"><code>Recurso: /videojuegos
+
+Endpoints CRUD:
+- POST   /videojuegos       → Crear nuevo juego
+- GET    /videojuegos       → Obtener todos los juegos
+- GET    /videojuegos/:id   → Obtener un juego específico
+- PATCH  /videojuegos/:id   → Actualizar un juego
+- DELETE /videojuegos/:id   → Eliminar un juego
+
+Campos:
+- titulo (string)
+- plataforma (string)
+- completado (boolean)</code></pre>
+                    </div>
+                </div>
+
+                <!-- Actividad 2: Laboratorio CRUD -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">🧪 Actividad 2: Laboratorio (CRUD funcionando)</h3>
+                    <p class="text-slate-700 mb-4">Usa el ejemplo CRUD de <code class="bg-green-100 px-2 py-1 rounded">tareas</code> y realiza pruebas en Postman o Insomnia:</p>
+                    <ol class="list-decimal list-inside space-y-3 text-slate-700 mb-4">
+                        <li>Prueba <code class="bg-green-100 px-2 py-1 rounded">GET /tareas</code></li>
+                        <li>Crea una tarea con <code class="bg-green-100 px-2 py-1 rounded">POST /tareas</code> enviando un JSON con <code class="bg-green-100 px-2 py-1 rounded">titulo</code></li>
+                        <li>Actualiza esa tarea con <code class="bg-green-100 px-2 py-1 rounded">PATCH /tareas/:id</code></li>
+                        <li>Elimínala con <code class="bg-green-100 px-2 py-1 rounded">DELETE /tareas/:id</code></li>
+                    </ol>
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                        <p class="text-sm text-yellow-800 font-semibold">📸 Producto esperado:</p>
+                        <p class="text-sm text-slate-700">Capturas o registro de cada petición con su código de estado (200, 201, 204, etc.)</p>
+                    </div>
+                </div>
+
+                <!-- Actividad 3: Validaciones -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">✅ Actividad 3: Validaciones más reales</h3>
+                    <p class="text-slate-700 mb-4">Mejora el endpoint <code class="bg-green-100 px-2 py-1 rounded">POST /tareas</code>:</p>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-700 mb-4">
+                        <li>Si <code class="bg-green-100 px-2 py-1 rounded">titulo</code> tiene menos de 3 caracteres, responde <code class="bg-red-100 px-2 py-1 rounded">400</code> con un mensaje claro</li>
+                        <li>Si <code class="bg-green-100 px-2 py-1 rounded">titulo</code> viene con espacios al inicio o al final, recórtalo antes de guardar</li>
+                    </ol>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <p class="text-sm text-green-800 font-semibold mb-2">💡 Código de ejemplo:</p>
+                        <pre class="bg-slate-800 text-green-400 p-3 rounded text-sm overflow-x-auto"><code>if (!titulo || titulo.trim().length < 3) {
+  return res.status(400).json({
+    success: false,
+    error: "El título debe tener al menos 3 caracteres"
+  });
+}
+
+const nuevaTarea = {
+  id: Date.now(),
+  titulo: titulo.trim(), // Recortar espacios
+  completada: false
+};</code></pre>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500 mt-4">
+                        <p class="text-sm text-yellow-800 font-semibold">📸 Producto esperado:</p>
+                        <p class="text-sm text-slate-700">Pruebas en Postman mostrando el <code class="bg-red-100 px-1 rounded">400</code> cuando corresponda</p>
+                    </div>
+                </div>
+
+                <!-- Actividad 4: Extensión del CRUD -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">🔧 Actividad 4: Extensión del CRUD (nuevo campo)</h3>
+                    <p class="text-slate-700 mb-4">Agrega el campo <code class="bg-green-100 px-2 py-1 rounded">completada</code> a tus tareas:</p>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-700 mb-4">
+                        <li>Ajusta el <code class="bg-green-100 px-2 py-1 rounded">POST /tareas</code> para que cree <code class="bg-green-100 px-2 py-1 rounded">{ completada: false }</code></li>
+                        <li>Crea un endpoint <code class="bg-green-100 px-2 py-1 rounded">PATCH /tareas/:id/completar</code> que marque la tarea como completada</li>
+                    </ol>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <p class="text-sm text-green-800 font-semibold mb-2">💡 Código de ejemplo:</p>
+                        <pre class="bg-slate-800 text-green-400 p-3 rounded text-sm overflow-x-auto"><code>app.patch("/tareas/:id/completar", (req, res) => {
+  const id = Number(req.params.id);
+  const tarea = tareas.find(t => t.id === id);
+  
+  if (!tarea) {
+    return res.status(404).json({
+      success: false,
+      error: "Tarea no encontrada"
+    });
+  }
+  
+  tarea.completada = true;
+  
+  res.json({
+    success: true,
+    data: tarea
+  });
+});</code></pre>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500 mt-4">
+                        <p class="text-sm text-yellow-800 font-semibold">📸 Producto esperado:</p>
+                        <p class="text-sm text-slate-700">Evidencia de la tarea antes y después del cambio</p>
+                    </div>
+                </div>
+
+                <!-- Actividad 5: Mini-integración -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">🌐 Actividad 5: Mini-integración (cliente simple)</h3>
+                    <p class="text-slate-700 mb-4">Crea un archivo HTML con un botón que haga <code class="bg-green-100 px-2 py-1 rounded">fetch</code> a <code class="bg-green-100 px-2 py-1 rounded">GET /tareas</code> y muestre el JSON en pantalla.</p>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <p class="text-sm text-green-800 font-semibold mb-2">💡 Código de ejemplo:</p>
+                        <pre class="bg-slate-800 text-green-400 p-3 rounded text-sm overflow-x-auto"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Cliente CRUD&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Mis Tareas&lt;/h1&gt;
+  &lt;button onclick="obtenerTareas()"&gt;Obtener Tareas&lt;/button&gt;
+  &lt;pre id="resultado"&gt;&lt;/pre&gt;
+
+  &lt;script&gt;
+    async function obtenerTareas() {
+      try {
+        const response = await fetch('http://localhost:3000/tareas');
+        const data = await response.json();
+        document.getElementById('resultado').textContent = 
+          JSON.stringify(data, null, 2);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500 mt-4">
+                        <p class="text-sm text-yellow-800 font-semibold">📸 Producto esperado:</p>
+                        <p class="text-sm text-slate-700">Captura del navegador mostrando el JSON y el código fuente del archivo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación (placeholder) -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre CRUD y bases de datos, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Node.js y Express</h3>
+                            <p class="text-slate-600 mb-2">Guía completa para crear APIs con Node.js y Express</p>
+                            <a href="https://nodejs.org/api/index.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/Nodejs y Express.png" alt="QR Node.js y Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">HTTP APIs y conceptos base</h3>
+                            <p class="text-slate-600 mb-2">Fundamentos de APIs REST, métodos HTTP y códigos de estado</p>
+                            <a href="https://developer.mozilla.org/es/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/HTTP APIs y conceptos base.png" alt="QR HTTP APIs" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Bootcamp nivel básico-intermedio</h3>
+                            <p class="text-slate-600 mb-2">Curso completo de desarrollo backend con Node.js</p>
+                            <a href="https://www.freecodecamp.org/espanol/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/Bootcamp nivel básicointermedio.png" alt="QR Bootcamp" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cabezas Granado, L. M. & González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i>. Difusora Larousse - Anaya Multimedia.
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MDN Web Docs. <i>HTTP status codes</i>.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Status" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Web/HTTP/Status</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer/Credits -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Modal para ampliar imágenes -->    
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/console.js"></script>
+    <script src="js/interactive.js"></script>
+    <script src="js/code-playground.js"></script>
+    <script src="js/speech.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/accordion.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/init-interactive.js"></script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

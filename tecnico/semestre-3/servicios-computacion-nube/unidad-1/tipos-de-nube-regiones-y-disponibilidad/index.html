@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Tipos de nube, regiones y disponibilidad</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .lat-bar-fill { height: 100%; width: 0; border-radius: 9999px; transition: width 0.8s ease; }
+        .az-node { transition: all 0.3s ease; cursor: pointer; }
+        .az-node.down { opacity: 0.35; filter: grayscale(1); }
+        .opt-btn { transition: all 0.2s ease; }
+        .opt-btn.ok  { background-color: #bbf7d0 !important; border-color: #16a34a !important; color:#14532d !important; }
+        .opt-btn.bad { background-color: #fecaca !important; border-color: #dc2626 !important; color:#7f1d1d !important; }
+        #progreso-actividades-bar { transition: width 0.4s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- SIDEBAR — NO MODIFICAR -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- INTRODUCCIÓN -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🌎 Tipos de nube, regiones y disponibilidad</h2>
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    ¿Alguna vez te has preguntado por qué Netflix sigue funcionando aunque haya una falla técnica en algún servidor del mundo? 🎬 ¿O por qué los sistemas bancarios de muchos países no están en las mismas plataformas que una startup de aplicaciones móviles? La respuesta tiene que ver con algo que se decide antes de escribir una sola línea de código: <strong>dónde y cómo se va a alojar la aplicación</strong>.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    No toda la nube es igual ni funciona de la misma forma. Hay organizaciones que prefieren tener sus datos en servidores propios por privacidad o regulación. Otras aprovechan la infraestructura de grandes proveedores para crecer rápido. Y hay quienes combinan lo mejor de ambos mundos. Cada decisión responde a un <strong>modelo de despliegue</strong> distinto. 🏗️
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Pero el modelo de despliegue no es la única variable. También importa <strong>desde dónde</strong> se sirven los datos. Si tus usuarios están en Colombia y tu servidor está en Japón, cada clic viaja miles de kilómetros de ida y vuelta antes de que la página responda. Ese tiempo se llama <strong>latencia</strong> ⏱️, y puede arruinar la experiencia aunque la app esté perfecta. Por eso los proveedores distribuyen su infraestructura en <strong>regiones y zonas de disponibilidad</strong> por todo el mundo.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800"><span class="text-xl">✨</span> Vas a entender por qué estas decisiones se toman y cómo afectan el diseño de una solución web real. <span class="text-xl">🚀</span></p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+            </div>
+
+            <!-- OBJETIVOS -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Diferenciar los modelos de despliegue de la computación en la nube (pública, privada, híbrida y multicloud), argumentando con criterio técnico la elección según el contexto organizacional.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🌐</span>
+                        <span>Relacionar los conceptos de regiones y zonas de disponibilidad con decisiones de arquitectura en aplicaciones web, explicando el impacto de la ubicación geográfica del servidor en la experiencia del usuario final.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+                </ul>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>⏱️ La física de la latencia: ¿por qué la distancia importa?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La latencia no es magia ni "mala suerte de internet": es <strong>física pura</strong>. La información viaja por fibra óptica a unos <strong>200.000 km/s</strong> (dos tercios de la velocidad de la luz, porque el vidrio la frena un poco). Eso significa que la distancia entre tú y el servidor pone un <strong>límite mínimo</strong> al tiempo de respuesta que ninguna optimización de código puede romper. 🔬</p>
+                                <p class="mb-4">Los ingenieros usan una regla rápida: <strong>~1 ms de retraso por cada 100 km</strong> (ida), y hay que contar ida y vuelta (RTT, <em>round-trip time</em>). Pruébalo tú mismo desde Montería 👇</p>
+
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Calculadora de latencia — elige una región destino</p>
+                                    <select id="lat-select" class="w-full p-2 border border-teal-300 rounded-md bg-white mb-3">
+                                        <option value="">— Selecciona una región de AWS —</option>
+                                        <option value="0">São Paulo, Brasil (sa-east-1) · ~4.000 km</option>
+                                        <option value="1">Norte de Virginia, EE.UU. (us-east-1) · ~3.200 km</option>
+                                        <option value="2">Irlanda (eu-west-1) · ~8.500 km</option>
+                                        <option value="3">Singapur (ap-southeast-1) · ~18.000 km</option>
+                                    </select>
+                                    <div id="lat-result" class="hidden">
+                                        <div class="flex justify-between text-sm mb-1"><span>Latencia estimada (ida y vuelta):</span><span id="lat-ms" class="font-bold text-teal-900"></span></div>
+                                        <div class="w-full bg-slate-200 rounded-full h-4 mb-2"><div id="lat-bar" class="lat-bar-fill bg-teal-500"></div></div>
+                                        <p id="lat-comment" class="text-sm"></p>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-3">Fórmula usada: RTT ≈ (distancia ÷ 200.000 km/s) × 2 × 1000, con un factor 1,4 por rutas no rectas. Es una estimación teórica; la latencia real la mides con herramientas como cloudping.info. 😉</p>
+                                </div>
+
+                                <div class="mt-6 p-4 bg-amber-50 border border-amber-300 rounded-lg">
+                                    <p class="font-bold text-amber-800 mb-2">💡 La solución de la industria: acercar los datos al usuario</p>
+                                    <p class="text-sm">Como la distancia no se puede "hackear", la estrategia es <strong>poner copias de los datos más cerca</strong>. Eso hacen los CDN (redes de distribución de contenido) y el <em>edge computing</em>: en vez de traer el dato desde el otro lado del planeta, lo sirven desde un punto cercano. Por eso una imagen de una web famosa te llega igual de rápido en Montería que en Madrid. 🌍</p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: visualización de cómo un CDN reduce la latencia
+                                     Buscar: "qué es un CDN y cómo funciona explicación español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">✅ Disponible</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: qué es un CDN y cómo reduce la latencia</p>
+                                    <p class="text-slate-600 text-sm mb-4">🎥 Descubre cómo un CDN acerca los datos al usuario para que la web cargue más rápido.</p>
+                                    <a href="https://www.youtube.com/watch?v=RI9np1LWzqw" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm"><span>▶️</span> Ver recurso</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🛑 Cuando la nube se cae: zonas de disponibilidad y "blast radius"</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La nube también falla. En diciembre de 2021, una caída de la región de AWS en Norte de Virginia dejó sin servicio a Netflix, Disney+, Amazon, aplicaciones bancarias y hasta aspiradoras inteligentes. 🤖 La lección de los ingenieros: hay que diseñar pensando en el <strong>"blast radius"</strong> (radio de impacto) — cuánto se rompe cuando algo falla.</p>
+                                <p class="mb-4">Por eso cada <strong>región</strong> se divide en varias <strong>zonas de disponibilidad</strong> (AZ): centros de datos físicamente separados, con energía y red independientes. Si repartes tu app en varias zonas, la caída de una no tumba todo. Compruébalo: apaga zonas y mira qué pasa. 👇</p>
+
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Mantén la app en línea</p>
+                                    <p class="text-slate-600 text-sm mb-3">Haz clic en las zonas para apagarlas o encenderlas. Logra el reto: que caiga una zona pero la app siga <strong>ARRIBA</strong>. 💪</p>
+                                    <div id="az-container" class="grid grid-cols-3 gap-3 mb-4">
+                                        <div class="az-node bg-white border-2 border-green-400 rounded-lg p-3 text-center" data-az="1"><p class="text-2xl">🟢</p><p class="text-xs font-bold text-slate-700">Zona A</p><p class="text-xs text-green-600 az-state">Activa</p></div>
+                                        <div class="az-node bg-white border-2 border-green-400 rounded-lg p-3 text-center" data-az="2"><p class="text-2xl">🟢</p><p class="text-xs font-bold text-slate-700">Zona B</p><p class="text-xs text-green-600 az-state">Activa</p></div>
+                                        <div class="az-node bg-white border-2 border-green-400 rounded-lg p-3 text-center" data-az="3"><p class="text-2xl">🟢</p><p class="text-xs font-bold text-slate-700">Zona C</p><p class="text-xs text-green-600 az-state">Activa</p></div>
+                                    </div>
+                                    <div id="app-status" class="text-center font-bold p-3 rounded-lg bg-green-100 text-green-800">✅ Aplicación EN LÍNEA — 3 zonas activas</div>
+                                    <p id="az-badge" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Arquitecto de alta disponibilidad! Entendiste por qué se usan varias zonas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>⚖️ ¿Dónde pueden vivir tus datos? Soberanía y regulación</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Elegir región no es solo una cuestión de velocidad: también es <strong>legal</strong>. Muchos países exigen que ciertos datos (personales, médicos, financieros) se guarden dentro de sus fronteras. Es lo que se llama <strong>soberanía de datos</strong>. 🏛️</p>
+                                <ul class="list-disc list-inside mb-4 space-y-1 text-sm">
+                                    <li>🇨🇴 En Colombia, la <strong>Ley 1581 de 2012</strong> regula el tratamiento de datos personales.</li>
+                                    <li>🇪🇺 En Europa, el <strong>RGPD (GDPR)</strong> es tan estricto que puede aplicarte aunque tu empresa no esté en Europa, si tienes usuarios europeos.</li>
+                                    <li>🌎 Por eso empresas globales eligen regiones específicas para <strong>cumplir la ley de cada país</strong>, no solo para ir rápido.</li>
+                                </ul>
+                                <p class="mb-4 font-semibold text-teal-800">Pon a prueba tu criterio: ¿verdadero o falso? 👇</p>
+
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Verdadero o Falso — soberanía de datos</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="sob-score">0</span> / 100</p>
+                                    <div id="sob-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                </div>
+            </div>
+
+            <!-- ACTIVIDADES -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades</h2>
+                <p class="text-slate-600 mb-4">Completa estas misiones para poner en práctica lo aprendido. Marca cada una al terminarla y observa cómo avanza tu progreso. 🏆</p>
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
+                    <p class="text-sm font-semibold text-slate-700 mb-2">🏁 Progreso de misiones: <span id="progreso-actividades-texto">0 / 5 completadas</span></p>
+                    <div class="w-full bg-slate-200 rounded-full h-4"><div id="progreso-actividades-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div></div>
+                </div>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📡 Actividad 1: Laboratorio — Mide la latencia a distintas regiones</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Abre <strong>cloudping.info</strong> (no requiere registro) y haz clic en "Run" para medir la latencia a todas las regiones de AWS. Registra los tiempos de: la más cercana a Colombia (São Paulo, <code>sa-east-1</code>), una de EE.UU. (<code>us-east-1</code>), una de Europa (<code>eu-west-1</code>) y una de Asia (<code>ap-southeast-1</code>). Repite el ejercicio en <strong>gcping.com</strong> para Google Cloud y construye una tabla comparativa. Responde: ¿cuál región tuvo la latencia más baja? ¿Era la que esperabas? Si construyeras una app para estudiantes de la Universidad de Córdoba, ¿qué región elegirías en cada proveedor?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> tabla con resultados de latencia de ambos proveedores + respuestas escritas a las tres preguntas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="1"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🗺️ Actividad 2: Investigación de regiones en América Latina</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Investiga sobre al menos dos proveedores (AWS, Azure y/o Google Cloud): ¿qué regiones tienen en América Latina y en qué países? ¿Cuántas zonas de disponibilidad tiene cada región latinoamericana? ¿Existe alguna región en Colombia o en un país cercano? Si no, ¿cuál sería la más cercana para usuarios colombianos?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> tabla comparativa de ambos proveedores + conclusión de un párrafo sobre cuál elegirías para usuarios en Colombia.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="2"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📐 Actividad 3: Diagrama de infraestructura con regiones y zonas</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Dibuja (a mano o con draw.io / Excalidraw) el diagrama de infraestructura de una app web sencilla (frontend + backend + base de datos) desplegada en la nube, mostrando: la región elegida, al menos dos zonas de disponibilidad, cómo se distribuyen los componentes entre las zonas y el flujo de una petición desde el usuario hasta la base de datos y de vuelta.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> diagrama exportado como imagen o PDF con una breve explicación de las decisiones tomadas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="3"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔌 Actividad 4: Análisis de caso — el apagón de la nube</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Investiga un incidente real de interrupción de servicio en la nube (por ejemplo, la caída de AWS en diciembre de 2021 o la de Google Cloud en junio de 2019). Responde: ¿qué proveedor fue afectado y qué región o servicio falló? ¿Qué aplicaciones o empresas se vieron impactadas? ¿Por qué algunas aplicaciones del mismo proveedor sí fallaron y otras no? ¿Qué lección de arquitectura (regiones, zonas, multicloud) se puede extraer?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> informe de una página con las respuestas y una reflexión final.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="4"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 5: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Responde individualmente: ¿cuál es la diferencia principal entre nube pública y privada? Da un ejemplo de una organización que usaría cada una. ¿Qué problema resuelve la nube híbrida? ¿Qué es una región y por qué importa cuál eliges? ¿Qué es una zona de disponibilidad y qué ventaja ofrece? Si construyes una app para estudiantes de Colombia, ¿en qué región desplegarías y por qué? ¿Qué significa "vendor lock-in" y cómo lo ayuda a evitar el multicloud?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> respuestas escritas de mínimo 3 líneas por pregunta.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="5"> Marcar actividad como completada ✅</label>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+                </div>
+            </div>
+
+            <!-- EVALUACIÓN -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que aprendiste. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- RECURSOS -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">cloudping.info</h3>
+                            <p class="text-slate-600 mb-2">Herramienta interactiva para medir la latencia desde tu navegador a todas las regiones de AWS. Usada directamente en la Actividad 1.</p>
+                            <a href="https://cloudping.info" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/Cloudping.png" alt="QR cloudping.info" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">gcping.com</h3>
+                            <p class="text-slate-600 mb-2">Equivalente a cloudping.info para Google Cloud. Permite comparar la latencia a todas las regiones de GCP desde tu ubicación actual.</p>
+                            <a href="https://gcping.com" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/Gcping.png" alt="QR gcping.com" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">AWS Global Infrastructure</h3>
+                            <p class="text-slate-600 mb-2">Mapa interactivo oficial de AWS con todas sus regiones, zonas de disponibilidad y ubicaciones en el mundo.</p>
+                            <a href="https://aws.amazon.com/es/about-aws/global-infrastructure/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/AWS%20Global%20Infrastructure.png" alt="QR AWS Global Infrastructure" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Google Cloud — Ubicaciones</h3>
+                            <p class="text-slate-600 mb-2">Mapa interactivo de regiones y zonas de disponibilidad de Google Cloud, con filtros por tipo de servicio y continente.</p>
+                            <a href="https://cloud.google.com/about/locations" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/Google%20Cloud%20%20Ubicaciones.png" alt="QR Google Cloud Ubicaciones" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+                </ul>
+            </div>
+
+            <!-- BIBLIOGRAFÍA -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Cabezas Granado, L. M. y González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084</a></span></div>
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+                </div>
+            </div>
+
+            <!-- FOOTER — NO MODIFICAR -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Script de navegación — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const panel = document.querySelector(this.dataset.target);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) { panel.classList.remove('hidden'); icon.textContent = '➖'; }
+                else { panel.classList.add('hidden'); icon.textContent = '➕'; }
+            });
+        });
+    </script>
+
+    <!-- QUIZ -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Por qué la latencia tiene un límite mínimo que ninguna optimización de código puede romper?",
+                options: ["Porque los servidores son lentos", "Porque la información viaja por fibra óptica a una velocidad finita (~200.000 km/s) y la distancia impone un retraso físico", "Porque internet cobra por velocidad", "Porque el navegador limita la velocidad"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la estrategia de la industria para reducir la latencia cuando no se puede acortar la distancia?",
+                options: ["Comprar servidores más caros", "Poner copias de los datos más cerca del usuario mediante CDN y edge computing", "Apagar otras aplicaciones", "Usar cables más gruesos"],
+                correct: 1
+            },
+            {
+                question: "¿Qué es el 'blast radius' (radio de impacto) en arquitectura de nube?",
+                options: ["El área que cubre una antena", "Cuánto del sistema se ve afectado cuando un componente falla", "La distancia entre dos regiones", "El tamaño de un centro de datos"],
+                correct: 1
+            },
+            {
+                question: "Si distribuyes tu aplicación en 3 zonas de disponibilidad y una se cae, ¿qué ocurre?",
+                options: ["Toda la app deja de funcionar", "La app sigue en línea porque las otras zonas continúan operando", "Se pierden todos los datos", "Se duplica la latencia"],
+                correct: 1
+            },
+            {
+                question: "En Colombia, ¿qué ley regula el tratamiento de datos personales y por tanto influye en dónde alojarlos?",
+                options: ["El RGPD europeo", "La Ley 1581 de 2012", "La Ley de Netflix", "Ninguna, se pueden alojar en cualquier país sin restricción"],
+                correct: 1
+            },
+            {
+                question: "Elegir la región donde despliegas tu aplicación afecta principalmente a:",
+                options: ["Solo el color de la interfaz", "La latencia (velocidad) y el cumplimiento legal (soberanía de datos)", "Solo el precio del dominio", "Nada relevante para el usuario"],
+                correct: 1
+            }
+        ];
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>`).join('')}
+                </div>`;
+            quizContainer.appendChild(div);
+        });
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- SCRIPTS DE ACTIVIDADES INTERACTIVAS -->
+    <script>
+        // ---- Juego 1: Calculadora de latencia ----
+        const destinos = [
+            { km: 4000, nombre: "São Paulo" },
+            { km: 3200, nombre: "Norte de Virginia" },
+            { km: 8500, nombre: "Irlanda" },
+            { km: 18000, nombre: "Singapur" }
+        ];
+        document.getElementById('lat-select').addEventListener('change', function() {
+            const res = document.getElementById('lat-result');
+            if (this.value === "") { res.classList.add('hidden'); return; }
+            const d = destinos[parseInt(this.value)];
+            const rtt = Math.round((d.km / 200000) * 2 * 1000 * 1.4);
+            res.classList.remove('hidden');
+            document.getElementById('lat-ms').textContent = '~' + rtt + ' ms';
+            // barra: 300ms = 100%
+            document.getElementById('lat-bar').style.width = Math.min(100, (rtt / 300) * 100) + '%';
+            let comentario;
+            if (rtt < 80) comentario = "✅ Excelente: un usuario ni lo nota. Ideal para tus usuarios en Colombia.";
+            else if (rtt < 150) comentario = "🟡 Aceptable: se percibe un poco, pero es usable.";
+            else comentario = "🔴 Alto: el usuario siente que la app va lenta. Mejor elegir una región más cercana.";
+            document.getElementById('lat-comment').textContent = comentario;
+        });
+
+        // ---- Juego 2: Simulador de alta disponibilidad ----
+        const azNodes = document.querySelectorAll('.az-node');
+        let retoLogrado = false;
+        function actualizarEstadoApp() {
+            const activas = document.querySelectorAll('.az-node:not(.down)').length;
+            const status = document.getElementById('app-status');
+            if (activas === 0) {
+                status.className = "text-center font-bold p-3 rounded-lg bg-red-100 text-red-800";
+                status.textContent = "❌ Aplicación CAÍDA — no quedan zonas activas";
+            } else {
+                status.className = "text-center font-bold p-3 rounded-lg bg-green-100 text-green-800";
+                status.textContent = `✅ Aplicación EN LÍNEA — ${activas} zona(s) activa(s)`;
+            }
+            // Reto: al menos una zona caída pero app sigue arriba
+            if (!retoLogrado && activas >= 1 && activas < 3) {
+                retoLogrado = true;
+                document.getElementById('az-badge').classList.remove('hidden');
+            }
+        }
+        azNodes.forEach(node => {
+            node.addEventListener('click', function() {
+                this.classList.toggle('down');
+                const down = this.classList.contains('down');
+                this.querySelector('p:first-child').textContent = down ? '⚫' : '🟢';
+                const state = this.querySelector('.az-state');
+                state.textContent = down ? 'Caída' : 'Activa';
+                state.className = 'text-xs az-state ' + (down ? 'text-red-600' : 'text-green-600');
+                actualizarEstadoApp();
+            });
+        });
+
+        // ---- Juego 3: Verdadero o Falso — soberanía ----
+        const sobData = [
+            { afirm: "En Colombia, la Ley 1581 de 2012 regula el tratamiento de datos personales.", correcta: "V" },
+            { afirm: "Puedes almacenar datos personales de colombianos en cualquier país del mundo sin ninguna consideración legal.", correcta: "F" },
+            { afirm: "El RGPD (GDPR) europeo puede aplicarte aunque tu empresa no esté en Europa, si tienes usuarios europeos.", correcta: "V" },
+            { afirm: "Elegir la región del servidor solo afecta la velocidad, nunca aspectos legales.", correcta: "F" }
+        ];
+        let sobScore = 0;
+        const sobDone = new Set();
+        const sobContainer = document.getElementById('sob-container');
+        sobData.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = 'bg-white p-3 rounded-lg border border-teal-200';
+            row.innerHTML = `
+                <p class="text-sm text-slate-700 mb-2">🔸 ${item.afirm}</p>
+                <div class="flex gap-2">
+                    <button class="opt-btn border-2 border-teal-300 text-teal-700 text-xs font-bold px-4 py-1 rounded-full" data-index="${index}" data-op="V">Verdadero</button>
+                    <button class="opt-btn border-2 border-teal-300 text-teal-700 text-xs font-bold px-4 py-1 rounded-full" data-index="${index}" data-op="F">Falso</button>
+                </div>`;
+            sobContainer.appendChild(row);
+        });
+        sobContainer.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('opt-btn')) return;
+            const index = e.target.dataset.index;
+            if (sobDone.has(index)) return;
+            sobDone.add(index);
+            const row = e.target.closest('div.flex');
+            if (e.target.dataset.op === sobData[index].correcta) { e.target.classList.add('ok'); sobScore += 25; }
+            else { e.target.classList.add('bad'); row.querySelector(`[data-op="${sobData[index].correcta}"]`).classList.add('ok'); }
+            document.getElementById('sob-score').textContent = sobScore;
+            row.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        });
+
+        // ---- Barra de progreso de misiones ----
+        const actividadChecks = document.querySelectorAll('.actividad-check');
+        actividadChecks.forEach(chk => {
+            chk.addEventListener('change', () => {
+                const completadas = document.querySelectorAll('.actividad-check:checked').length;
+                const total = actividadChecks.length;
+                document.getElementById('progreso-actividades-bar').style.width = Math.round((completadas / total) * 100) + '%';
+                document.getElementById('progreso-actividades-texto').textContent = `${completadas} / ${total} completadas`;
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

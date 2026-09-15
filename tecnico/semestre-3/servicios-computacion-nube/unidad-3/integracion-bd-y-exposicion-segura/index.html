@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Integración con bases de datos y exposición segura</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ESTILOS BASE — NO MODIFICAR */
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; max-width: 100vw; }
+        html { overflow-x: hidden; max-width: 100vw; }
+        aside.w-64 { position: fixed; height: 100vh; overflow-y: auto; }
+        @media (min-width: 768px) { main.flex-1 { margin-left: 16rem; } }
+        .md\:hidden.mb-6 { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: #f8fafc; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @media (max-width: 767px) {
+            main.flex-1 { padding-top: 12rem; padding-left: 0.5rem; padding-right: 0.5rem; overflow-x: hidden; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section { overflow-x: hidden !important; max-width: 100vw !important; }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; } h3 { font-size: 1.25rem !important; } h4 { font-size: 1.125rem !important; }
+            .accordion-panel { overflow-x: hidden; max-width: 100%; padding: 0.5rem !important; }
+            .content-section { overflow-x: hidden; max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+        }
+        .sidebar-link { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-link.active, .sidebar-link:hover { background-color: #e6f4ea; color: #166534; border-left-color: #22c55e; }
+        .content-pane { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected { background-color: #dcfce7; border-color: #22c55e; }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* ESTILOS PROPIOS */
+        .hs-step { transition: all 0.3s ease; opacity: 0.45; }
+        .hs-step.on { opacity: 1; }
+        .hs-step.on .hs-box { background-color: #dcfce7; border-color: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.25); transform: translateY(-4px); }
+        .hs-step .hs-box { transition: all 0.3s ease; }
+        .opt-btn { transition: all 0.2s ease; }
+        .opt-btn.ok  { background-color: #bbf7d0 !important; border-color: #16a34a !important; color:#14532d !important; }
+        .opt-btn.bad { background-color: #fecaca !important; border-color: #dc2626 !important; color:#7f1d1d !important; }
+        #progreso-actividades-bar { transition: width 0.4s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR — NO MODIFICAR -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4"><div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400"><img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy"></div></div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2"><img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy"></div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- INTRODUCCIÓN -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🔒 Integración con bases de datos y exposición segura</h2>
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">Tu frontend y tu backend ya viven en internet, cada uno con su dirección. Pero si intentas registrarte o guardar algo, notarás que la información no persiste: falta conectar el "cerebro" (el backend) con su "memoria" (la base de datos). 🧠🔗🗄️ Y una vez conectados, aparece una pregunta que no puede quedar para después: <strong>¿está esto seguro?</strong></p>
+                <p class="text-slate-700 leading-relaxed mb-4">Piensa en una tienda física. Ya tienes el local abierto (el despliegue) y el mostrador donde atiendes (la API). Ahora necesitas la bodega donde guardas la mercancía (la base de datos) y, sobre todo, buenas cerraduras: que la bodega no dé a la calle, que la caja no quede abierta y que solo entre quien debe. 🔐 En la nube, esas "cerraduras" se llaman conexiones cifradas, HTTPS, variables de entorno, claves y tokens.</p>
+                <p class="text-slate-700 leading-relaxed mb-4">Aquí vas a conectar tu aplicación con una base de datos gestionada de forma segura, entender por qué toda aplicación seria usa HTTPS y aprender a manejar claves y tokens sin exponerlos. Es el paso que convierte un despliegue "de demostración" en una aplicación que de verdad puede tener usuarios. 🚀</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg"><p class="text-green-800"><span class="text-xl">✨</span> Al terminar, tu aplicación guardará datos reales y estará protegida como una de verdad. <span class="text-xl">🔒</span></p></div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+            </div>
+
+            <!-- OBJETIVOS -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🔗</span><span>Integrar una aplicación web desplegada con una base de datos gestionada en la nube, verificando que los datos se guarden y consulten correctamente.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🔐</span><span>Configurar la exposición segura de la aplicación mediante HTTPS, dominio y un manejo adecuado de claves y tokens.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🛡️</span><span>Aplicar buenas prácticas de seguridad en la conexión con la base de datos y en el acceso a la API.</span></li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+                </ul>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- ACORDEÓN 1 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1"><span>🤝 El "apretón de manos" de HTTPS: qué hay tras el candado</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Cuando una dirección empieza por <code>https://</code> y ves el candado 🔒, no es solo un adorno: significa que toda la comunicación entre el navegador y el servidor viaja <strong>cifrada</strong> mediante un protocolo llamado <strong>TLS</strong>. Sin HTTPS, todo lo que el usuario escribe (una contraseña, un correo) viaja en texto plano y podría ser leído por cualquiera en el camino; con HTTPS, viaja protegido.</p>
+                                <p class="mb-4">Antes de intercambiar datos, el navegador y el servidor hacen un breve "apretón de manos" (<em>handshake</em>) para ponerse de acuerdo en cómo cifrar. Recórrelo paso a paso y verás que detrás del candado hay un proceso ingenioso. 👇</p>
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-3">🎮 Misión: Descubre el apretón de manos de HTTPS</p>
+                                    <div id="hs-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4"></div>
+                                    <p id="hs-desc" class="text-sm bg-white border border-teal-200 rounded-lg p-3 min-h-[3rem]">Presiona <strong>"Siguiente paso"</strong> para iniciar el apretón de manos. 🤝</p>
+                                    <div class="flex gap-2 mt-3">
+                                        <button id="hs-next" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">Siguiente paso ▶️</button>
+                                        <button id="hs-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold py-2 px-4 rounded-lg transition-colors">Reiniciar 🔄</button>
+                                    </div>
+                                    <p id="hs-badge" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia desbloqueada: Guardián del candado! Ya sabes qué protege HTTPS y cómo.</p>
+                                </div>
+                                <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg"><p class="text-sm text-amber-900"><strong>💡 Idea clave:</strong> las plataformas de despliegue (Vercel, Render, Netlify) activan HTTPS por ti, gratis, y renuevan el certificado automáticamente. Por eso tu app desplegada ya venía con candado sin que hicieras nada.</p></div>
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: qué es HTTPS y cómo funciona el cifrado TLS
+                                     Buscar: "qué es HTTPS y cómo funciona el cifrado TLS explicación español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3"><span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span><span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span></div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: qué es HTTPS y cómo funciona el cifrado</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"qué es HTTPS y cómo funciona el cifrado TLS explicación español"</em></p>
+                                    <a href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed"><span>▶️</span> Ver recurso</a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg"><p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p><p class="text-green-700 text-xs mb-2">Busca el video y dile esto a tu agente de IA en el chat:</p><div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">"Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2"><span>🎟️ Claves y tokens: quién eres y qué puedes hacer</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Una API desplegada está, por definición, abierta a internet. ¿Cómo se controla quién puede usarla? Con dos herramientas que conviene no confundir:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-blue-50 border border-blue-300 rounded-lg p-3"><p class="font-bold text-blue-800">🔑 Clave de API (API key)</p><p class="text-sm">Identifica a una <strong>aplicación</strong> que consume un servicio. Tu backend la envía al llamar a una API externa para que el servicio sepa que es él. Se guarda como variable de entorno.</p></div>
+                                    <div class="bg-purple-50 border border-purple-300 rounded-lg p-3"><p class="font-bold text-purple-800">🎫 Token de autenticación (JWT)</p><p class="text-sm">Identifica a un <strong>usuario</strong> que ya inició sesión. El backend se lo entrega al autenticarse, y el frontend lo envía en cada petición para demostrar quién es, sin reenviar la contraseña.</p></div>
+                                </div>
+                                <p class="mb-4">Una forma sencilla de recordarlo: la <strong>clave de API dice "qué app soy"</strong>, mientras que el <strong>token dice "qué usuario soy"</strong>. Ambos son secretos y ambos deben viajar siempre sobre HTTPS para que nadie los robe en el camino. Y una regla que no falla: los secretos jamás se guardan en el código del frontend, porque cualquiera puede abrir el navegador y leerlo.</p>
+                                <p class="mb-4 font-semibold text-teal-800">Clasifica cada caso. Cada acierto suma 25 puntos. 👇</p>
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: ¿Clave de API o token de usuario?</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="kt-score">0</span> / 100</p>
+                                    <div id="kt-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3 -->
+                    <div class="mb-4"><button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3"><span>🛡️ Blindar la exposición: ¿seguro o inseguro?</span><span class="ml-2">➕</span></button></div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Exponer una aplicación de forma responsable se reduce a unas pocas prácticas mínimas, pero críticas:</p>
+                                <ul class="list-disc list-inside mb-4 space-y-1 text-sm">
+                                    <li>La base de datos <strong>nunca</strong> se expone directamente a internet: solo el backend se conecta a ella.</li>
+                                    <li><strong>Todo viaja por HTTPS</strong>, incluida la conexión a la base de datos (recuerda el <code>sslmode=require</code>).</li>
+                                    <li>Los <strong>secretos viven en variables de entorno</strong>, nunca en el código ni en el repositorio.</li>
+                                    <li>La API <strong>valida todo lo que recibe</strong>: nunca confíes en que los datos del frontend son correctos o seguros.</li>
+                                    <li><strong>CORS</strong> se configura de forma restrictiva: solo tu propio frontend puede llamar a tu API.</li>
+                                </ul>
+                                <p class="mb-4 font-semibold text-teal-800">Revisa cada decisión y marca si es segura o insegura. Cada acierto suma 20 puntos. 👇</p>
+                                <div class="mt-2 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-1">🎮 Misión: Auditor de seguridad</p>
+                                    <p class="mb-3 font-bold text-teal-900">Puntaje: <span id="sec-score">0</span> / 100</p>
+                                    <div id="sec-container" class="space-y-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ACTIVIDADES -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades</h2>
+                <p class="text-slate-600 mb-4">Completa estas misiones para poner en práctica lo aprendido. Marca cada una al terminarla y observa cómo avanza tu progreso. 🏆</p>
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm"><p class="text-sm font-semibold text-slate-700 mb-2">🏁 Progreso de misiones: <span id="progreso-actividades-texto">0 / 5 completadas</span></p><div class="w-full bg-slate-200 rounded-full h-4"><div id="progreso-actividades-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div></div></div>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔗 Actividad 1: Laboratorio — Conecta tu backend con una base de datos gestionada</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">En <strong>Neon</strong> usa (o crea) tu base de datos y copia su <strong>cadena de conexión</strong>. En el panel de tu backend desplegado (Render/Railway) agrégala como variable de entorno <code>DATABASE_URL</code> (no en el código). En el backend, usa un driver (por ejemplo <code>pg</code>) que lea <code>process.env.DATABASE_URL</code>. Crea una ruta <code>POST</code> que inserte un registro y una <code>GET</code> que devuelva los registros; pruébalas. Responde: ¿dónde quedó la cadena y por qué no en el código? ¿qué significa <code>sslmode=require</code>? Si alguien ve tu código en GitHub, ¿podría conectarse a tu base de datos? ¿por qué?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> capturas de las dos rutas funcionando (inserción y consulta) + respuestas escritas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="1"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔒 Actividad 2: Laboratorio — Verifica el HTTPS de tu aplicación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Abre tu aplicación desplegada, haz clic en el <strong>candado</strong> 🔒 de la barra de direcciones y explora el certificado (quién lo emitió, hasta cuándo es válido). Prueba escribir la URL con <code>http://</code> en vez de <code>https://</code> y observa qué hace el navegador. Opcional: analiza tu dominio en <strong>SSL Labs</strong>. Responde: ¿quién emitió tu certificado y tuviste que hacer algo? ¿qué diferencia hay entre <code>http</code> y <code>https</code> para los datos del usuario? ¿por qué hoy es obligatorio HTTPS?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> captura de la información del certificado + respuestas escritas.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="2"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🗝️ Actividad 3: Diseño — Inventario de secretos de tu aplicación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Para el proyecto integrador, elabora una tabla con todos los <strong>secretos</strong> que manejaría tu aplicación (cadena de conexión, clave de alguna API externa, secreto para firmar tokens, etc.). Para cada uno indica: para qué sirve, quién lo necesita (frontend o backend) y dónde debe guardarse. Luego responde: ¿alguno podría ir en el frontend? ¿por qué el frontend es un lugar inseguro para secretos?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> tabla de secretos con su ubicación segura + respuesta justificada.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="3"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Actividad 4: Análisis de caso — una API mal expuesta</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Investiga (o analiza un escenario) de una API o base de datos expuesta de forma insegura: por ejemplo, una API sin HTTPS, una clave filtrada en el código del frontend, o una base de datos accesible desde internet sin restricción. Responde: ¿qué error de exposición se cometió? ¿qué datos o recursos quedaron en riesgo? ¿qué práctica de esta unidad lo habría evitado?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> informe de media página con el análisis y la práctica correcta que lo habría prevenido.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="4"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 5: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Responde individualmente: ¿qué es una cadena de conexión y por qué no debe ir en el código? Explica qué hace HTTPS y por qué importa para una contraseña. ¿Cuál es la diferencia entre una clave de API y un token JWT? ¿Por qué el frontend nunca debe conectarse directo a la base de datos? ¿Qué significa validar las entradas en el backend y por qué no basta con el frontend? ¿Cómo se relacionan las variables de entorno con la seguridad?</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200"><p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> respuestas escritas de mínimo 3 líneas por pregunta.</p></div>
+                        <label class="mt-4 flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="actividad-check w-4 h-4 accent-green-600" data-actividad="5"> Marcar actividad como completada ✅</label>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+                </div>
+            </div>
+
+            <!-- EVALUACIÓN -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que aprendiste. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- RECURSOS -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Neon</h3><p class="text-slate-600 mb-2">Base de datos PostgreSQL gestionada y gratuita; de aquí se obtiene la cadena de conexión usada en la Actividad 1.</p><a href="https://neon.tech/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-neon.png" alt="QR Neon" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">jwt.io</h3><p class="text-slate-600 mb-2">Sitio interactivo para entender y decodificar tokens JWT: muestra visualmente las partes de un token y qué información contiene.</p><a href="https://jwt.io/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-jwt-io.png" alt="QR jwt.io" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">SSL Labs — SSL Test</h3><p class="text-slate-600 mb-2">Herramienta gratuita que analiza el certificado HTTPS de un sitio y le da una calificación de seguridad. Útil para la Actividad 2.</p><a href="https://www.ssllabs.com/ssltest/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-ssl-labs.png" alt="QR SSL Labs" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">MDN — Seguridad web</h3><p class="text-slate-600 mb-2">Documentación de referencia de Mozilla sobre seguridad en la web (HTTPS, CORS, buenas prácticas), en español.</p><a href="https://developer.mozilla.org/es/docs/Web/Security" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr-mdn-security.png" alt="QR MDN Seguridad web" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+                </ul>
+            </div>
+
+            <!-- BIBLIOGRAFÍA -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217150</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106414</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA Editorial.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/106494</a></span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Cabezas Granado, L. M. y González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.<br><a href="https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084" class="text-green-700 underline break-all" target="_blank">https://elibro-net.ezproxyucor.unicordoba.edu.co/es/lc/unicordoba/titulos/217084</a></span></div>
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+                </div>
+            </div>
+
+            <!-- FOOTER — NO MODIFICAR -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Script de navegación — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => { link.addEventListener('click', function(e){ e.preventDefault(); const t=this.dataset.target; document.querySelectorAll('.content-pane').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active')); document.getElementById(t).classList.add('active'); this.classList.add('active'); }); });
+        document.getElementById('mobile-nav').addEventListener('change', function(){ document.querySelectorAll('.content-pane').forEach(p=>p.classList.remove('active')); document.getElementById(this.value).classList.add('active'); });
+        document.querySelectorAll('.accordion-btn').forEach(btn => { btn.addEventListener('click', function(){ const panel=document.querySelector(this.dataset.target); const icon=this.querySelector('span:last-child'); if(panel.classList.contains('hidden')){panel.classList.remove('hidden');icon.textContent='➖';}else{panel.classList.add('hidden');icon.textContent='➕';} }); });
+    </script>
+
+    <!-- QUIZ -->
+    <script>
+        const quizData = [
+            { question: "¿Qué es una cadena de conexión (connection string)?", options: ["El nombre de la aplicación", "Un texto con los datos para conectarse a la base de datos (host, puerto, usuario, contraseña)", "Un tipo de imagen", "La URL del frontend"], correct: 1 },
+            { question: "¿Qué protege HTTPS?", options: ["El diseño de la página", "La comunicación entre el navegador y el servidor, cifrándola", "La velocidad de internet", "El nombre del dominio"], correct: 1 },
+            { question: "¿Cuál es la diferencia entre una clave de API y un token JWT?", options: ["Son exactamente lo mismo", "La clave de API identifica a una aplicación; el token JWT identifica a un usuario que inició sesión", "El token es para imágenes y la clave para texto", "Ninguno es secreto"], correct: 1 },
+            { question: "¿Por qué el frontend nunca debe conectarse directamente a la base de datos?", options: ["Porque es más lento", "Porque su código es visible y expondría las credenciales; solo el backend debe conectarse", "Porque el navegador no tiene internet", "No hay ningún problema en hacerlo"], correct: 1 },
+            { question: "¿Dónde deben guardarse los secretos (claves, cadena de conexión) de una aplicación?", options: ["En el código del frontend", "En variables de entorno del servidor, nunca en el código", "En un comentario del HTML", "En el nombre del archivo"], correct: 1 },
+            { question: "Validar las entradas en el backend es importante porque...", options: ["hace la app más lenta a propósito", "nunca se debe confiar en que los datos que llegan del frontend son correctos o seguros", "el frontend ya garantiza que todo es seguro", "no es necesario validar nada"], correct: 1 }
+        ];
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => { const div=document.createElement('div'); div.classList.add('mb-6'); div.innerHTML = `<p class="font-semibold text-slate-800 mb-3">${index+1}. ${item.question}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">${item.options.map((opt,i)=>`<div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors" data-question="${index}" data-option="${i}"><span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}</div>`).join('')}</div>`; quizContainer.appendChild(div); });
+        document.querySelectorAll('.quiz-option').forEach(opt => { opt.addEventListener('click', function(){ const q=this.dataset.question; document.querySelectorAll(`[data-question="${q}"]`).forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); }); });
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => { let score=0; quizData.forEach((item,index)=>{ const sel=document.querySelector(`.quiz-option.selected[data-question="${index}"]`); if(sel && parseInt(sel.dataset.option)===item.correct) score++; }); const r=document.getElementById('quiz-result'); const pct=Math.round((score/quizData.length)*100); r.textContent=`Obtuviste ${score} de ${quizData.length} (${pct}%)`; r.className=`mt-4 text-lg font-bold ${pct>=60?'text-green-700':'text-red-600'}`; });
+    </script>
+
+    <!-- ACTIVIDADES INTERACTIVAS -->
+    <script>
+        // Juego 1: apretón de manos HTTPS
+        const steps = [
+            { icon:"👋", nombre:"Hola (Client Hello)", desc:"El navegador saluda al servidor y le dice qué métodos de cifrado sabe usar." },
+            { icon:"📜", nombre:"Certificado", desc:"El servidor responde con su certificado digital, que prueba su identidad (emitido por una autoridad de confianza)." },
+            { icon:"✅", nombre:"Verificación", desc:"El navegador comprueba que el certificado es válido y de confianza. Si algo falla, muestra la advertencia de 'sitio no seguro'." },
+            { icon:"🔑", nombre:"Clave de sesión", desc:"Ambos acuerdan de forma segura una clave secreta compartida, única para esta sesión." },
+            { icon:"🔒", nombre:"Cifrado", desc:"A partir de aquí, todo lo que viaja entre navegador y servidor va cifrado con esa clave. Aparece el candado 🔒." }
+        ];
+        const hc = document.getElementById('hs-container');
+        steps.forEach((s,i)=>{ const d=document.createElement('div'); d.className='hs-step'; d.dataset.step=i; d.innerHTML=`<div class="hs-box bg-white border-2 border-slate-200 rounded-lg p-3 text-center"><p class="text-2xl">${s.icon}</p><p class="text-xs font-bold text-slate-700">${s.nombre}</p></div>`; hc.appendChild(d); });
+        let stepIdx=-1; const stepNodes=()=>document.querySelectorAll('.hs-step');
+        document.getElementById('hs-next').addEventListener('click', function(){ if(stepIdx>=steps.length-1) return; stepIdx++; stepNodes()[stepIdx].classList.add('on'); document.getElementById('hs-desc').innerHTML=`<strong>${steps[stepIdx].icon} ${steps[stepIdx].nombre}:</strong> ${steps[stepIdx].desc}`; if(stepIdx===steps.length-1) document.getElementById('hs-badge').classList.remove('hidden'); });
+        document.getElementById('hs-reset').addEventListener('click', function(){ stepIdx=-1; stepNodes().forEach(n=>n.classList.remove('on')); document.getElementById('hs-desc').innerHTML='Presiona <strong>"Siguiente paso"</strong> para iniciar el apretón de manos. 🤝'; document.getElementById('hs-badge').classList.add('hidden'); });
+
+        // Helper de juego de opciones
+        function montarJuego(containerId, scoreId, data, puntos) {
+            const cont=document.getElementById(containerId); const done=new Set(); let score=0;
+            data.forEach((item,index)=>{ const row=document.createElement('div'); row.className='bg-white p-3 rounded-lg border border-teal-200'; row.innerHTML=`<p class="text-sm text-slate-700 mb-2">🔸 ${item.texto}</p><div class="flex gap-2 flex-wrap">${item.opciones.map((op,i)=>`<button class="opt-btn border-2 border-teal-300 text-teal-700 text-xs font-bold px-3 py-1 rounded-full" data-index="${index}" data-op="${i}">${op}</button>`).join('')}</div>`; cont.appendChild(row); });
+            cont.addEventListener('click', function(e){ if(!e.target.classList.contains('opt-btn')) return; const index=e.target.dataset.index; if(done.has(index)) return; done.add(index); const row=e.target.closest('div.flex'); if(parseInt(e.target.dataset.op)===data[index].correcta){ e.target.classList.add('ok'); score+=puntos; } else { e.target.classList.add('bad'); row.querySelector(`[data-op="${data[index].correcta}"]`).classList.add('ok'); } document.getElementById(scoreId).textContent=score; row.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true); });
+        }
+
+        // Juego 2: clave de API vs token
+        montarJuego('kt-container','kt-score',[
+            { texto:"Tu backend llama a una API del clima y envía un secreto para identificarse como aplicación autorizada.", opciones:["Clave de API","Token de usuario"], correcta:0 },
+            { texto:"Un usuario inicia sesión y recibe un texto que enviará en cada petición para demostrar quién es.", opciones:["Clave de API","Token de usuario"], correcta:1 },
+            { texto:"Sirve para que un servicio externo sepa qué aplicación lo está consumiendo.", opciones:["Clave de API","Token de usuario"], correcta:0 },
+            { texto:"Evita que el usuario tenga que enviar su contraseña en cada petición tras iniciar sesión.", opciones:["Clave de API","Token de usuario"], correcta:1 }
+        ],25);
+
+        // Juego 3: seguro vs inseguro
+        montarJuego('sec-container','sec-score',[
+            { texto:"Guardar la cadena de conexión de la base de datos en una variable de entorno del servidor.", opciones:["Seguro","Inseguro"], correcta:0 },
+            { texto:"Poner la clave de una API dentro del JavaScript del frontend.", opciones:["Seguro","Inseguro"], correcta:1 },
+            { texto:"Dejar la base de datos accesible directamente desde internet para que el frontend la consulte.", opciones:["Seguro","Inseguro"], correcta:1 },
+            { texto:"Configurar CORS para que solo el dominio de tu propio frontend pueda llamar a tu API.", opciones:["Seguro","Inseguro"], correcta:0 },
+            { texto:"Servir la aplicación por HTTP sin cifrado para que cargue 'más rápido'.", opciones:["Seguro","Inseguro"], correcta:1 }
+        ],20);
+
+        // Progreso de misiones
+        const actividadChecks=document.querySelectorAll('.actividad-check');
+        actividadChecks.forEach(chk=>{ chk.addEventListener('change',()=>{ const c=document.querySelectorAll('.actividad-check:checked').length; const t=actividadChecks.length; document.getElementById('progreso-actividades-bar').style.width=Math.round((c/t)*100)+'%'; document.getElementById('progreso-actividades-texto').textContent=`${c} / ${t} completadas`; }); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
