@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Greetings, Introductions and Personal Information</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back {
+            display: none;
+        }
+        .reveal-card.opened .reveal-back {
+            display: block;
+        }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .mission-card.completed {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+        .blank-input {
+            display: inline-block;
+            width: 110px;
+            border-bottom: 2px solid #22c55e;
+            text-align: center;
+            font-weight: 600;
+            color: #166534;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">👋 Hello! Let's get started</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el mundo de la tecnología, el inglés está presente en programas, aplicaciones, páginas web, plataformas virtuales y recursos de aprendizaje. Por eso, desarrollar habilidades básicas en este idioma es clave para ti como estudiante de <strong>Tecnología en Desarrollo de Software</strong>. 💻
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Aprender inglés comienza con acciones sencillas: saludar, presentarte y compartir información personal o académica. Estas expresiones te permiten iniciar conversaciones, conocer a otras personas y participar con más seguridad en contextos universitarios y profesionales.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En esta guía vas a aprender expresiones básicas para <strong>saludar</strong>, <strong>despedirte</strong>, <strong>presentarte</strong> y <strong>responder preguntas sencillas sobre ti</strong>. La idea es que empieces a usar el inglés como una herramienta práctica de comunicación para tu formación académica y tu futuro en el área tecnológica. 🚀
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA vas a poder saludar, presentarte y hablar de ti en inglés con más seguridad. <span class="text-xl">🎉</span>
+                    </p>
+                </div>
+                <figure class="mt-8">
+                    <img src="img/figura-1-basic-conversation-flow.webp" alt="Basic Conversation Flow" class="w-full max-w-2xl mx-auto rounded-lg border border-slate-200">
+                    <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 1. Basic Conversation Flow. Imagen creada con inteligencia artificial (ChatGPT – OpenAI), 2026.</figcaption>
+                </figure>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">👋</span>
+                        <span>Utilizar expresiones básicas en inglés para saludar, despedirse, presentarse y presentar a otras personas en contextos universitarios y relacionados con el desarrollo de software.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💬</span>
+                        <span>Intercambiar información personal y académica sencilla mediante preguntas y respuestas básicas en inglés, favoreciendo el desarrollo de habilidades comunicativas.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🔍 Modo exploración: recorre las 5 estaciones y suma puntos</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Formal or Informal -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-registro">
+                            <span>🎭 Formal or Informal? Choosing the right greeting</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-registro" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="registro-intro" class="content-section">
+                                <p class="mb-4">
+                                    Ya conoces varias formas de saludar y despedirte en inglés. Pero no todas suenan igual de bien en cualquier situación: usar <em>"Hey!"</em> con tu profesor sonaría raro, igual que decirle a un compañero de clase <em>"Good evening, how do you do?"</em>. En inglés, el <strong>registro</strong> (qué tan formal o informal es una expresión) cambia según con quién hables.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada categoría para descubrirla (+5 puntos la primera vez):</p>
+                                <div id="reveal-registro" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="registro-clasifica" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🧩 Formal or Informal?</h4>
+                                <p class="mb-3">Haz click en una frase y luego en la categoría correcta (+5 pts por acierto).</p>
+                                <div id="registro-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="registro-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-4 rounded-lg" data-tipo="formal">🎓 Formal</button>
+                                    <button class="registro-btn bg-yellow-100 border border-yellow-400 text-yellow-800 font-semibold py-2 px-4 rounded-lg" data-tipo="informal">😎 Informal</button>
+                                </div>
+                                <p id="registro-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: New conversation -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-conversacion">
+                            <span>🗣️ A new conversation to practice</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-conversacion" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="conversacion-texto" class="content-section">
+                                <p class="mb-4">
+                                    Ya leíste una conversación en tu guía. Aquí tienes una nueva, en un contexto distinto: dos estudiantes que se conocen en un hackathon.
+                                </p>
+                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 font-medium">
+                                    <p>🧑 <strong>Alex:</strong> Hi! Good morning!</p>
+                                    <p>👩 <strong>Mia:</strong> Good morning! How are you doing?</p>
+                                    <p>🧑 <strong>Alex:</strong> I'm great, thanks. What's your name?</p>
+                                    <p>👩 <strong>Mia:</strong> I'm Mia. Nice to meet you!</p>
+                                    <p>🧑 <strong>Alex:</strong> Nice to meet you, too. I'm Alex. Where are you from?</p>
+                                    <p>👩 <strong>Mia:</strong> I'm from Bogotá. And you?</p>
+                                    <p>🧑 <strong>Alex:</strong> I'm from Montería. What are you studying?</p>
+                                    <p>👩 <strong>Mia:</strong> I'm studying Software Development. What about you?</p>
+                                    <p>🧑 <strong>Alex:</strong> Same here! Well, see you around!</p>
+                                    <p>👩 <strong>Mia:</strong> Take care, Alex!</p>
+                                </div>
+                            </div>
+                            <div id="conversacion-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): according to the conversation, what is Mia studying?</p>
+                                <div id="choice-conversacion" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-conversacion-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Small talk pitfalls -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-errores">
+                            <span>⚠️ Small talk pitfalls: common mistakes Spanish speakers make</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-errores" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="errores-intro" class="content-section">
+                                <p class="mb-4">
+                                    Al traducir directamente del español, es fácil cometer pequeños errores. Aquí tienes algunos de los más comunes cuando se habla de saludos e información personal.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada error para ver la corrección (+4 puntos la primera vez):</p>
+                                <div id="reveal-errores" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="errores-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): which sentence is correct?</p>
+                                <div id="choice-errores" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-errores-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Wh-questions -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-whquestions">
+                            <span>❓ Building your own Wh-questions</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-whquestions" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="whquestions-intro" class="content-section">
+                                <p class="mb-4">
+                                    Tu guía te muestra varias preguntas sobre información personal, pero no explica cómo se arman. La fórmula básica es: <strong>Wh-word + verbo auxiliar (am/is/are, do/does) + sujeto + resto</strong>. Ejemplo: <em>What</em> + <em>is</em> + <em>your name</em>?
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada palabra para descubrir qué pregunta (+4 puntos la primera vez):</p>
+                                <div id="reveal-whquestions" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="whquestions-clasifica" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🧩 What does each question ask about?</h4>
+                                <p class="mb-3">Haz click en una pregunta y luego en la categoría correcta (+4 pts por acierto).</p>
+                                <div id="wh-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="wh-btn bg-red-100 border border-red-400 text-red-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="persona">🧑 Persona</button>
+                                    <button class="wh-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="lugar">📍 Lugar</button>
+                                    <button class="wh-btn bg-yellow-100 border border-yellow-400 text-yellow-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="tiempo">🕐 Tiempo</button>
+                                    <button class="wh-btn bg-green-100 border border-green-400 text-green-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="cosa">📦 Cosa</button>
+                                </div>
+                                <p id="wh-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5: Culture note -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-cultura">
+                            <span>🌐 Culture note: greetings around the English-speaking world</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-cultura" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="cultura-intro" class="content-section">
+                                <p class="mb-4">
+                                    En equipos de tecnología globales, vas a conversar con personas de distintos países de habla inglesa. Las costumbres para saludar cambian un poco de un lugar a otro.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada bandera para descubrir su costumbre (+4 puntos la primera vez):</p>
+                                <div id="reveal-cultura" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="cultura-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): in most English-speaking professional contexts, which topic is generally a SAFE small talk topic when meeting someone new?</p>
+                                <div id="choice-cultura" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-cultura-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Modo misión activado — completa las 3 misiones</p>
+                        <p class="text-green-800 font-semibold">🏅 Misiones: <span id="actividades-completadas">0</span>/3</p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <!-- Warm-up: read the conversation -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">📖 Warm-up: Read the conversation</h3>
+                    <figure>
+                        <img src="img/figura-3-basic-conversation-example.webp" alt="Basic Conversation Example" class="w-full max-w-2xl mx-auto rounded-lg border border-slate-200">
+                        <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 3. Basic Conversation Example. Imagen creada con inteligencia artificial (ChatGPT – OpenAI), 2026.</figcaption>
+                    </figure>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Misión 1 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Misión 1: Complete</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Fill out the form with information about yourself. Use the examples in the infographic as a guide.</p>
+                        <figure class="mb-4">
+                            <img src="img/figura-4-personal-information.webp" alt="Personal Information infographic" class="w-full max-w-2xl mx-auto rounded-lg border border-slate-200">
+                            <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 4. Personal Information. Imagen creada con inteligencia artificial (ChatGPT – OpenAI), 2026.</figcaption>
+                        </figure>
+                        <div class="space-y-2">
+                            <div><label class="block text-sm font-semibold text-slate-700">Name:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Residence:</label>
+                                <div class="flex flex-wrap gap-4">
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> House</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Apartment</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Other</label>
+                                </div>
+                            </div>
+                            <div><label class="block text-sm font-semibold text-slate-700">City:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div class="flex gap-4">
+                                <div class="flex-1"><label class="block text-sm font-semibold text-slate-700">State:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                                <div class="flex-1"><label class="block text-sm font-semibold text-slate-700">Zip Code:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            </div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Telephone Number:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Country of origin:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Marital status:</label>
+                                <div class="flex flex-wrap gap-4">
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Single</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Married</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Divorced</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Widowed</label>
+                                </div>
+                            </div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Number of children:</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 2 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">💬 Misión 2: Complete the conversation</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Read the conversation and complete the blanks using the words in the box.</p>
+                        <figure class="mb-4">
+                            <img src="img/figura-2-greetings-and-farewells.webp" alt="Greetings and Farewells" class="w-full max-w-xl mx-auto rounded-lg border border-slate-200">
+                            <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 2. Greetings and Farewells. Imagen creada con inteligencia artificial (ChatGPT – OpenAI), 2026.</figcaption>
+                        </figure>
+                        <div class="mb-4 p-3 bg-green-50 border border-green-300 rounded-lg">
+                            <p class="font-semibold text-green-800 mb-1">Word Bank</p>
+                            <p class="text-slate-700">Hello • Good • name • Nice • from • How • fine • Goodbye</p>
+                        </div>
+                        <div class="space-y-3 text-slate-700">
+                            <p><strong>Laura:</strong> <input class="blank-input" type="text">!</p>
+                            <p><strong>David:</strong> Hello! <input class="blank-input" type="text"> are you?</p>
+                            <p><strong>Laura:</strong> I'm <input class="blank-input" type="text">, thank you. And you?</p>
+                            <p><strong>David:</strong> I'm <input class="blank-input" type="text">, thanks.</p>
+                            <p><strong>Laura:</strong> My <input class="blank-input" type="text"> is Laura. What's your name?</p>
+                            <p><strong>David:</strong> I'm David. <input class="blank-input" type="text"> to meet you.</p>
+                            <p><strong>Laura:</strong> Nice to meet you, too. Where are you <input class="blank-input" type="text">?</p>
+                            <p><strong>David:</strong> I'm from Colombia.</p>
+                            <p><strong>Laura:</strong> <input class="blank-input" type="text">! See you later.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 3 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Misión 3: Information Detective</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Read the personal profile below.</p>
+                        <figure class="mb-4">
+                            <img src="img/activity3-student-id-kevin.webp" alt="Student ID Example - Kevin Smith" class="w-full max-w-md mx-auto rounded-lg border border-slate-200">
+                            <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura. Student ID Example. Imagen creada con inteligencia artificial (ChatGPT – OpenAI), 2026.</figcaption>
+                        </figure>
+                        <p class="mb-2 font-semibold text-slate-700">Answer the questions.</p>
+                        <div class="space-y-2 mb-4">
+                            <div><label class="block text-sm font-semibold text-slate-700">What is the student's name?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">How old is he?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Where is he from?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">What is his nationality?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">What does he study?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Which university does he attend?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">What is his email address?</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                        </div>
+                        <p class="mb-2 font-semibold text-slate-700">Now... Write five new questions that could be asked to know more about Kevin.</p>
+                        <textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="5"></textarea>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: Greetings and Farewell Practice -->
+                    <li id="recurso-ext-1" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Meeting new people (British Council LearnEnglish)</h3>
+                            <p class="text-slate-600 mb-2">Práctica de habla nivel A1 para saludar y conocer gente nueva, con video y ejercicios.</p>
+                            <a href="https://learnenglish.britishcouncil.org/free-resources/speaking/a1/meeting-new-people" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Meeting new people" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: Greetings, Farewell and Introductions -->
+                    <li id="recurso-ext-2" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Greeting & introducing (British Council LearnEnglish Teens)</h3>
+                            <p class="text-slate-600 mb-2">Colección de ejercicios sobre cómo saludar, presentarse y despedirse en inglés.</p>
+                            <a href="https://learnenglishteens.britishcouncil.org/functions/greeting-introducing/term" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR Greeting and introducing" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: Personal Information -->
+                    <li id="recurso-ext-3" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">At the library – giving personal information (British Council)</h3>
+                            <p class="text-slate-600 mb-2">Práctica de escucha nivel A1 sobre cómo dar información personal en inglés.</p>
+                            <a href="https://learnenglishteens.britishcouncil.org/skills/listening/a1-listening/library-giving-personal-information" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR giving personal information" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 4: Test. Personal Information -->
+                    <li id="recurso-ext-4" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Questions: personal information (AgendaWeb)</h3>
+                            <p class="text-slate-600 mb-2">Ejercicio interactivo para practicar preguntas y respuestas de información personal en inglés.</p>
+                            <a href="https://agendaweb.org/exercises/grammar/questions/questions-1.htm" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-4.png" alt="QR Questions personal information" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">British Council. (2026). <i>LearnEnglish</i>.<br><a href="https://learnenglish.britishcouncil.org" class="text-green-700 underline break-all" target="_blank">https://learnenglish.britishcouncil.org</a></span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Cambridge University Press. (2026). <i>Cambridge Dictionary</i>.<br><a href="https://dictionary.cambridge.org" class="text-green-700 underline break-all" target="_blank">https://dictionary.cambridge.org</a></span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Glendinning, E. H., y McEwan, J. (2013). <i>Oxford English for Information Technology</i> (2nd ed.). Oxford University Press.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Murphy, R. (2019). <i>English Grammar in Use</i> (5th ed.). Cambridge University Press.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Universidad de Córdoba. (2026). <i>Plan de curso FDOC-088: Inglés I. Tecnología en Desarrollo de Software</i>. Documento institucional.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "Which greeting is most appropriate when meeting your professor for the first time?",
+                options: ["Hey!", "What's up?", "Good morning.", "Yo!"],
+                correct: 2
+            },
+            {
+                question: "Complete: \"I ___ 19 years old.\"",
+                options: ["have", "am", "is", "has"],
+                correct: 1
+            },
+            {
+                question: "Which question correctly asks about someone's age?",
+                options: ["How old are you?", "What old are you?", "Where old are you?", "When old are you?"],
+                correct: 0
+            },
+            {
+                question: "A classmate says \"How are you?\" What is the most natural response?",
+                options: ["(silence)", "Fine, thanks. And you?", "My name is Laura.", "Goodbye!"],
+                correct: 1
+            },
+            {
+                question: "Which topic is generally considered safe small talk when meeting someone from an English-speaking country for the first time?",
+                options: ["Their salary", "The weather or a shared interest", "Their age", "Their religion"],
+                correct: 1
+            },
+            {
+                question: "Which of these questions is correctly formed?",
+                options: ["Where you are from?", "Where are you from?", "From where you are?", "Are from where you?"],
+                correct: 1
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // --- Helper genérico para tarjetas "revelar" ---
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // --- Helper genérico para juegos de clasificación (2 o más categorías) ---
+        function renderClasifica(fraseContainerId, botonClass, frases, msgId, puntos) {
+            let seleccion = null;
+            const container = document.getElementById(fraseContainerId);
+            frases.forEach((f, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+                chip.textContent = f.texto;
+                chip.dataset.index = i;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('chip-done-correct') || this.classList.contains('chip-done-wrong')) return;
+                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                    this.classList.add('chip-selected');
+                    seleccion = this;
+                });
+                container.appendChild(chip);
+            });
+            document.querySelectorAll('.' + botonClass).forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!seleccion) return;
+                    const idx = parseInt(seleccion.dataset.index);
+                    const tipo = btn.dataset.tipo;
+                    const msg = document.getElementById(msgId);
+                    seleccion.classList.remove('chip-selected');
+                    if (frases[idx].tipo === tipo) {
+                        seleccion.classList.add('chip-done-correct');
+                        msg.textContent = '✅ Correct!';
+                        msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        seleccion.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ Not quite, try another one.';
+                        msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                    }
+                    seleccion = null;
+                });
+            });
+        }
+
+        // --- Formal or Informal: reveal cards ---
+        renderReveal('reveal-registro', [
+            { titulo: "🎓 Very formal", texto: "Good morning / Good afternoon / Good evening — used with teachers, in interviews, or the first time you meet someone important." },
+            { titulo: "🙂 Neutral", texto: "Hello / How are you? / Nice to meet you — safe to use in almost any situation." },
+            { titulo: "😎 Informal", texto: "Hi / Hey / What's up? — used with friends, classmates, or people you already know well." },
+            { titulo: "👋 Formal farewell", texto: "It was a pleasure meeting you / Have a nice day — used to close a formal conversation politely." },
+            { titulo: "✌️ Informal farewell", texto: "See you later / Take care / Bye — used to close a casual conversation." }
+        ], 5);
+
+        // --- Formal or Informal: clasificación ---
+        renderClasifica('registro-frases', 'registro-btn', [
+            { texto: "Good afternoon, Professor Smith.", tipo: "formal" },
+            { texto: "Hey! What's up?", tipo: "informal" },
+            { texto: "It was a pleasure meeting you.", tipo: "formal" },
+            { texto: "See you later!", tipo: "informal" },
+            { texto: "Good morning, everyone.", tipo: "formal" },
+            { texto: "Take care!", tipo: "informal" }
+        ], 'registro-msg', 5);
+
+        // --- Conversation quiz ---
+        const conversacionOpciones = ["Software Development", "Business Administration", "Nursing", "Graphic Design"];
+        const conversacionCorrecta = 0;
+        const conversacionContainer = document.getElementById('choice-conversacion');
+        let conversacionRespondido = false;
+        conversacionOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (conversacionRespondido) return;
+                conversacionRespondido = true;
+                const msg = document.getElementById('choice-conversacion-msg');
+                if (i === conversacionCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ Correct! Mia said "I\'m studying Software Development."';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Read the conversation again: Mia says what she is studying.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            conversacionContainer.appendChild(btn);
+        });
+
+        // --- Errores comunes: reveal cards ---
+        renderReveal('reveal-errores', [
+            { titulo: "❌ I have 19 years.", texto: "✅ I am 19 years old. (En español decimos \"tener años\", pero en inglés se usa el verbo \"to be\".)" },
+            { titulo: "❌ My name is call Daniela.", texto: "✅ My name is Daniela. / I am called Daniela. (Son dos estructuras correctas por separado, no se mezclan.)" },
+            { titulo: "❌ How are you? ... (silence)", texto: "✅ How are you? — I'm fine, thanks. And you? (Siempre se devuelve la pregunta, es la respuesta esperada.)" },
+            { titulo: "❌ I live in Bogotá city.", texto: "✅ I live in Bogotá. (No hace falta agregar \"city\" después del nombre de la ciudad.)" }
+        ], 4);
+
+        // --- Errores comunes: quiz ---
+        const erroresOpciones = ["I have 20 years.", "I am 20 years old."];
+        const erroresCorrecta = 1;
+        const erroresContainer = document.getElementById('choice-errores');
+        let erroresRespondido = false;
+        erroresOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (erroresRespondido) return;
+                erroresRespondido = true;
+                const msg = document.getElementById('choice-errores-msg');
+                if (i === erroresCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ Correct! In English, age uses the verb "to be".';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ That\'s a direct translation from Spanish — not correct in English.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            erroresContainer.appendChild(btn);
+        });
+
+        // --- Wh-questions: reveal cards ---
+        renderReveal('reveal-whquestions', [
+            { titulo: "What", texto: "Asks about things, names, or activities. Ex: What's your name? / What do you study?" },
+            { titulo: "Where", texto: "Asks about places. Ex: Where are you from? / Where do you live?" },
+            { titulo: "How", texto: "Asks about manner or condition, or with adjectives. Ex: How are you? / How old are you?" },
+            { titulo: "When", texto: "Asks about time. Ex: When is your birthday?" },
+            { titulo: "Who", texto: "Asks about people. Ex: Who is your teacher?" }
+        ], 4);
+
+        // --- Wh-questions: clasificación ---
+        renderClasifica('wh-frases', 'wh-btn', [
+            { texto: "What's your email?", tipo: "cosa" },
+            { texto: "Where are you from?", tipo: "lugar" },
+            { texto: "When is your birthday?", tipo: "tiempo" },
+            { texto: "Who is your teacher?", tipo: "persona" }
+        ], 'wh-msg', 4);
+
+        // --- Culture note: reveal cards ---
+        renderReveal('reveal-cultura', [
+            { titulo: "🇺🇸 United States", texto: "A handshake is common in professional settings; a casual \"Hi, how's it going?\" among coworkers. Talking about weekend plans or sports is common small talk." },
+            { titulo: "🇬🇧 United Kingdom", texto: "Polite and a bit reserved at first. Talking about the weather is a classic safe topic." },
+            { titulo: "🇨🇦 Canada", texto: "Friendly and informal; people often say \"sorry\" even casually. Small talk about hobbies or travel is common." },
+            { titulo: "🇦🇺 Australia", texto: "Very casual greetings even at work, like \"G'day\" or \"How ya going?\"; nicknames are common." },
+            { titulo: "🌐 In global remote teams", texto: "A simple \"Hi, how are you?\" at the start of a video call works everywhere; avoid personal topics like salary, age, or politics until you know someone well." }
+        ], 4);
+
+        // --- Culture quiz ---
+        const culturaOpciones = ["Their salary", "The weather or a shared interest", "Their age", "Their marital status"];
+        const culturaCorrecta = 1;
+        const culturaContainer = document.getElementById('choice-cultura');
+        let culturaRespondido = false;
+        culturaOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (culturaRespondido) return;
+                culturaRespondido = true;
+                const msg = document.getElementById('choice-cultura-msg');
+                if (i === culturaCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ Correct! The weather or shared interests are safe, neutral topics.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ That topic is usually considered too personal when you just met someone.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            culturaContainer.appendChild(btn);
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // Progreso de misiones
+        let misionesCompletadas = 0;
+        const contadorMisiones = document.getElementById('actividades-completadas');
+        const barraMisiones = document.getElementById('actividades-barra');
+        document.querySelectorAll('.complete-mission-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.mission-card');
+                if (card.classList.contains('completed')) return;
+                card.classList.add('completed');
+                this.textContent = '✅ Misión completada';
+                this.disabled = true;
+                misionesCompletadas++;
+                contadorMisiones.textContent = misionesCompletadas;
+                barraMisiones.style.width = Math.round((misionesCompletadas / 3) * 100) + '%';
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
