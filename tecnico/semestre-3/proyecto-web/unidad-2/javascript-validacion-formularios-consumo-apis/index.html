@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: JavaScript, validación de formularios y consumo simple de APIs</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back {
+            display: none;
+        }
+        .reveal-card.opened .reveal-back {
+            display: block;
+        }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .mission-card.completed {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: #166534;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">⚡ Dale vida a tu frontend con JavaScript</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Después de construir la estructura visual del frontend con HTML5 y CSS, tu proyecto web cuenta con pantallas que pueden verse en el navegador. Sin embargo, una interfaz no debe limitarse a mostrar contenido estático. Para que el usuario pueda interactuar con formularios, botones, mensajes y datos, es necesario incorporar comportamiento mediante <strong>JavaScript</strong>.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    JavaScript permite que una página responda a las acciones del usuario. Por ejemplo, puede mostrar u ocultar información, validar campos de un formulario, cambiar mensajes en pantalla, cargar datos desde una fuente externa o enviar información a un servicio. En esta guía trabajarás el uso básico de JavaScript desde el frontend, manteniendo el enfoque en la interacción y el consumo simple de APIs.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Esta guía corresponde al tercer tema de la Unidad 2. En ella abordarás eventos, manipulación básica del documento, validación de formularios, mensajes al usuario, peticiones HTTP, respuestas JSON y actualización de la interfaz. El propósito no es desarrollar todavía toda la lógica del backend, sino preparar el frontend para comunicarse con datos o servicios.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Al finalizar, tu equipo entregará una versión funcional del frontend con interacciones básicas, validación de formularios y al menos un ejemplo de consumo simple de API o datos simulados ⚡. Esta evidencia cierra la Unidad 2 y te prepara para la Unidad 3, enfocada en backend, integración, pruebas y despliegue.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> No necesitas construir todavía el backend completo: basta con que el frontend reaccione, valide y muestre datos de forma clara. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <figure class="mt-8">
+                    <img src="img/figura-1-flujo-interaccion.webp" alt="Flujo básico de interacción y consumo de datos desde el frontend" class="w-full max-w-3xl mx-auto rounded-lg border border-slate-200">
+                    <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 1. Flujo básico de interacción y consumo de datos desde el frontend. Fuente: elaboración propia con Python (matplotlib), 2026.</figcaption>
+                </figure>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">⚡</span>
+                        <span>Reconocer el papel de JavaScript en la construcción de interfaces web interactivas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🖱️</span>
+                        <span>Aplicar eventos básicos de JavaScript para responder a acciones del usuario dentro del frontend.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">✅</span>
+                        <span>Validar formularios del proyecto web antes de enviar o procesar la información ingresada.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💬</span>
+                        <span>Mostrar mensajes de error, confirmación o advertencia que orienten al usuario durante la interacción.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🌐</span>
+                        <span>Realizar consumo simple de APIs desde el frontend mediante peticiones HTTP básicas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔄</span>
+                        <span>Actualizar elementos de la interfaz a partir de respuestas obtenidas en formato JSON, sin profundizar todavía en la implementación del backend.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🔍 Modo exploración: recorre las 5 estaciones y suma puntos</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: addEventListener -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-eventos">
+                            <span>🎯 addEventListener: la forma moderna de escuchar eventos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-eventos" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="eventos-intro" class="content-section">
+                                <p class="mb-4">
+                                    Ya sabes qué eventos existen (click, submit, input, change, load). La forma estándar en JavaScript de "escuchar" un evento es el método <code>addEventListener()</code>.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada tarjeta para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-eventos" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="eventos-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): ¿qué método evita que un formulario recargue la página al enviarse?</p>
+                                <div id="choice-eventos" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-eventos-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: HTML5 validation -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-validacion">
+                            <span>✅ Antes de escribir JS: validaciones que HTML5 ya trae</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-validacion" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="validacion-intro" class="content-section">
+                                <p class="mb-4">
+                                    Tu guía habla de validar que un correo tenga formato válido o que una contraseña tenga cierta longitud. Antes de escribir JavaScript, HTML5 ya trae atributos que hacen gran parte de este trabajo.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada atributo para descubrirlo (+4 puntos la primera vez):</p>
+                                <div id="reveal-validacion" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="validacion-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): ¿qué atributo HTML usarías para exigir que una contraseña tenga al menos 8 caracteres?</p>
+                                <div id="choice-validacion" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-validacion-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: async/await -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-asyncawait">
+                            <span>🔄 async/await: esperar respuestas sin bloquear la página</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-asyncawait" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="asyncawait-intro" class="content-section">
+                                <figure class="mb-4">
+                                    <img src="img/figura-2-proceso-validacion.webp" alt="Proceso básico de validación de formularios en el frontend" class="w-full max-w-2xl mx-auto rounded-lg border border-slate-200">
+                                    <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 2. Proceso básico de validación de formularios en el frontend. Fuente: elaboración propia con Python (matplotlib), 2026.</figcaption>
+                                </figure>
+                                <p class="mb-4">
+                                    Tu guía menciona peticiones HTTP y respuestas JSON. En JavaScript moderno, la forma más clara de escribir ese flujo es con <code>async</code> y <code>await</code>.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada pieza para descubrir su función (+4 puntos la primera vez):</p>
+                                <div id="reveal-asyncawait" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="asyncawait-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): si la petición fetch falla, ¿qué bloque se ejecuta?</p>
+                                <div id="choice-asyncawait" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-asyncawait-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: destructuring y template literals -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-destructuring">
+                            <span>🧩 JS más limpio: destructuring y template literals</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-destructuring" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="destructuring-intro" class="content-section">
+                                <p class="mb-4">
+                                    Cuando recibes datos en formato JSON, dos herramientas de JavaScript moderno te ahorran mucho código: el <strong>destructuring</strong> y los <strong>template literals</strong>.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada tarjeta para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-destructuring" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="destructuring-clasifica" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🧩 ¿Destructuring o template literal?</h4>
+                                <p class="mb-3">Haz click en un fragmento de código y luego en su nombre correcto (+4 pts por acierto).</p>
+                                <div id="destructuring-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="destructuring-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-4 rounded-lg" data-tipo="destructuring">Destructuring</button>
+                                    <button class="destructuring-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-4 rounded-lg" data-tipo="template">Template literal</button>
+                                </div>
+                                <p id="destructuring-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5: Errores comunes -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-errores">
+                            <span>🛡️ Errores comunes al consumir APIs (y cómo evitarlos)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-errores" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="errores-intro" class="content-section">
+                                <p class="mb-4">
+                                    Consumir una API por primera vez suele traer los mismos errores. Conocerlos de antemano te va a ahorrar horas de depuración.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada error para ver cómo evitarlo (+4 puntos la primera vez):</p>
+                                <div id="reveal-errores" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="errores-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): según las buenas prácticas, ¿dónde NO se debe escribir una llave de API o contraseña?</p>
+                                <div id="choice-errores" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-errores-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Modo misión activado — completa las 7 misiones de tu equipo</p>
+                        <p class="text-green-800 font-semibold">🏅 Misiones: <span id="actividades-completadas">0</span>/7</p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <!-- Referencia -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6">
+                    <h3 class="text-xl font-bold text-green-700 mb-3">📖 Referencia: buenas prácticas con JavaScript</h3>
+                    <figure>
+                        <img src="img/figura-3-buenas-practicas-js.webp" alt="Buenas prácticas para el uso de JavaScript en el frontend" class="w-full max-w-md mx-auto rounded-lg border border-slate-200">
+                        <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 3. Buenas prácticas para el uso de JavaScript en el frontend. Fuente: elaboración propia, 2026.</figcaption>
+                    </figure>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Misión 1 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Misión 1: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Resuelve el cuestionario de forma individual y relaciona tus respuestas con las pantallas del proyecto web de tu equipo.</p>
+                        <div class="space-y-3">
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué función cumple JavaScript dentro del frontend?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué es un evento en una página web?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Mencione tres eventos que puedan usarse en un proyecto web.</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué significa validar un formulario?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Por qué es importante mostrar mensajes de error claros al usuario?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué es una API?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué tipo de información puede recibir el frontend desde una API?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué es JSON y por qué se usa en aplicaciones web?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué significan los estados de carga, éxito y error?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Por qué en esta guía no se debe profundizar todavía en la construcción completa del backend?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> El cuestionario respondido de forma individual por cada integrante.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 2 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🖱️ Misión 2: Identificación de interacciones del frontend</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Revisen las pantallas maquetadas en la guía anterior e identifiquen qué elementos necesitan interacción mediante JavaScript.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Pantalla</th>
+                                        <th class="border border-green-300 p-2">Elemento interactivo</th>
+                                        <th class="border border-green-300 p-2">Evento esperado</th>
+                                        <th class="border border-green-300 p-2">Acción que debe realizar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="interacciones-tabla"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Tabla con al menos 5 elementos interactivos identificados.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 3 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">✅ Misión 3: Validación de formularios</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Seleccionen un formulario principal del proyecto, definan las validaciones necesarias e impleméntenlas o simúlenlas con JavaScript.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Campo del formulario</th>
+                                        <th class="border border-green-300 p-2">Validación necesaria</th>
+                                        <th class="border border-green-300 p-2">Mensaje de error</th>
+                                        <th class="border border-green-300 p-2">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Nombre</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Correo o contacto</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Fecha u opción</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Descripción o comentario</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Formulario principal con validaciones definidas e implementadas o simuladas.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 4 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="4">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">💬 Misión 4: Mensajes de retroalimentación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Definan los mensajes que orientarán al usuario cuando complete correctamente una acción o cuando ocurra un error.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Situación</th>
+                                        <th class="border border-green-300 p-2">Mensaje que verá el usuario</th>
+                                        <th class="border border-green-300 p-2">Tipo de mensaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Formulario incompleto</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2 text-center">Error</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Dato inválido</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2 text-center">Advertencia</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Acción realizada correctamente</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2 text-center">Éxito</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Fallo al cargar información</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2 text-center">Error</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Mensajes de retroalimentación definidos para cada situación.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 5 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="5">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🌐 Misión 5: Consumo simple de API o datos simulados</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Realicen una práctica de consumo simple de datos desde el frontend, usando una API pública de prueba, un archivo JSON local o datos simulados.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Fuente de datos</th>
+                                        <th class="border border-green-300 p-2">Tipo de petición</th>
+                                        <th class="border border-green-300 p-2">Datos que se mostrarán</th>
+                                        <th class="border border-green-300 p-2">Elemento de la interfaz donde aparecerán</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="apis-tabla"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Ejemplo funcional de consumo de datos mostrados en la interfaz.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 6 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔄 Misión 6: Manejo de estados de carga, éxito y error</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Propongan cómo se visualizarán los estados de carga, éxito y error durante el consumo de datos o el envío de formularios.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Estado</th>
+                                        <th class="border border-green-300 p-2">Mensaje o comportamiento esperado</th>
+                                        <th class="border border-green-300 p-2">Evidencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Carga</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Éxito</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Error</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Los tres estados manejados y evidenciados en el frontend.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 7 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="7">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🎤 Misión 7: Socialización de la interfaz funcional</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Presenten en máximo cinco minutos la versión funcional del frontend: interacciones implementadas, validación de formularios, mensajes al usuario y consumo simple de API o datos simulados.
+                        </p>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Síntesis de las observaciones recibidas y ajustes realizados:</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="3"></textarea></div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Presentación realizada y ajustes incorporados a la interfaz funcional.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Evidencia de aprendizaje -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📦 Evidencia de aprendizaje: Producto de avance del frontend</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Cada equipo debe entregar un producto de avance relacionado con el diseño e implementación del frontend que incluya:</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Frontend con interacciones básicas mediante JavaScript</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Formulario principal con validación de campos</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Mensajes de error, advertencia o confirmación para orientar al usuario</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Consumo simple de API, archivo JSON o datos simulados desde el frontend</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Evidencia de manejo de estados de carga, éxito y error</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Síntesis de observaciones recibidas durante la socialización y ajustes realizados</label>
+                        </div>
+                    </div>
+
+                    <!-- Criterios de valoración -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📊 Criterios de valoración de la actividad</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2 text-left">Criterio</th>
+                                        <th class="border border-green-300 p-2 text-left">Nivel esperado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Interactividad</td><td class="border border-green-300 p-2">La interfaz responde a eventos básicos del usuario de manera clara.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Validación de formularios</td><td class="border border-green-300 p-2">Los campos principales son revisados antes de procesar la información.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Mensajes al usuario</td><td class="border border-green-300 p-2">Los mensajes de error o confirmación son comprensibles y oportunos.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Consumo de datos</td><td class="border border-green-300 p-2">El frontend obtiene o simula datos y los muestra correctamente en la interfaz.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Coherencia con la Unidad 2</td><td class="border border-green-300 p-2">La funcionalidad implementada complementa la maquetación y respeta el diseño previo.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: MDN JavaScript -->
+                    <li id="recurso-ext-1" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: JavaScript</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial y completa del lenguaje JavaScript, en español.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/JavaScript" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR MDN JavaScript" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: MDN Formularios web -->
+                    <li id="recurso-ext-2" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: Formularios web</h3>
+                            <p class="text-slate-600 mb-2">Guía de aprendizaje de MDN sobre construcción y validación de formularios web.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Learn/Forms" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR MDN Formularios web" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: MDN Fetch API -->
+                    <li id="recurso-ext-3" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: Fetch API</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial de la Fetch API, usada para hacer peticiones HTTP desde JavaScript.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/API/Fetch_API" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR MDN Fetch API" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 4: JSONPlaceholder -->
+                    <li id="recurso-ext-4" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">JSONPlaceholder: API pública de prueba</h3>
+                            <p class="text-slate-600 mb-2">API REST gratuita con datos falsos, ideal para practicar peticiones HTTP y consumo de JSON.</p>
+                            <a href="https://jsonplaceholder.typicode.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-4.png" alt="QR JSONPlaceholder" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Flanagan, D. (2020). <i>JavaScript: The definitive guide</i> (7.ª ed.). O'Reilly Media.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>JavaScript</i>. MDN Web Docs.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>Fetch API</i>. MDN Web Docs.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Universidad de Córdoba. (2025). <i>Plan de curso: Proyecto Web</i>. Técnico Profesional en Programación Web.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué método de JavaScript se usa para \"escuchar\" cuando el usuario hace click en un botón?",
+                options: ["addEventListener", "getElementById", "fetch", "JSON.parse"],
+                correct: 0
+            },
+            {
+                question: "¿Qué atributo HTML exige que un campo no se deje vacío?",
+                options: ["pattern", "required", "type", "minlength"],
+                correct: 1
+            },
+            {
+                question: "En un bloque try/catch usado con fetch, ¿qué ocurre si la petición falla?",
+                options: ["Se ejecuta el bloque try de nuevo", "Se ejecuta el bloque catch", "La página se recarga automáticamente", "No pasa nada"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace \"const { nombre, fecha } = reserva;\"?",
+                options: ["Crea una nueva reserva", "Extrae nombre y fecha del objeto reserva en variables separadas", "Elimina la reserva", "Convierte reserva a JSON"],
+                correct: 1
+            },
+            {
+                question: "Según las buenas prácticas, ¿dónde NO se debe escribir una contraseña o llave de API?",
+                options: ["En una base de datos segura", "Directamente en el código JavaScript del frontend", "En el backend", "En un archivo de configuración protegido"],
+                correct: 1
+            },
+            {
+                question: "¿Qué formato se usa comúnmente para representar los datos que envía o recibe una API?",
+                options: ["HTML", "JSON", "CSS", "Markdown"],
+                correct: 1
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // --- Helper genérico para tarjetas "revelar" ---
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // --- Helper genérico para juegos de clasificación (2 o más categorías) ---
+        function renderClasifica(fraseContainerId, botonClass, frases, msgId, puntos) {
+            let seleccion = null;
+            const container = document.getElementById(fraseContainerId);
+            frases.forEach((f, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+                chip.textContent = f.texto;
+                chip.dataset.index = i;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('chip-done-correct') || this.classList.contains('chip-done-wrong')) return;
+                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                    this.classList.add('chip-selected');
+                    seleccion = this;
+                });
+                container.appendChild(chip);
+            });
+            document.querySelectorAll('.' + botonClass).forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!seleccion) return;
+                    const idx = parseInt(seleccion.dataset.index);
+                    const tipo = btn.dataset.tipo;
+                    const msg = document.getElementById(msgId);
+                    seleccion.classList.remove('chip-selected');
+                    if (frases[idx].tipo === tipo) {
+                        seleccion.classList.add('chip-done-correct');
+                        msg.textContent = '✅ ¡Correcto!';
+                        msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        seleccion.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ No era esa categoría, sigue intentando.';
+                        msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                    }
+                    seleccion = null;
+                });
+            });
+        }
+
+        // --- addEventListener: reveal ---
+        renderReveal('reveal-eventos', [
+            { titulo: "element.addEventListener('click', función)", texto: "Conecta un evento con una función que se ejecuta cada vez que ese evento ocurre." },
+            { titulo: "event.preventDefault()", texto: "Evita el comportamiento por defecto del navegador, como recargar la página al enviar un formulario." },
+            { titulo: "event.target", texto: "Te dice exactamente qué elemento disparó el evento, útil cuando varios elementos comparten la misma función." },
+            { titulo: "El objeto event", texto: "Se pasa automáticamente a la función y contiene toda la información sobre lo que ocurrió." }
+        ], 4);
+
+        // --- Eventos quiz ---
+        const eventosOpciones = ["stopPropagation()", "preventDefault()", "addEventListener()", "return false"];
+        const eventosCorrecta = 1;
+        const eventosContainer = document.getElementById('choice-eventos');
+        let eventosRespondido = false;
+        eventosOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (eventosRespondido) return;
+                eventosRespondido = true;
+                const msg = document.getElementById('choice-eventos-msg');
+                if (i === eventosCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! preventDefault() evita la recarga por defecto del formulario.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Esa función no evita el comportamiento por defecto del formulario.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            eventosContainer.appendChild(btn);
+        });
+
+        // --- Validación HTML5: reveal ---
+        renderReveal('reveal-validacion', [
+            { titulo: "required", texto: "El campo no se puede dejar vacío al enviar el formulario." },
+            { titulo: "type=\"email\"", texto: "El navegador verifica automáticamente que el texto tenga formato de correo electrónico." },
+            { titulo: "minlength / maxlength", texto: "Define el largo mínimo o máximo de texto permitido en un campo." },
+            { titulo: "pattern", texto: "Permite definir una expresión regular personalizada para validar casos más específicos." }
+        ], 4);
+
+        // --- Validación quiz ---
+        const validacionOpciones = ["required", "type=\"password\"", "minlength=\"8\"", "pattern"];
+        const validacionCorrecta = 2;
+        const validacionContainer = document.getElementById('choice-validacion');
+        let validacionRespondido = false;
+        validacionOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (validacionRespondido) return;
+                validacionRespondido = true;
+                const msg = document.getElementById('choice-validacion-msg');
+                if (i === validacionCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! minlength="8" exige un mínimo de 8 caracteres.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Ese atributo no controla la longitud mínima del texto.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            validacionContainer.appendChild(btn);
+        });
+
+        // --- async/await: reveal ---
+        renderReveal('reveal-asyncawait', [
+            { titulo: "async function", texto: "Marca una función como asíncrona, lo que permite usar await dentro de ella." },
+            { titulo: "await fetch(url)", texto: "Espera a que llegue la respuesta antes de continuar, sin bloquear el resto de la página mientras tanto." },
+            { titulo: "response.json()", texto: "Convierte la respuesta recibida en un objeto de JavaScript que se puede usar en el código." },
+            { titulo: "try / catch", texto: "El bloque try intenta la petición; si algo falla, el bloque catch captura el error para mostrar el estado de error." }
+        ], 4);
+
+        // --- async/await quiz ---
+        const asyncawaitOpciones = ["El bloque try", "El bloque catch", "La página se recarga", "No pasa nada"];
+        const asyncawaitCorrecta = 1;
+        const asyncawaitContainer = document.getElementById('choice-asyncawait');
+        let asyncawaitRespondido = false;
+        asyncawaitOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (asyncawaitRespondido) return;
+                asyncawaitRespondido = true;
+                const msg = document.getElementById('choice-asyncawait-msg');
+                if (i === asyncawaitCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! El bloque catch captura el error para que puedas mostrar el estado de error.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Piensa en qué bloque de try/catch maneja las fallas.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            asyncawaitContainer.appendChild(btn);
+        });
+
+        // --- Destructuring y template literals: reveal ---
+        renderReveal('reveal-destructuring', [
+            { titulo: "Destructuring de objetos", texto: "const { nombre, fecha } = reserva; extrae valores directamente del objeto, sin escribir reserva.nombre cada vez." },
+            { titulo: "Destructuring de arreglos", texto: "const [primero, segundo] = lista; extrae elementos de un arreglo según su posición." },
+            { titulo: "Template literals", texto: "`Hola ${nombre}, tu reserva es el ${fecha}` combina texto y variables sin sumar strings con el símbolo +." },
+            { titulo: "Arreglo .map()", texto: "Convierte cada elemento de una lista JSON en una tarjeta HTML, uno por uno, de forma automática." }
+        ], 4);
+
+        // --- Destructuring: clasificación ---
+        renderClasifica('destructuring-frases', 'destructuring-btn', [
+            { texto: "const { nombre, edad } = usuario;", tipo: "destructuring" },
+            { texto: "`Bienvenido, ${nombre}!`", tipo: "template" },
+            { texto: "const [primero] = horarios;", tipo: "destructuring" },
+            { texto: "`Tienes ${cantidad} reservas pendientes`", tipo: "template" }
+        ], 'destructuring-msg', 4);
+
+        // --- Errores comunes: reveal ---
+        renderReveal('reveal-errores', [
+            { titulo: "Olvidar await o response.json()", texto: "Terminas con un objeto Promise en vez del dato real. Solución: usa await antes de fetch y de .json()." },
+            { titulo: "No manejar el estado de error", texto: "Si la API falla y no hay bloque catch, el usuario no sabe qué pasó. Solución: siempre incluye try/catch." },
+            { titulo: "Error de CORS", texto: "El navegador bloquea la petición si el servidor no la permite explícitamente. No se soluciona desde el frontend, hay que revisar el servidor." },
+            { titulo: "Datos sensibles en el código", texto: "Nunca escribas contraseñas o llaves de API directamente en el JavaScript del frontend: cualquiera puede verlas." }
+        ], 4);
+
+        // --- Errores quiz ---
+        const erroresOpciones = ["En una base de datos segura", "Directamente en el código JavaScript del frontend", "En el backend", "En un archivo de configuración protegido"];
+        const erroresCorrecta = 1;
+        const erroresContainer = document.getElementById('choice-errores');
+        let erroresRespondido = false;
+        erroresOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (erroresRespondido) return;
+                erroresRespondido = true;
+                const msg = document.getElementById('choice-errores-msg');
+                if (i === erroresCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! El código del frontend lo puede ver cualquiera que inspeccione la página.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Esa opción sí es un lugar seguro para guardar datos sensibles.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            erroresContainer.appendChild(btn);
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // Tabla de interacciones (5 filas)
+        const interaccionesTabla = document.getElementById('interacciones-tabla');
+        for (let i = 1; i <= 5; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+            `;
+            interaccionesTabla.appendChild(tr);
+        }
+
+        // Tabla de consumo de APIs (3 filas)
+        const apisTabla = document.getElementById('apis-tabla');
+        for (let i = 1; i <= 3; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+            `;
+            apisTabla.appendChild(tr);
+        }
+
+        // Progreso de misiones
+        let misionesCompletadas = 0;
+        const contadorMisiones = document.getElementById('actividades-completadas');
+        const barraMisiones = document.getElementById('actividades-barra');
+        document.querySelectorAll('.complete-mission-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.mission-card');
+                if (card.classList.contains('completed')) return;
+                card.classList.add('completed');
+                this.textContent = '✅ Misión completada';
+                this.disabled = true;
+                misionesCompletadas++;
+                contadorMisiones.textContent = misionesCompletadas;
+                barraMisiones.style.width = Math.round((misionesCompletadas / 7) * 100) + '%';
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
