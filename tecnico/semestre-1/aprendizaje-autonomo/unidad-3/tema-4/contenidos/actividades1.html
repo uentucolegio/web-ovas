@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Actividad interactiva - Estrategias de Aprendizaje Continuo</title>
+  <style>
+    :root {
+      --bg: #f0fdf4;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #064e3b;
+      --primary-soft: #dcfce7;
+      --green: #166534;
+      --green-bg: #ecfdf5;
+      --orange: #9a3412;
+      --orange-bg: #fff7ed;
+      --line: #d1fae5;
+      --shadow: 0 10px 28px rgba(15, 23, 42, .08);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f0fdf4, #f9fbff)
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #064e3b, #16a34a 55%, #4ade80);
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4vw, 2.8rem)
+    }
+
+    .hero p {
+      margin: 0;
+      line-height: 1.6;
+      max-width: 950px
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      font-size: .85rem;
+      font-weight: 700;
+      margin-bottom: 10px
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1.3rem
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 1.08rem
+    }
+
+    p {
+      line-height: 1.6
+    }
+
+    .question {
+      padding: 18px;
+      background: #f0fdf4;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      margin-top: 12px
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+      margin-top: 12px;
+      align-items: start
+    }
+
+    .bank,
+    .zones,
+    .word-panel {
+      background: #f0fdf4;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px
+    }
+
+    .zones {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px
+    }
+
+    .drag-item {
+      background: #fff;
+      border: 1px solid #d1fae5;
+      border-left: 5px solid #10b981;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: grab;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .04);
+      font-weight: 700
+    }
+
+    .dropzone {
+      min-height: 150px;
+      background: #fff;
+      border: 2px dashed #10b981;
+      border-radius: 16px;
+      padding: 12px
+    }
+
+    .dropzone.over {
+      background: #f0fdf4;
+      border-color: #10b981
+    }
+
+    .dropzone h4 {
+      margin: 0 0 8px;
+      color: #166534;
+      font-size: 1rem
+    }
+
+    .dropzone small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 8px;
+      line-height: 1.4
+    }
+
+    .feedback {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      display: none;
+      font-weight: 700;
+      line-height: 1.5
+    }
+
+    .feedback.show {
+      display: block
+    }
+
+    .feedback.ok {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid #bbf7d0
+    }
+
+    .feedback.warn {
+      background: var(--orange-bg);
+      color: var(--orange);
+      border: 1px solid #fed7aa
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: var(--shadow)
+    }
+
+    .main {
+      background: var(--primary);
+      color: #fff
+    }
+
+    .secondary {
+      background: #dcfce7;
+      color: #064e3b
+    }
+
+    .result {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: var(--shadow)
+    }
+
+    .result.show {
+      display: block
+    }
+
+    .score {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #166534;
+      margin-bottom: 8px
+    }
+
+    .word-layout {
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      gap: 18px;
+      align-items: start
+    }
+
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 4px;
+      user-select: none
+    }
+
+    .cell {
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .cell.selected {
+      background: #dcfce7;
+      border-color: #86efac
+    }
+
+    .cell.found {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534
+    }
+
+    .word-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: #fff;
+      border: 1px solid #e6edf7;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px
+    }
+
+    .word-item.done {
+      background: #ecfdf5;
+      color: #166534;
+      border-color: #bbf7d0;
+      text-decoration: line-through
+    }
+
+    .status {
+      margin-top: 10px;
+      font-weight: 700;
+      color: var(--muted)
+    }
+
+    .footer-note {
+      color: var(--muted);
+      text-align: center;
+      margin-top: 22px;
+      font-size: .95rem
+    }
+
+    @media (max-width:950px) {
+
+      .layout,
+      .word-layout {
+        grid-template-columns: 1fr
+      }
+
+      .zones {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"><style id="PoppinsQuizFix">body{font-family:'Poppins',sans-serif !important; padding:16px !important; background:#ffffff !important;}</style></head>
+
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Actividad interactiva: Estrategias de Aprendizaje Continuo</h1>
+      <p>Desarrolla 5 preguntas interactivas sobre aprendizaje continuo. Encontrarás ejercicios de arrastrar y soltar y
+        una sopa de letras, todos con retroalimentación para reforzar el análisis de estrategias, recursos y prácticas
+        de actualización profesional.</p>
+    </section>
+
+    <section class="card">
+      <span class="badge">Instrucciones</span>
+      <h2>¿Cómo realizar la actividad?</h2>
+      <p>En las preguntas de arrastrar y soltar, ubica cada elemento en la categoría correcta. En la sopa de letras,
+        selecciona las letras de una palabra y luego pulsa <strong>Verificar selección</strong>. Al final podrás revisar
+        tu puntaje general.</p>
+    </section>
+
+    <section class="card question" id="q1">
+      <span class="badge">Pregunta 1</span>
+      <h3>Relaciona cada estrategia con su categoría.</h3>
+      <div class="layout">
+        <div class="bank" id="bank1">
+          <div class="drag-item" draggable="true" data-match="gestion">Mapas mentales y conceptuales</div>
+          <div class="drag-item" draggable="true" data-match="gestion">Diarios de aprendizaje</div>
+          <div class="drag-item" draggable="true" data-match="metacognicion">Planificación de metas SMART</div>
+          <div class="drag-item" draggable="true" data-match="metacognicion">Monitoreo sistemático</div>
+        </div>
+        <div class="zones">
+          <div class="dropzone" data-zone="gestion">
+            <h4>Gestión del conocimiento personal</h4>
+            <small>Organizar, registrar e integrar el conocimiento.</small>
+          </div>
+          <div class="dropzone" data-zone="metacognicion">
+            <h4>Autoevaluación y metacognición</h4>
+            <small>Planificar, monitorear y ajustar el aprendizaje.</small>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="fb1"></div>
+    </section>
+
+    <section class="card question" id="q2">
+      <span class="badge">Pregunta 2</span>
+      <h3>Clasifica los recursos digitales según su función principal.</h3>
+      <div class="layout">
+        <div class="bank" id="bank2">
+          <div class="drag-item" draggable="true" data-match="plataformas">Coursera</div>
+          <div class="drag-item" draggable="true" data-match="documentacion">Documentación oficial de React</div>
+          <div class="drag-item" draggable="true" data-match="comunidades">Stack Overflow</div>
+          <div class="drag-item" draggable="true" data-match="blogs">Podcasts especializados</div>
+        </div>
+        <div class="zones">
+          <div class="dropzone" data-zone="plataformas">
+            <h4>Plataformas de aprendizaje en línea</h4>
+            <small>Cursos estructurados y actualización de competencias.</small>
+          </div>
+          <div class="dropzone" data-zone="documentacion">
+            <h4>Seguimiento de documentación oficial</h4>
+            <small>Información primaria, fidedigna y actualizada.</small>
+          </div>
+          <div class="dropzone" data-zone="comunidades">
+            <h4>Comunidades técnicas</h4>
+            <small>Resolver dudas y compartir buenas prácticas.</small>
+          </div>
+          <div class="dropzone" data-zone="blogs">
+            <h4>Blogs y podcasts especializados</h4>
+            <small>Tendencias, análisis y casos prácticos.</small>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </section>
+
+    <section class="card question" id="q3">
+      <span class="badge">Pregunta 3</span>
+      <h3>Ubica cada práctica en la estrategia colaborativa o profesional correspondiente.</h3>
+      <div class="layout">
+        <div class="bank" id="bank3">
+          <div class="drag-item" draggable="true" data-match="colaborativo">Grupos de estudio</div>
+          <div class="drag-item" draggable="true" data-match="colaborativo">Mentoring y tutorías</div>
+          <div class="drag-item" draggable="true" data-match="profesional">Asistencia a eventos técnicos</div>
+          <div class="drag-item" draggable="true" data-match="profesional">Lectura académica y técnica</div>
+        </div>
+        <div class="zones">
+          <div class="dropzone" data-zone="colaborativo">
+            <h4>Estrategias de aprendizaje colaborativo</h4>
+            <small>Aprender con otros, contrastar perspectivas y recibir apoyo.</small>
+          </div>
+          <div class="dropzone" data-zone="profesional">
+            <h4>Actualización profesional estructurada</h4>
+            <small>Formación formal y acceso a contenido especializado.</small>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="fb3"></div>
+    </section>
+
+    <section class="card question" id="q4">
+      <span class="badge">Pregunta 4</span>
+      <h3>Sopa de letras: encuentra conceptos clave del aprendizaje continuo.</h3>
+      <div class="word-layout">
+        <div>
+          <div id="wordGrid" class="word-grid"></div>
+          <div class="controls">
+            <button class="main" id="checkSelection">Verificar selección</button>
+            <button class="secondary" id="clearSelection">Limpiar selección</button>
+          </div>
+          <div id="wordStatus" class="status">Palabras encontradas: 0 / 6</div>
+        </div>
+        <aside class="word-panel" id="wordList"></aside>
+      </div>
+      <div class="feedback" id="fb4"></div>
+    </section>
+
+    <section class="card question" id="q5">
+      <span class="badge">Pregunta 5</span>
+      <h3>Relaciona cada acción con la estrategia de evaluación y ajuste más adecuada.</h3>
+      <div class="layout">
+        <div class="bank" id="bank5">
+          <div class="drag-item" draggable="true" data-match="revision">Evaluar metas cada mes o trimestre</div>
+          <div class="drag-item" draggable="true" data-match="brechas">Comparar competencias actuales con lo que exige
+            el mercado</div>
+          <div class="drag-item" draggable="true" data-match="indicadores">Registrar horas de estudio y número de
+            proyectos terminados</div>
+          <div class="drag-item" draggable="true" data-match="revision">Reformular objetivos según resultados obtenidos
+          </div>
+        </div>
+        <div class="zones">
+          <div class="dropzone" data-zone="revision">
+            <h4>Revisiones periódicas de metas</h4>
+            <small>Evaluar cumplimiento y ajustar objetivos.</small>
+          </div>
+          <div class="dropzone" data-zone="brechas">
+            <h4>Análisis de brechas de conocimiento</h4>
+            <small>Detectar vacíos frente a metas o exigencias profesionales.</small>
+          </div>
+          <div class="dropzone" data-zone="indicadores">
+            <h4>Uso de indicadores personales</h4>
+            <small>Medir el avance con métricas concretas.</small>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="fb5"></div>
+    </section>
+
+    <section class="card">
+      <div class="controls">
+        <button class="main" id="checkAll">Verificar respuestas</button>
+        <button class="secondary" id="resetAll">Reiniciar actividad</button>
+      </div>
+      <div class="result" id="resultBox">
+        <div class="score" id="scoreText"></div>
+        <div id="scoreMsg"></div>
+      </div>
+    </section>
+
+    <div class="footer-note">Actividad basada en el contenido: Estrategias de Aprendizaje Continuo.</div>
+  </div>
+
+  <script>
+    let dragged = null;
+
+    function bindDraggables() {
+      document.querySelectorAll('.drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => {
+          dragged = item;
+          setTimeout(() => item.style.opacity = '.45', 0);
+        });
+        item.addEventListener('dragend', () => {
+          item.style.opacity = '1';
+          dragged = null;
+        });
+      });
+    }
+
+    function bindDropzones() {
+      document.querySelectorAll('.dropzone, .bank').forEach(zone => {
+        zone.addEventListener('dragover', e => {
+          e.preventDefault();
+          if (zone.classList.contains('dropzone')) zone.classList.add('over');
+        });
+        zone.addEventListener('dragleave', () => {
+          if (zone.classList.contains('dropzone')) zone.classList.remove('over');
+        });
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          if (zone.classList.contains('dropzone')) zone.classList.remove('over');
+          if (dragged) zone.appendChild(dragged);
+        });
+      });
+    }
+
+    const dragFeedbacks = {
+      q1: {
+        ok: "¡Correcto! Distingues entre gestión del conocimiento personal y estrategias metacognitivas.",
+        bad: "Revisa: mapas mentales y diarios ayudan a organizar conocimiento; metas SMART y monitoreo pertenecen a autoevaluación y metacognición."
+      },
+      q2: {
+        ok: "Muy bien. Identificaste el papel de plataformas, documentación, comunidades y medios especializados.",
+        bad: "Recuerda: cursos estructurados, documentación oficial, comunidades técnicas y blogs/podcasts cumplen funciones distintas dentro del aprendizaje continuo."
+      },
+      q3: {
+        ok: "Excelente. Diferencias las estrategias colaborativas de las estrategias de actualización profesional estructurada.",
+        bad: "Piensa si la práctica implica aprender con otros o acceder a actualización profesional formal y especializada."
+      },
+      q5: {
+        ok: "¡Muy bien! Reconoces cómo se evalúa y ajusta el aprendizaje continuo mediante metas, brechas e indicadores.",
+        bad: "Revisa: las revisiones periódicas evalúan objetivos, las brechas comparan competencias y los indicadores cuantifican el progreso."
+      }
+    };
+
+    function evaluateDragQuestion(qId, fbId, expected) {
+      const section = document.getElementById(qId);
+      const drops = section.querySelectorAll('.dropzone .drag-item');
+      const fb = document.getElementById(fbId);
+
+      if (drops.length !== expected) {
+        fb.className = 'feedback show warn';
+        fb.textContent = 'Completa todos los espacios de esta pregunta antes de verificar.';
+        return false;
+      }
+
+      let ok = 0;
+      drops.forEach(item => {
+        const zone = item.parentElement.dataset.zone;
+        if (item.dataset.match === zone) ok++;
+      });
+
+      if (ok === expected) {
+        fb.className = 'feedback show ok';
+        fb.textContent = dragFeedbacks[qId].ok;
+        return true;
+      } else {
+        fb.className = 'feedback show warn';
+        fb.textContent = dragFeedbacks[qId].bad + ' Ahora tienes ' + ok + ' de ' + expected + ' relaciones correctas.';
+        return false;
+      }
+    }
+
+    const matrix = [
+      ['A', 'U', 'T', 'O', 'N', 'O', 'M', 'I', 'A', 'L', 'D', 'P'],
+      ['C', 'M', 'O', 'T', 'I', 'V', 'A', 'C', 'I', 'O', 'N', 'R'],
+      ['T', 'E', 'D', 'X', 'Y', 'O', 'F', 'L', 'E', 'X', 'Q', 'O'],
+      ['U', 'T', 'V', 'S', 'R', 'D', 'C', 'I', 'G', 'L', 'L', 'A'],
+      ['A', 'A', 'I', 'E', 'E', 'T', 'U', 'C', 'D', 'E', 'E', 'C'],
+      ['L', 'S', 'D', 'C', 'P', 'E', 'M', 'I', 'R', 'V', 'V', 'T'],
+      ['I', 'M', 'E', 'U', 'O', 'R', 'E', 'A', 'A', 'A', 'A', 'I'],
+      ['D', 'A', 'O', 'N', 'S', 'C', 'N', 'C', 'D', 'N', 'N', 'V'],
+      ['A', 'R', 'E', 'F', 'L', 'E', 'X', 'I', 'O', 'N', 'C', 'I'],
+      ['D', 'T', 'P', 'R', 'O', 'A', 'C', 'T', 'I', 'V', 'A', 'D'],
+      ['P', 'L', 'A', 'N', 'I', 'F', 'I', 'C', 'A', 'C', 'I', 'O'],
+      ['M', 'E', 'T', 'A', 'S', 'Q', 'R', 'E', 'C', 'U', 'R', 'S']
+    ];
+
+    const words = ["AUTONOMIA", "MOTIVACION", "REFLEXION", "PROACTIVIDAD", "PLANIFICACION", "METAS"];
+    const placements = {
+      "AUTONOMIA": [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8]],
+      "MOTIVACION": [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10]],
+      "REFLEXION": [[8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9]],
+      "PROACTIVIDAD": [[9, 2], [9, 3], [9, 4], [9, 5], [9, 6], [9, 7], [9, 8], [9, 9], [9, 10], [9, 11], [8, 11], [7, 11]],
+      "PLANIFICACION": [[10, 0], [10, 1], [10, 2], [10, 3], [10, 4], [10, 5], [10, 6], [10, 7], [10, 8], [10, 9], [10, 10], [10, 11]],
+      "METAS": [[11, 0], [11, 1], [11, 2], [11, 3], [11, 4]]
+    };
+
+    const wordGrid = document.getElementById('wordGrid');
+    const wordList = document.getElementById('wordList');
+    const wordStatus = document.getElementById('wordStatus');
+    const selected = new Set();
+    const foundWords = new Set();
+
+    function cellKey(r, c) { return r + '-' + c; }
+
+    function buildGrid() {
+      wordGrid.innerHTML = '';
+      matrix.forEach((row, r) => {
+        row.forEach((letter, c) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.textContent = letter;
+          cell.dataset.key = cellKey(r, c);
+          cell.addEventListener('click', () => toggleCell(cell));
+          wordGrid.appendChild(cell);
+        });
+      });
+    }
+
+    function buildWordList() {
+      wordList.innerHTML = '<h3>Palabras a encontrar</h3>';
+      words.forEach(word => {
+        const div = document.createElement('div');
+        div.className = 'word-item';
+        div.id = 'word-' + word;
+        div.innerHTML = '<span>' + word + '</span><span>🔎</span>';
+        wordList.appendChild(div);
+      });
+    }
+
+    function toggleCell(el) {
+      if (el.classList.contains('found')) return;
+      const key = el.dataset.key;
+      if (selected.has(key)) {
+        selected.delete(key);
+        el.classList.remove('selected');
+      } else {
+        selected.add(key);
+        el.classList.add('selected');
+      }
+    }
+
+    function clearSelection() {
+      selected.forEach(key => {
+        const el = document.querySelector('.cell[data-key="' + key + '"]');
+        if (el) el.classList.remove('selected');
+      });
+      selected.clear();
+    }
+
+    function matchWord() {
+      const sel = [...selected].map(k => k.split('-').map(Number));
+      for (const word in placements) {
+        if (foundWords.has(word)) continue;
+        const coords = placements[word];
+        if (coords.length !== sel.length) continue;
+        const a = coords.map(x => x.join('-')).sort().join('|');
+        const b = sel.map(x => x.join('-')).sort().join('|');
+        if (a === b) {
+          foundWords.add(word);
+          coords.forEach(([r, c]) => {
+            const el = document.querySelector('.cell[data-key="' + r + '-' + c + '"]');
+            el.classList.remove('selected');
+            el.classList.add('found');
+          });
+          const item = document.getElementById('word-' + word);
+          item.classList.add('done');
+          item.querySelector('span:last-child').textContent = '✅';
+          selected.clear();
+          updateWordStatus();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function updateWordStatus() {
+      wordStatus.textContent = 'Palabras encontradas: ' + foundWords.size + ' / ' + words.length;
+    }
+
+    document.getElementById('checkSelection').addEventListener('click', () => {
+      const fb = document.getElementById('fb4');
+      const ok = matchWord();
+      if (ok) {
+        fb.className = 'feedback show ok';
+        fb.textContent = '¡Bien! Identificaste un concepto clave del aprendizaje continuo.';
+      } else {
+        fb.className = 'feedback show warn';
+        fb.textContent = 'La selección no corresponde a una de las palabras objetivo. Revisa e inténtalo de nuevo.';
+      }
+    });
+
+    document.getElementById('clearSelection').addEventListener('click', () => {
+      clearSelection();
+      updateWordStatus();
+    });
+
+    function evaluateWordQuestion() {
+      const fb = document.getElementById('fb4');
+      if (foundWords.size === words.length) {
+        fb.className = 'feedback show ok';
+        fb.textContent = 'Excelente. Encontraste todos los conceptos clave de la sopa de letras.';
+        return true;
+      } else {
+        fb.className = 'feedback show warn';
+        fb.textContent = 'Aún faltan palabras por encontrar. Has identificado ' + foundWords.size + ' de ' + words.length + '.';
+        return false;
+      }
+    }
+
+    document.getElementById('checkAll').addEventListener('click', () => {
+      const results = [
+        evaluateDragQuestion('q1', 'fb1', 4),
+        evaluateDragQuestion('q2', 'fb2', 4),
+        evaluateDragQuestion('q3', 'fb3', 4),
+        evaluateWordQuestion(),
+        evaluateDragQuestion('q5', 'fb5', 4)
+      ];
+
+      const score = results.filter(Boolean).length;
+      const box = document.getElementById('resultBox');
+      const scoreText = document.getElementById('scoreText');
+      const scoreMsg = document.getElementById('scoreMsg');
+
+      scoreText.textContent = 'Puntaje: ' + score + ' / 5';
+
+      if (score === 5) {
+        scoreMsg.textContent = '¡Excelente! Comprendes y aplicas de forma muy adecuada las estrategias de aprendizaje continuo.';
+      } else if (score >= 3) {
+        scoreMsg.textContent = 'Buen trabajo. Reconoces varias estrategias, aunque aún puedes fortalecer algunas relaciones clave.';
+      } else {
+        scoreMsg.textContent = 'Necesitas repasar el tema. Observa mejor cómo se organizan y aplican las estrategias de aprendizaje continuo.';
+      }
+
+      box.classList.add('show');
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+
+    document.getElementById('resetAll').addEventListener('click', () => {
+      document.querySelectorAll('.feedback').forEach(f => {
+        f.className = 'feedback';
+        f.textContent = '';
+      });
+
+      ['1', '2', '3', '5'].forEach(n => {
+        const bank = document.getElementById('bank' + n);
+        document.querySelectorAll('#q' + n + ' .drag-item').forEach(item => bank.appendChild(item));
+      });
+
+      clearSelection();
+      foundWords.clear();
+      document.querySelectorAll('.cell').forEach(cell => cell.classList.remove('found', 'selected'));
+      words.forEach(word => {
+        const item = document.getElementById('word-' + word);
+        item.classList.remove('done');
+        item.querySelector('span:last-child').textContent = '🔎';
+      });
+      updateWordStatus();
+
+      document.getElementById('resultBox').classList.remove('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    bindDraggables();
+    bindDropzones();
+    buildGrid();
+    buildWordList();
+    updateWordStatus();
+  </script>
+</body>
+
+</html>
