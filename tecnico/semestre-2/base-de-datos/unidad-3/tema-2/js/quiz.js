@@ -1,123 +1,88 @@
-// --- Evaluación Quiz ---
 const quizData = [
-    {
-        question: "La escucha activa no es solo captar sonidos, sino que requiere atención consciente y completa. Los tres pasos o dimensiones fundamentales de este proceso para lograr una comprensión adecuada del mensaje son:",
-        options: [
-            "a. Distraer, interrumpir y juzgar.",
-            "b. Percibir, procesar y responder.",
-            "c. Contactar, hablar y solucionar.",
-            "d. Escucha pasiva, selectiva y activa."
-        ],
-        answer: "b. Percibir, procesar y responder."
-    },
-    {
-        question: "Uno de los elementos clave de la escucha activa requiere que la persona oyente suspenda el juicio sobre las palabras o acciones del interlocutor. Al hacerlo, se crea un espacio seguro para la expresión libre. ¿A qué elemento se refiere esta descripción?",
-        options: [
-            "a. Clarificar lo que se escuchó.",
-            "b. Retroalimentación.",
-            "c. Empatía.",
-            "d. No juzgar."
-        ],
-        answer: "d. No juzgar."
-    },
-    {
-        question: "Cuando una persona está enojada, ansiosa o triste mientras intenta escuchar a otra, puede que no logre entender bien el mensaje porque su atención está enfocada en sus sentimientos internos. Este obstáculo que impide la buena escucha activa es una barrera causada por:",
-        options: [
-            "a. Prejuicios.",
-            "b. Distracciones.",
-            "c. Emociones.",
-            "d. Querer hablar siempre."
-        ],
-        answer: "c. Emociones."
-    },
-    {
-        question: "La técnica de paráfrasis (o reformulación) se considera esencial en la escucha activa. Cuando utilizas esta técnica repitiendo el mensaje del emisor con tus propias palabras, ¿cuál es el objetivo principal que buscas?",
-        options: [
-            "a. Dar una solución inmediata al problema de la otra persona.",
-            "b. Demostrar que has escuchado y comprendido el mensaje.",
-            "c. Evaluar si la preocupación del compañero tiene lógica o evidencia.",
-            "d. Intentar cambiar el tema de la conversación para evitar un conflicto."
-        ],
-        answer: "b. Demostrar que has escuchado y comprendido el mensaje."
-    },
-    {
-        question: "Estás en una situación donde tu actitud es de distanciamiento analítico y escepticismo razonable (por ejemplo, al revisar un informe o una propuesta). Esta actitud es propia de la escucha crítica porque tu propósito principal es:",
-        options: [
-            "a. Comprender la experiencia emocional y la perspectiva personal del orador.",
-            "b. Acompañar al emisor con validación y no juicio para fortalecer la relación.",
-            "c. Buscar apoyo socioemocional ante un conflicto o problema personal.",
-            "d. Evaluar la calidad de la información y la solidez de los argumentos."
-        ],
-        answer: "d. Evaluar la calidad de la información y la solidez de los argumentos."
-    }
+    { q: "¿Qué es un Endpoint en una API?", a: ["Una base de datos", "Una URL específica que representa un recurso", "Un lenguaje de programación", "Un servidor físico"], c: 1 },
+    { q: "¿Qué significan las siglas REST?", a: ["Remote State Transfer", "Representational State Transfer", "Reset Entity Standard Text", "Relational System Transfer"], c: 1 },
+    { q: "¿Cuál es la convención correcta para nombrar una URL en REST?", a: ["/get_productos", "/productos", "/crearProducto", "/Producto"], c: 1 },
+    { q: "Si quieres crear un nuevo recurso, ¿qué método HTTP debes usar?", a: ["GET", "PUT", "DELETE", "POST"], c: 3 },
+    { q: "¿Qué código de estado HTTP indica que un recurso fue creado exitosamente?", a: ["200 OK", "404 Not Found", "201 Created", "500 Error"], c: 2 },
+    { q: "El método DELETE se utiliza para eliminar un recurso. ¿Cuál es la URL recomendada según REST?", a: ["/borrar-producto/5", "/productos/:id", "/productos/eliminar", "/delete_producto"], c: 1 },
+    { q: "¿Qué código de estado usarías si un usuario intenta registrar un email que ya existe (conflicto)?", a: ["200", "409 Conflict", "400 Bad Request", "204"], c: 1 },
+    { q: "¿Qué método HTTP y URL usarías para obtener la lista de todos los usuarios?", a: ["POST /usuarios", "GET /usuario", "GET /usuarios", "PUT /usuarios"], c: 2 },
+    { q: "¿Qué código de estado indica que la operación fue exitosa pero no hay nada que devolver (común en DELETE)?", a: ["200", "204 No Content", "404", "201"], c: 1 },
+    { q: "¿A qué categoría de error pertenece el código 500?", a: ["Error del cliente", "Éxito", "Redirección", "Internal Server Error (Error inesperado en el servidor)"], c: 3 }
 ];
 
-const quizContainer = document.getElementById('quiz-container');
-if(quizContainer) {
-    quizData.forEach((q, index) => {
-        const questionEl = document.createElement('div');
-        questionEl.className = 'mb-6';
-        questionEl.innerHTML = `<p class="font-semibold mb-2">${index + 1}. ${q.question}</p>`;
-        
-        const optionsContainer = document.createElement('div');
-        optionsContainer.className = 'space-y-2';
-        
-        q.options.forEach(option => {
-            const optionEl = document.createElement('div');
-            optionEl.className = 'quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer';
-            optionEl.textContent = option;
-            optionEl.addEventListener('click', () => {
-                questionEl.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
-                optionEl.classList.add('selected');
-            });
-            optionsContainer.appendChild(optionEl);
-        });
-        
-        questionEl.appendChild(optionsContainer);
-        quizContainer.appendChild(questionEl);
-    });
+const quizContainer = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit-btn');
+const errorBox = document.getElementById('error-message');
+const resultsDiv = document.getElementById('results');
+
+function initQuiz() {
+    quizContainer.innerHTML = quizData.map((data, i) => `
+        <div class="question-block" id="block-${i}">
+            <p class="question-text">${i + 1}. ${data.q}</p>
+            <div class="options">
+                ${data.a.map((opt, j) => `
+                    <label id="label-${i}-${j}">
+                        <input type="radio" name="q${i}" value="${j}"> ${opt}
+                    </label>
+                `).join('')}
+            </div>
+            <div id="feedback-${i}" class="feedback hidden"></div>
+        </div>
+    `).join('');
 }
 
-const submitQuizBtn = document.getElementById('submit-quiz-btn');
-if(submitQuizBtn){
-    submitQuizBtn.addEventListener('click', () => {
-        let score = 0;
-        const questions = quizContainer.querySelectorAll('.mb-6');
-        const feedbacks = [
-            'Correcto: Los tres pasos fundamentales de la escucha activa son percibir, procesar y responder.',
-            'Correcto: "No juzgar" es el elemento que crea un espacio seguro para la expresión libre.',
-            'Correcto: Las emociones intensas pueden impedir una buena escucha activa al desviar la atención.',
-            'Correcto: La paráfrasis demuestra que has escuchado y comprendido el mensaje del emisor.',
-            'Correcto: La escucha crítica busca evaluar la calidad de la información y la solidez de los argumentos.'
-        ];
-        const wrongFeedbacks = [
-            'Incorrecto. Los tres pasos fundamentales de la escucha activa son: percibir, procesar y responder.',
-            'Incorrecto. El elemento que crea un espacio seguro para la expresión libre es "No juzgar".',
-            'Incorrecto. Las emociones intensas (enojo, ansiedad, tristeza) son barreras que impiden la buena escucha activa.',
-            'Incorrecto. El objetivo principal de la paráfrasis es demostrar que has escuchado y comprendido el mensaje.',
-            'Incorrecto. La escucha crítica tiene como propósito evaluar la calidad de la información y la solidez de los argumentos.'
-        ];
-        questions.forEach((q, index) => {
-            const selectedOption = q.querySelector('.quiz-option.selected');
-            let feedbackDiv = q.querySelector('.quiz-feedback');
-            if (!feedbackDiv) {
-                feedbackDiv = document.createElement('div');
-                feedbackDiv.className = 'quiz-feedback mt-2 text-sm';
-                q.appendChild(feedbackDiv);
-            }
-            if (selectedOption && selectedOption.textContent === quizData[index].answer) {
-                score++;
-                feedbackDiv.innerHTML = `<span class='text-green-700 font-semibold'>✔️ ${feedbacks[index]}</span>`;
-            } else {
-                feedbackDiv.innerHTML = `<span class='text-red-700 font-semibold'>❌ ${wrongFeedbacks[index]}</span>`;
-            }
-        });
-        const resultEl = document.getElementById('quiz-result');
-        resultEl.textContent = `Tu puntuación es: ${score} de ${quizData.length}.`;
-        if (score / quizData.length >= 0.7) {
-            resultEl.className = 'mt-4 text-lg font-bold text-green-700';
-        } else {
-            resultEl.className = 'mt-4 text-lg font-bold text-red-700';
+submitBtn.addEventListener('click', () => {
+    let answeredCount = 0;
+    const userAnswers = [];
+
+    quizData.forEach((_, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+            answeredCount++;
+            userAnswers.push(parseInt(selected.value));
         }
     });
-}
+
+    if (answeredCount < quizData.length) {
+        errorBox.classList.remove('hidden');
+        window.scrollTo(0, errorBox.offsetTop - 50);
+        return;
+    }
+
+    errorBox.classList.add('hidden');
+    submitBtn.classList.add('hidden');
+    document.getElementById('retry-btn').classList.remove('hidden');
+    
+    let score = 0;
+    quizData.forEach((data, i) => {
+        const isCorrect = userAnswers[i] === data.c;
+        const feedbackEl = document.getElementById(`feedback-${i}`);
+        const selectedLabel = document.getElementById(`label-${i}-${userAnswers[i]}`);
+        
+        feedbackEl.classList.remove('hidden');
+        if (isCorrect) {
+            score++;
+            selectedLabel.classList.add('correct-row');
+            feedbackEl.innerHTML = `<span class="correct-text">✓ ¡Correcto!</span>`;
+        } else {
+            selectedLabel.classList.add('incorrect-row');
+            feedbackEl.innerHTML = `<span class="incorrect-text">✗ Incorrecto. La respuesta correcta era: ${data.a[data.c]}</span>`;
+        }
+    });
+
+    const percentage = (score / quizData.length) * 100;
+    const passed = percentage >= 70;
+
+    resultsDiv.classList.remove('hidden');
+    resultsDiv.style.backgroundColor = passed ? "#d4edda" : "#f8d7da";
+    
+    document.getElementById('score-title').innerText = `Resultado: ${percentage}% (${score} / ${quizData.length})`;
+    document.getElementById('score-text').innerHTML = passed 
+        ? `<strong>¡Excelente!</strong> Dominas los conceptos de APIs RESTful.` 
+        : `<strong>No has aprobado (mínimo 70%).</strong> Revisa la tabla de verbos HTTP y los códigos de estado antes de intentar nuevamente.`;
+
+    window.scrollTo(0, 0);
+});
+
+initQuiz();

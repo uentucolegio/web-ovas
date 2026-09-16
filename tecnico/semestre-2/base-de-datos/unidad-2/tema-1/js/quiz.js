@@ -1,123 +1,136 @@
-// --- Evaluación Quiz ---
-const quizData = [
-    {
-        question: "La escucha activa no es solo captar sonidos, sino que requiere atención consciente y completa. Los tres pasos o dimensiones fundamentales de este proceso para lograr una comprensión adecuada del mensaje son:",
-        options: [
-            "a. Distraer, interrumpir y juzgar.",
-            "b. Percibir, procesar y responder.",
-            "c. Contactar, hablar y solucionar.",
-            "d. Escucha pasiva, selectiva y activa."
-        ],
-        answer: "b. Percibir, procesar y responder."
-    },
-    {
-        question: "Uno de los elementos clave de la escucha activa requiere que la persona oyente suspenda el juicio sobre las palabras o acciones del interlocutor. Al hacerlo, se crea un espacio seguro para la expresión libre. ¿A qué elemento se refiere esta descripción?",
-        options: [
-            "a. Clarificar lo que se escuchó.",
-            "b. Retroalimentación.",
-            "c. Empatía.",
-            "d. No juzgar."
-        ],
-        answer: "d. No juzgar."
-    },
-    {
-        question: "Cuando una persona está enojada, ansiosa o triste mientras intenta escuchar a otra, puede que no logre entender bien el mensaje porque su atención está enfocada en sus sentimientos internos. Este obstáculo que impide la buena escucha activa es una barrera causada por:",
-        options: [
-            "a. Prejuicios.",
-            "b. Distracciones.",
-            "c. Emociones.",
-            "d. Querer hablar siempre."
-        ],
-        answer: "c. Emociones."
-    },
-    {
-        question: "La técnica de paráfrasis (o reformulación) se considera esencial en la escucha activa. Cuando utilizas esta técnica repitiendo el mensaje del emisor con tus propias palabras, ¿cuál es el objetivo principal que buscas?",
-        options: [
-            "a. Dar una solución inmediata al problema de la otra persona.",
-            "b. Demostrar que has escuchado y comprendido el mensaje.",
-            "c. Evaluar si la preocupación del compañero tiene lógica o evidencia.",
-            "d. Intentar cambiar el tema de la conversación para evitar un conflicto."
-        ],
-        answer: "b. Demostrar que has escuchado y comprendido el mensaje."
-    },
-    {
-        question: "Estás en una situación donde tu actitud es de distanciamiento analítico y escepticismo razonable (por ejemplo, al revisar un informe o una propuesta). Esta actitud es propia de la escucha crítica porque tu propósito principal es:",
-        options: [
-            "a. Comprender la experiencia emocional y la perspectiva personal del orador.",
-            "b. Acompañar al emisor con validación y no juicio para fortalecer la relación.",
-            "c. Buscar apoyo socioemocional ante un conflicto o problema personal.",
-            "d. Evaluar la calidad de la información y la solidez de los argumentos."
-        ],
-        answer: "d. Evaluar la calidad de la información y la solidez de los argumentos."
-    }
-];
+// ==================== EVALUACIÓN ====================
 
-const quizContainer = document.getElementById('quiz-container');
-if(quizContainer) {
-    quizData.forEach((q, index) => {
-        const questionEl = document.createElement('div');
-        questionEl.className = 'mb-6';
-        questionEl.innerHTML = `<p class="font-semibold mb-2">${index + 1}. ${q.question}</p>`;
-        
-        const optionsContainer = document.createElement('div');
-        optionsContainer.className = 'space-y-2';
-        
-        q.options.forEach(option => {
-            const optionEl = document.createElement('div');
-            optionEl.className = 'quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer';
-            optionEl.textContent = option;
-            optionEl.addEventListener('click', () => {
-                questionEl.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
-                optionEl.classList.add('selected');
-            });
-            optionsContainer.appendChild(optionEl);
-        });
-        
-        questionEl.appendChild(optionsContainer);
-        quizContainer.appendChild(questionEl);
+// Respuestas correctas
+const examAnswers = {
+    q1: 'b',
+    q2: 'b',
+    q3: 'c',
+    q4: 'b',
+    q5: 'c',
+    q6: 'b',
+    q7: 'b',
+    q8: 'c',
+    q9: 'd',
+    q10: 'c'
+};
+
+// Calificar evaluación
+function gradeExam() {
+    let score = 0;
+    const errors = [];
+    const userAnswers = {};
+    
+    // Limpiar estilos de preguntas incorrectas anteriores
+    document.querySelectorAll('.question').forEach(q => {
+        q.classList.remove('incorrect');
     });
+    
+    // Evaluar cada pregunta
+    for(let i = 1; i <= 10; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const questionDiv = document.querySelector(`.question:nth-child(${i})`);
+        
+        if(selected && selected.value === examAnswers[`q${i}`]) {
+            score++;
+            userAnswers[`q${i}`] = true;
+        } else {
+            const questionText = questionDiv.querySelector('p').innerText;
+            const correctAnswer = getCorrectAnswerText(i);
+            const userAnswerText = selected ? getAnswerLetterText(i, selected.value) : 'No respondida';
+            
+            errors.push({
+                number: i,
+                question: questionText.substring(0, 100),
+                correct: correctAnswer,
+                user: userAnswerText
+            });
+            
+            userAnswers[`q${i}`] = false;
+            questionDiv.classList.add('incorrect');
+        }
+    }
+    
+    // Mostrar resultados
+    document.getElementById('exam-score').textContent = score;
+    const examResults = document.getElementById('exam-results');
+    examResults.style.display = 'block';
+    
+    const errorsListDiv = document.getElementById('exam-errors-list');
+    
+    if(errors.length > 0) {
+        let errorsHtml = '<h4>❌ Preguntas incorrectas:</h4>';
+        errors.forEach(err => {
+            errorsHtml += `
+                <div class="error-item" style="margin-bottom: 12px;">
+                    <strong>Pregunta ${err.number}:</strong><br>
+                    <span style="color: #dc3545;">Tu respuesta: ${err.user}</span><br>
+                    <span style="color: #28a745;">Respuesta correcta: ${err.correct}</span>
+                </div>
+            `;
+        });
+        errorsListDiv.innerHTML = errorsHtml;
+    } else {
+        errorsListDiv.innerHTML = '<div class="error-item" style="background: #d4edda; color: #155724; border-left-color: #28a745;">🎉 ¡Excelente! Obtuviste calificación perfecta. ¡Dominas el tema de DDL!</div>';
+    }
+    
+    // Scroll a resultados
+    examResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-const submitQuizBtn = document.getElementById('submit-quiz-btn');
-if(submitQuizBtn){
-    submitQuizBtn.addEventListener('click', () => {
-        let score = 0;
-        const questions = quizContainer.querySelectorAll('.mb-6');
-        const feedbacks = [
-            'Correcto: Los tres pasos fundamentales de la escucha activa son percibir, procesar y responder.',
-            'Correcto: "No juzgar" es el elemento que crea un espacio seguro para la expresión libre.',
-            'Correcto: Las emociones intensas pueden impedir una buena escucha activa al desviar la atención.',
-            'Correcto: La paráfrasis demuestra que has escuchado y comprendido el mensaje del emisor.',
-            'Correcto: La escucha crítica busca evaluar la calidad de la información y la solidez de los argumentos.'
-        ];
-        const wrongFeedbacks = [
-            'Incorrecto. Los tres pasos fundamentales de la escucha activa son: percibir, procesar y responder.',
-            'Incorrecto. El elemento que crea un espacio seguro para la expresión libre es "No juzgar".',
-            'Incorrecto. Las emociones intensas (enojo, ansiedad, tristeza) son barreras que impiden la buena escucha activa.',
-            'Incorrecto. El objetivo principal de la paráfrasis es demostrar que has escuchado y comprendido el mensaje.',
-            'Incorrecto. La escucha crítica tiene como propósito evaluar la calidad de la información y la solidez de los argumentos.'
-        ];
-        questions.forEach((q, index) => {
-            const selectedOption = q.querySelector('.quiz-option.selected');
-            let feedbackDiv = q.querySelector('.quiz-feedback');
-            if (!feedbackDiv) {
-                feedbackDiv = document.createElement('div');
-                feedbackDiv.className = 'quiz-feedback mt-2 text-sm';
-                q.appendChild(feedbackDiv);
-            }
-            if (selectedOption && selectedOption.textContent === quizData[index].answer) {
-                score++;
-                feedbackDiv.innerHTML = `<span class='text-green-700 font-semibold'>✔️ ${feedbacks[index]}</span>`;
-            } else {
-                feedbackDiv.innerHTML = `<span class='text-red-700 font-semibold'>❌ ${wrongFeedbacks[index]}</span>`;
-            }
-        });
-        const resultEl = document.getElementById('quiz-result');
-        resultEl.textContent = `Tu puntuación es: ${score} de ${quizData.length}.`;
-        if (score / quizData.length >= 0.7) {
-            resultEl.className = 'mt-4 text-lg font-bold text-green-700';
-        } else {
-            resultEl.className = 'mt-4 text-lg font-bold text-red-700';
-        }
+// Obtener texto de respuesta correcta
+function getCorrectAnswerText(questionNumber) {
+    const correctAnswers = {
+        1: 'b) Definir, gestionar y modificar la estructura de los objetos de una BD',
+        2: 'b) CREATE, ALTER, DROP',
+        3: 'c) NOT NULL',
+        4: 'b) Elimina la tabla y su estructura permanentemente',
+        5: 'c) ALTER TABLE clientes ADD ciudad VARCHAR(100);',
+        6: 'b) DROP elimina tabla y estructura; TRUNCATE vacía datos pero mantiene estructura',
+        7: 'b) El valor se genera automáticamente y es clave primaria',
+        8: 'c) DECIMAL(10,2)',
+        9: 'd) UNIQUE',
+        10: 'c) Son irreversibles sin un respaldo (backup)'
+    };
+    return correctAnswers[questionNumber] || 'No especificada';
+}
+
+// Obtener texto de respuesta del usuario
+function getAnswerLetterText(questionNumber, letter) {
+    const answerTexts = {
+        1: {'a': 'a) Manipular los datos almacenados en las tablas', 'b': 'b) Definir, gestionar y modificar la estructura de los objetos de una BD', 'c': 'c) Controlar los permisos de los usuarios', 'd': 'd) Optimizar consultas SQL'},
+        2: {'a': 'a) INSERT, SELECT, DELETE', 'b': 'b) CREATE, ALTER, DROP', 'c': 'c) ADD, MODIFY, REMOVE', 'd': 'd) OPEN, CLOSE, FETCH'},
+        3: {'a': 'a) UNIQUE', 'b': 'b) PRIMARY KEY', 'c': 'c) NOT NULL', 'd': 'd) DEFAULT'},
+        4: {'a': 'a) Elimina solo los datos de la tabla, manteniendo su estructura', 'b': 'b) Elimina la tabla y su estructura permanentemente', 'c': 'c) Elimina una columna específica', 'd': 'd) Vacía los datos pero conserva la tabla'},
+        5: {'a': 'a) CREATE COLUMN ciudad IN clientes;', 'b': 'b) ADD COLUMN ciudad TO clientes;', 'c': 'c) ALTER TABLE clientes ADD ciudad VARCHAR(100);', 'd': 'd) MODIFY TABLE clientes ADD ciudad;'},
+        6: {'a': 'a) DROP elimina solo datos; TRUNCATE elimina estructura', 'b': 'b) DROP elimina tabla y estructura; TRUNCATE vacía datos pero mantiene estructura', 'c': 'c) Son sinónimos', 'd': 'd) TRUNCATE no se puede deshacer, DROP sí'},
+        7: {'a': 'a) La columna acepta valores nulos', 'b': 'b) El valor se genera automáticamente y es clave primaria', 'c': 'c) Solo permite números negativos', 'd': 'd) Es una clave foránea'},
+        8: {'a': 'a) INT', 'b': 'b) VARCHAR', 'c': 'c) DECIMAL(10,2)', 'd': 'd) DATE'},
+        9: {'a': 'a) NOT NULL', 'b': 'b) PRIMARY KEY', 'c': 'c) FOREIGN KEY', 'd': 'd) UNIQUE'},
+        10: {'a': 'a) Son lentas y afectan el rendimiento', 'b': 'b) Requieren permisos especiales', 'c': 'c) Son irreversibles sin un respaldo (backup)', 'd': 'd) Solo pueden ejecutarse en horario nocturno'}
+    };
+    return answerTexts[questionNumber]?.[letter] || `Opción ${letter.toUpperCase()}`;
+}
+
+// Reiniciar evaluación
+function resetExam() {
+    // Limpiar todos los radios seleccionados
+    const radioButtons = document.querySelectorAll('#exam-form input[type="radio"]');
+    radioButtons.forEach(radio => {
+        radio.checked = false;
     });
+    
+    // Limpiar estilos de preguntas incorrectas
+    document.querySelectorAll('.question').forEach(q => {
+        q.classList.remove('incorrect');
+    });
+    
+    // Ocultar resultados
+    const examResults = document.getElementById('exam-results');
+    examResults.style.display = 'none';
+    
+    // Limpiar lista de errores
+    document.getElementById('exam-errors-list').innerHTML = '';
+    
+    // Scroll al inicio de la evaluación
+    document.getElementById('exam').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

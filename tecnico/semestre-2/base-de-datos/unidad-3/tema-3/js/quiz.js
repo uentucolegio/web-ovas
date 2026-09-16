@@ -1,123 +1,88 @@
-// --- Evaluación Quiz ---
 const quizData = [
-    {
-        question: "La escucha activa no es solo captar sonidos, sino que requiere atención consciente y completa. Los tres pasos o dimensiones fundamentales de este proceso para lograr una comprensión adecuada del mensaje son:",
-        options: [
-            "a. Distraer, interrumpir y juzgar.",
-            "b. Percibir, procesar y responder.",
-            "c. Contactar, hablar y solucionar.",
-            "d. Escucha pasiva, selectiva y activa."
-        ],
-        answer: "b. Percibir, procesar y responder."
-    },
-    {
-        question: "Uno de los elementos clave de la escucha activa requiere que la persona oyente suspenda el juicio sobre las palabras o acciones del interlocutor. Al hacerlo, se crea un espacio seguro para la expresión libre. ¿A qué elemento se refiere esta descripción?",
-        options: [
-            "a. Clarificar lo que se escuchó.",
-            "b. Retroalimentación.",
-            "c. Empatía.",
-            "d. No juzgar."
-        ],
-        answer: "d. No juzgar."
-    },
-    {
-        question: "Cuando una persona está enojada, ansiosa o triste mientras intenta escuchar a otra, puede que no logre entender bien el mensaje porque su atención está enfocada en sus sentimientos internos. Este obstáculo que impide la buena escucha activa es una barrera causada por:",
-        options: [
-            "a. Prejuicios.",
-            "b. Distracciones.",
-            "c. Emociones.",
-            "d. Querer hablar siempre."
-        ],
-        answer: "c. Emociones."
-    },
-    {
-        question: "La técnica de paráfrasis (o reformulación) se considera esencial en la escucha activa. Cuando utilizas esta técnica repitiendo el mensaje del emisor con tus propias palabras, ¿cuál es el objetivo principal que buscas?",
-        options: [
-            "a. Dar una solución inmediata al problema de la otra persona.",
-            "b. Demostrar que has escuchado y comprendido el mensaje.",
-            "c. Evaluar si la preocupación del compañero tiene lógica o evidencia.",
-            "d. Intentar cambiar el tema de la conversación para evitar un conflicto."
-        ],
-        answer: "b. Demostrar que has escuchado y comprendido el mensaje."
-    },
-    {
-        question: "Estás en una situación donde tu actitud es de distanciamiento analítico y escepticismo razonable (por ejemplo, al revisar un informe o una propuesta). Esta actitud es propia de la escucha crítica porque tu propósito principal es:",
-        options: [
-            "a. Comprender la experiencia emocional y la perspectiva personal del orador.",
-            "b. Acompañar al emisor con validación y no juicio para fortalecer la relación.",
-            "c. Buscar apoyo socioemocional ante un conflicto o problema personal.",
-            "d. Evaluar la calidad de la información y la solidez de los argumentos."
-        ],
-        answer: "d. Evaluar la calidad de la información y la solidez de los argumentos."
-    }
+    { q: "¿Qué ocurre en un ataque de Inyección SQL?", a: ["Se borra el disco duro del servidor", "Se envía código malicioso que la aplicación ejecuta como instrucción legítima", "Se satura la red con peticiones falsas", "Se cambia el CSS de la página"], c: 1 },
+    { q: "¿Cuál es la causa técnica principal de la Inyección SQL?", a: ["Usar contraseñas cortas", "Cerrar mal la conexión", "Concatenar variables directamente en la consulta SQL", "No usar HTTPS"], c: 2 },
+    { q: "Si un atacante escribe ' OR '1'='1 en un login mal programado, ¿qué busca?", a: ["Cambiar su nombre de usuario", "Bypass de autenticación (entrar sin contraseña)", "Borrar todas las tablas", "Cifrar la base de datos"], c: 1 },
+    { q: "¿Cuál es la técnica robusta para evitar la inyección SQL?", a: ["Usar mayúsculas en SQL", "Consultas Preparadas (Prepared Statements)", "Validar solo en el Front-end", "Ocultar el puerto de la base de datos"], c: 1 },
+    { q: "¿Qué función cumplen los 'marcadores' (?) en una consulta preparada?", a: ["Son comentarios para el programador", "Representan donde irán los datos de forma segura sin ser ejecutados como código", "Sirven para hacer preguntas a la base de datos", "Indican un error en la sintaxis"], c: 1 },
+    { q: "¿Por qué NO debemos confiar únicamente en las validaciones del Front-end (HTML/JS)?", a: ["Porque son muy lentas", "Porque pueden ser saltadas o manipuladas fácilmente", "Porque el navegador no las entiende", "Porque ocupan mucho espacio"], c: 1 },
+    { q: "¿Qué herramienta se usa comúnmente para validar el formato de un correo electrónico?", a: ["Consultas SQL", "Expresiones Regulares (Regex)", "Un Pool de conexiones", "Un archivo .env"], c: 1 },
+    { q: "¿Cómo debe responder el servidor ante un error interno de base de datos?", a: ["Mostrando el error completo (ej: Table not found)", "Reiniciando el servidor", "Con un mensaje genérico (ej: Ocurrió un problema interno)", "Enviando el código SQL al cliente"], c: 2 },
+    { q: "¿Qué tipo de validación asegura que un campo 'precio' no reciba letras?", a: ["Validación de longitud", "Validación de tipo de dato", "Validación de formato Regex", "Consulta preparada"], c: 1 },
+    { q: "En el ejemplo 'db.execute(query, [id])', ¿qué representa el array [id]?", a: ["Los nombres de las tablas", "La contraseña de la base de datos", "Los datos enviados por separado de la estructura de la consulta", "El puerto de conexión"], c: 2 }
 ];
 
-const quizContainer = document.getElementById('quiz-container');
-if(quizContainer) {
-    quizData.forEach((q, index) => {
-        const questionEl = document.createElement('div');
-        questionEl.className = 'mb-6';
-        questionEl.innerHTML = `<p class="font-semibold mb-2">${index + 1}. ${q.question}</p>`;
-        
-        const optionsContainer = document.createElement('div');
-        optionsContainer.className = 'space-y-2';
-        
-        q.options.forEach(option => {
-            const optionEl = document.createElement('div');
-            optionEl.className = 'quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer';
-            optionEl.textContent = option;
-            optionEl.addEventListener('click', () => {
-                questionEl.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
-                optionEl.classList.add('selected');
-            });
-            optionsContainer.appendChild(optionEl);
-        });
-        
-        questionEl.appendChild(optionsContainer);
-        quizContainer.appendChild(questionEl);
-    });
+const quizContainer = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit-btn');
+const errorBox = document.getElementById('error-message');
+const resultsDiv = document.getElementById('results');
+
+function initQuiz() {
+    quizContainer.innerHTML = quizData.map((data, i) => `
+        <div class="question-block">
+            <p class="question-text">${i + 1}. ${data.q}</p>
+            <div class="options">
+                ${data.a.map((opt, j) => `
+                    <label id="label-${i}-${j}">
+                        <input type="radio" name="q${i}" value="${j}"> ${opt}
+                    </label>
+                `).join('')}
+            </div>
+            <div id="feedback-${i}" class="feedback hidden"></div>
+        </div>
+    `).join('');
 }
 
-const submitQuizBtn = document.getElementById('submit-quiz-btn');
-if(submitQuizBtn){
-    submitQuizBtn.addEventListener('click', () => {
-        let score = 0;
-        const questions = quizContainer.querySelectorAll('.mb-6');
-        const feedbacks = [
-            'Correcto: Los tres pasos fundamentales de la escucha activa son percibir, procesar y responder.',
-            'Correcto: "No juzgar" es el elemento que crea un espacio seguro para la expresión libre.',
-            'Correcto: Las emociones intensas pueden impedir una buena escucha activa al desviar la atención.',
-            'Correcto: La paráfrasis demuestra que has escuchado y comprendido el mensaje del emisor.',
-            'Correcto: La escucha crítica busca evaluar la calidad de la información y la solidez de los argumentos.'
-        ];
-        const wrongFeedbacks = [
-            'Incorrecto. Los tres pasos fundamentales de la escucha activa son: percibir, procesar y responder.',
-            'Incorrecto. El elemento que crea un espacio seguro para la expresión libre es "No juzgar".',
-            'Incorrecto. Las emociones intensas (enojo, ansiedad, tristeza) son barreras que impiden la buena escucha activa.',
-            'Incorrecto. El objetivo principal de la paráfrasis es demostrar que has escuchado y comprendido el mensaje.',
-            'Incorrecto. La escucha crítica tiene como propósito evaluar la calidad de la información y la solidez de los argumentos.'
-        ];
-        questions.forEach((q, index) => {
-            const selectedOption = q.querySelector('.quiz-option.selected');
-            let feedbackDiv = q.querySelector('.quiz-feedback');
-            if (!feedbackDiv) {
-                feedbackDiv = document.createElement('div');
-                feedbackDiv.className = 'quiz-feedback mt-2 text-sm';
-                q.appendChild(feedbackDiv);
-            }
-            if (selectedOption && selectedOption.textContent === quizData[index].answer) {
-                score++;
-                feedbackDiv.innerHTML = `<span class='text-green-700 font-semibold'>✔️ ${feedbacks[index]}</span>`;
-            } else {
-                feedbackDiv.innerHTML = `<span class='text-red-700 font-semibold'>❌ ${wrongFeedbacks[index]}</span>`;
-            }
-        });
-        const resultEl = document.getElementById('quiz-result');
-        resultEl.textContent = `Tu puntuación es: ${score} de ${quizData.length}.`;
-        if (score / quizData.length >= 0.7) {
-            resultEl.className = 'mt-4 text-lg font-bold text-green-700';
-        } else {
-            resultEl.className = 'mt-4 text-lg font-bold text-red-700';
+submitBtn.addEventListener('click', () => {
+    let answeredCount = 0;
+    const userAnswers = [];
+
+    quizData.forEach((_, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+            answeredCount++;
+            userAnswers.push(parseInt(selected.value));
         }
     });
-}
+
+    if (answeredCount < quizData.length) {
+        errorBox.classList.remove('hidden');
+        window.scrollTo(0, errorBox.offsetTop - 50);
+        return;
+    }
+
+    errorBox.classList.add('hidden');
+    submitBtn.classList.add('hidden');
+    document.getElementById('retry-btn').classList.remove('hidden');
+    
+    let score = 0;
+    quizData.forEach((data, i) => {
+        const isCorrect = userAnswers[i] === data.c;
+        const feedbackEl = document.getElementById(`feedback-${i}`);
+        const selectedLabel = document.getElementById(`label-${i}-${userAnswers[i]}`);
+        
+        feedbackEl.classList.remove('hidden');
+        if (isCorrect) {
+            score++;
+            selectedLabel.classList.add('correct-row');
+            feedbackEl.innerHTML = `<span class="correct-text">✓ ¡Correcto!</span>`;
+        } else {
+            selectedLabel.classList.add('incorrect-row');
+            feedbackEl.innerHTML = `<span class="incorrect-text">✗ Incorrecto. La respuesta correcta era: ${data.a[data.c]}</span>`;
+        }
+    });
+
+    const percentage = (score / quizData.length) * 100;
+    const passed = percentage >= 70;
+
+    resultsDiv.classList.remove('hidden');
+    resultsDiv.style.backgroundColor = passed ? "#d4edda" : "#f8d7da";
+    
+    document.getElementById('score-title').innerText = `Puntaje: ${percentage}% (${score} / ${quizData.length})`;
+    document.getElementById('score-text').innerHTML = passed 
+        ? `<strong>¡Excelente!</strong> Has demostrado conocimientos sólidos en seguridad de bases de datos.` 
+        : `<strong>Aún no superas el mínimo (70%).</strong> Repasa los conceptos de Inyección SQL y Consultas Preparadas antes de volver a intentarlo.`;
+
+    window.scrollTo(0, 0);
+});
+
+initQuiz();
