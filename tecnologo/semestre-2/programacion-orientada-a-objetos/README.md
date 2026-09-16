@@ -1,6 +1,6 @@
 # Programación orientada a objetos
 
-OVAs del programa Tecnólogo, semestre 2.
+OVAs del programa Tecnólogo, semestre 2. Las explicaciones, ejemplos y actividades de programación usan Java; los ejemplos se verificaron con Java 21.
 
 ## Unidad 2
 
