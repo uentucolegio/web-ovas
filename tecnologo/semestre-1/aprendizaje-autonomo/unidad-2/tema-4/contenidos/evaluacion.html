@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autoevaluación y Mejora Continua - Evaluación</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #166534;
+      --primary-soft: #dcfce7;
+      --success: #166534;
+      --success-bg: #dcfce7;
+      --error: #991b1b;
+      --error-bg: #fee2e2;
+      --warning: #92400e;
+      --warning-bg: #fef3c7;
+      --border: #d1d5db;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+    }
+
+    .header {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #22c55e;
+    }
+
+    .header h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      color: #0f172a;
+    }
+
+    .header h2 {
+      margin: 0 0 14px;
+      font-size: 1.2rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 8px 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .options-panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 24px;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #22c55e;
+    }
+
+    .options-panel h3 {
+      margin-top: 0;
+      color: #0f172a;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+    }
+
+    .option {
+      background: #f8fafc;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: grab;
+      line-height: 1.5;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      user-select: none;
+    }
+
+    .option:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .option.dragging {
+      opacity: 0.5;
+    }
+
+    .question-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 22px;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #22c55e;
+    }
+
+    .question-card h3 {
+      margin-top: 0;
+      color: #111827;
+    }
+
+    .question-type {
+      display: inline-block;
+      margin-bottom: 14px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .statement {
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .dropzone {
+      min-height: 76px;
+      border: 2px dashed #86efac;
+      background: #f0fdf4;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone.over {
+      border-color: var(--primary);
+      background: #dcfce7;
+    }
+
+    .dropzone.filled {
+      justify-content: flex-start;
+      color: var(--text);
+      background: #ffffff;
+      border-style: solid;
+    }
+
+    .dropzone .dropped {
+      width: 100%;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-check {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-reset {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-final {
+      background: #0f766e;
+      color: white;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .feedback.correct {
+      display: block;
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #86efac;
+    }
+
+    .feedback.incorrect {
+      display: block;
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid #fca5a5;
+    }
+
+    .feedback.warning {
+      display: block;
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid #fcd34d;
+    }
+
+    .score-box {
+      background: #0f172a;
+      color: white;
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      margin-top: 28px;
+    }
+
+    .score-box h3 {
+      margin: 0 0 8px;
+    }
+
+    .score-box p {
+      margin: 0;
+      line-height: 1.6;
+      color: #e5e7eb;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 680px) {
+      .header h1 {
+        font-size: 1.55rem;
+      }
+
+      .container {
+        padding: 16px 12px 30px;
+      }
+
+      .question-card,
+      .options-panel,
+      .header {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <section class="header">
+      <h1>Evaluación tema 4:
+        Evaluación del progreso en el aprendizaje</h1>
+      <p><strong>Instrucción:</strong> arrastra la respuesta correcta a cada espacio. Luego haz clic en
+        <strong>“Verificar respuesta”</strong> para recibir retroalimentación inmediata.
+      </p>
+      <p>La actividad contiene preguntas de selección múltiple con única respuesta. Las preguntas 3 y 4 son de
+        <strong>verdadero o falso</strong>.
+      </p>
+    </section>
+
+    <section class="options-panel">
+      <h3>Banco de respuestas para arrastrar</h3>
+      <div class="options-grid" id="optionsContainer"></div>
+    </section>
+
+    <section class="question-card" data-question="q1">
+      <div class="question-type">Pregunta 1 · Selección múltiple</div>
+      <h3>¿Qué debería hacer el estudiante?</h3>
+      <div class="statement">
+        Un estudiante identifica que tuvo dificultades en una actividad académica, pero decide continuar con el
+        siguiente tema sin analizar las causas de su bajo desempeño. Desde la perspectiva de la autoevaluación, ¿qué
+        debería hacer el estudiante?
+      </div>
+      <div class="dropzone" data-dropzone="q1">Suelta aquí la respuesta correcta</div>
+      <div class="actions">
+        <button class="btn-check" onclick="checkAnswer('q1')">Verificar respuesta</button>
+        <button class="btn-reset" onclick="resetQuestion('q1')">Reiniciar</button>
+      </div>
+      <div class="feedback" id="feedback-q1"></div>
+    </section>
+
+    <section class="question-card" data-question="q2">
+      <div class="question-type">Pregunta 2 · Selección múltiple</div>
+      <h3>¿Cuál sería la acción más adecuada?</h3>
+      <div class="statement">
+        Un estudiante implementa una nueva estrategia de aprendizaje, pero no realiza seguimiento a su efectividad ni
+        evalúa los resultados obtenidos. ¿Cuál sería la acción más adecuada en el marco del ciclo de mejora continua?
+      </div>
+      <div class="dropzone" data-dropzone="q2">Suelta aquí la respuesta correcta</div>
+      <div class="actions">
+        <button class="btn-check" onclick="checkAnswer('q2')">Verificar respuesta</button>
+        <button class="btn-reset" onclick="resetQuestion('q2')">Reiniciar</button>
+      </div>
+      <div class="feedback" id="feedback-q2"></div>
+    </section>
+
+    <section class="question-card" data-question="q3">
+      <div class="question-type">Pregunta 3 · Verdadero o falso</div>
+      <h3>Esta afirmación es:</h3>
+      <div class="statement">
+        Un estudiante afirma que la autoevaluación consiste principalmente en verificar si obtuvo la respuesta correcta
+        en una actividad, sin necesidad de analizar el proceso, las estrategias utilizadas ni las dificultades
+        presentadas.
+      </div>
+      <div class="dropzone" data-dropzone="q3">Suelta aquí: Verdadera o Falsa</div>
+      <div class="actions">
+        <button class="btn-check" onclick="checkAnswer('q3')">Verificar respuesta</button>
+        <button class="btn-reset" onclick="resetQuestion('q3')">Reiniciar</button>
+      </div>
+      <div class="feedback" id="feedback-q3"></div>
+    </section>
+
+    <section class="question-card" data-question="q4">
+      <div class="question-type">Pregunta 4 · Verdadero o falso</div>
+      <h3>Esta afirmación es:</h3>
+      <div class="statement">
+        Un estudiante que aplica la mejora continua en su aprendizaje analiza sus resultados, ajusta sus estrategias y
+        realiza seguimiento a los cambios implementados para verificar su efectividad.
+      </div>
+      <div class="dropzone" data-dropzone="q4">Suelta aquí: Verdadera o Falsa</div>
+      <div class="actions">
+        <button class="btn-check" onclick="checkAnswer('q4')">Verificar respuesta</button>
+        <button class="btn-reset" onclick="resetQuestion('q4')">Reiniciar</button>
+      </div>
+      <div class="feedback" id="feedback-q4"></div>
+    </section>
+
+    <section class="score-box">
+      <h3>Resultado general</h3>
+      <p id="scoreText">Aún no has calificado la actividad completa.</p>
+      <div class="actions" style="margin-top:14px;">
+        <button class="btn-final" onclick="checkAllAnswers()">Calificar toda la evaluación</button>
+        <button class="btn-reset" onclick="resetAll()">Reiniciar toda la actividad</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const answerBank = [
+      {
+        id: 'a1',
+        label: 'A. Continuar con el siguiente contenido para no retrasar su proceso de aprendizaje.',
+        question: 'q1',
+        correct: false
+      },
+      {
+        id: 'b1',
+        label: 'B. Revisar la actividad realizada, identificar las causas de la dificultad y reflexionar sobre las estrategias utilizadas.',
+        question: 'q1',
+        correct: true
+      },
+      {
+        id: 'c1',
+        label: 'C. Repetir la actividad varias veces hasta obtener un mejor resultado sin analizar el proceso.',
+        question: 'q1',
+        correct: false
+      },
+      {
+        id: 'a2',
+        label: 'A. Continuar utilizando la estrategia hasta finalizar el curso para evaluar su impacto global.',
+        question: 'q2',
+        correct: false
+      },
+      {
+        id: 'b2',
+        label: 'B. Evaluar periódicamente los resultados de la estrategia y realizar ajustes en función de su efectividad.',
+        question: 'q2',
+        correct: true
+      },
+      {
+        id: 'c2',
+        label: 'C. Cambiar constantemente de estrategia sin evaluar los resultados obtenidos.',
+        question: 'q2',
+        correct: false
+      },
+      {
+        id: 'a3',
+        label: 'A. Verdadera',
+        question: 'q3',
+        correct: false
+      },
+      {
+        id: 'b3',
+        label: 'B. Falsa',
+        question: 'q3',
+        correct: true
+      },
+      {
+        id: 'a4',
+        label: 'A. Verdadera',
+        question: 'q4',
+        correct: true
+      },
+      {
+        id: 'b4',
+        label: 'B. Falsa',
+        question: 'q4',
+        correct: false
+      }
+    ];
+
+    const feedbackData = {
+      q1: {
+        correctId: 'b1',
+        correct: 'Correcto. La autoevaluación implica revisar el desempeño, identificar las causas de las dificultades y analizar qué estrategias funcionaron o no. Esto permite aprender del error y mejorar el proceso.',
+        incorrect: {
+          a1: 'Esta opción no es adecuada. Continuar sin analizar las dificultades puede hacer que el estudiante repita los mismos errores y avance con vacíos en su aprendizaje.',
+          c1: 'Esta opción es insuficiente. Repetir una actividad sin reflexionar sobre el proceso no garantiza mejora real, porque no se identifican las causas del problema.'
+        }
+      },
+      q2: {
+        correctId: 'b2',
+        correct: 'Correcto. La mejora continua exige seguimiento, valoración de resultados y ajustes oportunos. No basta con aplicar una estrategia; es necesario comprobar si realmente está funcionando.',
+        incorrect: {
+          a2: 'Esta opción no es la más adecuada. Esperar hasta el final del curso impide hacer ajustes a tiempo y puede mantener estrategias poco efectivas durante demasiado tiempo.',
+          c2: 'Esta opción es incorrecta. Cambiar de estrategia sin evaluar resultados genera desorden y no favorece un proceso de aprendizaje consciente ni sistemático.'
+        }
+      },
+      q3: {
+        correctId: 'b3',
+        correct: 'Correcto. La afirmación es falsa. La autoevaluación no se limita a comprobar si una respuesta está bien o mal; también implica analizar el proceso, las estrategias empleadas y las dificultades encontradas.',
+        incorrect: {
+          a3: 'Respuesta incorrecta. La afirmación es falsa, porque la autoevaluación va más allá del resultado final: requiere reflexión sobre el proceso de aprendizaje.'
+        }
+      },
+      q4: {
+        correctId: 'a4',
+        correct: 'Correcto. La afirmación es verdadera. La mejora continua implica revisar resultados, ajustar estrategias y dar seguimiento a los cambios para comprobar si contribuyen al aprendizaje.',
+        incorrect: {
+          b4: 'Respuesta incorrecta. La afirmación es verdadera, porque describe con precisión el ciclo de mejora continua aplicado al aprendizaje.'
+        }
+      }
+    };
+
+    const state = {
+      placements: {}
+    };
+
+    const optionsContainer = document.getElementById('optionsContainer');
+
+    function shuffle(array) {
+      const clone = [...array];
+      for (let i = clone.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [clone[i], clone[j]] = [clone[j], clone[i]];
+      }
+      return clone;
+    }
+
+    function createOptionElement(item) {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.draggable = true;
+      div.id = item.id;
+      div.dataset.question = item.question;
+      div.innerHTML = item.label;
+
+      div.addEventListener('dragstart', (e) => {
+        div.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', item.id);
+      });
+
+      div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+      });
+
+      return div;
+    }
+
+    function renderOptions() {
+      optionsContainer.innerHTML = '';
+
+      const placedIds = Object.values(state.placements);
+      const available = shuffle(answerBank.filter(item => !placedIds.includes(item.id)));
+
+      available.forEach(item => {
+        optionsContainer.appendChild(createOptionElement(item));
+      });
+    }
+
+    function initializeDropzones() {
+      document.querySelectorAll('.dropzone').forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          zone.classList.add('over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          zone.classList.remove('over');
+          const answerId = e.dataTransfer.getData('text/plain');
+          const questionId = zone.dataset.dropzone;
+          placeAnswer(questionId, answerId);
+        });
+      });
+    }
+
+    function placeAnswer(questionId, answerId) {
+      const answer = answerBank.find(item => item.id === answerId);
+      if (!answer) return;
+
+      if (state.placements[questionId]) {
+        const previousId = state.placements[questionId];
+        delete state.placements[questionId];
+        returnOptionToBank(previousId);
+      }
+
+      const currentOwner = Object.keys(state.placements).find(q => state.placements[q] === answerId);
+      if (currentOwner) {
+        delete state.placements[currentOwner];
+        renderDropzone(currentOwner);
+      }
+
+      state.placements[questionId] = answerId;
+      renderDropzone(questionId);
+      renderOptions();
+    }
+
+    function returnOptionToBank(answerId) {
+      const owner = Object.keys(state.placements).find(q => state.placements[q] === answerId);
+      if (owner) {
+        delete state.placements[owner];
+        renderDropzone(owner);
+      }
+      renderOptions();
+    }
+
+    function renderDropzone(questionId) {
+      const zone = document.querySelector(`[data-dropzone="${questionId}"]`);
+      const answerId = state.placements[questionId];
+
+      if (!answerId) {
+        zone.classList.remove('filled');
+        zone.innerHTML = questionId === 'q3' || questionId === 'q4'
+          ? 'Suelta aquí: Verdadera o Falsa'
+          : 'Suelta aquí la respuesta correcta';
+        return;
+      }
+
+      const answer = answerBank.find(item => item.id === answerId);
+      zone.classList.add('filled');
+      zone.innerHTML = `<div class="dropped">${answer.label}</div>`;
+    }
+
+    function setFeedback(questionId, type, text) {
+      const box = document.getElementById(`feedback-${questionId}`);
+      box.className = `feedback ${type}`;
+      box.textContent = text;
+    }
+
+    function checkAnswer(questionId) {
+      const selectedId = state.placements[questionId];
+      const data = feedbackData[questionId];
+
+      if (!selectedId) {
+        setFeedback(questionId, 'warning', 'Debes arrastrar una opción antes de verificar tu respuesta.');
+        return false;
+      }
+
+      if (selectedId === data.correctId) {
+        setFeedback(questionId, 'correct', data.correct);
+        return true;
+      }
+
+      setFeedback(questionId, 'incorrect', data.incorrect[selectedId] || 'Respuesta incorrecta. Intenta nuevamente.');
+      return false;
+    }
+
+    function resetQuestion(questionId) {
+      const selectedId = state.placements[questionId];
+      if (selectedId) {
+        delete state.placements[questionId];
+      }
+      renderDropzone(questionId);
+      renderOptions();
+      const box = document.getElementById(`feedback-${questionId}`);
+      box.className = 'feedback';
+      box.textContent = '';
+      updateScoreText();
+    }
+
+    function checkAllAnswers() {
+      const questions = ['q1', 'q2', 'q3', 'q4'];
+      let score = 0;
+
+      questions.forEach(q => {
+        if (checkAnswer(q)) score++;
+      });
+
+      const scoreText = document.getElementById('scoreText');
+      const total = questions.length;
+      const percent = Math.round((score / total) * 100);
+
+      let message = `Obtuviste ${score} de ${total} respuestas correctas (${percent}%). `;
+
+      if (score === total) {
+        message += 'Excelente. Demuestras comprensión sólida de la autoevaluación y la mejora continua en el aprendizaje.';
+      } else if (score >= 3) {
+        message += 'Buen trabajo. Hay una comprensión adecuada, aunque conviene revisar algunos aspectos para fortalecer el proceso de autoevaluación.';
+      } else if (score >= 2) {
+        message += 'Vas avanzando, pero necesitas reforzar cómo se analiza el proceso de aprendizaje y cómo se ajustan las estrategias.';
+      } else {
+        message += 'Es importante repasar el tema. Recuerda que la autoevaluación implica reflexión sobre el proceso y que la mejora continua requiere seguimiento y ajustes.';
+      }
+
+      scoreText.textContent = message;
+    }
+
+    function updateScoreText() {
+      document.getElementById('scoreText').textContent = 'Aún no has calificado la actividad completa.';
+    }
+
+    function resetAll() {
+      state.placements = {};
+      ['q1', 'q2', 'q3', 'q4'].forEach(q => {
+        renderDropzone(q);
+        const box = document.getElementById(`feedback-${q}`);
+        box.className = 'feedback';
+        box.textContent = '';
+      });
+      renderOptions();
+      updateScoreText();
+    }
+
+    initializeDropzones();
+    resetAll();
+  </script>
+
+  <!-- Footer/Credits -->
+  <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+      <p class="text-slate-600 font-medium">Creado por:</p>
+      <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+          CINTIA
+      </p>
+      <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+  </footer>
+</body>
+
+</html>
