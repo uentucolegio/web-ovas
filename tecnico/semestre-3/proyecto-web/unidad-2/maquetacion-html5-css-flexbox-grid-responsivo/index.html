@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Maquetación HTML5, CSS, Flexbox, Grid y diseño responsivo</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back {
+            display: none;
+        }
+        .reveal-card.opened .reveal-back {
+            display: block;
+        }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .mission-card.completed {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: #166534;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🏗️ Del diseño al código: hora de maquetar</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Después de diseñar los wireframes, el prototipo navegable y la guía de estilos, tu equipo ya cuenta con una representación visual inicial del proyecto web. El siguiente paso consiste en convertir esas ideas de diseño en una estructura real de frontend, utilizando <strong>HTML5</strong> para organizar el contenido y <strong>CSS</strong> para definir la apariencia visual de las páginas.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La maquetación es una etapa fundamental porque permite pasar del diseño al código. En esta fase, las pantallas dejan de ser solamente esquemas o prototipos y comienzan a transformarse en archivos web que pueden abrirse en un navegador. Para lograrlo, es necesario usar etiquetas HTML de manera ordenada, aplicar estilos CSS coherentes con la guía de estilos y organizar los elementos mediante técnicas como Flexbox y Grid.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Esta guía corresponde al segundo tema de la Unidad 2. En ella abordarás la estructura semántica en HTML5, hojas de estilo CSS, el modelo de caja, Flexbox, Grid y diseño responsivo, con actividades prácticas para construir una primera versión estática de las pantallas principales de tu proyecto.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Al finalizar, tu equipo entregará una versión maquetada del frontend con estructura HTML5, estilos CSS, distribución mediante Flexbox o Grid y evidencias de adaptación responsiva 📱💻 — la base para la tercera guía de la unidad, orientada a JavaScript, validación de formularios y consumo simple de APIs.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> No necesitas conectar nada a una base de datos todavía: solo que las pantallas se vean bien, tengan una estructura clara y respeten la guía de estilos de tu equipo. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <figure class="mt-8">
+                    <img src="img/figura-1-flujo-maquetacion.webp" alt="Flujo para convertir un diseño en una maqueta web responsiva" class="w-full max-w-3xl mx-auto rounded-lg border border-slate-200">
+                    <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 1. Flujo para convertir un diseño en una maqueta web responsiva. Fuente: elaboración propia con Python (matplotlib), 2026.</figcaption>
+                </figure>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🏗️</span>
+                        <span>Reconocer la maquetación web como el proceso de convertir los diseños y wireframes en una estructura visual construida con HTML y CSS.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🏷️</span>
+                        <span>Aplicar etiquetas semánticas de HTML5 para organizar el contenido de las páginas principales del proyecto web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎨</span>
+                        <span>Utilizar reglas básicas de CSS para definir colores, tipografías, tamaños, márgenes, espaciados y apariencia visual de la interfaz.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>Emplear Flexbox y Grid como herramientas de distribución de elementos dentro de la página web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📱</span>
+                        <span>Implementar criterios básicos de diseño responsivo para adaptar la interfaz a celulares, tabletas y computadores.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💻</span>
+                        <span>Construir una primera versión estática del frontend a partir de los wireframes y la guía de estilos definidos en la guía anterior.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🔍 Modo exploración: recorre las 5 estaciones y suma puntos</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Más etiquetas semánticas -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-semantica">
+                            <span>🏷️ Más allá de header y footer: otras etiquetas semánticas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-semantica" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="semantica-intro" class="content-section">
+                                <p class="mb-4">
+                                    Ya conoces <code>header</code>, <code>nav</code>, <code>main</code>, <code>section</code>, <code>form</code> y <code>footer</code>. Aquí tienes más etiquetas semánticas que te van a servir en tu proyecto.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada etiqueta para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-semantica" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="semantica-clasifica" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🧩 ¿Qué etiqueta usarías?</h4>
+                                <p class="mb-3">Haz click en una situación y luego en la etiqueta correcta (+4 pts por acierto).</p>
+                                <div id="semantica-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="semantica-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="article">article</button>
+                                    <button class="semantica-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="aside">aside</button>
+                                    <button class="semantica-btn bg-orange-100 border border-orange-400 text-orange-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="figure">figure</button>
+                                </div>
+                                <p id="semantica-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: box-sizing -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-boxsizing">
+                            <span>📦 El truco del modelo de caja: box-sizing</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-boxsizing" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="boxsizing-intro" class="content-section">
+                                <p class="mb-4">
+                                    Ya sabes que una caja tiene contenido, padding, border y margin. Lo que casi nadie te cuenta al inicio es que, por defecto, el padding y el border <strong>se suman</strong> al ancho que defines, haciendo la caja más grande de lo esperado. La propiedad <code>box-sizing</code> soluciona esto.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada valor para ver la diferencia (+5 puntos la primera vez):</p>
+                                <div id="reveal-boxsizing" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="boxsizing-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): con <code>width: 200px</code> y <code>box-sizing: border-box</code>, ¿qué pasa si le agregas <code>padding: 20px</code>?</p>
+                                <div id="choice-boxsizing" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-boxsizing-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Flexbox cheat sheet -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-flexbox">
+                            <span>🧩 Flexbox: las propiedades que sí vas a usar</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-flexbox" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="flexbox-intro" class="content-section">
+                                <p class="mb-4">
+                                    Tu guía explica qué es Flexbox conceptualmente. Aquí tienes las propiedades CSS concretas que lo activan y controlan.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada propiedad para descubrir qué hace (+4 puntos la primera vez):</p>
+                                <div id="reveal-flexbox" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="flexbox-clasifica" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🧩 ¿Qué propiedad necesitas?</h4>
+                                <p class="mb-3">Haz click en una necesidad y luego en la propiedad correcta (+4 pts por acierto).</p>
+                                <div id="flexbox-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="flexbox-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="justify-content">justify-content</button>
+                                    <button class="flexbox-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="flex-wrap">flex-wrap</button>
+                                    <button class="flexbox-btn bg-orange-100 border border-orange-400 text-orange-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="gap">gap</button>
+                                </div>
+                                <p id="flexbox-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Grid cheat sheet -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-grid">
+                            <span>🔲 Grid: las propiedades que sí vas a usar</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-grid" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="grid-intro" class="content-section">
+                                <figure class="mb-4">
+                                    <img src="img/figura-2-flexbox-vs-grid.webp" alt="Diferencia básica entre Flexbox y Grid" class="w-full max-w-2xl mx-auto rounded-lg border border-slate-200">
+                                    <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 2. Diferencia básica entre Flexbox y Grid. Fuente: elaboración propia con Python (matplotlib), 2026.</figcaption>
+                                </figure>
+                                <p class="mb-4">
+                                    Igual que con Flexbox, aquí tienes las propiedades concretas de Grid que vas a necesitar para tu proyecto.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada propiedad para descubrir qué hace (+4 puntos la primera vez):</p>
+                                <div id="reveal-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="grid-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): ¿qué propiedad define cuántas columnas tendrá el contenedor en Grid?</p>
+                                <div id="choice-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-grid-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5: Mobile-first -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-mobilefirst">
+                            <span>📱 Mobile-first: empieza por la pantalla más pequeña</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-mobilefirst" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="mobilefirst-intro" class="content-section">
+                                <p class="mb-4">
+                                    Tu guía dice que hay que probar la interfaz en distintos tamaños de pantalla, pero no dice por dónde empezar a diseñar. La estrategia <strong>mobile-first</strong> propone diseñar primero para el celular y luego ir agregando estilos para pantallas más grandes con <em>media queries</em>.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada breakpoint para descubrirlo (+4 puntos la primera vez):</p>
+                                <div id="reveal-mobilefirst" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="mobilefirst-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): ¿qué significa diseñar "mobile-first"?</p>
+                                <div id="choice-mobilefirst" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-mobilefirst-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Modo misión activado — completa las 6 misiones de tu equipo</p>
+                        <p class="text-green-800 font-semibold">🏅 Misiones: <span id="actividades-completadas">0</span>/6</p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Misión 1 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Misión 1: Cuestionario de comprensión</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Resuelve el cuestionario de forma individual, usando ejemplos relacionados con el proyecto web de tu equipo.</p>
+                        <div class="space-y-3">
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué significa maquetar una página web?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué función cumple HTML5 dentro del frontend?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Por qué es importante usar etiquetas semánticas?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Mencione tres etiquetas semánticas de HTML5 y explique su uso.</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué función cumple CSS dentro de una página web?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué es el modelo de caja?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Cuál es la diferencia básica entre Flexbox y Grid?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Para qué sirve el diseño responsivo?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué problemas puede presentar una página que no es responsiva?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Por qué la maquetación debe respetar los wireframes y la guía de estilos?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> El cuestionario respondido de forma individual por cada integrante.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 2 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📐 Misión 2: Revisión de wireframes y guía de estilos</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Retomen sus wireframes y guía de estilos de la guía anterior para preparar la construcción de la primera versión estática del frontend.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Pantalla seleccionada</th>
+                                        <th class="border border-green-300 p-2">Elementos que debe contener</th>
+                                        <th class="border border-green-300 p-2">Colores o estilos definidos</th>
+                                        <th class="border border-green-300 p-2">Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wireframes-revision-tabla"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Tabla con al menos 4 pantallas revisadas y listas para maquetar.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 3 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🏷️ Misión 3: Estructura HTML5</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Construyan la estructura HTML de las pantallas principales del proyecto, iniciando con las más importantes para el usuario.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Pantalla</th>
+                                        <th class="border border-green-300 p-2">Etiquetas principales utilizadas</th>
+                                        <th class="border border-green-300 p-2">Archivo creado</th>
+                                        <th class="border border-green-300 p-2">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Inicio</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Formulario principal</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Listado o panel</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Contacto o confirmación</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Archivos HTML5 con estructura semántica para las pantallas principales.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 4 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="4">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🎨 Misión 4: Aplicación de estilos CSS</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Apliquen estilos CSS de acuerdo con la guía de estilos: colores, tipografías, tamaños, botones, formularios, tarjetas y espaciados.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Elemento</th>
+                                        <th class="border border-green-300 p-2">Estilo aplicado</th>
+                                        <th class="border border-green-300 p-2">Coincide con la guía de estilos</th>
+                                        <th class="border border-green-300 p-2">Ajustes pendientes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Botones</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Formularios</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Tarjetas o secciones</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Menú de navegación</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Textos y títulos</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Archivo(s) CSS aplicados de acuerdo con la guía de estilos del equipo.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 5 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="5">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Misión 5: Uso de Flexbox y Grid</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Identifiquen secciones de su proyecto donde sea necesario distribuir elementos, y apliquen Flexbox o Grid según las características de la pantalla.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Sección</th>
+                                        <th class="border border-green-300 p-2">Herramienta usada</th>
+                                        <th class="border border-green-300 p-2">Razón de la elección</th>
+                                        <th class="border border-green-300 p-2">Resultado esperado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Menú</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Tarjetas o productos</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Formulario</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Panel o listado</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Secciones del proyecto distribuidas con Flexbox o Grid según corresponda.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 6 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📱 Misión 6: Prueba de diseño responsivo</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Revisen las pantallas en diferentes tamaños de visualización y registren los ajustes realizados.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Tamaño de pantalla</th>
+                                        <th class="border border-green-300 p-2">¿Se visualiza correctamente?</th>
+                                        <th class="border border-green-300 p-2">Problema encontrado</th>
+                                        <th class="border border-green-300 p-2">Ajuste realizado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Celular</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Tableta</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Computador</td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td><td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Evidencias de prueba responsiva mediante capturas o registro de ajustes.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Evidencia de aprendizaje -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📦 Evidencia de aprendizaje: Producto de avance del frontend</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Cada equipo debe entregar un producto de avance relacionado con el diseño e implementación del frontend que incluya:</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Versión estática del frontend con mínimo tres pantallas principales</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Estructura HTML5 organizada y semántica</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Archivo o archivos CSS aplicados de acuerdo con la guía de estilos</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Uso visible de Flexbox o Grid en secciones del proyecto</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Evidencias de prueba responsiva mediante capturas o registro de ajustes</label>
+                        </div>
+                    </div>
+
+                    <!-- Criterios de valoración -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📊 Criterios de valoración de la actividad</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2 text-left">Criterio</th>
+                                        <th class="border border-green-300 p-2 text-left">Nivel esperado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Estructura HTML5</td><td class="border border-green-300 p-2">Las pantallas usan etiquetas semánticas y una organización clara del contenido.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Aplicación de CSS</td><td class="border border-green-300 p-2">Los estilos son coherentes con la guía de estilos y mantienen unidad visual.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Distribución de elementos</td><td class="border border-green-300 p-2">El uso de Flexbox o Grid permite organizar adecuadamente los elementos de la interfaz.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Diseño responsivo</td><td class="border border-green-300 p-2">La interfaz se adapta a diferentes tamaños de pantalla sin perder claridad.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Coherencia con el diseño previo</td><td class="border border-green-300 p-2">La maquetación respeta los wireframes y el prototipo inicial.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: MDN HTML -->
+                    <li id="recurso-ext-1" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: HTML</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial y completa del lenguaje HTML, en español.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTML" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR MDN HTML" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: MDN CSS -->
+                    <li id="recurso-ext-2" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: CSS</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial y completa del lenguaje CSS, en español.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/CSS" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR MDN CSS" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: MDN Flexbox -->
+                    <li id="recurso-ext-3" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: Flexbox</h3>
+                            <p class="text-slate-600 mb-2">Guía de aprendizaje de MDN sobre CSS Flexbox, con ejemplos prácticos.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Learn/CSS/CSS_layout/Flexbox" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR MDN Flexbox" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 4: MDN CSS Grid -->
+                    <li id="recurso-ext-4" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: CSS Grid</h3>
+                            <p class="text-slate-600 mb-2">Referencia y guía de MDN sobre CSS Grid Layout.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/CSS/CSS_grid_layout" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-4.png" alt="QR MDN CSS Grid" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 5: web.dev Responsive design -->
+                    <li id="recurso-ext-5" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Learn Responsive Design (web.dev)</h3>
+                            <p class="text-slate-600 mb-2">Curso completo de Google sobre diseño responsivo: media queries, layouts, tipografía e imágenes adaptables.</p>
+                            <a href="https://web.dev/learn/design/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-5.png" alt="QR web.dev responsive design" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Duckett, J. (2011). <i>HTML and CSS: Design and build websites</i>. Wiley.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>HTML: Lenguaje de etiquetas de hipertexto</i>. MDN Web Docs.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>CSS: Hojas de estilo en cascada</i>. MDN Web Docs.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Universidad de Córdoba. (2025). <i>Plan de curso: Proyecto Web</i>. Técnico Profesional en Programación Web.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál etiqueta HTML5 semántica se usa para el pie de página?",
+                options: ["header", "footer", "aside", "nav"],
+                correct: 1
+            },
+            {
+                question: "Con box-sizing: border-box, ¿qué incluye el ancho total que defines en CSS?",
+                options: ["Solo el contenido", "Contenido + padding + border", "Solo el margin", "Nada, ese valor no existe"],
+                correct: 1
+            },
+            {
+                question: "¿Qué propiedad de Flexbox centra los elementos a lo largo del eje principal del contenedor?",
+                options: ["align-items", "justify-content", "flex-wrap", "gap"],
+                correct: 1
+            },
+            {
+                question: "¿Qué propiedad de CSS Grid define cuántas columnas tendrá el contenedor?",
+                options: ["grid-gap", "grid-template-columns", "flex-direction", "grid-row"],
+                correct: 1
+            },
+            {
+                question: "¿Qué significa diseñar \"mobile-first\"?",
+                options: ["Diseñar primero para pantallas grandes y luego achicar", "Diseñar primero para pantallas pequeñas y luego expandir", "Solo diseñar para celulares", "Ignorar el diseño de escritorio"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la diferencia principal entre Flexbox y Grid?",
+                options: ["Flexbox organiza en una dimensión, Grid en dos dimensiones", "Son exactamente lo mismo", "Grid es solo para celulares", "Flexbox no se usa en proyectos reales"],
+                correct: 0
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // --- Helper genérico para tarjetas "revelar" ---
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // --- Helper genérico para juegos de clasificación (2 o más categorías) ---
+        function renderClasifica(fraseContainerId, botonClass, frases, msgId, puntos) {
+            let seleccion = null;
+            const container = document.getElementById(fraseContainerId);
+            frases.forEach((f, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+                chip.textContent = f.texto;
+                chip.dataset.index = i;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('chip-done-correct') || this.classList.contains('chip-done-wrong')) return;
+                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                    this.classList.add('chip-selected');
+                    seleccion = this;
+                });
+                container.appendChild(chip);
+            });
+            document.querySelectorAll('.' + botonClass).forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!seleccion) return;
+                    const idx = parseInt(seleccion.dataset.index);
+                    const tipo = btn.dataset.tipo;
+                    const msg = document.getElementById(msgId);
+                    seleccion.classList.remove('chip-selected');
+                    if (frases[idx].tipo === tipo) {
+                        seleccion.classList.add('chip-done-correct');
+                        msg.textContent = '✅ ¡Correcto!';
+                        msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        seleccion.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ No era esa etiqueta, sigue intentando.';
+                        msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                    }
+                    seleccion = null;
+                });
+            });
+        }
+
+        // --- Más etiquetas semánticas: reveal ---
+        renderReveal('reveal-semantica', [
+            { titulo: "article", texto: "Un contenido independiente que tendría sentido por sí solo, como una publicación de blog o una tarjeta de producto." },
+            { titulo: "aside", texto: "Contenido relacionado pero secundario, como una barra lateral, notas o enlaces relacionados." },
+            { titulo: "figure + figcaption", texto: "Una imagen, diagrama o gráfico junto con su descripción o pie de foto." },
+            { titulo: "time", texto: "Representa una fecha o una hora, de forma que el navegador (y los buscadores) la entiendan." },
+            { titulo: "mark", texto: "Resalta texto relevante, como cuando se marca un resultado de búsqueda." }
+        ], 4);
+
+        // --- Semántica: clasificación ---
+        renderClasifica('semantica-frases', 'semantica-btn', [
+            { texto: "Una tarjeta de un producto que se podría compartir de forma independiente.", tipo: "article" },
+            { texto: "Una barra lateral con enlaces relacionados a otras pantallas.", tipo: "aside" },
+            { texto: "Una captura de pantalla del prototipo, con su descripción debajo.", tipo: "figure" }
+        ], 'semantica-msg', 4);
+
+        // --- box-sizing: reveal ---
+        renderReveal('reveal-boxsizing', [
+            { titulo: "content-box (por defecto)", texto: "El width que defines es solo para el contenido. El padding y el border se SUMAN, haciendo la caja más ancha de lo que pusiste." },
+            { titulo: "border-box", texto: "El width que defines incluye el padding y el border. La caja mantiene el tamaño exacto que definiste, sin sorpresas." }
+        ], 5);
+
+        // --- box-sizing quiz ---
+        const boxsizingOpciones = ["La caja crece a 240px de ancho total", "La caja se mantiene en 200px de ancho total", "El padding se ignora", "El navegador muestra un error"];
+        const boxsizingCorrecta = 1;
+        const boxsizingContainer = document.getElementById('choice-boxsizing');
+        let boxsizingRespondido = false;
+        boxsizingOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (boxsizingRespondido) return;
+                boxsizingRespondido = true;
+                const msg = document.getElementById('choice-boxsizing-msg');
+                if (i === boxsizingCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! Con border-box, el padding se resta del contenido, no se suma al ancho total.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Justo eso es lo que evita border-box: que la caja crezca al agregar padding.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            boxsizingContainer.appendChild(btn);
+        });
+
+        // --- Flexbox cheat sheet: reveal ---
+        renderReveal('reveal-flexbox', [
+            { titulo: "display: flex", texto: "Activa Flexbox en un contenedor. Es el primer paso, sin esto las demás propiedades no hacen nada." },
+            { titulo: "justify-content", texto: "Alinea los elementos a lo largo del eje principal (horizontal, si es fila): inicio, centro, fin, espacio entre ellos." },
+            { titulo: "align-items", texto: "Alinea los elementos en el eje cruzado (vertical, si es fila): arriba, centro, abajo." },
+            { titulo: "flex-wrap", texto: "Permite que los elementos pasen a una nueva línea cuando no caben, en vez de encogerse." },
+            { titulo: "gap", texto: "Define el espacio entre los elementos, sin necesidad de usar margin en cada uno." }
+        ], 4);
+
+        // --- Flexbox: clasificación ---
+        renderClasifica('flexbox-frases', 'flexbox-btn', [
+            { texto: "Quiero centrar mis botones horizontalmente dentro del contenedor.", tipo: "justify-content" },
+            { texto: "Quiero que mis tarjetas pasen a una nueva fila cuando no quepan.", tipo: "flex-wrap" },
+            { texto: "Quiero separar mis tarjetas sin usar margin en cada una.", tipo: "gap" }
+        ], 'flexbox-msg', 4);
+
+        // --- Grid cheat sheet: reveal ---
+        renderReveal('reveal-grid', [
+            { titulo: "display: grid", texto: "Activa Grid en un contenedor, el primer paso antes de cualquier otra propiedad de Grid." },
+            { titulo: "grid-template-columns", texto: "Define cuántas columnas tendrá el contenedor y su tamaño, ej: 1fr 1fr 1fr para tres columnas iguales." },
+            { titulo: "grid-template-rows", texto: "Define cuántas filas tendrá el contenedor y su tamaño." },
+            { titulo: "gap", texto: "Define el espacio entre filas y columnas, igual que en Flexbox." },
+            { titulo: "grid-column / grid-row", texto: "Permite que un elemento ocupe varias columnas o filas a la vez, como una tarjeta destacada más grande." }
+        ], 4);
+
+        // --- Grid quiz ---
+        const gridOpciones = ["grid-gap", "grid-template-columns", "flex-direction", "grid-row"];
+        const gridCorrecta = 1;
+        const gridContainer = document.getElementById('choice-grid');
+        let gridRespondido = false;
+        gridOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (gridRespondido) return;
+                gridRespondido = true;
+                const msg = document.getElementById('choice-grid-msg');
+                if (i === gridCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! grid-template-columns define el número y tamaño de las columnas.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Esa propiedad no controla las columnas del contenedor.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            gridContainer.appendChild(btn);
+        });
+
+        // --- Mobile-first: reveal ---
+        renderReveal('reveal-mobilefirst', [
+            { titulo: "📱 Menos de 600px", texto: "Celulares. Aquí empiezas a diseñar: una sola columna, menú simplificado, texto legible sin hacer zoom." },
+            { titulo: "📟 600px – 900px", texto: "Tabletas. Puedes empezar a mostrar dos columnas o expandir el menú." },
+            { titulo: "🖥️ Más de 900px", texto: "Computadores. Aquí aprovechas el espacio extra: más columnas, menús completos, contenido más denso." }
+        ], 4);
+
+        // --- Mobile-first quiz ---
+        const mobilefirstOpciones = ["Diseñar solo para computadores de escritorio", "Diseñar primero para la pantalla más pequeña y luego ir agregando estilos para pantallas más grandes", "Usar únicamente imágenes pequeñas", "Eliminar el menú de navegación en todas las versiones"];
+        const mobilefirstCorrecta = 1;
+        const mobilefirstContainer = document.getElementById('choice-mobilefirst');
+        let mobilefirstRespondido = false;
+        mobilefirstOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (mobilefirstRespondido) return;
+                mobilefirstRespondido = true;
+                const msg = document.getElementById('choice-mobilefirst-msg');
+                if (i === mobilefirstCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! Se diseña primero lo esencial para pantallas pequeñas y se va enriqueciendo con media queries.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Mobile-first parte de la pantalla más pequeña, no al revés.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            mobilefirstContainer.appendChild(btn);
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // Tabla revisión de wireframes (4 filas)
+        const wireframesRevisionTabla = document.getElementById('wireframes-revision-tabla');
+        for (let i = 1; i <= 4; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+            `;
+            wireframesRevisionTabla.appendChild(tr);
+        }
+
+        // Progreso de misiones
+        let misionesCompletadas = 0;
+        const contadorMisiones = document.getElementById('actividades-completadas');
+        const barraMisiones = document.getElementById('actividades-barra');
+        document.querySelectorAll('.complete-mission-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.mission-card');
+                if (card.classList.contains('completed')) return;
+                card.classList.add('completed');
+                this.textContent = '✅ Misión completada';
+                this.disabled = true;
+                misionesCompletadas++;
+                contadorMisiones.textContent = misionesCompletadas;
+                barraMisiones.style.width = Math.round((misionesCompletadas / 6) * 100) + '%';
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

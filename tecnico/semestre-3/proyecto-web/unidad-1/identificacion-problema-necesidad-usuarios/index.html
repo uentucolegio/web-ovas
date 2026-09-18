@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Identificación del problema, necesidad y usuarios objetivo</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back {
+            display: none;
+        }
+        .reveal-card.opened .reveal-back {
+            display: block;
+        }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .mission-card.completed {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+        .badge-locked {
+            filter: grayscale(1);
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🕵️ Antes de construir, hay que entender</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Todo proyecto web nace de una necesidad o de un problema real que hay que comprender <strong>antes</strong> de salir a resolverlo. Es muy tentador empezar directo por los colores, los botones o "cómo se va a ver" la página... pero si saltas ese paso, corres el riesgo de construir algo bonito que a nadie le sirve. 😅
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Antes de escribir una sola línea de código deberías poder responder preguntas como: <em>¿qué problema se quiere resolver?, ¿quién lo sufre?, ¿dónde ocurre?, ¿por qué importa?, ¿qué necesitan realmente los usuarios?, ¿qué pasaría si nadie hace nada?</em>
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Este OVA te va a acompañar en ese primer paso de la Unidad 1: <strong>Formulación y planificación del proyecto web</strong>. Vas a aprender a distinguir problema, necesidad, usuario objetivo y solución, y vas a aplicar herramientas prácticas (lluvia de ideas, árbol de problemas, mapa de empatía) para convertir una situación real de tu entorno en la idea inicial de tu proyecto.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Una buena formulación inicial marca la diferencia en todo lo que viene después: objetivos, requerimientos, diseño, programación y despliegue. Al final de este tema, tu equipo tendrá lista una <strong>ficha inicial del proyecto</strong> 📋 que servirá de base para las siguientes guías de la unidad.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA vas a poder mirar cualquier situación cotidiana y decir: "ahí hay un problema, ahí hay una necesidad... y ahí hay una posible solución web". <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <figure class="mt-8">
+                    <img src="img/figura-1-relacion-problema-necesidad-solucion.webp" alt="Relación entre problema, necesidad, usuarios objetivo y solución web" class="w-full max-w-2xl mx-auto rounded-lg border border-slate-200">
+                    <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 1. Relación entre problema, necesidad, usuarios y solución. Fuente: elaboración propia con Python (matplotlib), 2026.</figcaption>
+                </figure>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Reconocer la diferencia entre <strong>problema</strong>, <strong>necesidad</strong>, <strong>usuario objetivo</strong> y <strong>solución</strong> dentro de la formulación inicial de un proyecto web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔎</span>
+                        <span>Analizar situaciones del entorno que puedan convertirse en oportunidades para el desarrollo de una aplicación o sitio web funcional.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">👥</span>
+                        <span>Caracterizar los usuarios objetivo de un proyecto web a partir de sus necesidades, dificultades, intereses y formas de uso de la tecnología.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧰</span>
+                        <span>Aplicar herramientas básicas de análisis, como lluvia de ideas, árbol de problemas y mapa de empatía, para definir una idea inicial de proyecto web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📋</span>
+                        <span>Elaborar una ficha inicial del proyecto donde se describa el problema, la necesidad, los usuarios objetivo, el contexto y una posible solución web.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🔍 Modo exploración: recorre las 5 estaciones y suma puntos</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Design Thinking -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-design-thinking">
+                            <span>🎯 Design Thinking: el mapa detrás de un buen proyecto</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-design-thinking" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="dt-intro" class="content-section">
+                                <p class="mb-4">
+                                    Identificar problema, necesidad y usuarios no es un invento de esta guía: es el corazón de una metodología usada por equipos de producto en todo el mundo llamada <strong>Design Thinking</strong>. Nació en la Universidad de Stanford y se popularizó gracias a la consultora IDEO en los años 90. Hoy la usan equipos de Google, Airbnb, bancos, ONGs y, por supuesto, muchísimos equipos de desarrollo web, sin importar el tamaño del proyecto.
+                                </p>
+                                <p class="mb-4">
+                                    A diferencia de un proceso lineal ("primero esto, después esto, y ya"), el Design Thinking es <strong>iterativo</strong>: los equipos regresan varias veces a fases anteriores a medida que aprenden algo nuevo. Tiene 5 fases que se repiten una y otra vez hasta llegar a una buena solución.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada fase para descubrirla (+5 puntos la primera vez):</p>
+                                <div id="reveal-design-thinking" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="dt-mapeo" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🔗 Estas fases ya están escondidas en tu Unidad 1</h4>
+                                <p class="mb-3">Lo interesante es que las herramientas que vas a usar en las Actividades de este mismo tema son, en el fondo, aplicaciones directas de estas fases:</p>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Fase</th>
+                                                <th class="border border-green-300 p-2 text-left">Herramienta de tu unidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td class="border border-green-300 p-2">❤️ Empatizar</td><td class="border border-green-300 p-2">Mapa de empatía</td></tr>
+                                            <tr><td class="border border-green-300 p-2">🎯 Definir</td><td class="border border-green-300 p-2">Árbol de problemas y ficha de análisis del problema</td></tr>
+                                            <tr><td class="border border-green-300 p-2">💡 Idear</td><td class="border border-green-300 p-2">Lluvia de ideas de problemas reales</td></tr>
+                                            <tr><td class="border border-green-300 p-2">🛠️ Prototipar</td><td class="border border-green-300 p-2">Se trabajará en las próximas guías (bocetos y pantallas)</td></tr>
+                                            <tr><td class="border border-green-300 p-2">🧪 Testear</td><td class="border border-green-300 p-2">Socialización de la idea con el docente y compañeros</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: Casos que fallaron -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-casos-fallidos">
+                            <span>📉 Cuando nadie entendió el problema</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-casos-fallidos" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="casos-intro" class="content-section">
+                                <p class="mb-4">
+                                    Estudios clásicos de gestión de proyectos de software (como los informes CHAOS del Standish Group) coinciden en algo incómodo: una gran parte de los proyectos que fracasan o se retrasan no fallan por errores de código, sino por <strong>requerimientos mal entendidos desde el inicio</strong>. El equipo programa muy bien... la solución equivocada.
+                                </p>
+                                <p class="mb-4">
+                                    Esto se relaciona con una idea muy conocida en ingeniería de software: el <strong>costo del cambio</strong>. Mientras más tarde detectas que entendiste mal el problema, más caro sale corregirlo. Un malentendido descubierto en esta fase de formulación se arregla borrando un párrafo y reescribiéndolo; el mismo malentendido descubierto con el sistema ya en producción puede significar rehacer pantallas completas, cambiar la base de datos y perder semanas o meses de trabajo. Por eso esta unidad dedica tiempo completo solo a entender bien el problema antes de tocar una sola pantalla.
+                                </p>
+                                <p class="mb-4">
+                                    <strong>Caso ilustrativo 1:</strong> un emprendimiento de comida rápida contrató el desarrollo de una app de domicilios completa (pagos, mapas, cupones) sin antes preguntar a sus clientes cómo hacían sus pedidos hoy. Meses después descubrieron que el 90% de sus clientes pedía por WhatsApp porque valoraban hablar con alguien para personalizar su pedido. La app terminó casi sin uso: se resolvió un problema que nadie había validado.
+                                </p>
+                                <p class="mb-4">
+                                    <strong>Caso ilustrativo 2:</strong> una institución educativa construyó una plataforma completa de biblioteca virtual pensando que el problema era "no tener el catálogo en línea". Al lanzarla, casi nadie la usaba. La causa real era otra: los estudiantes no necesitaban un catálogo, sino ayuda para decidir qué leer en poco tiempo, y preferían reseñas cortas y recomendaciones antes que un listado extenso. La solución que realmente hacía falta era distinta a la que se había imaginado desde el principio.
+                                </p>
+                            </div>
+                            <div id="casos-5porques" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🪜 Herramienta extra: la técnica de los 5 Porqués</h4>
+                                <p class="mb-3">Sirve para no quedarte en el síntoma superficial: se pregunta "¿por qué?" varias veces seguidas hasta llegar a la causa raíz. Haz click y descubre la cadena de un caso real (+3 pts por paso):</p>
+                                <p class="mb-2 text-sm text-slate-600 italic">Situación inicial: "En una tienda de barrio, los clientes se quejan de que no encuentran rápido lo que buscan."</p>
+                                <div id="reveal-5-porques" class="space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Iceberg -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-iceberg">
+                            <span>🧊 El iceberg del problema: síntoma vs. causa raíz</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-iceberg" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="iceberg-intro" class="content-section">
+                                <p class="mb-4">
+                                    Imagina un iceberg 🧊. Lo que ves flotando sobre el agua es el <strong>síntoma</strong> (la queja, lo evidente: "los clientes se quejan"). Lo que sostiene ese síntoma está bajo el agua: las <strong>causas raíz</strong> (procesos manuales, falta de información, mala comunicación). Si solo atacas el síntoma, el problema vuelve a aparecer.
+                                </p>
+                                <div class="flex flex-col items-center my-4">
+                                    <div class="w-full max-w-sm bg-sky-50 border border-sky-200 rounded-t-lg p-3 text-center font-semibold text-sky-800">🌊 Superficie — Síntoma visible</div>
+                                    <div class="w-full max-w-sm bg-blue-900 text-white rounded-b-lg p-4 text-center font-semibold">🧊 Bajo el agua — Causas raíz</div>
+                                </div>
+                                <p class="mb-2">
+                                    Para no quedarte adivinando dónde buscar, ayuda agrupar las causas raíz en categorías. Esta idea es la base del <strong>diagrama de Ishikawa</strong> (o diagrama de espina de pescado), una herramienta clásica de análisis de causas usada en calidad y gestión de proyectos:
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada categoría para ver un ejemplo de un gimnasio con problemas de administración (+4 pts):</p>
+                                <div id="reveal-ishikawa" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="iceberg-quiz" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Pregunta rápida (+5 pts): "Los estudiantes entregan tarde sus trabajos" es un ejemplo de...</p>
+                                <div id="choice-iceberg" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-iceberg-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Clasificación -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-clasifica">
+                            <span>🧩 Clasifica: ¿problema, necesidad o solución?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-clasifica" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="clasifica-intro" class="content-section">
+                                <p class="mb-4">
+                                    Un error frecuente es mezclar los tres conceptos en una sola frase. Mira cómo se distinguen con un caso nuevo, un <strong>gimnasio</strong>:
+                                </p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Concepto</th>
+                                                <th class="border border-green-300 p-2 text-left">Pregunta clave</th>
+                                                <th class="border border-green-300 p-2 text-left">Ejemplo (gimnasio)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td class="border border-green-300 p-2 font-semibold">Problema</td><td class="border border-green-300 p-2">¿Qué situación negativa ocurre?</td><td class="border border-green-300 p-2">Los usuarios llegan y no saben qué máquinas o clases tienen cupo disponible; se forman filas y reclamos.</td></tr>
+                                            <tr><td class="border border-green-300 p-2 font-semibold">Necesidad</td><td class="border border-green-300 p-2">¿Qué requiere el usuario para mejorar esa situación?</td><td class="border border-green-300 p-2">Saber en tiempo real qué máquinas y clases tienen cupo disponible.</td></tr>
+                                            <tr><td class="border border-green-300 p-2 font-semibold">Solución</td><td class="border border-green-300 p-2">¿Qué se puede construir para atender la necesidad?</td><td class="border border-green-300 p-2">Una app web con mapa de ocupación en vivo y reserva de turnos por máquina o clase.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-4">
+                                    Ahora te toca a ti: practica con un caso distinto, una <strong>biblioteca escolar</strong>. Haz click en una frase y luego en la categoría correcta (+5 pts por acierto).
+                                </p>
+                                <div id="clasifica-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="clasifica-btn bg-red-100 border border-red-400 text-red-800 font-semibold py-2 px-4 rounded-lg" data-categoria="problema">😟 Problema</button>
+                                    <button class="clasifica-btn bg-yellow-100 border border-yellow-400 text-yellow-800 font-semibold py-2 px-4 rounded-lg" data-categoria="necesidad">🙋 Necesidad</button>
+                                    <button class="clasifica-btn bg-green-100 border border-green-400 text-green-800 font-semibold py-2 px-4 rounded-lg" data-categoria="solucion">💡 Solución</button>
+                                </div>
+                                <p id="clasifica-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 5: MVP -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-mvp">
+                            <span>🌱 Empieza pequeño: qué es un MVP</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-mvp" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="mvp-intro" class="content-section">
+                                <p class="mb-4">
+                                    Una vez tienes claros el problema, la necesidad y los usuarios, aparece la siguiente tentación: diseñar la solución "completa" desde el primer momento (login, roles, pagos, notificaciones, reportes...). El movimiento <strong>Lean Startup</strong>, popularizado por Eric Ries, propone otra ruta: construir primero un <strong>MVP (Producto Mínimo Viable)</strong>, la versión más pequeña posible de la solución que ya resuelve la necesidad central y se puede mostrar a usuarios reales para validarla.
+                                </p>
+                                <p class="mb-4">
+                                    Para tu proyecto de este semestre, pensar en un MVP es clave: entre más grande e ideal imagines tu solución desde el día uno, más riesgo hay de quedarte sin tiempo para terminarla. Un buen MVP no es "una versión pobre" de tu idea: es la versión que te permite <em>aprender rápido</em> si vas por buen camino.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada señal para descubrirla (+4 pts la primera vez):</p>
+                                <div id="reveal-mvp" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Modo misión activado — completa las 7 misiones de tu equipo</p>
+                        <p class="text-green-800 font-semibold">🏅 Misiones: <span id="actividades-completadas">0</span>/7</p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Misión 1 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Misión 1: Cuestionario de comprensión de la necesidad</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Responde con tus palabras. Cada respuesta guardada suma puntos a tu misión.</p>
+                        <div class="space-y-3">
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué es un proyecto web?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué diferencia existe entre un problema y una necesidad?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Por qué no es recomendable iniciar un proyecto web pensando primero en la solución?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Qué son los usuarios objetivo?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Mencione tres aspectos que se deben tener en cuenta para caracterizar un usuario.</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Explique con sus palabras qué es un árbol de problemas.</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Para qué sirve un mapa de empatía?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Por qué es importante que el problema seleccionado sea viable para desarrollarse durante el semestre?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Escriba un ejemplo de problema que pueda convertirse en proyecto web.</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Identifique una posible necesidad asociada al problema anterior y proponga una solución web.</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> El cuestionario respondido por cada integrante o de forma consensuada por el equipo.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 2 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">💡 Misión 2: Lluvia de ideas de problemas reales</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">En equipos de 3 o 4 estudiantes, propongan mínimo cinco situaciones problemáticas de su entorno.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Número</th>
+                                        <th class="border border-green-300 p-2">Situación problemática</th>
+                                        <th class="border border-green-300 p-2">Lugar o contexto</th>
+                                        <th class="border border-green-300 p-2">Personas afectadas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lluvia-tabla"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4"><label class="block text-sm font-semibold text-slate-700 mb-1">Las dos ideas más viables y su justificación:</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Tabla completa con 5 situaciones y la selección justificada de las 2 más viables.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 3 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔍 Misión 3: Análisis del problema seleccionado</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Ya con la idea principal elegida, completen la ficha de análisis:</p>
+                        <div class="space-y-2">
+                            <div><label class="block text-sm font-semibold text-slate-700">Nombre tentativo del proyecto</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Problema identificado</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Lugar o contexto donde ocurre</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Personas afectadas</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Causas principales</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Consecuencias</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Necesidad del usuario</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Posible solución web</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">Razón por la cual el proyecto es viable</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Ficha de análisis completa del problema elegido por el equipo.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 4 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="4">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👤 Misión 4: Caracterización de usuarios objetivo</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Identifiquen mínimo dos tipos de usuarios para su proyecto (aquí tienen espacio para tres).</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2">Tipo de usuario</th>
+                                        <th class="border border-green-300 p-2">Características</th>
+                                        <th class="border border-green-300 p-2">Necesidades</th>
+                                        <th class="border border-green-300 p-2">Dificultades</th>
+                                        <th class="border border-green-300 p-2">Funciones que podría usar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuarios-tabla"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Tabla con al menos 2 tipos de usuarios caracterizados.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 5 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="5">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🌳 Misión 5: Árbol de problemas</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Construyan su árbol de problemas: problema central, tres causas, tres consecuencias, necesidad y posible solución web. (También pueden dibujarlo a mano o en una herramienta digital.)</p>
+                        <figure class="mb-4">
+                            <img src="img/figura-2-arbol-de-problemas.webp" alt="Estructura básica del árbol de problemas" class="w-full max-w-xl mx-auto rounded-lg border border-slate-200">
+                            <figcaption class="text-center text-sm text-slate-500 mt-2 italic">Figura 2. Estructura básica del árbol de problemas. Fuente: elaboración propia con Python (matplotlib), 2026.</figcaption>
+                        </figure>
+                        <div class="space-y-2">
+                            <div><label class="block text-sm font-semibold text-slate-700">🌲 Problema central (tronco)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🌱 Causa 1 (raíz)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🌱 Causa 2 (raíz)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🌱 Causa 3 (raíz)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🍃 Consecuencia 1 (rama)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🍃 Consecuencia 2 (rama)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🍃 Consecuencia 3 (rama)</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">🙋 Necesidad que surge del problema</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">💡 Posible solución web</label><input class="mission-input w-full border rounded-lg p-2 text-sm"></div>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Árbol de problemas completo (aquí o en hoja/herramienta digital).</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 6 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">❤️ Misión 6: Mapa de empatía</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Seleccionen uno de los usuarios principales del proyecto y completen el mapa de empatía.</p>
+                        <div class="space-y-2">
+                            <div><label class="block text-sm font-semibold text-slate-700">¿Qué piensa y siente el usuario frente al problema?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">¿Qué observa en su entorno?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">¿Qué dice o hace frente al problema?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">¿Qué dificultades tiene?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">¿Qué necesita resolver?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                            <div><label class="block text-sm font-semibold text-slate-700">¿Qué espera de una solución web?</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="2"></textarea></div>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Mapa de empatía completo de un usuario principal.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Misión 7 -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="7">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🎤 Misión 7: Socialización de la idea</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Su equipo presentará la idea inicial del proyecto web ante el docente y sus compañeros, de forma presencial, para fortalecerla mediante el diálogo y recibir retroalimentación.
+                        </p>
+                        <p class="mb-2 font-semibold text-slate-700">Marquen lo que ya tienen listo para presentar:</p>
+                        <div class="space-y-2 mb-4">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="socializacion-check w-4 h-4"> Nombre tentativo del proyecto</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="socializacion-check w-4 h-4"> Problema identificado</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="socializacion-check w-4 h-4"> Usuarios objetivo</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="socializacion-check w-4 h-4"> Necesidad principal que se busca atender</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="socializacion-check w-4 h-4"> Posible solución web</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="socializacion-check w-4 h-4"> Importancia y viabilidad de la propuesta</label>
+                        </div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Síntesis de las observaciones recibidas y ajustes realizados:</label><textarea class="mission-input w-full border rounded-lg p-2 text-sm" rows="3"></textarea></div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> Presentación realizada y observaciones incorporadas a la ficha inicial.</p>
+                        </div>
+                        <button class="complete-mission-btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">🏁 Marcar misión como completada</button>
+                    </div>
+
+                    <!-- Evidencia de aprendizaje -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📦 Evidencia de aprendizaje: Ficha inicial del proyecto</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Cada equipo debe entregar una ficha inicial del proyecto web que incluya:</p>
+                        <div class="space-y-2" id="evidencia-checklist">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Nombre tentativo del proyecto</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Integrantes del equipo</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Descripción del problema</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Necesidad identificada</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Usuarios objetivo</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Contexto en el que ocurre el problema</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Causas y consecuencias del problema</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Posible solución web</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Justificación de la importancia y viabilidad del proyecto</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Árbol de problemas o mapa de empatía</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4"> Síntesis de observaciones recibidas y ajustes realizados</label>
+                        </div>
+                    </div>
+
+                    <!-- Criterios de valoración -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📊 Criterios de valoración de la actividad</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-green-100">
+                                        <th class="border border-green-300 p-2 text-left">Criterio</th>
+                                        <th class="border border-green-300 p-2 text-left">Nivel esperado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Identificación del problema</td><td class="border border-green-300 p-2">El problema se describe de manera clara, concreta y relacionada con una necesidad real del contexto.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Caracterización de los usuarios</td><td class="border border-green-300 p-2">Los usuarios objetivo están claramente definidos y se explican sus principales necesidades o dificultades.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Coherencia problema-necesidad-solución</td><td class="border border-green-300 p-2">La solución web propuesta responde de manera lógica al problema y a la necesidad identificada.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Viabilidad del proyecto</td><td class="border border-green-300 p-2">La idea puede desarrollarse durante el semestre con los recursos, conocimientos y tiempo académico disponibles.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Argumentación de la propuesta</td><td class="border border-green-300 p-2">El equipo explica de manera clara la importancia del proyecto y sustenta su viabilidad.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Trabajo colaborativo</td><td class="border border-green-300 p-2">Los integrantes participan activamente en la construcción, análisis y socialización de la idea.</td></tr>
+                                    <tr><td class="border border-green-300 p-2 font-semibold">Apropiación de la retroalimentación</td><td class="border border-green-300 p-2">El equipo escucha, analiza e incorpora las observaciones pertinentes para mejorar su propuesta inicial.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: Árbol de problemas: explicación y ejemplo práctico -->
+                    <li id="recurso-ext-1" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Cómo hacer un árbol de problemas: ejemplo práctico</h3>
+                            <p class="text-slate-600 mb-2">Guía paso a paso para construir un árbol de problemas, con un ejemplo aplicado a una empresa real.</p>
+                            <a href="https://www.ingenioempresa.com/arbol-de-problemas/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Árbol de problemas" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: Video cómo hacer un árbol de problemas y objetivos -->
+                    <li id="recurso-ext-2" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Video: cómo hacer un árbol de problemas y objetivos (Marco Lógico)</h3>
+                            <p class="text-slate-600 mb-2">Video tutorial que explica cómo construir el árbol de problemas y el árbol de objetivos con la metodología de Marco Lógico.</p>
+                            <a href="https://www.youtube.com/watch?v=76OBJ3sYTVk" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR Video árbol de problemas" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: Video Design Thinking fases y ejemplos -->
+                    <li id="recurso-ext-3" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Qué es el Design Thinking: fases y ejemplos</h3>
+                            <p class="text-slate-600 mb-2">Video en español que explica las fases del Design Thinking con ejemplos prácticos, la metodología que está detrás de identificar bien problema, necesidad y usuarios.</p>
+                            <a href="https://www.youtube.com/watch?v=CTKvYD4PGIA" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR Video Design Thinking" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">IDEO. (2011). <i>Diseño centrado en las personas: Kit de herramientas</i> (2.ª ed.).</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Norman, D. A. (2024). <i>El diseño de las cosas cotidianas</i>. Capitán Swing.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Pressman, R. S., y Maxim, B. R. (2021). <i>Ingeniería de software: Un enfoque práctico</i> (9.ª ed.). McGraw-Hill Education.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo web: HTML, CSS y JavaScript</i>. Difusora Larousse–Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Sommerville, I. (2011). <i>Ingeniería de software</i> (9.ª ed.). Pearson Educación.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué describe mejor un 'problema' en la formulación de un proyecto web?",
+                options: ["Una idea de aplicación que se quiere construir", "Una situación que genera dificultad o afecta negativamente a alguien", "Un listado de funciones del sistema", "El nombre tentativo del proyecto"],
+                correct: 1
+            },
+            {
+                question: "Un equipo dice: 'Vamos a hacer una app con login, carrito y pagos'. ¿Qué error comete al formular así su proyecto?",
+                options: ["Ninguno, así se debe empezar todo proyecto", "Empieza por la solución sin haber descrito el problema ni la necesidad", "Describe demasiado bien el problema", "Usa demasiados usuarios objetivo"],
+                correct: 1
+            },
+            {
+                question: "Según Design Thinking, ¿en qué fase se busca comprender a fondo a los usuarios antes de proponer ideas?",
+                options: ["Prototipar", "Idear", "Empatizar", "Testear"],
+                correct: 2
+            },
+            {
+                question: "Usando la técnica del iceberg, 'los clientes se quejan por demoras' sería...",
+                options: ["Una causa raíz", "Un síntoma visible", "Una solución web", "Un usuario objetivo"],
+                correct: 1
+            },
+            {
+                question: "Un docente necesita organizar la información académica de sus estudiantes sin depender de hojas sueltas. Esto es principalmente...",
+                options: ["Una solución web ya construida", "Una necesidad", "Un criterio de valoración", "Un mapa de empatía"],
+                correct: 1
+            },
+            {
+                question: "¿Por qué la técnica de los '5 Porqués' es útil antes de diseñar una solución web?",
+                options: ["Porque ayuda a llegar a la causa raíz en vez de quedarse en el síntoma superficial", "Porque reemplaza el mapa de empatía", "Porque define el diseño visual de la interfaz", "Porque sirve solo para elegir colores del sitio"],
+                correct: 0
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // --- Helper genérico para tarjetas "revelar" ---
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // --- Design Thinking: reveal cards ---
+        renderReveal('reveal-design-thinking', [
+            { titulo: "❤️ Empatizar", texto: "Observar y escuchar a los usuarios reales para entender su situación, sin asumir nada." },
+            { titulo: "🎯 Definir", texto: "Redactar con claridad cuál es el problema y la necesidad concreta que se va a atender." },
+            { titulo: "💡 Idear", texto: "Proponer muchas posibles soluciones antes de decidirse por una sola." },
+            { titulo: "🛠️ Prototipar", texto: "Construir una versión simple y rápida de la solución para probarla." },
+            { titulo: "🧪 Testear", texto: "Mostrar el prototipo a usuarios reales y ajustar la solución con su retroalimentación." }
+        ], 5);
+
+        // --- 5 Porqués: cadena guiada tipo "revelar" ---
+        renderReveal('reveal-5-porques', [
+            { titulo: "¿Por qué 1?", texto: "Los clientes se quejan porque no encuentran rápido lo que buscan en la tienda." },
+            { titulo: "¿Por qué 2?", texto: "No lo encuentran rápido porque los productos no están organizados por categorías visibles." },
+            { titulo: "¿Por qué 3?", texto: "No están organizados porque el inventario se lleva en cuadernos y nadie sabe con certeza qué hay y dónde." },
+            { titulo: "¿Por qué 4?", texto: "Se lleva en cuadernos porque nunca han tenido un sistema digital de inventario accesible para los empleados." },
+            { titulo: "¿Por qué 5?", texto: "Causa raíz: no existe una herramienta web sencilla y económica adaptada a las necesidades de una tienda pequeña." }
+        ], 3);
+
+        // --- Categorías de Ishikawa: reveal cards ---
+        renderReveal('reveal-ishikawa', [
+            { titulo: "🧑 Personas", texto: "El personal del gimnasio no recibió capacitación sobre cómo registrar el uso de las máquinas." },
+            { titulo: "🔁 Procesos", texto: "No existe un protocolo claro para reservar horarios ni para liberar un cupo si alguien no asiste." },
+            { titulo: "🖥️ Tecnología", texto: "No hay ninguna herramienta digital: todo se organiza por mensajes de WhatsApp sueltos." },
+            { titulo: "📊 Datos", texto: "Nadie lleva un registro histórico de qué horarios y máquinas son los más solicitados." }
+        ], 4);
+
+        // --- MVP: reveal cards ---
+        renderReveal('reveal-mvp', [
+            { titulo: "🎯 Enfoque en UNA necesidad", texto: "Un buen MVP resuelve una necesidad concreta y central, no todas las necesidades imaginables del proyecto." },
+            { titulo: "🧩 Sin funciones avanzadas todavía", texto: "Un buen MVP no necesita todavía roles complejos (administrador, permisos, reportes) si el curso no lo exige aún." },
+            { titulo: "⏱️ Cabe en el tiempo real disponible", texto: "Un buen MVP se puede construir, probar y ajustar dentro del tiempo real que tiene tu equipo en el semestre." },
+            { titulo: "🧪 Se puede probar con usuarios", texto: "Un buen MVP se puede mostrar a un usuario real (o simulado) y obtener retroalimentación útil, aunque no se vea \"terminado\"." }
+        ], 4);
+
+        // --- Iceberg quick check ---
+        const icebergOpciones = ["Un síntoma visible (la punta del iceberg)", "Una causa raíz oculta"];
+        const icebergCorrecta = 0;
+        const icebergContainer = document.getElementById('choice-iceberg');
+        let icebergRespondido = false;
+        icebergOpciones.forEach((op, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer';
+            btn.textContent = op;
+            btn.addEventListener('click', () => {
+                if (icebergRespondido) return;
+                icebergRespondido = true;
+                const msg = document.getElementById('choice-iceberg-msg');
+                if (i === icebergCorrecta) {
+                    btn.classList.add('selected');
+                    msg.textContent = '✅ ¡Correcto! Es el síntoma visible; la causa raíz habría que investigarla.';
+                    msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    btn.classList.add('bg-red-100', 'border-red-400');
+                    msg.textContent = '❌ Es un síntoma visible, no la causa raíz.';
+                    msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            icebergContainer.appendChild(btn);
+        });
+
+        // --- Clasificación problema/necesidad/solución ---
+        const frasesClasificar = [
+            { texto: "Los estudiantes hacen fila física para saber si un libro está disponible.", categoria: "problema" },
+            { texto: "Los estudiantes necesitan consultar la disponibilidad de libros desde su celular.", categoria: "necesidad" },
+            { texto: "Una aplicación web de consulta y reserva de libros con notificaciones.", categoria: "solucion" },
+            { texto: "El bibliotecario pierde tiempo actualizando fichas de préstamo a mano.", categoria: "problema" },
+            { texto: "El bibliotecario necesita un registro digital de préstamos y devoluciones.", categoria: "necesidad" },
+            { texto: "Un sistema de préstamos con historial y alertas de vencimiento.", categoria: "solucion" }
+        ];
+        let clasificaSeleccion = null;
+        const clasificaContainer = document.getElementById('clasifica-frases');
+        frasesClasificar.forEach((f, i) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+            chip.textContent = f.texto;
+            chip.dataset.index = i;
+            chip.addEventListener('click', function() {
+                if (this.classList.contains('chip-done-correct') || this.classList.contains('chip-done-wrong')) return;
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                this.classList.add('chip-selected');
+                clasificaSeleccion = this;
+            });
+            clasificaContainer.appendChild(chip);
+        });
+        document.querySelectorAll('.clasifica-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!clasificaSeleccion) return;
+                const idx = parseInt(clasificaSeleccion.dataset.index);
+                const categoria = btn.dataset.categoria;
+                const msg = document.getElementById('clasifica-msg');
+                clasificaSeleccion.classList.remove('chip-selected');
+                if (frasesClasificar[idx].categoria === categoria) {
+                    clasificaSeleccion.classList.add('chip-done-correct');
+                    msg.textContent = '✅ ¡Correcto!';
+                    msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                    sumarPuntos(5);
+                } else {
+                    clasificaSeleccion.classList.add('chip-done-wrong');
+                    msg.textContent = '❌ No era esa categoría, pero sigue intentando con las demás frases.';
+                    msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                }
+                clasificaSeleccion = null;
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // Tabla lluvia de ideas (5 filas)
+        const lluviaTabla = document.getElementById('lluvia-tabla');
+        for (let i = 1; i <= 5; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="border border-green-300 p-2 text-center font-semibold">${i}</td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+            `;
+            lluviaTabla.appendChild(tr);
+        }
+
+        // Tabla usuarios (3 filas)
+        const usuariosTabla = document.getElementById('usuarios-tabla');
+        for (let i = 1; i <= 3; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="border border-green-300 p-2 font-semibold text-center">Usuario ${i}</td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+                <td class="border border-green-300 p-2"><input class="mission-input w-full border rounded p-1 text-sm"></td>
+            `;
+            usuariosTabla.appendChild(tr);
+        }
+
+        // Progreso de misiones
+        let misionesCompletadas = 0;
+        const contadorMisiones = document.getElementById('actividades-completadas');
+        const barraMisiones = document.getElementById('actividades-barra');
+        document.querySelectorAll('.complete-mission-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.mission-card');
+                if (card.classList.contains('completed')) return;
+                card.classList.add('completed');
+                this.textContent = '✅ Misión completada';
+                this.disabled = true;
+                misionesCompletadas++;
+                contadorMisiones.textContent = misionesCompletadas;
+                barraMisiones.style.width = Math.round((misionesCompletadas / 7) * 100) + '%';
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
