@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Recurso Educativo Digital (RED)</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Verdes y Blancos Institucionales -->
+    <!-- Application Structure Plan: Se diseña un Objeto Virtual de Aprendizaje (OVA) con una disposición de dos columnas. Un menú lateral fijo a la izquierda permite la navegación entre las secciones pedagógicas (Introducción, Objetivos, etc.). El área de contenido principal a la derecha se actualiza dinámicamente con JavaScript para mostrar la sección seleccionada. Esta estructura es ideal para un aprendizaje guiado y organizado, permitiendo al usuario explorar el contenido de forma secuencial o no lineal. -->
+    <!-- Visualization & Content Choices: 1. Navegación -> Menú lateral con estado activo (HTML/JS) y ahora con iconos para mejorar la usabilidad. Justificación: Estructura clásica y efectiva para un OVA. 2. Fundamentos Teóricos -> Contenido textual con tarjetas destacadas con iconos. Justificación: Facilita la lectura y resalta conceptos clave. 3. Actividades Prácticas -> Cuestionario interactivo. Justificación: Fomenta la participación activa. 4. Evaluación -> Quiz de opción múltiple con retroalimentación. Justificación: Permite la autoevaluación del aprendizaje. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534; /* green-800 */
+            border-left-color: #22c55e; /* green-500 */
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover {
+            background-color: #f0fdf4; /* green-50 */
+        }
+        .quiz-option.selected {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .type-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .type-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        /* Ajuste para la tabla*/
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }   
+        .resultado{
+            border-radius: 15px; /* Esquinas redondeadas */
+            box-shadow: 5px 5px 15px rgb(1, 103, 56); /* Sombra */
+            display: block; /* Hacer que la imagen sea un bloque */
+            margin: 0 auto; /* Centrar horizontalmente */
+        }
+
+        /* Estilos para iframes interactivos */
+        .interactive-frame {
+            width: 500px;
+            height: 400px;
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px rgb(1, 103, 56);
+            display: block;
+            margin: 0 auto;
+            border: none;
+        }
+
+        /* Responsive para iframes */
+        @media (max-width: 768px) {
+            .interactive-frame {
+                width: 100%;
+                height: 300px;
+            }
+        }
+
+    /* Estilos para la sección de actividades */
+    #actividades {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-radius: 25px;
+        padding: 35px;
+        box-shadow: 0 25px 50px rgba(245, 158, 11, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    #actividades::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #f59e0b, #d97706, #b45309);
+        border-radius: 3px;
+    }
+
+    #actividades::after {
+        content: '🚀';
+        position: absolute;
+        top: 25px;
+        right: 35px;
+        font-size: 3rem;
+        opacity: 0.08;
+        animation: rocketFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes rocketFloat {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-15px) rotate(5deg);
+        }
+    }
+
+    #actividades h2 {
+        background: linear-gradient(135deg, #92400e, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        margin-bottom: 35px;
+        text-align: center;
+    }
+
+    #actividades h2::after {
+        content: '';
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+        border-radius: 2px;
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
+    }
+
+    #actividades .bg-white {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(245, 158, 11, 0.2);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px rgba(245, 158, 11, 0.12);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+
+    #actividades .bg-white::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.06), transparent);
+        transition: left 0.7s ease;
+    }
+
+    #actividades .bg-white:hover::before {
+        left: 100%;
+    }
+
+    #actividades .bg-white:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(245, 158, 11, 0.2);
+        border-color: rgba(245, 158, 11, 0.5);
+    }
+
+    #actividades h3 {
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.4rem;
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 20px;
+    }
+
+    #actividades h3::before {
+        content: '📚';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.8rem;
+        opacity: 0.9;
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
+    }
+
+    #actividades h4 {
+        background: linear-gradient(135deg, #b45309, #d97706);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.2rem;
+        position: relative;
+        padding: 15px 20px;
+        background: rgba(245, 158, 11, 0.08);
+        border-radius: 15px;
+        border-left: 4px solid #f59e0b;
+        margin: 20px 0;
+    }
+
+    #actividades h4 span {
+        margin-right: 15px;
+        font-size: 1.5rem;
+    }
+
+    #actividades p {
+        color: #4c1d06;
+        line-height: 1.7;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    #actividades p strong {
+        color: #92400e;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    #actividades ul {
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 15px;
+        padding: 20px 25px;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        margin: 20px 0;
+        box-shadow: inset 0 2px 8px rgba(245, 158, 11, 0.1);
+    }
+
+    #actividades ul li {
+        color: #4c1d06;
+        margin: 12px 0;
+        padding: 8px 15px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        border-left: 3px solid #f59e0b;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #actividades ul li::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    #actividades ul li:hover::before {
+        left: 100%;
+    }
+
+    #actividades ul li:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-left-color: #d97706;
+        transform: translateX(8px);
+        box-shadow: 0 5px 15px rgba(245, 158, 11, 0.2);
+    }
+
+    #actividades button {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border: none;
+        border-radius: 20px;
+        padding: 18px 32px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 20px;
+    }
+
+    #actividades button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+        transition: left 0.7s ease;
+    }
+
+    #actividades button:hover::before {
+        left: 100%;
+    }
+
+    #actividades button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 45px rgba(245, 158, 11, 0.4);
+        background: linear-gradient(135deg, #d97706, #b45309);
+    }
+
+    #actividades button:active {
+        transform: translateY(-2px);
+    }
+
+    #actividades #activity-result {
+        background: rgba(245, 158, 11, 0.1);
+        border: 2px dashed rgba(245, 158, 11, 0.4);
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-top: 20px;
+        text-align: center;
+        color: #92400e;
+        font-weight: 600;
+    }
+
+    /* Efectos especiales para las actividades */
+    #actividades .bg-white:nth-child(odd) {
+        border-left: 5px solid #f59e0b;
+    }
+
+    #actividades .bg-white:nth-child(even) {
+        border-right: 5px solid #d97706;
+    }
+
+    /* Animaciones adicionales */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    #actividades .bg-white {
+        animation: slideInLeft 0.6s ease-out;
+    }
+
+    #actividades .bg-white:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    #actividades .bg-white:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    /* Responsive design para actividades */
+    @media (max-width: 768px) {
+        #actividades {
+            padding: 25px;
+            border-radius: 20px;
+        }
+        
+        #actividades h3::before {
+            display: none;
+        }
+        
+        #actividades h3 {
+            padding-left: 0;
+            text-align: center;
+        }
+        
+        #actividades button {
+            padding: 15px 28px;
+            font-size: 1.1rem;
+            width: 100%;
+        }
+        
+        #actividades ul {
+            padding: 15px 20px;
+        }
+        
+        #actividades ul li {
+            padding: 10px 12px;
+        }
+    }
+
+    /* Estilos para zoom de imágenes */
+    .expand-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(34, 197, 94, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .expand-btn:hover {
+        background: rgba(34, 197, 94, 1);
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Modal para zoom */
+    .image-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .image-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: zoomIn 0.3s ease;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        z-index: 1001;
+    }
+
+    .close-modal:hover {
+        color: #22c55e;
+    }
+
+    @keyframes zoomIn {
+        from {
+            transform: scale(0.3);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    </style>
+    
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+               
+                
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6">
+                  <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                 <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    
+                    
+                    <option value="actividades">✍️ Actividades Prácticas</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                    
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🎨 Introducción a Flexbox y Grid Layout</h2>
+                <p style="text-align: justify;" class="text-slate-700 leading-relaxed mb-4">El <strong>desarrollo web</strong> se ha consolidado como uno de los <strong>pilares fundamentales</strong> en la <strong>transformación digital</strong> de empresas, instituciones y proyectos personales. Un <strong>Técnico Profesional en Programación Web</strong> posee las <strong>competencias necesarias</strong> para <strong>diseñar</strong>, <strong>implementar</strong> y <strong>mantener</strong> aplicaciones y sitios web <strong>dinámicos</strong>, <strong>eficientes</strong> y <strong>seguros</strong>, aplicando <strong>lenguajes de programación</strong>, <strong>herramientas</strong> y <strong>metodologías actualizadas</strong>.</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">🧭 Navega por el <strong>menú</strong> para explorar cada una de las <strong>secciones</strong> de este OVA. ¡Comencemos este <strong>viaje de aprendizaje</strong>!</p>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Al finalizar el estudio de este Objeto Virtual de Aprendizaje, estarás en capacidad de:</p>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-600 font-bold text-2xl mr-4">🎯</span>
+                        <p class="text-slate-700"><strong>Construir</strong> sitios y aplicaciones web dinámicas y funcionales, aplicando lenguajes de programación.</p>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-600 font-bold text-2xl mr-4">🎯</span>
+                        <p class="text-slate-700"><strong>Implementar</strong> soluciones web seguras y optimizadas.</p>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-600 font-bold text-2xl mr-4">🎯</span>
+                        <p class="text-slate-700"><strong>Fomentar</strong> el trabajo colaborativo y la adaptación a nuevas tecnologías, aplicando metodologías ágiles y habilidades de comunicación.</p>
+                    </li>
+                </ul>
+            </div>
+
+             <!-- Fundamentos con acordeón -->
+        <div id="contenido" class="content-pane">
+            
+            <div class="space-y-4">
+                    <div>
+            
+                        <h2 class="text-xl sm:text-2xl font-bold text-green-700 pt-4 mb-4">🎨 ¿Qué son Flexbox y Grid en CSS?</h2>
+                        <p class="mt-2">📝 Cuando empiezas a construir <strong>sitios web más complejos</strong>, necesitas <strong>herramientas</strong> que te ayuden a <strong>organizar el contenido</strong> de manera <strong>precisa</strong> y <strong>flexible</strong>. Aquí es donde entran <strong>Flexbox</strong> y <strong>Grid Layout</strong>.   </p>
+                        <br>
+                        <ul>
+                            <li>🔹	<strong>Flexbox (Flexible Box Layout)</strong>: permite <strong>distribuir los elementos</strong> de una forma <strong>fluida</strong> en una <strong>sola dimensión</strong> (fila o columna)</li>
+                            <br>
+                            <li>🔹	<strong>Grid Layout</strong>: permite <strong>diseñar estructuras</strong> en <strong>dos dimensiones</strong> (filas y columnas), ideal para crear <strong>interfaces más complejas</strong>.</li>
+                        </ul>
+                    
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-green-700 pt-4 mb-4">📐 Flexbox: diseño unidimensional</h3>
+                        <div class="space-y-6">
+
+                            <p style="text-align: justify;">📦 <strong>Flexbox</strong>, o el <strong>Módulo de Caja Flexible</strong>, es un <strong>modelo de diseño unidimensional</strong>. Esto significa que se enfoca en la <strong>disposición de elementos</strong> en una <strong>sola dimensión</strong>, ya sea en una <strong>fila</strong> o en una <strong>columna</strong>.</p>
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                <iframe class="interactive-frame" title="Imagen interactiva" src="https://view.genially.com/68a356b61340797031c73fd4" allowscriptaccess="always" allowfullscreen="true" scrolling="yes" allownetworking="all"></iframe>
+                                
+                                <br>
+                                <h4 class="text-lg sm:text-xl font-bold text-green-700 flex items-center mb-2"><span class="text-2xl mr-3">🎯</span>Propiedades del Contenedor Flex (display: flex; o display: inline-flex;):</h4>
+                                <iframe class="interactive-frame" title="Imagen interactiva" src="https://view.genially.com/68a35b09e2d9741279c7363e" allowscriptaccess="always" allowfullscreen="true" scrolling="yes" allownetworking="all"></iframe>
+                                
+                                <br>
+                                <p>🎯 <strong>Propiedades de los Ítems Flexibles (elementos hijos del contenedor)</strong></p>
+                                <br>
+                                <img class="resultado" src="img/Imagen 12.png"  width="500" height="400"  alt="">
+                            </div>
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl shadow-lg border-2 border-green-200 mb-6 overflow-hidden hover:shadow-xl transition-all duration-300">
+                                <details class="group">
+                                    <summary class="flex items-center justify-between p-8 cursor-pointer bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-all duration-300 relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                        <h4 class="text-xl sm:text-2xl font-bold flex items-center relative z-10"><span class="text-3xl mr-4 animate-bounce">👆</span>Ejemplo práctico aplicando Flexbox</h4>
+                                        <div class="relative z-10 bg-white bg-opacity-20 rounded-full p-2">
+                                            <svg class="w-6 h-6 text-white transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
+                                    </summary>
+                                    <div class="px-6 pb-6">
+                                        <br>
+                                        
+                                        <br>
+                                        <p style="text-align: justify;">📝 Este ejemplo utiliza <strong>Flexbox</strong> para <strong>organizar tres cajas</strong> (divs) de forma <strong>horizontal</strong>, <strong>centradas</strong> dentro de un <strong>contenedor</strong>. El <strong>código</strong> de este ejercicio está resuelto en los anexos.</p>
+                                        <br>
+                                        <!-- Guía paso a paso completa -->
+                                        <div class="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+                                            <h5 class="font-semibold text-green-800 mb-4">📘 Guía paso a paso: Cajas con Flexbox</h5>
+                                            
+                                            <!-- Paso 1 -->
+                                            <div class="mb-6">
+                                                <h6 class="font-semibold text-green-700 mb-2">🔹 Paso 1: Crear la carpeta del proyecto en Visual Studio Code</h6>
+                                                <ul class="text-green-700 text-sm ml-4 space-y-1">
+                                                    <li>💻 Abre <strong>Visual Studio Code</strong>.</li>
+                                                    <li>📁 Crea una <strong>carpeta nueva</strong> llamada por ejemplo <code class="bg-green-100 px-1 rounded">flexbox-ejercicio</code>.</li>
+                                                    <li>📄 Dentro de esa carpeta crea dos <strong>archivos</strong>:</li>
+                                                    <li class="ml-4">- <code class="bg-green-100 px-1 rounded">index.html</code></li>
+                                                    <li class="ml-4">- <code class="bg-green-100 px-1 rounded">styles.css</code></li>
+                                                </ul>
+                                                <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                    <img src="img/20.png" alt="">
+                                                    <button class="expand-btn" data-img="img/20.png">🔍</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Paso 2 -->
+                                            <div class="mb-6">
+                                                <h6 class="font-semibold text-green-700 mb-2">🔹 Paso 2: Construcción del archivo HTML</h6>
+                                                <p class="text-green-700 text-sm mb-2">🏗️ En este paso vamos a preparar la <strong>estructura básica</strong> de un documento <strong>HTML</strong>.</p>
+                                                <ul class="text-green-700 text-sm ml-4 space-y-1 mb-3">
+                                                    <li>📂 Abre el archivo <code class="bg-green-100 px-1 rounded">index.html</code>.</li>
+                                                    <li>✍️ Escribe el siguiente <strong>código</strong>:</li>
+                                                </ul>
+                                                <pre class="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;!-- Configuración de caracteres --&gt;
+  &lt;meta charset="UTF-8"&gt;
+  
+  &lt;!-- Adaptar la vista a dispositivos móviles --&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  
+  &lt;!-- Título de la pestaña en el navegador --&gt;
+  &lt;title&gt;Ejercicio Flexbox&lt;/title&gt;
+  
+  &lt;!-- Enlace al archivo de estilos externos --&gt;
+  &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- Contenedor principal que agrupará las cajas --&gt;
+  &lt;div class="contenedor"&gt;
+    &lt;!-- Cada div es una caja --&gt;
+    &lt;div class="caja"&gt;Caja 1&lt;/div&gt;
+    &lt;div class="caja"&gt;Caja 2&lt;/div&gt;
+    &lt;div class="caja"&gt;Caja 3&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                                                <div class="mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                                    <p class="text-blue-700 text-sm"><strong>🔎 Explicación clave:</strong></p>
+                                                    <ul class="text-blue-700 text-sm ml-4 space-y-1">
+                                                        <li>🔗 <code class="bg-blue-100 px-1 rounded">&lt;link rel="stylesheet" href="styles.css"&gt;</code> <strong>conecta el HTML</strong> con el archivo <strong>CSS externo</strong>.</li>
+                                                        <li>📦 <code class="bg-blue-100 px-1 rounded">&lt;div class="contenedor"&gt;</code> es el <strong>padre de las cajas</strong>, lo usaremos como <strong>contenedor Flexbox</strong>.</li>
+                                                        <li>🎨 Cada <code class="bg-blue-100 px-1 rounded">&lt;div class="caja"&gt;</code> representa una de las <strong>cajas verdes</strong> que se verán en la pantalla.</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                    <img src="img/21.png" alt="">
+                                                    <button class="expand-btn" data-img="img/21.png">🔍</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Paso 3 -->
+                                            <div class="mb-6">
+                                                <h6 class="font-semibold text-green-700 mb-2">🔹 Paso 3: Construcción del archivo CSS</h6>
+                                                <p class="text-green-700 text-sm mb-2">🎨 Ahora le damos <strong>estilos</strong> a la página y a las <strong>cajas</strong>.</p>
+                                                <ul class="text-green-700 text-sm ml-4 space-y-1 mb-3">
+                                                    <li>📂 Abre el archivo <code class="bg-green-100 px-1 rounded">styles.css</code>.</li>
+                                                    <li>✍️ Escribe el siguiente <strong>código</strong>:</li>
+                                                </ul>
+                                                <pre class="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto"><code>/* Estilos generales del body */
+body {
+  background-color: #f2f2f2; /* color gris claro de fondo */
+  font-family: Arial, sans-serif; /* fuente del texto */
+  height: 100vh; /* altura total de la ventana */
+  
+  /* Usamos flexbox para centrar el contenido en la pantalla */
+  display: flex;
+  justify-content: center; /* centra horizontalmente */
+  align-items: center;     /* centra verticalmente */
+}
+
+/* Contenedor que organiza las cajas */
+.contenedor {
+  display: flex;   /* activa flexbox dentro del contenedor */
+  gap: 15px;       /* espacio entre cada caja */
+}
+
+/* Estilo visual de cada caja */
+.caja {
+  background-color: #4CAF50; /* verde */
+  color: white;              /* texto en blanco */
+  padding: 15px 25px;        /* espacio interno */
+  border-radius: 5px;        /* bordes redondeados */
+  font-weight: bold;         /* texto en negrita */
+  text-align: center;        /* centrar el texto dentro de la caja */
+}</code></pre>
+                                                <div class="mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                                    <p class="text-blue-700 text-sm"><strong>🔎 Explicación clave:</strong></p>
+                                                    <ul class="text-blue-700 text-sm ml-4 space-y-1">
+                                                        <li>⚡ <code class="bg-blue-100 px-1 rounded">display: flex;</code> en <strong>body</strong> y en <strong>.contenedor</strong> son los que hacen posible el uso de <strong>Flexbox</strong>.</li>
+                                                        <li>🎯 En el <strong>body</strong>, Flexbox se usa para <strong>centrar el contenedor completo</strong> en la pantalla.</li>
+                                                        <li>📐 En el <strong>.contenedor</strong>, Flexbox se usa para <strong>ubicar las cajas</strong> una al lado de la otra con <strong>separación (gap)</strong>.</li>
+                                                        <li>🎨 <code class="bg-blue-100 px-1 rounded">.caja</code> define el <strong>estilo visual</strong>: color, bordes, padding, etc.</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                    <img src="img/22.png" alt="">
+                                                    <button class="expand-btn" data-img="img/22.png">🔍</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Paso 4 -->
+                                            <div class="mb-4">
+                                                <h6 class="font-semibold text-green-700 mb-2">🔹 Paso 4: Visualizar en el navegador</h6>
+                                                <ul class="text-green-700 text-sm ml-4 space-y-1">
+                                                    <li>• Guarda los dos archivos (<code class="bg-green-100 px-1 rounded">index.html</code> y <code class="bg-green-100 px-1 rounded">styles.css</code>).</li>
+                                                    <li>• Da clic derecho en <code class="bg-green-100 px-1 rounded">index.html</code> → "Abrir con Live Server" (si tienes instalada la extensión).</li>
+                                                    <li>• Si no tienes Live Server, abre el archivo directamente en tu navegador con doble clic.</li>
+                                                    <li>• En la pantalla deberían aparecer 3 cajas verdes centradas, iguales al ejercicio de la imagen. ✅</li>
+                                                </ul>
+                                                <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                    <img src="img/23.png" alt="">
+                                                    <button class="expand-btn" data-img="img/23.png">🔍</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+                               
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                <h4 class="text-lg sm:text-xl font-bold text-green-700 flex items-center mb-2"><span class="text-2xl mr-3">🔄</span>Grid o Diseño bidimensional</h4>
+                                <br>
+                                <p style="text-align: justify;">Grid, o el Módulo de Diseño de Cuadrícula, es un modelo de diseño bidimensional. Esto significa que te permite crear diseños complejos con filas y columnas. </p>
+                                <br>
+                                <img class="resultado" width="600px" height="400px" src="img/Imagen 14.png" alt="">
+                                <br>
+                                <p><strong>Propiedades del Contenedor Grid:</strong></p>
+                                <br>
+                                <iframe class="interactive-frame" title="Info" src="https://view.genially.com/68a364451340797031cdfa42" allowscriptaccess="always" allowfullscreen="true" scrolling="yes" allownetworking="all"></iframe>
+                                <br>
+                                
+                                <p><strong>Propiedades de los Ítems Grid:</strong></p>
+                                <br>
+                                <iframe class="interactive-frame" title="Imagen interactiva" src="https://view.genially.com/68a367a4ceac00b769b54f5d" allowscriptaccess="always" allowfullscreen="true" scrolling="yes" allownetworking="all"></iframe>
+                                
+                                <br>
+                                
+                                <!-- Sección desplegable para Ejercicio práctico Grid -->
+                                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg border-2 border-blue-200 mb-6 overflow-hidden hover:shadow-xl transition-all duration-300">
+                                    <details class="group">
+                                        <summary class="flex items-center justify-between p-8 cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 relative overflow-hidden">
+                                            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                            <h4 class="text-xl sm:text-2xl font-bold flex items-center relative z-10"><span class="text-3xl mr-4 animate-pulse">🔲</span>Ejercicio práctico Grid</h4>
+                                            <div class="relative z-10 bg-white bg-opacity-20 rounded-full p-2">
+                                                <svg class="w-6 h-6 text-white transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </div>
+                                        </summary>
+                                        <div class="px-6 pb-6">
+                                            <br>
+
+                                            <br>
+                                            <p>En este ejercicio, el estudiante construirá una cuadrícula de 3 columnas y 2 filas utilizando CSS Grid.</p>
+                                            <br>
+                                            
+                                            
+                                            <!-- Guía paso a paso completa para Grid -->
+                                            <div class="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                                                <h5 class="font-semibold text-blue-800 mb-4">📘 Guía paso a paso: Cajas con CSS Grid</h5>
+                                                
+                                                <!-- Paso 1 -->
+                                                <div class="mb-6">
+                                                    <h6 class="font-semibold text-blue-700 mb-2">🔹 Paso 1: Crear la carpeta del proyecto en Visual Studio Code</h6>
+                                                    <ul class="text-blue-700 text-sm ml-4 space-y-1">
+                                                        <li>• Abre Visual Studio Code.</li>
+                                                        <li>• Crea una carpeta llamada por ejemplo <code class="bg-blue-100 px-1 rounded">grid-ejercicio</code>.</li>
+                                                        <li>• Dentro de esa carpeta crea dos archivos:</li>
+                                                        <li class="ml-4">- <code class="bg-blue-100 px-1 rounded">index.html</code></li>
+                                                        <li class="ml-4">- <code class="bg-blue-100 px-1 rounded">styles.css</code></li>
+                                                    </ul>
+                                                    <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                        <img src="img/40.png" alt="">
+                                                        <button class="expand-btn" data-img="img/40.png">🔍</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Paso 2 -->
+                                                <div class="mb-6">
+                                                    <h6 class="font-semibold text-blue-700 mb-2">🔹 Paso 2: Construcción del archivo HTML</h6>
+                                                    <p class="text-blue-700 text-sm mb-2">En este archivo crearemos la estructura básica con un contenedor padre y sus 6 cajas.</p>
+                                                    <pre class="bg-gray-800 text-blue-400 p-3 rounded text-xs overflow-x-auto"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;!-- Configuración de caracteres --&gt;
+  &lt;meta charset="UTF-8"&gt;
+  
+  &lt;!-- Adaptar la vista a dispositivos móviles --&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  
+  &lt;!-- Título de la pestaña en el navegador --&gt;
+  &lt;title&gt;Ejercicio Grid&lt;/title&gt;
+  
+  &lt;!-- Enlace al archivo de estilos externos --&gt;
+  &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- Contenedor principal que usará Grid --&gt;
+  &lt;div class="contenedor"&gt;
+    &lt;div class="caja"&gt;1&lt;/div&gt;
+    &lt;div class="caja"&gt;2&lt;/div&gt;
+    &lt;div class="caja"&gt;3&lt;/div&gt;
+    &lt;div class="caja"&gt;4&lt;/div&gt;
+    &lt;div class="caja"&gt;5&lt;/div&gt;
+    &lt;div class="caja"&gt;6&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                                                    <div class="mt-3 p-3 bg-purple-50 border-l-4 border-purple-400 rounded">
+                                                        <p class="text-purple-700 text-sm"><strong>🔎 Explicación clave:</strong></p>
+                                                        <ul class="text-purple-700 text-sm ml-4 space-y-1">
+                                                            <li>• <code class="bg-purple-100 px-1 rounded">&lt;div class="contenedor"&gt;</code> será el Grid principal.</li>
+                                                            <li>• Cada <code class="bg-purple-100 px-1 rounded">&lt;div class="caja"&gt;</code> será un elemento del grid.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                        <img src="img/41.png" alt="">
+                                                        <button class="expand-btn" data-img="img/41.png">🔍</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Paso 3 -->
+                                                <div class="mb-6">
+                                                    <h6 class="font-semibold text-blue-700 mb-2">🔹 Paso 3: Construcción del archivo CSS</h6>
+                                                    <p class="text-blue-700 text-sm mb-2">En este paso definiremos el grid con 2 filas y 3 columnas.</p>
+                                                    <pre class="bg-gray-800 text-blue-400 p-3 rounded text-xs overflow-x-auto"><code>/* Estilos generales del body */
+body {
+  background-color: #f2f2f2; /* fondo gris claro */
+  font-family: Arial, sans-serif; /* fuente del texto */
+  height: 100vh; /* alto completo de la ventana */
+  
+  /* Usamos flex para centrar el grid en pantalla */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenedor principal usando Grid */
+.contenedor {
+  display: grid; /* activamos grid */
+  grid-template-columns: repeat(3, 150px); /* 3 columnas de 150px */
+  grid-template-rows: repeat(2, 80px);     /* 2 filas de 80px */
+  gap: 15px; /* espacio entre cajas */
+}
+
+/* Estilo visual de cada caja */
+.caja {
+  background-color: #6a5af9; /* morado azulado */
+  color: white;              /* texto en blanco */
+  display: flex;             /* usamos flex solo para centrar el texto */
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;        /* bordes redondeados */
+  font-size: 18px;
+  font-weight: bold;
+}</code></pre>
+                                                    <div class="mt-3 p-3 bg-purple-50 border-l-4 border-purple-400 rounded">
+                                                        <p class="text-purple-700 text-sm"><strong>🔎 Explicación clave:</strong></p>
+                                                        <ul class="text-purple-700 text-sm ml-4 space-y-1">
+                                                            <li>• <code class="bg-purple-100 px-1 rounded">display: grid;</code> activa el modelo Grid.</li>
+                                                            <li>• <code class="bg-purple-100 px-1 rounded">grid-template-columns: repeat(3, 150px);</code> crea 3 columnas iguales de 150px.</li>
+                                                            <li>• <code class="bg-purple-100 px-1 rounded">grid-template-rows: repeat(2, 80px);</code> crea 2 filas iguales de 80px.</li>
+                                                            <li>• <code class="bg-purple-100 px-1 rounded">gap: 15px;</code> añade espacio entre las cajas.</li>
+                                                            <li>• <code class="bg-purple-100 px-1 rounded">.caja</code> usa Flexbox solo para centrar el número dentro de cada caja.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                        <img src="img/42.png" alt="">
+                                                        <button class="expand-btn" data-img="img/42.png">🔍</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Paso 4 -->
+                                                <div class="mb-4">
+                                                    <h6 class="font-semibold text-blue-700 mb-2">🔹 Paso 4: Visualizar en el navegador</h6>
+                                                    <ul class="text-blue-700 text-sm ml-4 space-y-1">
+                                                        <li>• Guarda los dos archivos (<code class="bg-blue-100 px-1 rounded">index.html</code> y <code class="bg-blue-100 px-1 rounded">styles.css</code>).</li>
+                                                        <li>• Abre el archivo <code class="bg-blue-100 px-1 rounded">index.html</code> en tu navegador (clic derecho → "Abrir con Live Server" o doble clic).</li>
+                                                        <li>• Deberías ver 6 cajas distribuidas en 2 filas y 3 columnas exactamente como en la imagen que compartiste. ✅</li>
+                                                    </ul>
+                                                    <div class="mt-3 p-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center text-gray-600 relative">
+                                                        <img src="img/43.png" alt="">
+                                                        <button class="expand-btn" data-img="img/43.png">🔍</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                
+                               
+                                <p><strong>Continuación del proyecto tienda online aplicando Flexbox y Grid.</strong></p>
+                                <br>
+                                <p style="text-align: justify;">En el desarrollo de nuestra tienda online, uno de los objetivos clave es lograr una distribución ordenada, adaptable y visualmente atractiva de los elementos de la página. Para ello, implementaremos dos potentes herramientas de diseño CSS moderno: Flexbox y Grid Layout</p>
+                                <br>
+                                <div class="relative inline-block">
+                                    <img class="resultado" src="img/Imagen 18.png" alt="">
+                                    <button class="expand-btn" data-img="img/Imagen 18.png">🔍</button>
+                                </div>
+
+                                
+                            </div>
+                            
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+            
+            
+            
+
+           
+
+            <!-- Actividades Prácticas -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+                <p class="text-slate-700 leading-relaxed mb-8">Resuelve los siguientes ejercicios propuestos para poner en práctica tus conocimientos de HTML y CSS.</p>
+                
+                <!-- Actividad 1 -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-8 shadow-lg border border-blue-200 mb-8">
+                    <div class="flex items-start mb-6">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mr-6 flex-shrink-0">
+                            <span class="text-white text-3xl">🍽️</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-blue-800 mb-3">Actividad 1. Menú del restaurante escolar</h3>
+                            <p class="text-blue-700 text-lg mb-4"><strong>Objetivo:</strong> Usar listas ordenadas, enlaces e imágenes para crear una página web completa.</p>
+                            
+                            <div class="bg-white rounded-lg p-6 shadow-sm border border-blue-200">
+                                <p class="text-blue-800 font-semibold mb-4">Simula una página que muestre:</p>
+                                <ul class="space-y-3">
+                                    <li class="flex items-center text-blue-700">
+                                        <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">1</span>
+                                        </span>
+                                        El nombre del restaurante (etiqueta <code class="bg-blue-100 px-2 py-1 rounded text-sm">&lt;h1&gt;</code>)
+                                    </li>
+                                    <li class="flex items-center text-blue-700">
+                                        <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">2</span>
+                                        </span>
+                                        Un menú con 5 comidas (etiqueta <code class="bg-blue-100 px-2 py-1 rounded text-sm">&lt;ol&gt;</code>)
+                                    </li>
+                                    <li class="flex items-center text-blue-700">
+                                        <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">3</span>
+                                        </span>
+                                        Un enlace a una receta de YouTube para cada comida (etiqueta <code class="bg-blue-100 px-2 py-1 rounded text-sm">&lt;a&gt;</code>)
+                                    </li>
+                                    <li class="flex items-center text-blue-700">
+                                        <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">4</span>
+                                        </span>
+                                        Un enlace a un video que te guste
+                                    </li>
+                                    <li class="flex items-center text-blue-700">
+                                        <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">5</span>
+                                        </span>
+                                        Imágenes de los platos (etiqueta <code class="bg-blue-100 px-2 py-1 rounded text-sm">&lt;img&gt;</code>)
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button style="text-transform: none;" onclick="window.open('https://codi.link/PGRpdj4KICA8YnV0dG9uPvCfpbMgQ2xpY2sgbWUgdGVzdCE8L2J1dHRvbj4KPC9kaXY+%7CYnV0dG9uIHsKICBmb250LXNpemU6IDQ4cHg7CiAgYm9yZGVyOiAxcHggc29saWQgcmVkOwogIGJhY2tncm91bmQ6IHllbGxvdzsKICBjb2xvcjogIzMzMzsKICBwYWRkaW5nOiA0cHggMTZweDsKICBjdXJzb3I6IHBvaW50ZXI7CiAgYm9yZGVyLXJhZGl1czogOTk5OXB4Owp9Cgpib2R5IHsKICBkaXNwbGF5OiBncmlkOwogIHBsYWNlLWNvbnRlbnQ6IGNlbnRlcjsKICBoZWlnaHQ6IDEwMHZoOwp9%7CaW1wb3J0IENhbnZhc0NvbmZldHRpIGZyb20gJ2h0dHBzOi8vY2RuLnNreXBhY2suZGV2L2NhbnZhcy1jb25mZXR0aSc7Cgpkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdidXR0b24nKS5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsICgpID0+IHsKICBDYW52YXNDb25mZXR0aSgpCn0p');" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-8 rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center mx-auto">
+                            <span class="mr-2">🚀</span>
+                            Iniciar solución
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actividad 2 -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-8 shadow-lg border border-green-200">
+                    <div class="flex items-start mb-6">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mr-6 flex-shrink-0">
+                            <span class="text-white text-3xl">🎨</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-green-800 mb-3">Actividad 2. Diseño de un menú colorido</h3>
+                            <p class="text-green-700 text-lg mb-4"><strong>Objetivo:</strong> Usar listas y aplicarles estilos CSS para crear un diseño atractivo.</p>
+                            
+                            <div class="bg-white rounded-lg p-6 shadow-sm border border-green-200">
+                                <p class="text-green-800 font-semibold mb-4">Simula una página de restaurante con:</p>
+                                <ul class="space-y-3">
+                                    <li class="flex items-center text-green-700">
+                                        <span class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">1</span>
+                                        </span>
+                                        Fondo tipo "pizarra" (color oscuro)
+                                    </li>
+                                    <li class="flex items-center text-green-700">
+                                        <span class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">2</span>
+                                        </span>
+                                        Nombres de los platos en color crema
+                                    </li>
+                                    <li class="flex items-center text-green-700">
+                                        <span class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">3</span>
+                                        </span>
+                                        Lista ordenada con margen y espaciado
+                                    </li>
+                                    <li class="flex items-center text-green-700">
+                                        <span class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span class="text-white text-sm">4</span>
+                                        </span>
+                                        Agrega un borde decorativo a cada ítem del menú
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button style="text-transform: none;" onclick="window.open('https://codi.link/PGRpdj4KICA8YnV0dG9uPvCfpbMgQ2xpY2sgbWUgdGVzdCE8L2J1dHRvbj4KPC9kaXY+%7CYnV0dG9uIHsKICBmb250LXNpemU6IDQ4cHg7CiAgYm9yZGVyOiAxcHggc29saWQgcmVkOwogIGJhY2tncm91bmQ6IHllbGxvdzsKICBjb2xvcjogIzMzMzsKICBwYWRkaW5nOiA0cHggMTZweDsKICBjdXJzb3I6IHBvaW50ZXI7CiAgYm9yZGVyLXJhZGl1czogOTk5OXB4Owp9Cgpib2R5IHsKICBkaXNwbGF5OiBncmlkOwogIHBsYWNlLWNvbnRlbnQ6IGNlbnRlcjsKICBoZWlnaHQ6IDEwMHZoOwp9%7CaW1wb3J0IENhbnZhc0NvbmZldHRpIGZyb20gJ2h0dHBzOi8vY2RuLnNreXBhY2suZGV2L2NhbnZhcy1jb25mZXR0aSc7Cgpkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdidXR0b24nKS5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsICgpID0+IHsKICBDYW52YXNDb25mZXR0aSgpCn0p');" class="bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-4 px-8 rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center mx-auto">
+                            <span class="mr-2">🎯</span>
+                            Iniciar solucion
+                        </button>
+                    </div>
+                </div>
+
+               
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-green-800 mb-4">Evaluación: Flexbox y Grid Layout</h2>
+                    <p class="text-slate-700 leading-relaxed text-lg max-w-3xl mx-auto">Evalúa tu conocimiento sobre Flexbox y Grid Layout respondiendo las siguientes preguntas. Selecciona todas las opciones que consideres correctas.</p>
+                    
+                    <!-- Indicador de progreso -->
+                    <div class="mt-6 bg-green-100 rounded-full p-1 max-w-md mx-auto">
+                        <div class="bg-green-500 h-2 rounded-full transition-all duration-500" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-green-600 mt-2">Progreso: <span id="progress-text">0/10</span></p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg border border-green-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white">
+                        <h3 class="text-xl font-bold flex items-center">
+                            <span class="mr-3">📊</span>
+                            Cuestionario de evaluación
+                        </h3>
+                        <p class="text-green-100 mt-2">Selecciona todas las opciones correctas para cada pregunta</p>
+                    </div>
+                    
+                    <form id="quiz-form" class="p-6">
+                        <!-- Pregunta 1 -->
+                        <div class="mb-8 p-6 border-2 border-green-200 rounded-xl hover:border-green-300 transition-colors bg-gradient-to-r from-green-50 to-emerald-50">
+                            <div class="flex items-start mb-4">
+                                <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4 flex-shrink-0">1</span>
+                                <h3 class="text-lg font-bold text-green-800">¿Cuáles de las siguientes propiedades son específicas de Flexbox?</h3>
+                            </div>
+                            <div class="space-y-3 ml-12">
+                                <label class="flex items-center p-3 bg-white rounded-lg hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200">
+                                    <input type="checkbox" name="q1" value="justify-content" class="mr-3 w-5 h-5 text-green-600 border-green-300 rounded focus:ring-green-500">
+                                    <span class="text-green-700 font-medium">justify-content</span>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200">
+                                    <input type="checkbox" name="q1" value="grid-template-columns" class="mr-3 w-5 h-5 text-green-600 border-green-300 rounded focus:ring-green-500">
+                                    <span class="text-green-700 font-medium">grid-template-columns</span>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200">
+                                    <input type="checkbox" name="q1" value="align-items" class="mr-3 w-5 h-5 text-green-600 border-green-300 rounded focus:ring-green-500">
+                                    <span class="text-green-700 font-medium">align-items</span>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200">
+                                    <input type="checkbox" name="q1" value="flex-direction" class="mr-3 w-5 h-5 text-green-600 border-green-300 rounded focus:ring-green-500">
+                                    <span class="text-green-700 font-medium">flex-direction</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 2 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">2. ¿Qué propiedades de Grid Layout permiten definir el tamaño de las columnas?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q2" value="grid-template-columns" class="mr-2">
+                                    <span>grid-template-columns</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q2" value="grid-template-rows" class="mr-2">
+                                    <span>grid-template-rows</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q2" value="grid-gap" class="mr-2">
+                                    <span>grid-gap</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q2" value="grid-area" class="mr-2">
+                                    <span>grid-area</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 3 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">3. ¿Cuáles son las diferencias principales entre Flexbox y Grid?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q3" value="flexbox-unidimensional" class="mr-2">
+                                    <span>Flexbox es unidimensional (fila o columna)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q3" value="grid-bidimensional" class="mr-2">
+                                    <span>Grid es bidimensional (filas y columnas)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q3" value="ambos-iguales" class="mr-2">
+                                    <span>Ambos son iguales en funcionalidad</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q3" value="flexbox-mas-antiguo" class="mr-2">
+                                    <span>Flexbox es más antiguo que Grid</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 4 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">4. ¿Qué valores puede tomar la propiedad flex-direction?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q4" value="row" class="mr-2">
+                                    <span>row</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q4" value="column" class="mr-2">
+                                    <span>column</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q4" value="diagonal" class="mr-2">
+                                    <span>diagonal</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q4" value="row-reverse" class="mr-2">
+                                    <span>row-reverse</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 5 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">5. ¿Cuáles de estas propiedades se usan para alinear elementos en Flexbox?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q5" value="justify-content" class="mr-2">
+                                    <span>justify-content</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q5" value="align-items" class="mr-2">
+                                    <span>align-items</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q5" value="text-align" class="mr-2">
+                                    <span>text-align</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q5" value="vertical-align" class="mr-2">
+                                    <span>vertical-align</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 6 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">6. ¿Qué unidades se pueden usar en grid-template-columns?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q6" value="px" class="mr-2">
+                                    <span>px (píxeles)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q6" value="fr" class="mr-2">
+                                    <span>fr (fracción)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q6" value="em" class="mr-2">
+                                    <span>em</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q6" value="auto" class="mr-2">
+                                    <span>auto</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 7 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">7. ¿Cuáles son las ventajas de usar Flexbox?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q7" value="facil-alineacion" class="mr-2">
+                                    <span>Facilita la alineación de elementos</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q7" value="responsive" class="mr-2">
+                                    <span>Hace el diseño más responsive</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q7" value="menos-codigo" class="mr-2">
+                                    <span>Requiere menos código CSS</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q7" value="mejor-performance" class="mr-2">
+                                    <span>Mejor performance que Grid</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 8 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">8. ¿Qué propiedades permiten controlar el espaciado en Grid?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q8" value="grid-gap" class="mr-2">
+                                    <span>grid-gap</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q8" value="grid-row-gap" class="mr-2">
+                                    <span>grid-row-gap</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q8" value="grid-column-gap" class="mr-2">
+                                    <span>grid-column-gap</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q8" value="margin" class="mr-2">
+                                    <span>margin</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 9 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">9. ¿Cuáles son los valores de justify-content en Flexbox?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q9" value="flex-start" class="mr-2">
+                                    <span>flex-start</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q9" value="center" class="mr-2">
+                                    <span>center</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q9" value="space-between" class="mr-2">
+                                    <span>space-between</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q9" value="space-around" class="mr-2">
+                                    <span>space-around</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 10 -->
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <h3 class="text-lg font-bold text-green-700 mb-3">10. ¿Qué propiedades de Grid permiten posicionar elementos específicos?</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q10" value="grid-column" class="mr-2">
+                                    <span>grid-column</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q10" value="grid-row" class="mr-2">
+                                    <span>grid-row</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q10" value="grid-area" class="mr-2">
+                                    <span>grid-area</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="q10" value="position" class="mr-2">
+                                    <span>position</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-8">
+                            <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-4 px-12 rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xl flex items-center mx-auto">
+                                <span class="mr-3">📊</span>
+                                Calcular Resultado
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Resultados -->
+                    <div id="quiz-results" class="mt-8 hidden">
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200 p-8 rounded-xl shadow-lg">
+                            <div class="text-center mb-6">
+                                <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <span class="text-white text-4xl">🎉</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-green-800 mb-2">¡Resultado del cuestionario!</h3>
+                            </div>
+                            
+                            <div id="score-display" class="text-center mb-6">
+                                <div class="bg-white rounded-lg p-6 shadow-sm border border-green-200">
+                                    <div class="text-4xl font-bold text-green-600 mb-2" id="score-percentage"></div>
+                                    <div class="text-lg font-semibold text-green-700 mb-2" id="score-fraction"></div>
+                                    <div class="text-sm text-green-600" id="score-description"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="feedback" class="text-center mb-6">
+                                <div class="bg-white rounded-lg p-4 shadow-sm border border-green-200">
+                                    <p class="text-green-700 text-lg font-medium" id="feedback-text"></p>
+                                </div>
+                            </div>
+                            
+                            <div id="correct-answers" class="bg-white rounded-lg p-6 shadow-sm border border-green-200">
+                                <h4 class="text-lg font-bold text-green-800 mb-4 text-center">📚 Respuestas Correctas por Pregunta</h4>
+                                <div id="answers-content" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<!-- Tipos y Herramientas -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre el desarrollo web, HTML, CSS y JavaScript, te recomendamos explorar los siguientes enlaces y documentos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Recurso interactivo para aprender HTML y CSS paso a paso</h3>
+                            <a href="https://www.w3schools.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-10.png" alt="Recurso HTML/CSS" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación oficial de MDN Web Docs</h3>
+                            <a href="https://developer.mozilla.org/es/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-11.png" alt="MDN Web Docs" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Plataforma de práctica con proyectos reales</h3>
+                            <a href="https://www.frontendmentor.io/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-12.png" alt="Frontend Mentor" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 4 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Canal de YouTube con tutoriales prácticos</h3>
+                            <a href="https://www.youtube.com/@codigofacilito" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-13.png" alt="Código Facilito" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 5 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Editor de código online con preview en tiempo real</h3>
+                            <a href="https://codepen.io/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-14.png" alt="CodePen" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 6 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Curso gratuito de HTML y CSS desde cero</h3>
+                            <a href="https://www.freecodecamp.org/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-15.png" alt="FreeCodeCamp" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 7 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Biblioteca de componentes CSS y JavaScript</h3>
+                            <a href="https://getbootstrap.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-16.png" alt="Bootstrap" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+                        <!-- Lecturas Sugeridas -->
+            <div id="lecturas" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Lecturas sugeridas para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre los Recursos Educativos Digitales, te recomendamos explorar los siguientes enlaces y documentos:</p>
+                
+                <!-- Grid de tarjetas modernas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Tarjeta 1: W3Schools -->
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-blue-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                                <span class="text-white text-2xl">🌐</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-blue-800">W3Schools</h3>
+                        </div>
+                        <p class="text-blue-700 text-sm mb-4 leading-relaxed">Aprende a programar con el sitio de desarrolladores web más grande del mundo. Tutoriales interactivos y ejemplos prácticos.</p>
+                        <a href="https://www.w3schools.com/" target="_blank" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors">
+                            Visitar sitio
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 2: Mozilla Developer Network -->
+                    <div class="bg-gradient-to-br from-orange-50 to-red-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mr-4">
+                                <span class="text-white text-2xl">🦊</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-orange-800">MDN Web Docs</h3>
+                        </div>
+                        <p class="text-orange-700 text-sm mb-4 leading-relaxed">Recursos para desarrolladores, por desarrolladores. Documentación completa y actualizada de tecnologías web.</p>
+                        <a href="https://developer.mozilla.org/es/" target="_blank" class="inline-flex items-center text-orange-600 hover:text-orange-800 font-semibold transition-colors">
+                            Visitar sitio
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 3: Frontend Mentor -->
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-purple-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                                <span class="text-white text-2xl">⚡</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-purple-800">Frontend Mentor</h3>
+                        </div>
+                        <p class="text-purple-700 text-sm mb-4 leading-relaxed">Desafíos de codificación front-end y full-stack. Practica con proyectos reales y mejora tus habilidades.</p>
+                        <a href="https://www.frontendmentor.io/" target="_blank" class="inline-flex items-center text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+                            Visitar sitio
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 4: CSS-Tricks -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-green-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                                <span class="text-white text-2xl">🎨</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-green-800">CSS-Tricks</h3>
+                        </div>
+                        <p class="text-green-700 text-sm mb-4 leading-relaxed">Trucos, consejos y técnicas avanzadas de CSS. Guías completas sobre Flexbox, Grid y más.</p>
+                        <a href="https://css-tricks.com/" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-800 font-semibold transition-colors">
+                            Visitar sitio
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 5: Zero To Mastery -->
+                    <div class="bg-gradient-to-br from-yellow-50 to-amber-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-yellow-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center mr-4">
+                                <span class="text-white text-2xl">🚀</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-yellow-800">Zero To Mastery</h3>
+                        </div>
+                        <p class="text-yellow-700 text-sm mb-4 leading-relaxed">Artículos y recursos para ir de principiante a experto en desarrollo web. Contenido actualizado y práctico.</p>
+                        <a href="https://zerotomastery.io/" target="_blank" class="inline-flex items-center text-yellow-600 hover:text-yellow-800 font-semibold transition-colors">
+                            Visitar sitio
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 6: Learn to Code HTML & CSS -->
+                    <div class="bg-gradient-to-br from-teal-50 to-cyan-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-teal-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-teal-500 rounded-lg flex items-center justify-center mr-4">
+                                <span class="text-white text-2xl">📚</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-teal-800">Learn to Code HTML & CSS</h3>
+                        </div>
+                        <p class="text-teal-700 text-sm mb-4 leading-relaxed">Libro digital gratuito que te guía desde los fundamentos hasta técnicas avanzadas de HTML y CSS.</p>
+                        <a href="https://learn.shayhowe.com/" target="_blank" class="inline-flex items-center text-teal-600 hover:text-teal-800 font-semibold transition-colors">
+                            Visitar sitio
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Sección adicional de recursos -->
+                <div class="mt-8 bg-gradient-to-r from-slate-50 to-gray-100 rounded-xl p-6 border border-slate-200">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+                        <span class="text-2xl mr-3">💡</span>
+                        Recursos Adicionales Recomendados
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <span class="text-2xl mr-3">🎬</span>
+                            <div>
+                                <p class="font-semibold text-slate-700">YouTube - Código Facilito</p>
+                                <p class="text-sm text-slate-600">Tutoriales en español de desarrollo web</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <span class="text-2xl mr-3">🎧</span>
+                            <div>
+                                <p class="font-semibold text-slate-700">Podcasts de Desarrollo Web</p>
+                                <p class="text-sm text-slate-600">Mantente actualizado con las últimas tendencias</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <span class="text-2xl mr-3">🕹️</span>
+                            <div>
+                                <p class="font-semibold text-slate-700">Codi - Editor Online</p>
+                                <p class="text-sm text-slate-600">Practica HTML, CSS y JavaScript en tiempo real</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <span class="text-2xl mr-3">🧠</span>
+                            <div>
+                                <p class="font-semibold text-slate-700">Kahoot! - Quizzes Interactivos</p>
+                                <p class="text-sm text-slate-600">Aprende divirtiéndote con cuestionarios</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Duckett, J. (2011). <i>HTML and CSS: Design and Build Websites</i>. John Wiley & Sons.<br>
+                        <a href="https://www.htmlandcssbook.com/" class="text-green-700 underline break-all" target="_blank">https://www.htmlandcssbook.com/</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Mozilla Developer Network. (2023). <i>CSS: Cascading Style Sheets</i>. Mozilla Foundation.<br>
+                        <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/en-US/docs/Web/CSS</a>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Robbins, J. N. (2018). <i>Learning Web Design: A Beginner's Guide to HTML, CSS, JavaScript, and Web Graphics</i>. O'Reilly Media.<br>
+                        <a href="https://learningwebdesign.com/" class="text-green-700 underline break-all" target="_blank">https://learningwebdesign.com/</a>
+                    </span>
+                </div>
+            </div>
+            </div>
+            
+            
+            <!-- Footer/Credits -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const contentPanes = document.querySelectorAll('.content-pane');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    function switchPane(targetId) {
+        contentPanes.forEach(pane => {
+            pane.classList.remove('active');
+        });
+        const targetPane = document.getElementById(targetId);
+        if (targetPane) {
+            targetPane.classList.add('active');
+        }
+
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.dataset.target === targetId) {
+                link.classList.add('active');
+            }
+        });
+        
+        if (mobileNav.value !== targetId) {
+            mobileNav.value = targetId;
+        }
+    }
+
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = e.currentTarget.dataset.target;
+            switchPane(targetId);
+        });
+    });
+
+    mobileNav.addEventListener('change', (e) => {
+        switchPane(e.target.value);
+    });
+
+    // --- Actividad Práctica ---
+    /*
+    const activityData = [
+        { 
+            question: "Un video tutorial que muestra cómo resolver una ecuación.", 
+            options: ["Interactividad", "Finalidad Educativa", "Reusabilidad"], 
+            answer: "Finalidad Educativa" 
+        },
+        { 
+            question: "Un quiz en línea que da retroalimentación inmediata.", 
+            options: ["Interactividad", "Adaptabilidad", "Formato Digital"], 
+            answer: "Interactividad" 
+        },
+        { 
+            question: "Una simulación de un laboratorio de química que se puede usar en bachillerato y universidad.", 
+            options: ["Reusabilidad", "Accesibilidad", "Intencionalidad Educativa"], 
+            answer: "Reusabilidad" 
+        }
+    ];
+
+    const activityContainer = document.getElementById('activity-container');
+    if (activityContainer) {
+        activityData.forEach((item, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'p-4 border rounded-lg';
+            
+            let optionsHtml = item.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+            questionDiv.innerHTML = `
+                <p class="font-medium text-slate-700 mb-2">${index + 1}. ${item.question}</p>
+                <select class="activity-select w-full p-2 border rounded-md bg-white" data-answer="${item.answer}">
+                    <option value="">Selecciona una característica...</option>
+                    ${optionsHtml}
+                </select>
+            `;
+            activityContainer.appendChild(questionDiv);
+        });
+    }
+
+    const checkActivityBtn = document.getElementById('check-activity-btn');
+    if (checkActivityBtn) {
+        checkActivityBtn.addEventListener('click', () => {
+            const selects = document.querySelectorAll('.activity-select');
+            let correctAnswers = 0;
+            selects.forEach(select => {
+                if (select.value === select.dataset.answer) {
+                    correctAnswers++;
+                    select.classList.add('border-green-500');
+                    select.classList.remove('border-red-500');
+                } else {
+                    select.classList.add('border-red-500');
+                    select.classList.remove('border-green-500');
+                }
+            });
+            const resultDiv = document.getElementById('activity-result');
+            resultDiv.textContent = `Obtuviste ${correctAnswers} de ${activityData.length} respuestas correctas.`;
+            resultDiv.className = correctAnswers === activityData.length ? 'mt-4 font-medium text-green-700' : 'mt-4 font-medium text-red-700';
+        });
+    }
+     */
+        // --- Evaluación Quiz ---
+    const quizData = [
+        {
+            question: "¿Cuál es el propósito principal de un RED?",
+            options: ["Entretener al usuario", "Facilitar un proceso de enseñanza y aprendizaje", "Vender un producto digital", "Mostrar publicidad"],
+            answer: "Facilitar un proceso de enseñanza y aprendizaje"
+        },
+        {
+            question: "La característica que permite usar un RED en diferentes contextos se llama:",
+            options: ["Interactividad", "Adaptabilidad", "Reusabilidad", "Accesibilidad"],
+            answer: "Reusabilidad"
+        },
+        {
+            question: "Un ejemplo de un RED es:",
+            options: ["Una película de Hollywood", "Un videojuego de acción comercial", "Una simulación interactiva de PhET Colorado", "Un anuncio de televisión"],
+            answer: "Una simulación interactiva de PhET Colorado"
+        }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    if(quizContainer) {
+        quizData.forEach((q, index) => {
+            const questionEl = document.createElement('div');
+            questionEl.className = 'mb-6';
+            questionEl.innerHTML = `<p class="font-semibold mb-2">${index + 1}. ${q.question}</p>`;
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'space-y-2';
+            
+            q.options.forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', () => {
+                    questionEl.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
+                    optionEl.classList.add('selected');
+                });
+                optionsContainer.appendChild(optionEl);
+            });
+            
+            questionEl.appendChild(optionsContainer);
+            quizContainer.appendChild(questionEl);
+        });
+    }
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    if (submitQuizBtn) {
+        submitQuizBtn.addEventListener('click', () => {
+            let score = 0;
+            const questions = quizContainer.querySelectorAll('.mb-6');
+            questions.forEach((q, index) => {
+                const selectedOption = q.querySelector('.quiz-option.selected');
+                if (selectedOption && selectedOption.textContent === quizData.length) {
+                    score++;
+                }
+                });
+            const resultEl = document.getElementById('quiz-result');
+            resultEl.textContent = `Tu puntuación es: ${score} de ${quizData.length}.`;
+            if (score / quizData.length >= 0.7) {
+                resultEl.className = 'mt-4 text-lg font-bold text-green-700';
+            } else {
+                resultEl.className = 'mt-4 text-lg font-bold text-red-700';
+            }
+        });
+    }
+
+    // --- Cuestionario Flexbox y Grid ---
+    const flexboxGridQuiz = {
+        q1: {
+            correct: ["justify-content", "align-items", "flex-direction"],
+            explanation: "justify-content, align-items y flex-direction son propiedades específicas de Flexbox. grid-template-columns pertenece a Grid Layout."
+        },
+        q2: {
+            correct: ["grid-template-columns"],
+            explanation: "grid-template-columns es la propiedad específica para definir el tamaño de las columnas en Grid."
+        },
+        q3: {
+            correct: ["flexbox-unidimensional", "grid-bidimensional"],
+            explanation: "Flexbox es unidimensional (fila o columna), mientras que Grid es bidimensional (filas y columnas)."
+        },
+        q4: {
+            correct: ["row", "column", "row-reverse"],
+            explanation: "flex-direction puede ser row, column, row-reverse o column-reverse. 'diagonal' no es un valor válido."
+        },
+        q5: {
+            correct: ["justify-content", "align-items"],
+            explanation: "justify-content y align-items son las propiedades específicas de Flexbox para alineación. text-align y vertical-align son propiedades generales de CSS."
+        },
+        q6: {
+            correct: ["px", "fr", "em", "auto"],
+            explanation: "Todas estas unidades se pueden usar en grid-template-columns: px (píxeles), fr (fracción), em y auto."
+        },
+        q7: {
+            correct: ["facil-alineacion", "responsive", "menos-codigo"],
+            explanation: "Flexbox facilita la alineación, hace el diseño más responsive y requiere menos código CSS. No necesariamente tiene mejor performance que Grid."
+        },
+        q8: {
+            correct: ["grid-gap", "grid-row-gap", "grid-column-gap"],
+            explanation: "grid-gap, grid-row-gap y grid-column-gap son las propiedades específicas de Grid para espaciado. margin es una propiedad general de CSS."
+        },
+        q9: {
+            correct: ["flex-start", "center", "space-between", "space-around"],
+            explanation: "Todos estos son valores válidos de justify-content en Flexbox."
+        },
+        q10: {
+            correct: ["grid-column", "grid-row", "grid-area"],
+            explanation: "grid-column, grid-row y grid-area son propiedades específicas de Grid para posicionar elementos. position es una propiedad general de CSS."
+        }
+    };
+
+    // Funcionalidad de progreso en tiempo real
+    function updateProgress() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        if (progressBar && progressText) {
+            const progress = (checkedBoxes.length / checkboxes.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${checkedBoxes.length}/10`;
+        }
+    }
+
+    // Agregar event listeners para el progreso
+    document.addEventListener('change', function(e) {
+        if (e.target.type === 'checkbox') {
+            updateProgress();
+        }
+    });
+
+    // Manejar el envío del formulario del cuestionario
+    const quizForm = document.getElementById('quiz-form');
+    if (quizForm) {
+        quizForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            let totalScore = 0;
+            let maxScore = 0;
+            let results = [];
+            
+            // Calcular puntuación para cada pregunta
+            Object.keys(flexboxGridQuiz).forEach(questionKey => {
+                const question = flexboxGridQuiz[questionKey];
+                const selectedValues = Array.from(document.querySelectorAll(`input[name="${questionKey}"]:checked`))
+                    .map(input => input.value);
+                
+                const correctCount = question.correct.length;
+                const selectedCorrect = selectedValues.filter(value => question.correct.includes(value)).length;
+                const selectedIncorrect = selectedValues.filter(value => !question.correct.includes(value)).length;
+                
+                // Puntuación: respuestas correctas seleccionadas - respuestas incorrectas seleccionadas
+                let questionScore = Math.max(0, selectedCorrect - selectedIncorrect);
+                totalScore += questionScore;
+                maxScore += correctCount;
+                
+                results.push({
+                    question: questionKey,
+                    score: questionScore,
+                    maxScore: correctCount,
+                    explanation: question.explanation
+                });
+            });
+            
+            // Mostrar resultados
+            const resultsDiv = document.getElementById('quiz-results');
+            const scorePercentage = document.getElementById('score-percentage');
+            const scoreFraction = document.getElementById('score-fraction');
+            const scoreDescription = document.getElementById('score-description');
+            const feedbackText = document.getElementById('feedback-text');
+            const answersContent = document.getElementById('answers-content');
+            
+            const percentage = Math.round((totalScore / maxScore) * 100);
+            
+            // Actualizar elementos de puntuación
+            scorePercentage.textContent = `${percentage}%`;
+            scoreFraction.textContent = `${totalScore} de ${maxScore} puntos`;
+            
+            if (percentage >= 80) {
+                scoreDescription.textContent = "¡Excelente puntuación!";
+                feedbackText.textContent = "¡Excelente! Tienes un dominio sólido de Flexbox y Grid Layout. ¡Sigue así!";
+            } else if (percentage >= 60) {
+                scoreDescription.textContent = "¡Buen trabajo!";
+                feedbackText.textContent = "¡Buen trabajo! Tienes una comprensión buena, pero hay espacio para mejorar. ¡Sigue practicando!";
+            } else {
+                scoreDescription.textContent = "Necesitas más práctica";
+                feedbackText.textContent = "Necesitas revisar más conceptos de Flexbox y Grid Layout. ¡No te desanimes, la práctica hace al maestro!";
+            }
+            
+            // Mostrar respuestas correctas con mejor formato
+            let answersHtml = "";
+            results.forEach((result, index) => {
+                const questionNumber = index + 1;
+                const questionTitle = document.querySelector(`[name="q${questionNumber}"]`).closest('.mb-8').querySelector('h3').textContent;
+                
+                answersHtml += `
+                    <div class="border-l-4 border-green-500 pl-4 py-2">
+                        <div class="font-semibold text-green-800 mb-1">Pregunta ${questionNumber}: ${questionTitle}</div>
+                        <div class="text-green-700 text-sm">${result.explanation}</div>
+                    </div>
+                `;
+            });
+            answersContent.innerHTML = answersHtml;
+            
+            resultsDiv.classList.remove('hidden');
+            
+            // Scroll suave a los resultados
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+});
+
+// Funcionalidad de zoom para imágenes
+document.addEventListener('DOMContentLoaded', function() {
+    // Crear el modal
+    const modal = document.createElement('div');
+    modal.className = 'image-modal';
+    modal.innerHTML = `
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" src="" alt="Imagen ampliada">
+    `;
+    document.body.appendChild(modal);
+
+    const modalImg = modal.querySelector('.modal-content');
+    const closeBtn = modal.querySelector('.close-modal');
+
+    // Agregar event listeners a todos los botones de zoom
+    document.querySelectorAll('.expand-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const imgSrc = this.getAttribute('data-img');
+            modalImg.src = imgSrc;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        });
+    });
+
+    // Cerrar modal al hacer clic en la X
+    closeBtn.addEventListener('click', function() {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restaurar scroll del body
+    });
+
+    // Cerrar modal al hacer clic fuera de la imagen
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Restaurar scroll del body
+        }
+    });
+
+    // Cerrar modal con la tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Restaurar scroll del body
+        }
+    });
+});
+</script>
+
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
