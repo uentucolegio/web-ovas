@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OVA: Introducción al Pensamiento Crítico</title>
+  <link rel="stylesheet" href="../tailwind.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #166534;
+      --primary-soft: #dcfce7;
+      --success: #166534;
+      --success-bg: #dcfce7;
+      --danger: #991b1b;
+      --danger-bg: #fee2e2;
+      --border: #d1d5db;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      border: 1px solid rgba(22, 101, 52, .08);
+      border-left: 4px solid #22c55e;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .instructions {
+      margin-top: 18px;
+      background: var(--primary-soft);
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-left: 5px solid var(--primary);
+    }
+
+    .question-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #22c55e;
+    }
+
+    .question-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .scenario {
+      margin: 12px 0 18px;
+      color: #374151;
+    }
+
+    .answer-bank {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .draggable {
+      background: #f9fafb;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: grab;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      user-select: none;
+    }
+
+    .draggable:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+      border-color: var(--primary);
+    }
+
+    .draggable.dragging {
+      opacity: .55;
+    }
+
+    .drop-zone {
+      min-height: 84px;
+      border: 3px dashed var(--primary);
+      background: #f0fdf4;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px;
+      color: #15803d;
+      font-weight: 600;
+    }
+
+    .drop-zone.over {
+      background: #dcfce7;
+      transform: scale(1.01);
+    }
+
+    .drop-zone.filled {
+      justify-content: stretch;
+      padding: 8px;
+      min-height: unset;
+    }
+
+    .dropped-answer {
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      border: 2px solid #86efac;
+      padding: 12px 14px;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.98rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: none;
+    }
+
+    .feedback.correct {
+      display: block;
+      background: var(--success-bg);
+      color: var(--success);
+      border-left: 5px solid #22c55e;
+    }
+
+    .feedback.incorrect {
+      display: block;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-left: 5px solid #ef4444;
+    }
+
+    .result-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-top: 26px;
+      text-align: center;
+      display: none;
+      border: 1px solid #e5e7eb;
+    }
+
+    .score {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 12px 0 6px;
+    }
+
+    .summary-text {
+      color: var(--muted);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .pill {
+      display: inline-block;
+      margin-top: 14px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 1.55rem;
+      }
+
+      .question-card,
+      .hero,
+      .result-card {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Actividad dinámica: Pensamiento crítico</h1>
+      <p class="subtitle">Arrastra la alternativa que represente la mejor decisión desde el pensamiento crítico. Cada
+        pregunta tiene una única respuesta correcta.</p>
+      <div class="instructions">
+        <strong>Instrucciones:</strong> lee cada situación, arrastra una opción al espacio de respuesta y luego pulsa
+        <em>Verificar</em>. Al final verás tu porcentaje de aciertos.
+      </div>
+    </section>
+
+    <div id="questions"></div>
+
+    <section id="results" class="result-card">
+      <h2>Resultado final</h2>
+      <div id="score" class="score">0%</div>
+      <p id="scoreText" class="summary-text"></p>
+      <div id="scorePill" class="pill"></div>
+      <div class="actions" style="justify-content:center; margin-top:18px;">
+        <button class="btn-secondary" id="restartBtn">Reiniciar actividad</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        id: 1,
+        title: 'Pregunta 1',
+        prompt: 'Un estudiante de programación web encuentra dos tutoriales que explican cómo implementar autenticación de usuarios. Uno es un blog reciente con ejemplos prácticos, y otro es documentación oficial más técnica pero menos actualizada. El estudiante necesita elegir cuál utilizar para su proyecto. ¿Cuál sería la acción más adecuada desde el pensamiento crítico?',
+        options: [
+          { id: '1A', label: 'A', text: 'Elegir el blog reciente porque presenta ejemplos prácticos que facilitan la implementación inmediata.' },
+          { id: '1B', label: 'B', text: 'Utilizar únicamente la documentación oficial por ser una fuente institucional confiable.' },
+          { id: '1C', label: 'C', text: 'Analizar ambas fuentes, comparar la validez, actualidad y aplicabilidad de la información, y decidir cuál o cuáles integrar según el contexto del proyecto.' }
+        ],
+        correct: '1C',
+        feedbackCorrect: 'Correcto. El pensamiento crítico implica contrastar fuentes, valorar su confiabilidad, revisar su actualidad y decidir con base en el contexto real del proyecto.',
+        feedbackIncorrect: 'No es la mejor opción. Desde el pensamiento crítico no basta con elegir lo más práctico o lo institucional de forma automática; es necesario evaluar, comparar e integrar la información según su validez, actualidad y pertinencia.'
+      },
+      {
+        id: 2,
+        title: 'Pregunta 2',
+        prompt: 'Durante el desarrollo de una aplicación, un estudiante identifica que su solución funciona, pero consume muchos recursos. Encuentra en un foro una alternativa que parece más eficiente, aunque no comprende completamente su funcionamiento. ¿Qué debería hacer el estudiante para actuar críticamente?',
+        options: [
+          { id: '2A', label: 'A', text: 'Implementar la nueva solución de inmediato, ya que mejora el rendimiento del programa.' },
+          { id: '2B', label: 'B', text: 'Mantener su solución actual porque ya funciona correctamente, evitando riesgos innecesarios.' },
+          { id: '2C', label: 'C', text: 'Analizar la nueva alternativa, comprender su lógica, evaluar ventajas y posibles limitaciones antes de decidir si implementarla.' }
+        ],
+        correct: '2C',
+        feedbackCorrect: 'Correcto. Pensar críticamente exige comprender antes de aplicar, valorar ventajas y riesgos, y decidir de forma fundamentada, no impulsiva.',
+        feedbackIncorrect: 'No es la respuesta adecuada. El pensamiento crítico requiere comprender la alternativa y evaluar sus implicaciones antes de adoptarla o descartarla.'
+      },
+      {
+        id: 3,
+        title: 'Pregunta 3',
+        prompt: 'En un equipo de trabajo, dos estudiantes proponen diferentes tecnologías para desarrollar un proyecto web. Ambos presentan argumentos válidos, pero con enfoques distintos. ¿Cuál sería la mejor actuación desde el pensamiento crítico?',
+        options: [
+          { id: '3A', label: 'A', text: 'Elegir la tecnología más conocida para evitar complicaciones durante el desarrollo.' },
+          { id: '3B', label: 'B', text: 'Defender la propia propuesta sin considerar la otra opción, priorizando la coherencia del trabajo individual.' },
+          { id: '3C', label: 'C', text: 'Comparar ambas propuestas considerando criterios como contexto, requerimientos del proyecto y evidencia técnica, para tomar una decisión fundamentada.' }
+        ],
+        correct: '3C',
+        feedbackCorrect: 'Correcto. El pensamiento crítico valora la evidencia, el contexto y los requerimientos del problema antes de elegir una opción.',
+        feedbackIncorrect: 'No es la mejor respuesta. Actuar críticamente implica analizar ambas propuestas con criterios técnicos y contextuales, no decidir por costumbre o por preferencia personal.'
+      }
+    ];
+
+    const state = {};
+    const questionsContainer = document.getElementById('questions');
+    const resultsSection = document.getElementById('results');
+
+    function shuffle(arr) {
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function init() {
+      questionsContainer.innerHTML = '';
+      resultsSection.style.display = 'none';
+
+      questions.forEach(q => {
+        state[q.id] = { selected: null, checked: false, correct: false };
+
+        const card = document.createElement('section');
+        card.className = 'question-card';
+        card.id = `question-${q.id}`;
+
+        const shuffled = shuffle(q.options);
+
+        card.innerHTML = `
+          <div class="question-title">
+            <span class="badge">${q.id}</span>
+            <h2 style="margin:0; font-size:1.2rem;">${q.title}</h2>
+          </div>
+          <div class="scenario">${q.prompt}</div>
+          <div class="answer-bank" id="bank-${q.id}"></div>
+          <div class="drop-zone" id="drop-${q.id}" aria-label="Zona para soltar respuesta" tabindex="0">
+            Arrastra aquí la respuesta correcta
+          </div>
+          <div class="actions">
+            <button class="btn-primary" id="check-${q.id}" disabled>Verificar</button>
+            <button class="btn-secondary" id="reset-${q.id}">Reiniciar pregunta</button>
+          </div>
+          <div class="feedback" id="feedback-${q.id}"></div>
+        `;
+
+        questionsContainer.appendChild(card);
+
+        const bank = card.querySelector(`#bank-${q.id}`);
+        shuffled.forEach(opt => {
+          const option = document.createElement('div');
+          option.className = 'draggable';
+          option.draggable = true;
+          option.dataset.question = q.id;
+          option.dataset.optionId = opt.id;
+          option.innerHTML = `<strong>${opt.label}.</strong> ${opt.text}`;
+          bank.appendChild(option);
+        });
+
+        setupDragAndDrop(q.id);
+        card.querySelector(`#check-${q.id}`).addEventListener('click', () => checkAnswer(q.id));
+        card.querySelector(`#reset-${q.id}`).addEventListener('click', () => resetQuestion(q.id));
+      });
+
+      document.getElementById('restartBtn').addEventListener('click', init);
+    }
+
+    function setupDragAndDrop(questionId) {
+      const card = document.getElementById(`question-${questionId}`);
+      const draggables = card.querySelectorAll('.draggable');
+      const dropZone = card.querySelector(`#drop-${questionId}`);
+
+      draggables.forEach(item => {
+        item.addEventListener('dragstart', e => {
+          if (state[questionId].checked) {
+            e.preventDefault();
+            return;
+          }
+          item.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', JSON.stringify({
+            questionId,
+            optionId: item.dataset.optionId,
+            html: item.innerHTML
+          }));
+        });
+
+        item.addEventListener('dragend', () => item.classList.remove('dragging'));
+      });
+
+      dropZone.addEventListener('dragover', e => {
+        if (state[questionId].checked) return;
+        e.preventDefault();
+        dropZone.classList.add('over');
+      });
+
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+
+      dropZone.addEventListener('drop', e => {
+        if (state[questionId].checked) return;
+        e.preventDefault();
+        dropZone.classList.remove('over');
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        if (Number(data.questionId) !== Number(questionId)) return;
+
+        state[questionId].selected = data.optionId;
+        renderDropped(questionId, data.optionId, data.html);
+      });
+    }
+
+    function renderDropped(questionId, optionId, html) {
+      const card = document.getElementById(`question-${questionId}`);
+      const dropZone = card.querySelector(`#drop-${questionId}`);
+      const bank = card.querySelector(`#bank-${questionId}`);
+      const button = card.querySelector(`#check-${questionId}`);
+
+      Array.from(bank.children).forEach(child => {
+        child.style.opacity = child.dataset.optionId === optionId ? '0.35' : '1';
+      });
+
+      dropZone.classList.add('filled');
+      dropZone.innerHTML = `<div class="dropped-answer">${html}</div>`;
+      button.disabled = false;
+    }
+
+    function resetQuestion(questionId) {
+      const card = document.getElementById(`question-${questionId}`);
+      const q = questions.find(item => item.id === questionId);
+      const dropZone = card.querySelector(`#drop-${questionId}`);
+      const feedback = card.querySelector(`#feedback-${questionId}`);
+      const button = card.querySelector(`#check-${questionId}`);
+      const bank = card.querySelector(`#bank-${questionId}`);
+
+      state[questionId] = { selected: null, checked: false, correct: false };
+
+      feedback.className = 'feedback';
+      feedback.style.display = 'none';
+      feedback.textContent = '';
+      button.disabled = true;
+      dropZone.className = 'drop-zone';
+      dropZone.innerHTML = 'Arrastra aquí la respuesta correcta';
+
+      bank.innerHTML = '';
+      shuffle(q.options).forEach(opt => {
+        const option = document.createElement('div');
+        option.className = 'draggable';
+        option.draggable = true;
+        option.dataset.question = q.id;
+        option.dataset.optionId = opt.id;
+        option.innerHTML = `<strong>${opt.label}.</strong> ${opt.text}`;
+        bank.appendChild(option);
+      });
+
+      setupDragAndDrop(questionId);
+      updateResultsVisibility();
+    }
+
+    function checkAnswer(questionId) {
+      const q = questions.find(item => item.id === questionId);
+      const card = document.getElementById(`question-${questionId}`);
+      const feedback = card.querySelector(`#feedback-${questionId}`);
+
+      if (!state[questionId].selected) return;
+
+      state[questionId].checked = true;
+      state[questionId].correct = state[questionId].selected === q.correct;
+
+      feedback.className = `feedback ${state[questionId].correct ? 'correct' : 'incorrect'}`;
+      feedback.textContent = state[questionId].correct ? q.feedbackCorrect : q.feedbackIncorrect;
+      feedback.style.display = 'block';
+
+      updateResultsVisibility();
+    }
+
+    function updateResultsVisibility() {
+      const allChecked = questions.every(q => state[q.id] && state[q.id].checked);
+      if (!allChecked) {
+        resultsSection.style.display = 'none';
+        return;
+      }
+
+      const correctCount = questions.filter(q => state[q.id].correct).length;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      const scoreEl = document.getElementById('score');
+      const scoreText = document.getElementById('scoreText');
+      const scorePill = document.getElementById('scorePill');
+
+      scoreEl.textContent = `${percentage}%`;
+      scorePill.textContent = `${correctCount} de ${questions.length} respuestas correctas`;
+
+      let message = '';
+      if (percentage === 100) {
+        message = 'Excelente. Estás evaluando la información, contrastando evidencias y tomando decisiones fundamentadas, que son rasgos centrales del pensamiento crítico.';
+      } else if (percentage >= 67) {
+        message = 'Buen trabajo. Reconoces varios elementos del pensamiento crítico, aunque todavía puedes fortalecer la evaluación comparativa y la toma de decisiones con mayor fundamento.';
+      } else {
+        message = 'Sigue practicando. El pensamiento crítico implica analizar información, comprender alternativas, contrastar evidencias y decidir según el contexto, no por impulso o costumbre.';
+      }
+
+      scoreText.textContent = message;
+      resultsSection.style.display = 'block';
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    init();
+  </script>
+
+  <!-- Footer/Credits -->
+  <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+      <p class="text-slate-600 font-medium">Creado por:</p>
+      <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+          CINTIA
+      </p>
+      <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+  </footer>
+
+
+
+</body></html>

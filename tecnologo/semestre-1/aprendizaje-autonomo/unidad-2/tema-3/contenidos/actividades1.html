@@ -1,0 +1,532 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OVA: Introducción a la evaluación del progreso en el
+        aprendizaje</title>
+  <link rel="stylesheet" href="../tailwind.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #166534;
+      --primary-soft: #dcfce7;
+      --success: #15803d;
+      --success-soft: #dcfce7;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
+      --border: #d1d5db;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 18px 50px;
+    }
+
+    .header {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #22c55e;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 1.9rem;
+      color: #111827;
+    }
+
+    .header h2 {
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .header p {
+      margin: 6px 0;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .question-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #22c55e;
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    .question-card h3 {
+      margin: 0 0 12px;
+      color: #111827;
+      font-size: 1.2rem;
+    }
+
+    .question-text {
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .options-panel,
+    .drop-panel {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 210px;
+    }
+
+    .panel-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1f2937;
+    }
+
+    .option {
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      cursor: grab;
+      line-height: 1.5;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      user-select: none;
+    }
+
+    .option:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+      border-color: #86efac;
+    }
+
+    .option.dragging {
+      opacity: .55;
+      transform: scale(.98);
+    }
+
+    .dropzone {
+      min-height: 120px;
+      border: 2px dashed #86efac;
+      border-radius: 16px;
+      background: #f0fdf4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      color: #166534;
+      font-weight: 700;
+      transition: background .2s ease, border-color .2s ease;
+    }
+
+    .dropzone.over {
+      background: #dcfce7;
+      border-color: #16a34a;
+    }
+
+    .dropzone.filled {
+      display: block;
+      text-align: left;
+      color: var(--text);
+      font-weight: normal;
+      background: #fff;
+      border-style: solid;
+    }
+
+    .dropzone.correct {
+      border-color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .dropzone.incorrect {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .feedback {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.correct {
+      background: var(--success-soft);
+      color: #14532d;
+      border-color: #86efac;
+    }
+
+    .feedback.incorrect {
+      background: var(--danger-soft);
+      color: #7f1d1d;
+      border-color: #fca5a5;
+    }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-check {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-reset {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .score-box {
+      position: static;
+      background: #111827;
+      color: white;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .score-box strong {
+      font-size: 1.2rem;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 860px) {
+      .activity-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-box {
+        position: static;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <section class="header">
+      <h1>Actividad de aprendizaje de arrastrar y soltar</h1>
+      <p><strong>Actividad tema 3:</strong> Evaluación del progreso en el aprendizaje</p>
+      <p><strong>Instrucciones:</strong> arrastra la opción que consideres correcta y suéltala en el recuadro de
+        respuesta de cada pregunta. Luego haz clic en <em>Verificar respuesta</em> para recibir retroalimentación
+        inmediata.</p>
+    </section>
+
+    <aside class="score-box">
+      <div>Progreso de la actividad</div>
+      <strong><span id="score">0</span>/3 respuestas correctas</strong>
+    </aside>
+
+    <section class="question-card" data-question="q1" data-correct="q1b">
+      <h3>Pregunta 1</h3>
+      <div class="question-text">
+        En una primera entrega, un estudiante recibe comentarios del docente sobre la falta de claridad en sus ideas,
+        pero decide continuar con la siguiente fase sin revisar lo anterior.<br><br>
+        <strong>¿Cuál de las siguientes acciones evidencia una adecuada evaluación del progreso en el
+          aprendizaje?</strong>
+      </div>
+
+      <div class="activity-grid">
+        <div class="options-panel" id="bank-q1">
+          <div class="panel-title">Opciones</div>
+          <div class="option" id="q1a" draggable="true">A. Continuar con el desarrollo del proyecto, considerando que
+            podrá corregir al final todos los aspectos señalados.</div>
+          <div class="option" id="q1b" draggable="true">B. Revisar los comentarios recibidos, analizar los errores
+            identificados y ajustar su trabajo antes de avanzar a la siguiente fase.</div>
+          <div class="option" id="q1c" draggable="true">C. Comparar su trabajo con el de otros compañeros para
+            determinar si realmente presenta dificultades significativas.</div>
+        </div>
+
+        <div class="drop-panel">
+          <div class="panel-title">Zona de respuesta</div>
+          <div class="dropzone" data-target="q1">Suelta aquí la respuesta correcta</div>
+          <div class="feedback" id="feedback-q1"></div>
+          <div class="actions">
+            <button class="btn-check" onclick="checkAnswer('q1')">Verificar respuesta</button>
+            <button class="btn-reset" onclick="resetQuestion('q1')">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="question-card" data-question="q2" data-correct="q2a">
+      <h3>Pregunta 2</h3>
+      <div class="question-text">
+        Durante un curso, se solicita a los estudiantes que utilicen una rúbrica para autoevaluar sus actividades antes
+        de entregarlas. Un estudiante considera que su trabajo cumple con todos los criterios, pero al recibir la
+        retroalimentación del docente identifica diferencias importantes.<br><br>
+        <strong>¿Qué acción refleja un proceso adecuado de evaluación del progreso?</strong>
+      </div>
+
+      <div class="activity-grid">
+        <div class="options-panel" id="bank-q2">
+          <div class="panel-title">Opciones</div>
+          <div class="option" id="q2a" draggable="true">A. Ajustar su percepción inicial revisando la rúbrica junto con
+            la retroalimentación, para identificar brechas entre su autoevaluación y su desempeño real.</div>
+          <div class="option" id="q2b" draggable="true">B. Mantener su criterio inicial, considerando que la
+            autoevaluación es suficiente para validar su desempeño.</div>
+          <div class="option" id="q2c" draggable="true">C. Modificar su trabajo únicamente en función de la calificación
+            obtenida, sin analizar los criterios de evaluación.</div>
+        </div>
+
+        <div class="drop-panel">
+          <div class="panel-title">Zona de respuesta</div>
+          <div class="dropzone" data-target="q2">Suelta aquí la respuesta correcta</div>
+          <div class="feedback" id="feedback-q2"></div>
+          <div class="actions">
+            <button class="btn-check" onclick="checkAnswer('q2')">Verificar respuesta</button>
+            <button class="btn-reset" onclick="resetQuestion('q2')">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="question-card" data-question="q3" data-correct="q3b">
+      <h3>Pregunta 3</h3>
+      <div class="question-text">
+        En una actividad de seguimiento, un estudiante debe analizar su desempeño en varias tareas realizadas durante el
+        curso. Al revisar sus resultados, observa mejoras en algunos aspectos, pero dificultades persistentes en
+        otros.<br><br>
+        <strong>¿Cuál de las siguientes decisiones evidencia una adecuada evaluación del progreso en el
+          aprendizaje?</strong>
+      </div>
+
+      <div class="activity-grid">
+        <div class="options-panel" id="bank-q3">
+          <div class="panel-title">Opciones</div>
+          <div class="option" id="q3a" draggable="true">A. Enfocarse únicamente en los resultados positivos para
+            mantener la motivación en el curso.</div>
+          <div class="option" id="q3b" draggable="true">B. Identificar tanto los avances como las dificultades y definir
+            acciones específicas para mejorar en los aspectos que aún presentan debilidades.</div>
+          <div class="option" id="q3c" draggable="true">C. Considerar que las dificultades son parte del proceso y
+            continuar con las actividades sin realizar ajustes en su estrategia de aprendizaje.</div>
+        </div>
+
+        <div class="drop-panel">
+          <div class="panel-title">Zona de respuesta</div>
+          <div class="dropzone" data-target="q3">Suelta aquí la respuesta correcta</div>
+          <div class="feedback" id="feedback-q3"></div>
+          <div class="actions">
+            <button class="btn-check" onclick="checkAnswer('q3')">Verificar respuesta</button>
+            <button class="btn-reset" onclick="resetQuestion('q3')">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Esta actividad está diseñada con selección múltiple de única respuesta en formato de arrastrar y soltar, orientada
+      a fortalecer la reflexión continua y la evaluación del progreso en el aprendizaje.
+    </p>
+  </div>
+
+  <script>
+    const state = {
+      q1: { checkedCorrect: false },
+      q2: { checkedCorrect: false },
+      q3: { checkedCorrect: false }
+    };
+
+    let dragged = null;
+
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('dragstart', e => {
+        dragged = option;
+        option.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', option.id);
+      });
+
+      option.addEventListener('dragend', () => {
+        option.classList.remove('dragging');
+      });
+    });
+
+    document.querySelectorAll('.dropzone, .options-panel').forEach(zone => {
+      zone.addEventListener('dragover', e => {
+        e.preventDefault();
+        zone.classList.add('over');
+      });
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('over');
+      });
+
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('over');
+        const optionId = e.dataTransfer.getData('text/plain');
+        const option = document.getElementById(optionId);
+        if (!option) return;
+
+        if (zone.classList.contains('dropzone')) {
+          const q = zone.dataset.target;
+          const current = zone.querySelector('.option');
+          if (current) {
+            document.getElementById('bank-' + q).appendChild(current);
+          }
+          zone.innerHTML = '';
+          zone.appendChild(option);
+          zone.classList.add('filled');
+          zone.classList.remove('correct', 'incorrect');
+          hideFeedback(q);
+        } else if (zone.classList.contains('options-panel')) {
+          zone.appendChild(option);
+          const q = zone.id.replace('bank-', '');
+          const dropzone = document.querySelector(`.dropzone[data-target="${q}"]`);
+          if (!dropzone.querySelector('.option')) {
+            dropzone.innerHTML = 'Suelta aquí la respuesta correcta';
+            dropzone.classList.remove('filled', 'correct', 'incorrect');
+          }
+          hideFeedback(q);
+        }
+      });
+    });
+
+    function checkAnswer(questionId) {
+      const card = document.querySelector(`[data-question="${questionId}"]`);
+      const correctId = card.dataset.correct;
+      const dropzone = document.querySelector(`.dropzone[data-target="${questionId}"]`);
+      const selected = dropzone.querySelector('.option');
+      const feedback = document.getElementById(`feedback-${questionId}`);
+
+      if (!selected) {
+        feedback.className = 'feedback show incorrect';
+        feedback.innerHTML = '<strong>Aún no has respondido.</strong><br>Arrastra una opción a la zona de respuesta antes de verificar.';
+        return;
+      }
+
+      const isCorrect = selected.id === correctId;
+
+      if (isCorrect) {
+        dropzone.classList.remove('incorrect');
+        dropzone.classList.add('correct');
+        feedback.className = 'feedback show correct';
+        feedback.innerHTML = getFeedback(questionId, true);
+        state[questionId].checkedCorrect = true;
+      } else {
+        dropzone.classList.remove('correct');
+        dropzone.classList.add('incorrect');
+        feedback.className = 'feedback show incorrect';
+        feedback.innerHTML = getFeedback(questionId, false);
+        state[questionId].checkedCorrect = false;
+      }
+
+      updateScore();
+    }
+
+    function resetQuestion(questionId) {
+      const bank = document.getElementById('bank-' + questionId);
+      const dropzone = document.querySelector(`.dropzone[data-target="${questionId}"]`);
+      const selected = dropzone.querySelector('.option');
+
+      if (selected) bank.appendChild(selected);
+
+      dropzone.innerHTML = 'Suelta aquí la respuesta correcta';
+      dropzone.classList.remove('filled', 'correct', 'incorrect');
+      hideFeedback(questionId);
+      state[questionId].checkedCorrect = false;
+      updateScore();
+    }
+
+    function hideFeedback(questionId) {
+      const feedback = document.getElementById(`feedback-${questionId}`);
+      feedback.className = 'feedback';
+      feedback.innerHTML = '';
+    }
+
+    function updateScore() {
+      let score = 0;
+      Object.keys(state).forEach(k => {
+        if (state[k].checkedCorrect) score++;
+      });
+      document.getElementById('score').textContent = score;
+    }
+
+    function getFeedback(questionId, isCorrect) {
+      const feedbacks = {
+        q1: {
+          correct: '<strong>¡Correcto!</strong><br>La evaluación del progreso implica revisar la retroalimentación, reconocer errores y hacer ajustes antes de avanzar. Esto demuestra autorregulación y mejora continua.',
+          incorrect: '<strong>Respuesta incorrecta.</strong><br>La opción adecuada es la <strong>B</strong>, porque evaluar el progreso significa analizar la retroalimentación recibida y corregir oportunamente antes de continuar con una nueva fase.'
+        },
+        q2: {
+          correct: '<strong>¡Correcto!</strong><br>Un proceso adecuado de evaluación del progreso requiere contrastar la autoevaluación con la retroalimentación externa para identificar diferencias y mejorar con base en criterios claros.',
+          incorrect: '<strong>Respuesta incorrecta.</strong><br>La opción correcta es la <strong>A</strong>, ya que la evaluación del progreso no se limita a la calificación ni a la percepción personal: exige revisar criterios, reconocer brechas y ajustar el trabajo.'
+        },
+        q3: {
+          correct: '<strong>¡Correcto!</strong><br>Evaluar el progreso implica reconocer fortalezas y debilidades. A partir de ello, el estudiante define acciones concretas de mejora, lo cual fortalece su aprendizaje autónomo.',
+          incorrect: '<strong>Respuesta incorrecta.</strong><br>La opción correcta es la <strong>B</strong>, porque una evaluación adecuada del progreso considera tanto avances como dificultades, y conduce a tomar decisiones específicas para mejorar.'
+        }
+      };
+
+      return isCorrect ? feedbacks[questionId].correct : feedbacks[questionId].incorrect;
+    }
+  </script>
+
+  <!-- Footer/Credits -->
+  <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+      <p class="text-slate-600 font-medium">Creado por:</p>
+      <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+          CINTIA
+      </p>
+      <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+  </footer>
+
+
+</body></html>
