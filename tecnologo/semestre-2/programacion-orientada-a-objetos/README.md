@@ -2,6 +2,13 @@
 
 OVAs del programa Tecnólogo, semestre 2. Las explicaciones, ejemplos y actividades de programación usan Java; los ejemplos se verificaron con Java 21.
 
+## Unidad 1
+
+- [Paradigmas de programación y pensamiento orientado a objetos](unidad-1/paradigmas-programacion-pensamiento-orientado-objetos/index.html)
+- [Clases, objetos, atributos, métodos y constructores](unidad-1/clases-objetos-atributos-metodos-constructores/index.html)
+- [Abstracción y encapsulamiento](unidad-1/abstraccion-encapsulamiento/index.html)
+- [Diagramas de clases y modelado de entidades](unidad-1/diagramas-clases-modelado-entidades/index.html)
+
 ## Unidad 2
 
 - [Asociación, agregación y composición](unidad-2/asociacion-agregacion-composicion/index.html)
