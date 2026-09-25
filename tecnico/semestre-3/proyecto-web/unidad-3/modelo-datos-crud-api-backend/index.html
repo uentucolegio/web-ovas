@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Modelo de Datos, CRUD y API Backend</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card { cursor: pointer; transition: all 0.2s ease; }
+        .reveal-card .reveal-back { display: none; }
+        .reveal-card.opened .reveal-back { display: block; }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .paso-btn { cursor: pointer; transition: all 0.2s ease; }
+        .paso-btn.paso-ok {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .insignia { transition: all 0.3s ease; opacity: 0.35; filter: grayscale(1); }
+        .insignia.ganada { opacity: 1; filter: none; }
+        code {
+            background-color: #f1f5f9;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: #166534;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🗄️ Del prototipo al backend: donde viven los datos</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En la Unidad 2 tu equipo construyó el frontend del proyecto web: pantallas maquetadas con HTML5 y CSS, formularios validados con JavaScript y hasta un primer consumo simple de datos. Sin embargo, hay algo que ese prototipo todavía no puede hacer: <strong>recordar</strong>. Si un usuario registra un pedido y recarga la página, todo desaparece, porque los datos solo existían en la memoria del navegador.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Esa es exactamente la carencia que resuelve la capa de <strong>backend</strong>: un programa que corre en el servidor, guarda la información en una <strong>base de datos</strong> y la expone al frontend a través de una <strong>API</strong>. Con esta guía inicias la Unidad 3, dedicada al backend, la integración, las pruebas y el despliegue del proyecto web.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Este primer tema recorre el camino completo de los datos: primero diseñarás el <strong>modelo de datos</strong> (qué entidades existen en tu proyecto y cómo se relacionan), luego lo convertirás en tablas de una base de datos con sus operaciones <strong>CRUD</strong> (crear, leer, actualizar y eliminar), y finalmente construirás la <strong>API/backend</strong> con sus rutas y controladores, para que el frontend que ya tienes pueda pedir y enviar datos reales.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Como hilo conductor usaremos un ejemplo cercano: <strong>una app de gestión de pedidos para una tienda de barrio</strong>, con usuarios que hacen pedidos de productos. El mismo razonamiento aplica al proyecto de tu equipo, sea cual sea su temática 🛒.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA sabrás dibujar el mapa de los datos de tu proyecto, traducirlo a tablas con SQL y diseñar las rutas de la API que conectarán tu frontend con una base de datos real. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>Diseñar el modelo de datos del proyecto web identificando entidades, atributos y relaciones a partir de las necesidades reales de la aplicación.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🗄️</span>
+                        <span>Implementar la base de datos del proyecto traduciendo el modelo a tablas con claves primarias y foráneas, y aplicar las cuatro operaciones CRUD mediante sentencias SQL.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔌</span>
+                        <span>Desarrollar los servicios del backend definiendo rutas REST y controladores que conecten las peticiones HTTP del frontend con las operaciones sobre la base de datos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛡️</span>
+                        <span>Aplicar buenas prácticas básicas en el diseño de la API: nombres coherentes de rutas y tablas, y uso correcto de los códigos de estado HTTP en las respuestas.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🧭 Misión de lectura: explora las 4 estaciones, descubre las tarjetas y supera el mini reto de cada una</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Modelo de datos -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-modelo">
+                            <span>🧩 Estación 1 — El modelo de datos: entidades, atributos y relaciones</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-modelo" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="modelo-intro" class="content-section">
+                                <p class="mb-4">
+                                    Antes de escribir una sola línea de SQL o de backend, hay que responder una pregunta: <strong>¿qué información necesita guardar tu aplicación?</strong> La respuesta se organiza en un <strong>modelo de datos</strong>, un plano que describe las <strong>entidades</strong> (las "cosas" del sistema), sus <strong>atributos</strong> (los datos de cada cosa) y las <strong>relaciones</strong> entre ellas.
+                                </p>
+                                <p class="mb-4">
+                                    Pensemos en nuestra app de pedidos de la tienda. Con solo describir el negocio ("los <em>usuarios</em> hacen <em>pedidos</em> de <em>productos</em>") ya aparecen las entidades principales. El modelo quedaría así:
+                                </p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Entidad</th>
+                                                <th class="border border-green-300 p-2 text-left">Atributos principales</th>
+                                                <th class="border border-green-300 p-2 text-left">Se relaciona con…</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Usuario</td>
+                                                <td class="border border-green-300 p-2">id, nombre, correo, contraseña, rol</td>
+                                                <td class="border border-green-300 p-2">Un usuario realiza <strong>muchos</strong> pedidos (1:N)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Producto</td>
+                                                <td class="border border-green-300 p-2">id, nombre, precio, stock</td>
+                                                <td class="border border-green-300 p-2">Un producto aparece en <strong>muchos</strong> pedidos, y un pedido tiene <strong>muchos</strong> productos (N:M)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Pedido</td>
+                                                <td class="border border-green-300 p-2">id, usuario_id, fecha, estado, total</td>
+                                                <td class="border border-green-300 p-2">Pertenece a <strong>un</strong> usuario; se detalla en Detalle de pedido</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Detalle de pedido</td>
+                                                <td class="border border-green-300 p-2">id, pedido_id, producto_id, cantidad, subtotal</td>
+                                                <td class="border border-green-300 p-2">Entidad intermedia que convierte la relación N:M en dos relaciones 1:N</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-4 text-sm text-slate-600 italic">
+                                    Este mismo cuadro, dibujado con cajas y líneas, es lo que conocerás como diagrama entidad–relación (ER): cada entidad es una caja con sus atributos, y cada línea indica el tipo de relación (1:1, 1:N o N:M).
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada concepto para descubrirlo (+4 puntos la primera vez):</p>
+                                <div id="reveal-modelo" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="modelo-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): en la app de la tienda, ¿qué tipo de relación hay entre Usuario y Pedido?</p>
+                                <div id="choice-modelo" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-modelo-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: De modelo a base de datos + CRUD -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-crud">
+                            <span>🗄️ Estación 2 — De modelo a base de datos: tablas, claves y CRUD</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-crud" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="crud-intro" class="content-section">
+                                <p class="mb-4">
+                                    Cuando el modelo está claro, traducirlo a una base de datos relacional es casi mecánico: cada <strong>entidad</strong> se convierte en una <strong>tabla</strong>, cada <strong>atributo</strong> en una <strong>columna</strong>, el identificador se declara como <strong>clave primaria</strong> (PRIMARY KEY) y cada relación se materializa con una <strong>clave foránea</strong> (FOREIGN KEY) que apunta a la tabla relacionada. Así se crea la tabla de productos:
+                                </p>
+                                <pre class="mb-4"><code>CREATE TABLE productos (
+  id     INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  precio DECIMAL(10,2) NOT NULL,
+  stock  INT DEFAULT 0
+);
+
+CREATE TABLE pedidos (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  fecha      DATE NOT NULL,
+  estado     VARCHAR(20) DEFAULT 'pendiente',
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);</code></pre>
+                                <p class="mb-4">
+                                    Sobre esas tablas, toda aplicación repite una y otra vez las mismas cuatro operaciones, conocidas como <strong>CRUD</strong> por sus siglas en inglés: <strong>C</strong>reate (crear), <strong>R</strong>ead (leer), <strong>U</strong>pdate (actualizar) y <strong>D</strong>elete (eliminar). En SQL, cada una tiene su sentencia:
+                                </p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Operación CRUD</th>
+                                                <th class="border border-green-300 p-2 text-left">Sentencia SQL de ejemplo (tabla productos)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Create — crear</td>
+                                                <td class="border border-green-300 p-2"><code>INSERT INTO productos (nombre, precio, stock) VALUES ('Café tostado 500 g', 18000, 25);</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Read — leer</td>
+                                                <td class="border border-green-300 p-2"><code>SELECT id, nombre, precio FROM productos WHERE stock &gt; 0;</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Update — actualizar</td>
+                                                <td class="border border-green-300 p-2"><code>UPDATE productos SET precio = 19500 WHERE id = 3;</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Delete — eliminar</td>
+                                                <td class="border border-green-300 p-2"><code>DELETE FROM productos WHERE id = 3;</code></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-4 text-sm text-slate-600 italic">
+                                    Ojo con UPDATE y DELETE: si olvidas el <code>WHERE</code>, la sentencia afecta TODAS las filas de la tabla. Es uno de los errores más costosos en bases de datos reales.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada pieza para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-crud" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="crud-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): ¿qué columna de la tabla pedidos es una clave foránea?</p>
+                                <div id="choice-crud" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-crud-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: API / backend -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-api">
+                            <span>🔌 Estación 3 — API REST: rutas, métodos HTTP y controladores</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-api" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="api-intro" class="content-section">
+                                <p class="mb-4">
+                                    El frontend no habla SQL ni toca la base de datos directamente: le pide los datos al backend a través de una <strong>API REST</strong>, un conjunto de <strong>rutas</strong> (URLs) que representan recursos y responden en formato JSON. Lo elegante de REST es que las cuatro operaciones CRUD se corresponden con los <strong>métodos HTTP</strong> que ya conoces de la Unidad 2:
+                                </p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Método + ruta</th>
+                                                <th class="border border-green-300 p-2 text-left">Operación CRUD</th>
+                                                <th class="border border-green-300 p-2 text-left">Qué hace</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2"><code>GET /api/productos</code></td>
+                                                <td class="border border-green-300 p-2 font-semibold">Read</td>
+                                                <td class="border border-green-300 p-2">Devuelve la lista de productos</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2"><code>GET /api/productos/3</code></td>
+                                                <td class="border border-green-300 p-2 font-semibold">Read</td>
+                                                <td class="border border-green-300 p-2">Devuelve solo el producto con id 3</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2"><code>POST /api/productos</code></td>
+                                                <td class="border border-green-300 p-2 font-semibold">Create</td>
+                                                <td class="border border-green-300 p-2">Crea un producto con los datos que llegan en el cuerpo de la petición</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2"><code>PUT /api/productos/3</code></td>
+                                                <td class="border border-green-300 p-2 font-semibold">Update</td>
+                                                <td class="border border-green-300 p-2">Actualiza el producto con id 3</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2"><code>DELETE /api/productos/3</code></td>
+                                                <td class="border border-green-300 p-2 font-semibold">Delete</td>
+                                                <td class="border border-green-300 p-2">Elimina el producto con id 3</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-4">
+                                    Dentro del backend, cada ruta delega el trabajo en un <strong>controlador</strong>: una función que recibe la petición, ejecuta la consulta en la base de datos y devuelve la respuesta. Así se ve el flujo completo <strong>ruta → controlador → base de datos</strong> en un backend estilo Express (Node.js); en PHP u otro lenguaje la estructura es equivalente:
+                                </p>
+                                <pre class="mb-4"><code>// rutas.js — la ruta conecta URL + método con su controlador
+app.get('/api/productos', obtenerProductos);
+app.post('/api/productos', crearProducto);
+
+// controladores.js — el controlador habla con la base de datos
+async function obtenerProductos(req, res) {
+  try {
+    const filas = await bd.consultar('SELECT * FROM productos');
+    res.status(200).json(filas);            // 200 OK + datos en JSON
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+}
+
+async function crearProducto(req, res) {
+  const { nombre, precio, stock } = req.body; // datos enviados por el frontend
+  await bd.consultar(
+    'INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)',
+    [nombre, precio, stock]
+  );
+  res.status(201).json({ mensaje: 'Producto creado' }); // 201 Created
+}</code></pre>
+                                <p class="mb-4 text-sm text-slate-600 italic">
+                                    Fíjate en los signos <code>?</code> del INSERT: son consultas parametrizadas, un criterio básico de seguridad que evita que un usuario malicioso inyecte SQL a través del formulario.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada actor del flujo para descubrir su papel (+4 puntos la primera vez):</p>
+                                <div id="reveal-api" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="api-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): tu frontend necesita actualizar el pedido con id 12. ¿Qué petición debe enviar?</p>
+                                <div id="choice-api" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-api-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Buenas prácticas -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-practicas">
+                            <span>🛡️ Estación 4 — Buenas prácticas mínimas: nombres y códigos de estado</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-practicas" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="practicas-intro" class="content-section">
+                                <p class="mb-4">
+                                    Un backend bien construido se nota en los detalles. Dos hábitos marcan la diferencia desde el primer día: <strong>nombrar con coherencia</strong> y <strong>responder con el código de estado correcto</strong>.
+                                </p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Nombres:</strong> tablas y rutas en minúsculas, en plural y sin tildes ni espacios (<code>productos</code>, <code>/api/pedidos</code>). Columnas descriptivas y consistentes (<code>usuario_id</code>, no <code>idUsr</code> en una tabla y <code>id_usuario</code> en otra).</li>
+                                    <li><strong>Rutas por recurso, no por acción:</strong> el método HTTP ya dice qué se hace. Es mejor <code>DELETE /api/pedidos/9</code> que <code>GET /api/borrarPedido?id=9</code>.</li>
+                                    <li><strong>Códigos de estado:</strong> el número de la respuesta le informa al frontend qué pasó, sin tener que adivinar leyendo el mensaje.</li>
+                                </ul>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Código</th>
+                                                <th class="border border-green-300 p-2 text-left">Significado</th>
+                                                <th class="border border-green-300 p-2 text-left">Cuándo usarlo en tu API</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">200 OK</td>
+                                                <td class="border border-green-300 p-2">Todo salió bien</td>
+                                                <td class="border border-green-300 p-2">Un GET, PUT o DELETE que se ejecutó correctamente</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">201 Created</td>
+                                                <td class="border border-green-300 p-2">Recurso creado</td>
+                                                <td class="border border-green-300 p-2">Un POST que insertó un nuevo registro</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">404 Not Found</td>
+                                                <td class="border border-green-300 p-2">No existe</td>
+                                                <td class="border border-green-300 p-2">Se pidió <code>/api/productos/999</code> y ese id no está en la base de datos</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">500 Internal Server Error</td>
+                                                <td class="border border-green-300 p-2">Falla del servidor</td>
+                                                <td class="border border-green-300 p-2">La consulta falló, la base de datos no responde o hay un error de código</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada tarjeta para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-practicas" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="practicas-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): el frontend pide <code>GET /api/pedidos/999</code> y ese pedido no existe. ¿Qué código debe devolver la API?</p>
+                                <div id="choice-practicas" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-practicas-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Pon a prueba lo aprendido y gana tus insignias</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntaje: <span id="actividades-puntos">0</span></p>
+                    </div>
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <span id="insignia-crud" class="insignia bg-white border border-green-300 rounded-full px-4 py-1 text-sm font-semibold text-green-800">🧩 Maestro del CRUD</span>
+                        <span id="insignia-rutas" class="insignia bg-white border border-green-300 rounded-full px-4 py-1 text-sm font-semibold text-green-800">🚦 Ingeniero de rutas</span>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 1: Conecta el CRUD</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Cada tarjeta muestra una sentencia SQL o una necesidad de la app de pedidos. Haz click en una tarjeta y luego en el botón de la operación CRUD (con su método HTTP) que le corresponde. Cada acierto vale <strong>+10 puntos</strong>. Empareja las 8 tarjetas para ganar la insignia <strong>🧩 Maestro del CRUD</strong>.
+                        </p>
+                        <div id="crud-tarjetas" class="flex flex-wrap gap-2 mb-4"></div>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="crud-cat-btn bg-green-100 border border-green-500 text-green-800 font-semibold py-2 px-4 rounded-lg" data-tipo="create">Create · POST</button>
+                            <button class="crud-cat-btn bg-teal-50 border border-teal-500 text-teal-800 font-semibold py-2 px-4 rounded-lg" data-tipo="read">Read · GET</button>
+                            <button class="crud-cat-btn bg-amber-50 border border-amber-500 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-tipo="update">Update · PUT</button>
+                            <button class="crud-cat-btn bg-red-50 border border-red-400 text-red-800 font-semibold py-2 px-4 rounded-lg" data-tipo="delete">Delete · DELETE</button>
+                        </div>
+                        <p id="crud-actividad-msg" class="text-sm mt-3 font-semibold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Las 8 tarjetas emparejadas correctamente. Luego, repite el ejercicio en tu cuaderno con 4 operaciones reales del proyecto de tu equipo (por ejemplo: registrar cliente, listar servicios, cambiar estado, eliminar reserva).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🚦 Actividad 2: El viaje de la petición</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            <strong>Parte A.</strong> Cuando un usuario guarda un pedido, la información recorre 5 paradas. Haz click en las etapas <strong>en el orden correcto</strong> para armar el flujo completo. Cada etapa bien ubicada vale <strong>+10 puntos</strong>; si te equivocas, el flujo se reinicia.
+                        </p>
+                        <div id="flujo-botones" class="flex flex-wrap gap-2 mb-3"></div>
+                        <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 min-h-12">
+                            <p class="text-xs text-slate-500 font-semibold mb-1">Tu flujo armado:</p>
+                            <p id="flujo-armado" class="text-sm font-semibold text-green-800">(vacío)</p>
+                        </div>
+                        <p id="flujo-msg" class="text-sm mt-2 font-semibold"></p>
+
+                        <p class="mb-4 mt-6 text-slate-700 leading-relaxed">
+                            <strong>Parte B.</strong> Ahora clasifica estas rutas reales de la API de la tienda: haz click en una ruta y luego en la operación que realiza (<strong>+10 puntos</strong> por acierto). Completa ambas partes para ganar la insignia <strong>🚦 Ingeniero de rutas</strong>.
+                        </p>
+                        <div id="rutas-tarjetas" class="flex flex-wrap gap-2 mb-4"></div>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="rutas-cat-btn bg-green-100 border border-green-500 text-green-800 font-semibold py-2 px-4 rounded-lg" data-tipo="create">Crear</button>
+                            <button class="rutas-cat-btn bg-teal-50 border border-teal-500 text-teal-800 font-semibold py-2 px-4 rounded-lg" data-tipo="read">Leer</button>
+                            <button class="rutas-cat-btn bg-amber-50 border border-amber-500 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-tipo="update">Actualizar</button>
+                            <button class="rutas-cat-btn bg-red-50 border border-red-400 text-red-800 font-semibold py-2 px-4 rounded-lg" data-tipo="delete">Eliminar</button>
+                        </div>
+                        <p id="rutas-msg" class="text-sm mt-3 font-semibold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> El flujo de 5 etapas armado sin errores y las 6 rutas clasificadas. Como cierre, diseña con tu equipo la tabla de rutas de la API de su proyecto (método, ruta, operación y tabla que afecta) para presentarla en la siguiente sesión.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: MDN Programación lado servidor -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: Programación de sitios web del lado del servidor</h3>
+                            <p class="text-slate-600 mb-2">Módulo de aprendizaje de MDN, en español, sobre cómo funciona el backend: peticiones, bases de datos y frameworks como Express y Django.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Learn/Server-side" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-1.png" alt="QR MDN Programación lado servidor" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: MDN Métodos HTTP -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: Métodos de petición HTTP</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial de los métodos GET, POST, PUT y DELETE que tu API usará para mapear las operaciones CRUD.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Methods" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-2.png" alt="QR MDN Métodos HTTP" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: Express -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Express: sitio oficial en español</h3>
+                            <p class="text-slate-600 mb-2">Documentación del framework de backend para Node.js usado en los ejemplos de rutas y controladores de este OVA.</p>
+                            <a href="https://expressjs.com/es/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-3.png" alt="QR Express en español" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Cabezas Granado, L. M. &amp; González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i>. Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript</i>. Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>Programación de sitios web del lado del servidor</i>. MDN Web Docs.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Learn/Server-side" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Learn/Server-side</a>
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>Métodos de petición HTTP</i>. MDN Web Docs.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Methods" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Web/HTTP/Methods</a>
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">OpenJS Foundation. (s. f.). <i>Express: infraestructura de aplicaciones web Node.js</i>.<br>
+                            <a href="https://expressjs.com/es/" class="text-green-700 underline break-all" target="_blank">https://expressjs.com/es/</a>
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Universidad de Córdoba. (2025). <i>Plan de curso: Proyecto Web</i>. Técnico Profesional en Programación Web.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "En la app de pedidos de la tienda, un usuario puede hacer muchos pedidos, pero cada pedido pertenece a un solo usuario. ¿Qué tipo de relación es?",
+                options: ["1:1 (uno a uno)", "1:N (uno a muchos)", "N:M (muchos a muchos)", "No hay relación entre esas entidades"],
+                correct: 1
+            },
+            {
+                question: "¿Qué es una clave foránea (FOREIGN KEY)?",
+                options: ["El identificador único de cada fila de una tabla", "Una columna que guarda contraseñas cifradas", "Una columna que apunta a la clave primaria de otra tabla para materializar una relación", "Un índice que acelera las búsquedas en la tabla"],
+                correct: 2
+            },
+            {
+                question: "¿Qué sentencia SQL corresponde a la operación Read (leer) del CRUD?",
+                options: ["INSERT INTO productos …", "UPDATE productos SET …", "DELETE FROM productos …", "SELECT … FROM productos"],
+                correct: 3
+            },
+            {
+                question: "En una API REST, ¿qué método HTTP se usa normalmente para crear un nuevo recurso?",
+                options: ["GET", "POST", "PUT", "DELETE"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace la petición PUT /api/productos/5 en la API de la tienda?",
+                options: ["Devuelve la lista completa de productos", "Crea el producto número 5", "Actualiza los datos del producto con id 5", "Elimina el producto con id 5"],
+                correct: 2
+            },
+            {
+                question: "En el flujo ruta → controlador → base de datos, ¿cuál es la función del controlador?",
+                options: ["Dibujar la interfaz que ve el usuario", "Recibir la petición, ejecutar la consulta en la base de datos y devolver la respuesta", "Guardar los archivos HTML y CSS del frontend", "Definir los estilos de la página"],
+                correct: 1
+            },
+            {
+                question: "El frontend pide GET /api/pedidos/999 y ese pedido no existe en la base de datos. Según las buenas prácticas, ¿qué código de estado debe devolver la API?",
+                options: ["200 OK", "201 Created", "404 Not Found", "500 Internal Server Error"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        // --- Puntos de la misión de lectura (sección Contenido) ---
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // --- Helper: tarjetas "revelar" (+puntos la primera vez) ---
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // --- Helper: mini reto de opción única (+puntos si acierta a la primera) ---
+        function renderChoice(containerId, msgId, opciones, correcta, puntos) {
+            const container = document.getElementById(containerId);
+            const msg = document.getElementById(msgId);
+            let resuelto = false;
+            opciones.forEach((texto, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white text-left';
+                btn.textContent = texto;
+                btn.addEventListener('click', function() {
+                    if (resuelto) return;
+                    if (i === correcta) {
+                        resuelto = true;
+                        this.classList.add('chip-done-correct');
+                        msg.textContent = '✅ ¡Correcto! +' + puntos + ' puntos.';
+                        msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        this.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ No es esa. Revisa la estación y vuelve a intentar.';
+                        msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                    }
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        // --- Estación 1: modelo de datos ---
+        renderReveal('reveal-modelo', [
+            { titulo: '📦 Entidad', texto: 'Una "cosa" del sistema sobre la que se guarda información: Usuario, Producto, Pedido. En el diagrama ER es una caja; en la base de datos será una tabla.' },
+            { titulo: '🏷️ Atributo', texto: 'Cada dato que describe a la entidad: el nombre y el correo del usuario, el precio y el stock del producto. Serán las columnas de la tabla.' },
+            { titulo: '🔗 Relación', texto: 'El vínculo entre entidades. Puede ser 1:1 (un usuario, un carrito activo), 1:N (un usuario, muchos pedidos) o N:M (muchos productos en muchos pedidos).' },
+            { titulo: '🪪 Identificador', texto: 'El atributo que distingue cada ejemplar de la entidad (id). Sin él no podrías saber cuál de los 200 pedidos quieres consultar o modificar.' }
+        ], 4);
+        renderChoice('choice-modelo', 'choice-modelo-msg',
+            ['1:1 — uno a uno', '1:N — uno a muchos', 'N:M — muchos a muchos', 'No se relacionan'], 1, 5);
+
+        // --- Estación 2: base de datos y CRUD ---
+        renderReveal('reveal-crud', [
+            { titulo: '🔑 Clave primaria (PRIMARY KEY)', texto: 'Columna que identifica de forma única cada fila de la tabla. En nuestras tablas es el id autoincremental.' },
+            { titulo: '🧲 Clave foránea (FOREIGN KEY)', texto: 'Columna que guarda el id de otra tabla para materializar la relación: usuario_id en pedidos apunta a usuarios(id).' },
+            { titulo: '🔁 CRUD', texto: 'Las 4 operaciones básicas sobre los datos: Create (INSERT), Read (SELECT), Update (UPDATE) y Delete (DELETE). Toda la lógica de tu backend gira alrededor de ellas.' },
+            { titulo: '🎯 Cláusula WHERE', texto: 'El filtro que indica sobre qué filas actúa la sentencia. Un UPDATE o DELETE sin WHERE modifica o borra la tabla completa.' }
+        ], 4);
+        renderChoice('choice-crud', 'choice-crud-msg',
+            ['id', 'fecha', 'usuario_id', 'estado'], 2, 5);
+
+        // --- Estación 3: API / backend ---
+        renderReveal('reveal-api', [
+            { titulo: '🖥️ Cliente (frontend)', texto: 'La página que construiste en la Unidad 2. Envía la petición HTTP con fetch y muestra en pantalla el JSON que recibe.' },
+            { titulo: '🛣️ Ruta', texto: 'La combinación método + URL que identifica el recurso: GET /api/productos. Decide qué controlador atiende la petición.' },
+            { titulo: '🎛️ Controlador', texto: 'La función del backend que recibe la petición, valida los datos, ejecuta la consulta en la base de datos y arma la respuesta.' },
+            { titulo: '📨 Respuesta JSON', texto: 'El resultado que viaja de regreso al frontend: un código de estado (200, 201, 404, 500…) y los datos en formato JSON.' }
+        ], 4);
+        renderChoice('choice-api', 'choice-api-msg',
+            ['GET /api/pedidos/12', 'POST /api/pedidos', 'PUT /api/pedidos/12', 'DELETE /api/pedidos/12'], 2, 5);
+
+        // --- Estación 4: buenas prácticas ---
+        renderReveal('reveal-practicas', [
+            { titulo: '✅ 200 OK', texto: 'La petición se procesó con éxito. Es la respuesta normal de un GET que encontró datos o de un PUT/DELETE que se ejecutó bien.' },
+            { titulo: '🆕 201 Created', texto: 'Se creó un nuevo recurso. Es la respuesta correcta de un POST que insertó un registro en la base de datos.' },
+            { titulo: '🔍 404 Not Found', texto: 'El recurso pedido no existe: la ruta está mal escrita o el id no está en la base de datos.' },
+            { titulo: '💥 500 Internal Server Error', texto: 'Algo falló dentro del servidor: un error de código, una consulta inválida o la base de datos caída. El detalle se registra en el servidor, no se le muestra al usuario.' }
+        ], 4);
+        renderChoice('choice-practicas', 'choice-practicas-msg',
+            ['200 OK', '201 Created', '404 Not Found', '500 Internal Server Error'], 2, 5);
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // --- Puntaje e insignias de la sección Actividades ---
+        let actividadesPuntos = 0;
+        const actividadesPuntosEl = document.getElementById('actividades-puntos');
+        function sumarPuntosActividad(n) {
+            actividadesPuntos += n;
+            actividadesPuntosEl.textContent = actividadesPuntos;
+        }
+        function otorgarInsignia(id, msgEl, nombre) {
+            document.getElementById(id).classList.add('ganada');
+            msgEl.textContent = '🏅 ¡Insignia desbloqueada: ' + nombre + '! Puntaje total: ' + actividadesPuntos + ' puntos.';
+            msgEl.className = 'text-sm mt-3 font-semibold text-green-700';
+        }
+
+        // --- Helper: clasificar tarjetas en categorías (tarjeta → botón) ---
+        function renderClasifica(tarjetasId, botonClass, items, msgId, puntos, alCompletar) {
+            let seleccion = null;
+            let correctas = 0;
+            const container = document.getElementById(tarjetasId);
+            const msg = document.getElementById(msgId);
+            items.forEach((item, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+                chip.textContent = item.texto;
+                chip.dataset.index = i;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('chip-done-correct')) return;
+                    this.classList.remove('chip-done-wrong');
+                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                    this.classList.add('chip-selected');
+                    seleccion = this;
+                });
+                container.appendChild(chip);
+            });
+            document.querySelectorAll('.' + botonClass).forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!seleccion) {
+                        msg.textContent = '👆 Primero haz click en una tarjeta y luego en su categoría.';
+                        msg.className = 'text-sm mt-3 font-semibold text-amber-700';
+                        return;
+                    }
+                    const idx = parseInt(seleccion.dataset.index);
+                    seleccion.classList.remove('chip-selected');
+                    if (items[idx].tipo === btn.dataset.tipo) {
+                        seleccion.classList.add('chip-done-correct');
+                        correctas++;
+                        sumarPuntosActividad(puntos);
+                        if (correctas === items.length) {
+                            alCompletar(msg);
+                        } else {
+                            msg.textContent = '✅ ¡Correcto! +' + puntos + ' puntos. Llevas ' + correctas + ' de ' + items.length + '.';
+                            msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                        }
+                    } else {
+                        seleccion.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ Esa no es la operación. Vuelve a seleccionar la tarjeta e inténtalo de nuevo.';
+                        msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                    }
+                    seleccion = null;
+                });
+            });
+        }
+
+        // --- Actividad 1: Conecta el CRUD (SQL + necesidad → operación/método) ---
+        renderClasifica('crud-tarjetas', 'crud-cat-btn', [
+            { texto: "INSERT INTO pedidos (usuario_id, fecha) VALUES (7, '2026-03-10');", tipo: 'create' },
+            { texto: 'SELECT * FROM productos WHERE stock > 0;', tipo: 'read' },
+            { texto: "UPDATE pedidos SET estado = 'entregado' WHERE id = 12;", tipo: 'update' },
+            { texto: 'DELETE FROM detalle_pedido WHERE id = 40;', tipo: 'delete' },
+            { texto: 'Registrar un nuevo cliente desde el formulario de la app', tipo: 'create' },
+            { texto: 'Mostrar el catálogo de productos en la pantalla de inicio', tipo: 'read' },
+            { texto: 'Cambiar el precio del café tostado a 19.500', tipo: 'update' },
+            { texto: 'Quitar del sistema un producto descontinuado', tipo: 'delete' }
+        ], 'crud-actividad-msg', 10, (msg) => {
+            otorgarInsignia('insignia-crud', msg, 'Maestro del CRUD');
+        });
+
+        // --- Actividad 2 Parte A: ordenar el viaje de la petición ---
+        const flujoPasos = [
+            { texto: '1️⃣ Cliente: el frontend envía la petición con fetch', orden: 0 },
+            { texto: 'Ruta: POST /api/pedidos recibe la petición', orden: 1 },
+            { texto: 'Controlador: valida los datos del pedido', orden: 2 },
+            { texto: 'Base de datos: se ejecuta el INSERT', orden: 3 },
+            { texto: 'Respuesta: 201 Created + JSON al frontend', orden: 4 }
+        ];
+        // Se muestran desordenados para que el estudiante arme la secuencia.
+        const flujoDesorden = [flujoPasos[2], flujoPasos[0], flujoPasos[4], flujoPasos[1], flujoPasos[3]];
+        let flujoEsperado = 0;
+        let flujoCompleto = false;
+        let rutasCompletas = false;
+        const flujoArmadoEl = document.getElementById('flujo-armado');
+        const flujoMsg = document.getElementById('flujo-msg');
+        const flujoNombres = ['Cliente', 'Ruta', 'Controlador', 'Consulta a la BD', 'Respuesta JSON'];
+
+        function verificarInsigniaRutas(msg) {
+            if (flujoCompleto && rutasCompletas) {
+                otorgarInsignia('insignia-rutas', msg, 'Ingeniero de rutas');
+            }
+        }
+
+        const flujoContainer = document.getElementById('flujo-botones');
+        flujoDesorden.forEach(paso => {
+            const btn = document.createElement('button');
+            btn.className = 'paso-btn border-2 border-slate-300 rounded-lg p-2 text-sm bg-white text-left';
+            btn.textContent = paso.texto.replace('1️⃣ ', '');
+            btn.addEventListener('click', function() {
+                if (flujoCompleto || this.classList.contains('paso-ok')) return;
+                if (paso.orden === flujoEsperado) {
+                    this.classList.add('paso-ok');
+                    flujoEsperado++;
+                    sumarPuntosActividad(10);
+                    flujoArmadoEl.textContent = flujoNombres.slice(0, flujoEsperado).join(' → ');
+                    if (flujoEsperado === flujoPasos.length) {
+                        flujoCompleto = true;
+                        flujoMsg.textContent = '✅ ¡Flujo completo! Así viaja cada petición de tu proyecto.';
+                        flujoMsg.className = 'text-sm mt-2 font-semibold text-green-700';
+                        verificarInsigniaRutas(document.getElementById('rutas-msg'));
+                    } else {
+                        flujoMsg.textContent = '✅ ¡Bien! +10 puntos. ¿Cuál sigue?';
+                        flujoMsg.className = 'text-sm mt-2 font-semibold text-green-700';
+                    }
+                } else {
+                    flujoEsperado = 0;
+                    flujoArmadoEl.textContent = '(vacío)';
+                    flujoContainer.querySelectorAll('.paso-btn').forEach(b => b.classList.remove('paso-ok'));
+                    flujoMsg.textContent = '❌ Esa etapa no va ahí. El flujo se reinició: comienza por quien origina la petición.';
+                    flujoMsg.className = 'text-sm mt-2 font-semibold text-red-600';
+                }
+            });
+            flujoContainer.appendChild(btn);
+        });
+
+        // --- Actividad 2 Parte B: clasificar rutas según su operación ---
+        renderClasifica('rutas-tarjetas', 'rutas-cat-btn', [
+            { texto: 'GET /api/productos', tipo: 'read' },
+            { texto: 'POST /api/usuarios', tipo: 'create' },
+            { texto: 'PUT /api/productos/8', tipo: 'update' },
+            { texto: 'DELETE /api/pedidos/9', tipo: 'delete' },
+            { texto: 'GET /api/pedidos/12', tipo: 'read' },
+            { texto: 'POST /api/pedidos', tipo: 'create' }
+        ], 'rutas-msg', 10, (msg) => {
+            rutasCompletas = true;
+            if (flujoCompleto) {
+                verificarInsigniaRutas(msg);
+            } else {
+                msg.textContent = '✅ ¡Las 6 rutas clasificadas! Completa la Parte A para ganar la insignia.';
+                msg.className = 'text-sm mt-3 font-semibold text-green-700';
+            }
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
