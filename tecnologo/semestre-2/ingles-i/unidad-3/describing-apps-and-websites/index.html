@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Describing Apps and Websites</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back { display: none; }
+        .reveal-card.opened .reveal-back { display: block; }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .builder-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .builder-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .builder-option.result-ok {
+            background-color: #bbf7d0;
+            border-color: #16a34a;
+        }
+        .builder-option.result-bad {
+            background-color: #fecaca;
+            border-color: #ef4444;
+        }
+        .mission-card.completed {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">📱 Describing apps and websites: your first tech pitch in English</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Piensa en las aplicaciones que abriste hoy: una app de mensajería, el navegador, la plataforma de la universidad… Ahora imagina que debes explicarle a alguien, en inglés y en pocas frases, qué es cada una y para qué sirve. Eso es exactamente lo que hacen a diario los desarrolladores de software: describen sus productos en tiendas de aplicaciones, páginas web, documentación y presentaciones de proyectos.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En este OVA de la Unidad 3 aprenderás a construir descripciones cortas de aplicaciones y sitios web usando tres estructuras muy simples — <strong>It is a…</strong>, <strong>It has…</strong> y <strong>You can use it to…</strong> — junto con adjetivos útiles como <em>free</em>, <em>fast</em>, <em>easy to use</em>, <em>secure</em> y <em>popular</em>, todo en presente simple. Estas mismas frases aparecen en Google Play, en la App Store y en los README de GitHub, así que también te ayudarán a entender lo que lees allí. Además, son la base de la evidencia del curso: la <strong>presentación corta de una aplicación</strong>.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> <strong>Learning Tip:</strong> Three short sentences are enough to describe any app: what it is, what it has, and what you can do with it. Master this formula and you can talk about any software product. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>Identificar las estructuras básicas <em>It is a…</em>, <em>It has…</em> y <em>You can use it to…</em> en descripciones cortas de aplicaciones y sitios web escritas en presente simple.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">⭐</span>
+                        <span>Emplear adjetivos útiles del inglés técnico (<em>free</em>, <em>fast</em>, <em>easy to use</em>, <em>secure</em>, <em>popular</em>, <em>useful</em>) para caracterizar herramientas de software.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📖</span>
+                        <span>Comprender descripciones breves de aplicaciones como las que aparecen en tiendas de aplicaciones, sitios web y documentación de software.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🗣️</span>
+                        <span>Construir una descripción corta y coherente de una aplicación, como preparación para la evidencia del curso "Presentación corta de una aplicación".</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🎮 Misión de exploración: recorre las 3 estaciones, descubre las tarjetas y responde los mini retos</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Estructuras para describir -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-estructuras">
+                            <span>🧱 Three magic sentences: It is… / It has… / You can use it to…</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-estructuras" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="estructuras-intro" class="content-section">
+                                <p class="mb-4">
+                                    Toda descripción corta de una app o de un sitio web responde tres preguntas. Cada pregunta tiene su propia estructura en presente simple:
+                                </p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                    <div class="p-4 bg-green-50 border border-green-300 rounded-lg">
+                                        <p class="text-xs font-bold text-green-700 uppercase mb-1">❓ What is it?</p>
+                                        <p class="font-bold text-green-800 text-lg mb-2">It is a…</p>
+                                        <p class="text-sm text-slate-600 mb-2">Dice <strong>qué es</strong>: el tipo de aplicación o sitio web.</p>
+                                        <p class="text-sm bg-white border border-green-200 rounded p-2"><em>It is a <strong>free messaging app</strong>.</em></p>
+                                        <p class="text-sm bg-white border border-green-200 rounded p-2 mt-2"><em>It is a <strong>website for online courses</strong>.</em></p>
+                                    </div>
+                                    <div class="p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                        <p class="text-xs font-bold text-teal-700 uppercase mb-1">❓ What does it have?</p>
+                                        <p class="font-bold text-teal-800 text-lg mb-2">It has…</p>
+                                        <p class="text-sm text-slate-600 mb-2">Dice <strong>qué tiene</strong>: sus características (<em>features</em>).</p>
+                                        <p class="text-sm bg-white border border-teal-200 rounded p-2"><em>It has a <strong>simple interface</strong>.</em></p>
+                                        <p class="text-sm bg-white border border-teal-200 rounded p-2 mt-2"><em>It has <strong>group chats and video calls</strong>.</em></p>
+                                    </div>
+                                    <div class="p-4 bg-blue-50 border border-blue-300 rounded-lg">
+                                        <p class="text-xs font-bold text-blue-700 uppercase mb-1">❓ What does it do? / What is it for?</p>
+                                        <p class="font-bold text-blue-800 text-lg mb-2">You can use it to…</p>
+                                        <p class="text-sm text-slate-600 mb-2">Dice <strong>para qué sirve</strong>: la acción va en verbo base.</p>
+                                        <p class="text-sm bg-white border border-blue-200 rounded p-2"><em>You can use it to <strong>send messages</strong>.</em></p>
+                                        <p class="text-sm bg-white border border-blue-200 rounded p-2 mt-2"><em>You can use it to <strong>learn English online</strong>.</em></p>
+                                    </div>
+                                </div>
+
+                                <p class="mb-3">
+                                    Para hablar de las personas que la usan, agrega una frase con <strong>presente simple</strong>. Recuerda la <strong>-s</strong> de la tercera persona singular:
+                                </p>
+                                <div class="p-4 bg-slate-100 border border-slate-300 rounded-lg mb-4">
+                                    <p class="mb-1"><em>Who uses it?</em> → <em>Millions of people <strong>use</strong> it every day.</em></p>
+                                    <p class="mb-1"><em>My teacher <strong>uses</strong> it in class.</em> <span class="text-green-700 font-semibold">(he/she/it → verbo + s)</span></p>
+                                    <p><em>The app <strong>works</strong> on Android and iOS.</em></p>
+                                </div>
+                            </div>
+
+                            <div id="estructuras-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🎯 Mini reto (+5 pts)</h4>
+                                <p class="text-sm text-teal-800 font-semibold mb-2">Which sentence tells us what you DO with the app (its purpose)?</p>
+                                <div id="choice-estructuras" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-estructuras-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: Adjetivos y vocabulario útil -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-adjetivos">
+                            <span>⭐ Useful adjectives to describe software</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-adjetivos" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="adjetivos-intro" class="content-section">
+                                <p class="mb-4">
+                                    Los adjetivos hacen tu descripción más interesante y precisa. En inglés, el adjetivo <strong>no cambia</strong> con el plural y suele ir <strong>antes del sustantivo</strong> (<em>a fast browser</em>) o después del verbo <em>to be</em> (<em>the browser is fast</em>).
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada adjetivo para descubrir su significado y un ejemplo (+3 puntos la primera vez):</p>
+                                <div id="reveal-adjetivos" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+
+                            <div id="adjetivos-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🎯 Mini reto (+5 pts)</h4>
+                                <p class="text-sm text-teal-800 font-semibold mb-2">Which adjective describes an app that protects your data and passwords?</p>
+                                <div id="choice-adjetivos" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-adjetivos-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Modelo de descripción -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-modelo">
+                            <span>🔍 Model in action: describing a code editor, sentence by sentence</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-modelo" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="modelo-intro" class="content-section">
+                                <p class="mb-4">
+                                    Lee esta descripción corta de <strong>Visual Studio Code</strong>, un editor de código que probablemente usarás durante toda tu carrera. Es el mismo estilo de texto que encuentras en una tienda de aplicaciones o en la página oficial de una herramienta:
+                                </p>
+                                <div class="p-4 bg-slate-100 border border-slate-300 rounded-lg mb-4 italic">
+                                    "Visual Studio Code is a free code editor. It has a simple interface and thousands of extensions. You can use it to write, edit and debug code. It is fast, easy to use and very popular. Millions of developers use it every day."
+                                </div>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">📖 Misión de lectura: haz click en cada frase para ver su análisis (+3 puntos la primera vez):</p>
+                                <div id="reveal-modelo" class="grid grid-cols-1 gap-3"></div>
+                            </div>
+
+                            <div id="modelo-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🎯 Mini reto de comprensión (+5 pts)</h4>
+                                <p class="text-sm text-teal-800 font-semibold mb-2">According to the model description, what can you use Visual Studio Code to do?</p>
+                                <div id="choice-modelo" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-modelo-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Modo misión activado — completa las 2 misiones y gana tus insignias</p>
+                        <p class="text-green-800 font-semibold">🏅 Insignias: <span id="insignias-lista">ninguna todavía</span></p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1: Match the description -->
+                    <div id="mision-1" class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Misión 1: What app is it?</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Lee cada descripción en inglés y decide qué tipo de aplicación describe. Haz click primero en una <strong>descripción</strong> y luego en el <strong>tipo de app</strong> correcto. Cada acierto vale <strong>+10 puntos</strong>; cada error resta 2.
+                        </p>
+                        <div id="match-descripciones" class="flex flex-col gap-2 mb-4"></div>
+                        <div class="flex flex-wrap gap-3 mb-3">
+                            <button class="match-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="browser">🌐 Web browser</button>
+                            <button class="match-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="editor">💻 Code editor</button>
+                            <button class="match-btn bg-orange-100 border border-orange-400 text-orange-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="mensajeria">💬 Messaging app</button>
+                            <button class="match-btn bg-pink-100 border border-pink-400 text-pink-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="elearning">🎓 E-learning platform</button>
+                            <button class="match-btn bg-yellow-100 border border-yellow-500 text-yellow-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="tienda">🛒 Online store</button>
+                        </div>
+                        <p id="match-msg" class="text-sm font-semibold mb-2"></p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos misión 1: <span id="match-puntos">0</span></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> emparejar las 5 descripciones con su tipo de app. Insignia de oro 🥇 si no cometes ningún error, de plata 🥈 con 1 o 2 errores y de bronce 🥉 si necesitas más intentos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2: Build a description -->
+                    <div id="mision-2" class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🏗️ Misión 2: Build your description</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Ahora construye tú una descripción completa. Primero elige la app que quieres describir; luego selecciona <strong>una frase de cada bloque</strong> (It is… → It has… → You can…). Cuidado: algunas frases pertenecen a otras apps. Al final pulsa <strong>Check my description</strong> para verificar la estructura y el contenido.
+                        </p>
+                        <p class="font-semibold text-slate-700 mb-2">1️⃣ Choose your app:</p>
+                        <div class="flex flex-wrap gap-3 mb-4">
+                            <button class="builder-app-btn bg-orange-100 border border-orange-400 text-orange-800 font-semibold py-2 px-3 rounded-lg text-sm" data-app="mensajeria">💬 A messaging app</button>
+                            <button class="builder-app-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-3 rounded-lg text-sm" data-app="editor">💻 A code editor</button>
+                            <button class="builder-app-btn bg-pink-100 border border-pink-400 text-pink-800 font-semibold py-2 px-3 rounded-lg text-sm" data-app="elearning">🎓 An e-learning platform</button>
+                        </div>
+                        <div id="builder-zona" class="hidden">
+                            <div class="mb-4">
+                                <p class="font-semibold text-green-800 mb-2">2️⃣ It is… <span class="text-xs text-slate-500">(what is it?)</span></p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3" data-slot="is"></div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="font-semibold text-teal-800 mb-2">3️⃣ It has… <span class="text-xs text-slate-500">(what does it have?)</span></p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3" data-slot="has"></div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="font-semibold text-blue-800 mb-2">4️⃣ You can… <span class="text-xs text-slate-500">(what is it for?)</span></p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3" data-slot="can"></div>
+                            </div>
+                            <button id="builder-check" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">✅ Check my description</button>
+                            <div id="builder-resultado" class="mt-4"></div>
+                        </div>
+                        <p class="text-green-800 font-semibold mt-3">⭐ Puntos misión 2: <span id="builder-puntos">0</span></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> una descripción de 3 frases coherente con la app elegida (+10 puntos por frase correcta). Insignia Description Builder 🏆 si logras las 3 frases correctas en el primer intento. Como reto extra, escribe en tu cuaderno la misma descripción para una app que uses todos los días: será tu borrador para la presentación corta de una aplicación.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">LearnEnglish – Writing (British Council)</h3>
+                            <p class="text-slate-600 mb-2">Práctica gratuita de escritura por niveles (A1–C1) con textos modelo y ejercicios interactivos, ideal para redactar tus propias descripciones cortas.</p>
+                            <a href="https://learnenglish.britishcouncil.org/skills/writing" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-1.png" alt="QR LearnEnglish Writing" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">LearnEnglish – Vocabulary (British Council)</h3>
+                            <p class="text-slate-600 mb-2">Actividades de vocabulario A1–A2 y B1–B2 con pronunciación y juegos, para reforzar los adjetivos y palabras de este OVA.</p>
+                            <a href="https://learnenglish.britishcouncil.org/vocabulary" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-2.png" alt="QR LearnEnglish Vocabulary" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">LearnEnglish – Present Simple (British Council)</h3>
+                            <p class="text-slate-600 mb-2">Referencia gramatical del presente simple con explicaciones y ejercicios: el tiempo verbal de todas las descripciones de este OVA.</p>
+                            <a href="https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-3.png" alt="QR LearnEnglish Present Simple" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">British Council. (s. f.). <i>LearnEnglish</i>.<br><a href="https://learnenglish.britishcouncil.org/" class="text-green-700 underline break-all" target="_blank">https://learnenglish.britishcouncil.org/</a></span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">British Council. (s. f.). <i>Present simple. LearnEnglish – English grammar reference</i>.<br><a href="https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple" class="text-green-700 underline break-all" target="_blank">https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple</a></span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Glendinning, E. H., y McEwan, J. (2013). <i>Oxford English for Information Technology</i> (2nd ed.). Oxford University Press.</span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Murphy, R. (2019). <i>English Grammar in Use</i> (5th ed.). Cambridge University Press.</span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Universidad de Córdoba. (2026). <i>Plan de curso FDOC-088: Inglés I. Tecnología en Desarrollo de Software</i>. Documento institucional.</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "Which sentence correctly says WHAT an app is?",
+                options: ["It has a mobile app free.", "It is a free mobile app.", "You can a free mobile app.", "It free is a mobile app."],
+                correct: 1
+            },
+            {
+                question: "Complete the sentence: \"___ a simple and modern interface.\"",
+                options: ["It is", "You can", "It has", "It uses"],
+                correct: 2
+            },
+            {
+                question: "Complete the sentence: \"You can use it ___ files to the cloud.\"",
+                options: ["to upload", "uploading", "uploads", "for upload"],
+                correct: 0
+            },
+            {
+                question: "Which adjective means that an app costs no money?",
+                options: ["Fast", "Popular", "Secure", "Free"],
+                correct: 3
+            },
+            {
+                question: "\"The app is easy to use\" means that…",
+                options: ["the app is expensive.", "the app is simple and clear for users.", "the app protects your passwords.", "the app works without internet."],
+                correct: 1
+            },
+            {
+                question: "Which question asks about the PURPOSE of an app or website?",
+                options: ["What does it do?", "Who uses it?", "What is it?", "How much is it?"],
+                correct: 0
+            },
+            {
+                question: "Choose the correct present simple form: \"The app ___ your files automatically.\"",
+                options: ["save", "saving", "saves", "is save"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        // ---- Gamificación de la sección Contenido: puntos acumulados ----
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // ---- Tarjetas "revelar" genéricas ----
+        function renderReveal(containerId, items, puntos) {
+            const cont = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card p-3 bg-white border-2 border-slate-200 rounded-lg';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.front}</p>
+                    <div class="reveal-back mt-2 text-sm text-slate-600">${item.back}</div>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                cont.appendChild(card);
+            });
+        }
+
+        // ---- Preguntas rápidas de una sola respuesta (mini retos) ----
+        function renderChoice(containerId, msgId, opciones, correcta, puntos) {
+            const cont = document.getElementById(containerId);
+            const msg = document.getElementById(msgId);
+            let resuelto = false;
+            opciones.forEach((op, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'text-left p-3 bg-white border-2 border-slate-200 rounded-lg hover:bg-green-50 transition-colors text-sm';
+                btn.textContent = op;
+                btn.addEventListener('click', function() {
+                    if (resuelto) return;
+                    if (i === correcta) {
+                        resuelto = true;
+                        this.classList.add('bg-green-200', 'border-green-500');
+                        msg.textContent = '✅ Correct! +' + puntos + ' puntos.';
+                        msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        this.classList.add('bg-red-100', 'border-red-400');
+                        msg.textContent = '❌ Not quite. Try again!';
+                        msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                    }
+                });
+                cont.appendChild(btn);
+            });
+        }
+
+        // Estación 1: mini reto de estructuras
+        renderChoice('choice-estructuras', 'choice-estructuras-msg', [
+            'It is a popular website.',
+            'You can use it to share files with your team.',
+            'It has a blue icon and a dark mode.',
+            'Millions of people use it.'
+        ], 1, 5);
+
+        // Estación 2: tarjetas de adjetivos
+        renderReveal('reveal-adjetivos', [
+            { front: '🆓 Free', back: '<strong>Gratis</strong>: no cuesta dinero.<br><em>The app is free: you don\'t pay anything.</em>' },
+            { front: '⚡ Fast', back: '<strong>Rápido</strong>: responde sin demoras.<br><em>It is a fast browser: pages load in seconds.</em>' },
+            { front: '👍 Easy to use', back: '<strong>Fácil de usar</strong>: no necesitas ser experto.<br><em>The platform is easy to use for new students.</em>' },
+            { front: '🔒 Secure', back: '<strong>Seguro</strong>: protege tus datos y contraseñas.<br><em>It is a secure app: your messages are encrypted.</em>' },
+            { front: '🌟 Popular', back: '<strong>Popular</strong>: muchas personas lo usan.<br><em>It is a popular website with millions of visits.</em>' },
+            { front: '🛠️ Useful', back: '<strong>Útil</strong>: sirve para muchas cosas.<br><em>It is a useful tool for software developers.</em>' },
+            { front: '✨ Simple', back: '<strong>Sencillo</strong>: sin complicaciones.<br><em>It has a simple interface with three buttons.</em>' },
+            { front: '🤝 User-friendly', back: '<strong>Amigable con el usuario</strong>: cómodo e intuitivo.<br><em>The website is user-friendly on phones and laptops.</em>' }
+        ], 3);
+
+        // Estación 2: mini reto de adjetivos
+        renderChoice('choice-adjetivos', 'choice-adjetivos-msg', [
+            'Popular',
+            'Fast',
+            'Secure',
+            'Free'
+        ], 2, 5);
+
+        // Estación 3: misión de lectura frase a frase
+        renderReveal('reveal-modelo', [
+            {
+                front: '1. "Visual Studio Code is a free code editor."',
+                back: 'Estructura <strong>It is a…</strong> (aquí con el nombre propio): responde <em>What is it?</em> Tipo de app (<em>code editor</em>) + adjetivo (<em>free</em>) antes del sustantivo.'
+            },
+            {
+                front: '2. "It has a simple interface and thousands of extensions."',
+                back: 'Estructura <strong>It has…</strong>: responde <em>What does it have?</em> Presenta dos características (<em>features</em>) unidas con <em>and</em>.'
+            },
+            {
+                front: '3. "You can use it to write, edit and debug code."',
+                back: 'Estructura <strong>You can use it to…</strong>: responde <em>What is it for?</em> Después de <em>to</em> van verbos en forma base: <em>write, edit, debug</em>.'
+            },
+            {
+                front: '4. "It is fast, easy to use and very popular."',
+                back: 'Adjetivos después del verbo <em>to be</em>, en lista separada por comas y <em>and</em>. <em>Very</em> intensifica el adjetivo.'
+            },
+            {
+                front: '5. "Millions of developers use it every day."',
+                back: 'Responde <em>Who uses it?</em> Presente simple con sujeto plural (<em>developers use</em>, sin -s) y expresión de frecuencia <em>every day</em>.'
+            }
+        ], 3);
+
+        // Estación 3: mini reto de comprensión
+        renderChoice('choice-modelo', 'choice-modelo-msg', [
+            'Watch movies and series online',
+            'Write, edit and debug code',
+            'Send voice messages to your friends',
+            'Buy extensions with your card'
+        ], 1, 5);
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // ---- Gamificación: insignias y barra de progreso de misiones ----
+        const insignias = [];
+        let misionesCompletadas = 0;
+        function otorgarInsignia(nombre) {
+            insignias.push(nombre);
+            document.getElementById('insignias-lista').textContent = insignias.join(' · ');
+            misionesCompletadas++;
+            document.getElementById('actividades-barra').style.width = (misionesCompletadas / 2 * 100) + '%';
+        }
+
+        // =====================================================
+        // Misión 1: emparejar descripciones con el tipo de app
+        // =====================================================
+        const matchItems = [
+            { texto: 'You can use it to visit websites and search for information. It is fast and free.', tipo: 'browser' },
+            { texto: 'You can use it to write and edit source code. It has extensions and a dark theme.', tipo: 'editor' },
+            { texto: 'You can use it to send messages, photos and voice notes. It has group chats.', tipo: 'mensajeria' },
+            { texto: 'You can use it to watch video lessons, submit homework and take quizzes online.', tipo: 'elearning' },
+            { texto: 'You can use it to buy products, compare prices and pay with your card.', tipo: 'tienda' }
+        ];
+        let matchSeleccion = null;
+        let matchPuntos = 0;
+        let matchErrores = 0;
+        let matchAciertos = 0;
+        const matchMsg = document.getElementById('match-msg');
+        const matchPuntosEl = document.getElementById('match-puntos');
+
+        const matchCont = document.getElementById('match-descripciones');
+        matchItems.forEach(item => {
+            const chip = document.createElement('div');
+            chip.className = 'chip p-3 bg-white border-2 border-slate-200 rounded-lg text-sm text-slate-700';
+            chip.textContent = item.texto;
+            chip.dataset.tipo = item.tipo;
+            chip.addEventListener('click', function() {
+                if (this.classList.contains('chip-done-correct')) return;
+                document.querySelectorAll('#match-descripciones .chip').forEach(c => c.classList.remove('chip-selected'));
+                this.classList.add('chip-selected');
+                matchSeleccion = this;
+                matchMsg.textContent = '👉 Ahora haz click en el tipo de app correcto.';
+                matchMsg.className = 'text-sm font-semibold mb-2 text-slate-600';
+            });
+            matchCont.appendChild(chip);
+        });
+
+        document.querySelectorAll('.match-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!matchSeleccion) {
+                    matchMsg.textContent = '👆 Primero selecciona una descripción.';
+                    matchMsg.className = 'text-sm font-semibold mb-2 text-slate-600';
+                    return;
+                }
+                if (this.dataset.tipo === matchSeleccion.dataset.tipo) {
+                    matchSeleccion.classList.remove('chip-selected');
+                    matchSeleccion.classList.add('chip-done-correct');
+                    matchPuntos += 10;
+                    matchAciertos++;
+                    matchMsg.textContent = '✅ Correct! +10 puntos.';
+                    matchMsg.className = 'text-sm font-semibold mb-2 text-green-700';
+                } else {
+                    matchPuntos = Math.max(0, matchPuntos - 2);
+                    matchErrores++;
+                    matchMsg.textContent = '❌ Not quite. That description is for another type of app. (-2 puntos)';
+                    matchMsg.className = 'text-sm font-semibold mb-2 text-red-600';
+                }
+                matchPuntosEl.textContent = matchPuntos;
+                matchSeleccion = null;
+                document.querySelectorAll('#match-descripciones .chip').forEach(c => c.classList.remove('chip-selected'));
+
+                if (matchAciertos === matchItems.length) {
+                    let insignia;
+                    if (matchErrores === 0) insignia = '🥇 App Matcher (oro)';
+                    else if (matchErrores <= 2) insignia = '🥈 App Matcher (plata)';
+                    else insignia = '🥉 App Matcher (bronce)';
+                    otorgarInsignia(insignia);
+                    document.getElementById('mision-1').classList.add('completed');
+                    matchMsg.textContent = '🎉 ¡Misión 1 completada! Ganaste la insignia ' + insignia + ' con ' + matchPuntos + ' puntos.';
+                    matchMsg.className = 'text-sm font-semibold mb-2 text-green-700';
+                }
+            });
+        });
+
+        // =====================================================
+        // Misión 2: construir una descripción eligiendo frases
+        // =====================================================
+        const builderApps = {
+            mensajeria: 'A messaging app',
+            editor: 'A code editor',
+            elearning: 'An e-learning platform'
+        };
+        // Cada opción indica a qué app pertenece realmente.
+        const builderOpciones = {
+            is: [
+                { frase: 'It is a free app for chatting with friends and family.', app: 'mensajeria' },
+                { frase: 'It is a program for writing source code.', app: 'editor' },
+                { frase: 'It is a website with online courses and video lessons.', app: 'elearning' }
+            ],
+            has: [
+                { frase: 'It has group chats, stickers and video calls.', app: 'mensajeria' },
+                { frase: 'It has syntax highlighting and useful extensions.', app: 'editor' },
+                { frase: 'It has quizzes, forums and progress reports.', app: 'elearning' }
+            ],
+            can: [
+                { frase: 'You can use it to send messages and share photos.', app: 'mensajeria' },
+                { frase: 'You can use it to write, test and debug your programs.', app: 'editor' },
+                { frase: 'You can use it to study at your own pace, anywhere.', app: 'elearning' }
+            ]
+        };
+        // Orden fijo pero distinto en cada bloque para que no queden alineadas.
+        const builderOrden = { is: [0, 1, 2], has: [1, 2, 0], can: [2, 0, 1] };
+
+        let builderApp = null;
+        let builderPuntos = 0;
+        let builderIntentos = 0;
+        let builderCompletada = false;
+        const builderZona = document.getElementById('builder-zona');
+        const builderResultado = document.getElementById('builder-resultado');
+        const builderPuntosEl = document.getElementById('builder-puntos');
+
+        function renderBuilderSlots() {
+            ['is', 'has', 'can'].forEach(slot => {
+                const cont = builderZona.querySelector(`[data-slot="${slot}"]`);
+                cont.innerHTML = '';
+                builderOrden[slot].forEach(idx => {
+                    const op = builderOpciones[slot][idx];
+                    const card = document.createElement('div');
+                    card.className = 'builder-option p-3 bg-white border-2 border-slate-200 rounded-lg text-sm text-slate-700';
+                    card.textContent = op.frase;
+                    card.dataset.app = op.app;
+                    card.addEventListener('click', function() {
+                        if (builderCompletada) return;
+                        cont.querySelectorAll('.builder-option').forEach(c => c.classList.remove('selected', 'result-ok', 'result-bad'));
+                        this.classList.add('selected');
+                    });
+                    cont.appendChild(card);
+                });
+            });
+            builderResultado.innerHTML = '';
+        }
+
+        document.querySelectorAll('.builder-app-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (builderCompletada) return;
+                builderApp = this.dataset.app;
+                builderIntentos = 0;
+                document.querySelectorAll('.builder-app-btn').forEach(b => b.classList.remove('ring-2', 'ring-green-500'));
+                this.classList.add('ring-2', 'ring-green-500');
+                builderZona.classList.remove('hidden');
+                renderBuilderSlots();
+            });
+        });
+
+        document.getElementById('builder-check').addEventListener('click', function() {
+            if (builderCompletada) return;
+            if (!builderApp) return;
+            const seleccion = {};
+            let faltantes = false;
+            ['is', 'has', 'can'].forEach(slot => {
+                const sel = builderZona.querySelector(`[data-slot="${slot}"] .builder-option.selected`);
+                if (!sel) faltantes = true;
+                seleccion[slot] = sel;
+            });
+            if (faltantes) {
+                builderResultado.innerHTML = '<p class="text-sm font-semibold text-red-600">⚠️ Tu descripción está incompleta: elige una frase de cada bloque (It is… → It has… → You can…).</p>';
+                return;
+            }
+            builderIntentos++;
+            let correctas = 0;
+            ['is', 'has', 'can'].forEach(slot => {
+                const sel = seleccion[slot];
+                if (sel.dataset.app === builderApp) {
+                    sel.classList.add('result-ok');
+                    correctas++;
+                } else {
+                    sel.classList.add('result-bad');
+                }
+            });
+
+            if (correctas === 3) {
+                builderPuntos = 30 - (builderIntentos - 1) * 5;
+                if (builderPuntos < 10) builderPuntos = 10;
+                builderPuntosEl.textContent = builderPuntos;
+                builderCompletada = true;
+                const texto = ['is', 'has', 'can'].map(s => seleccion[s].textContent).join(' ');
+                let extra = '';
+                if (builderIntentos === 1) {
+                    otorgarInsignia('🏆 Description Builder');
+                    extra = ' Ganaste la insignia 🏆 Description Builder por lograrlo en el primer intento.';
+                } else {
+                    otorgarInsignia('🎖️ Description Builder (con reintentos)');
+                    extra = ' Ganaste la insignia 🎖️ Description Builder.';
+                }
+                document.getElementById('mision-2').classList.add('completed');
+                builderResultado.innerHTML = `
+                    <div class="p-4 bg-green-50 border border-green-300 rounded-lg">
+                        <p class="text-sm font-semibold text-green-700 mb-2">🎉 Perfect! Tu descripción sigue la estructura It is… → It has… → You can… y todas las frases hablan de "${builderApps[builderApp]}". +${builderPuntos} puntos.${extra}</p>
+                        <p class="text-sm text-slate-700 italic">"${texto}"</p>
+                    </div>`;
+            } else {
+                builderResultado.innerHTML = `<p class="text-sm font-semibold text-red-600">❌ Hay ${3 - correctas} frase(s) que describen otra app (marcadas en rojo). La estructura va bien: revisa el contenido y vuelve a intentar.</p>`;
+            }
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
