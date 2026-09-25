@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Uso de medios audiovisuales en presentaciones</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        button,
+        select,
+        input {
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .ova-shell {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .ova-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+
+        .ova-main {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .ova-mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+        }
+
+        @media (min-width: 768px) {
+            .ova-shell {
+                flex-direction: row;
+            }
+
+            .ova-main {
+                margin-left: 16rem;
+                width: auto;
+                flex: 1 1 0%;
+            }
+
+            .ova-mobile-header {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .ova-main {
+                padding-top: 13rem !important;
+            }
+
+            .ova-mobile-header {
+                margin-bottom: 0 !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .ova-main {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+        }
+
+        .sidebar-link.active,
+        .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-pane.active {
+            display: block;
+        }
+
+        .ova-objectives-title {
+            margin: 1.5rem 0 0.75rem;
+            font-size: 1.5rem;
+            line-height: 2rem;
+            font-weight: 700;
+            color: #166534;
+        }
+
+        .ova-objectives-list {
+            max-width: 100%;
+            list-style: none;
+            padding: 4px 4px 8px;
+            margin: 0 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: visible;
+        }
+
+        .ova-objective-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s ease;
+            border-left: 4px solid #22c55e;
+            cursor: default;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .ova-objective-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .ova-objective-marker {
+            color: #15803d;
+            margin-right: 0.75rem;
+            font-size: 1.5rem;
+            line-height: 2rem;
+            flex-shrink: 0;
+        }
+
+        .ova-objective-text {
+            color: #334155;
+            line-height: 1.625;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .ova-resources-title {
+            font-size: 1.5rem;
+            line-height: 2rem;
+            font-weight: 700;
+            color: #166534;
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        .ova-resources-intro {
+            color: #334155;
+            line-height: 1.625;
+            margin-bottom: 1rem;
+        }
+
+        .ova-resources-list {
+            list-style: none;
+            padding: 4px 4px 8px;
+            margin: 0 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 100%;
+            overflow: visible;
+        }
+
+        .ova-resource-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem;
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.08);
+            border-left: 4px solid #22c55e;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .ova-resource-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.12);
+        }
+
+        .ova-resource-copy {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .ova-resource-type {
+            font-weight: 700;
+            color: #15803d;
+            margin-bottom: 0.25rem;
+        }
+
+        .ova-resource-name {
+            font-weight: 700;
+            color: #15803d;
+            margin-bottom: 0.5rem;
+        }
+
+        .ova-resource-description {
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .ova-resource-link {
+            color: #334155;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            transition: color 0.3s ease;
+        }
+
+        .ova-resource-link:hover {
+            color: #15803d;
+        }
+
+        .ova-resource-qr-wrap {
+            margin-left: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .ova-resource-qr-box {
+            width: 2cm;
+            height: 2cm;
+            padding: 5px;
+            background-color: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ova-resource-qr-box img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            .ova-resource-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ova-resource-qr-wrap {
+                margin-left: 0;
+            }
+        }
+
+        .ova-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ova-sidebar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .ova-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+
+        .hero-grid {
+            background:
+                radial-gradient(circle at 12% 18%, rgba(34, 197, 94, 0.18), transparent 32%),
+                radial-gradient(circle at 82% 12%, rgba(16, 185, 129, 0.16), transparent 26%),
+                linear-gradient(140deg, #ffffff 0%, #f0fdf4 58%, #f0fdf4 100%);
+        }
+
+        .card-lift,
+        .objective-card,
+        .resource-card,
+        .choice-card,
+        .scenario-card {
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+        }
+
+        .card-lift:hover,
+        .objective-card:hover,
+        .resource-card:hover,
+        .choice-card:hover,
+        .scenario-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 32px -24px rgba(15, 23, 42, 0.35);
+        }
+
+        .content-accordion {
+            transition: all 0.28s ease;
+        }
+
+        .content-accordion.open {
+            border-color: #22c55e;
+            box-shadow: 0 16px 30px -24px rgba(34, 197, 94, 0.5);
+        }
+
+        .accordion-panel {
+            display: none;
+            animation: fadeIn 0.32s ease-in-out;
+        }
+
+        .accordion-panel.open {
+            display: block;
+        }
+
+        .accordion-icon {
+            transition: transform 0.25s ease;
+        }
+
+        .content-accordion.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .concept-item {
+            transition: all 0.28s ease;
+        }
+
+        .concept-item.open {
+            box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.4);
+        }
+
+        .concept-toggle {
+            transition: all 0.24s ease;
+        }
+
+        .concept-icon {
+            transition: transform 0.24s ease;
+        }
+
+        .concept-item.open .concept-icon {
+            transform: rotate(45deg);
+        }
+
+        .concept-panel {
+            display: none;
+            animation: fadeIn 0.24s ease-in-out;
+        }
+
+        .concept-panel.open {
+            display: block;
+        }
+
+        .audit-select.correct,
+        .scenario-select.correct {
+            border-color: #16a34a;
+            background-color: #dcfce7;
+        }
+
+        .audit-select.incorrect,
+        .scenario-select.incorrect {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        .sequence-card {
+            transition: all 0.24s ease;
+        }
+
+        .sequence-card.used {
+            opacity: 0.45;
+            transform: scale(0.98);
+            pointer-events: none;
+        }
+
+        .selected-sequence-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid #16a34a;
+            color: #166534;
+            border-radius: 9999px;
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .selected-sequence-item:hover {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .selected-sequence-item.correct {
+            border-color: #16a34a;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .selected-sequence-item.incorrect {
+            border-color: #dc2626;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+
+        .quiz-option:hover {
+            background-color: #f0fdf4;
+        }
+
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .quiz-option.correct {
+            border-color: #16a34a;
+            background-color: #dcfce7;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="reference-theme.css">
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen ova-shell">
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col ova-sidebar">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducci&oacute;n</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluaci&oacute;n</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliograf&iacute;a</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50 ova-main">
+            <div class="md:hidden mb-6 flex flex-col items-center ova-mobile-header">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducci&oacute;n</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluaci&oacute;n</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliograf&iacute;a</option>
+                </select>
+            </div>
+
+            <div id="introduccion" class="content-pane active">
+                <section class="hero-grid rounded-3xl shadow-sm border border-green-100 p-6 sm:p-8 mb-8 overflow-hidden">
+                    <div class="grid gap-8">
+                        <div class="w-full">
+                            <h2 class="text-3xl font-bold text-green-800 leading-tight mb-5 max-w-2xl">
+                                Uso de medios audiovisuales en presentaciones
+                            </h2>
+                            <p class="text-slate-700 leading-relaxed mb-6">
+                                Una presentaci&oacute;n no se fortalece solo con lo que dices, sino con la forma en que lo muestras.
+                                Diapositivas, im&aacute;genes, gr&aacute;ficos, videos y prototipos pueden aclarar ideas, sostener la atenci&oacute;n
+                                y hacer m&aacute;s comprensible un proyecto de software cuando se usan con intenci&oacute;n.
+                            </p>
+                            <div class="rounded-[30px] border border-green-100 bg-white p-4 shadow-sm mb-6">
+                                <img src="img/medios-audiovisuales.png" alt="Infograf&iacute;a con tipos de medios audiovisuales" class="w-full rounded-2xl border border-slate-100" loading="lazy">
+                            </div>
+                            <div class="rounded-3xl bg-green-900 text-white p-5">
+                                <p class="text-sm text-green-300 mb-2">Idea clave del tema</p>
+                                <p class="leading-relaxed">
+                                    Un recurso audiovisual funciona mejor cuando reduce la carga cognitiva, destaca lo esencial
+                                    y ayuda a la audiencia a entender un problema, una soluci&oacute;n o un resultado con menos esfuerzo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Dise&ntilde;ar presentaciones visuales claras que orienten la comprensi&oacute;n y mantengan el foco en la idea central.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Aplicar principios de dise&ntilde;o para reducir la sobrecarga visual y mejorar la comprensi&oacute;n del mensaje.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Integrar recursos audiovisuales de forma estrat&eacute;gica seg&uacute;n el tipo de contenido que se presenta.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Evitar la sobrecarga de informaci&oacute;n al detectar excesos de texto, decoraci&oacute;n o animaciones innecesarias.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🚀</span>
+                        <span>Comunicar proyectos de software con apoyo visual mediante interfaces, arquitecturas, resultados y funcionalidades claras.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="contenido" class="content-pane">
+                <section class="mb-8">
+                    <h2 class="text-3xl font-bold text-green-800 mb-3">Desarrollo del contenido</h2>
+                    <p class="text-slate-600 max-w-3xl">
+                        Recorre cada bloque para identificar qu&eacute; recurso conviene usar, c&oacute;mo dise&ntilde;arlo y de qu&eacute; forma integrarlo con tu discurso.
+                    </p>
+                </section>
+
+                <div class="space-y-5">
+                    <section class="content-accordion bg-white rounded-3xl border border-slate-200 p-5" data-accordion>
+                        <button class="accordion-trigger w-full flex items-center justify-between gap-4 text-left" type="button">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800">Medios audiovisuales en una presentaci&oacute;n</h3>
+                            </div>
+                            <span class="accordion-icon text-2xl text-green-700">⌄</span>
+                        </button>
+                        <div class="accordion-panel pt-5">
+                            <div class="grid gap-6 items-start">
+                                <div>
+                                    <p class="text-slate-700 leading-relaxed mb-5">
+                                        Son los recursos visuales y multimedia que acompa&ntilde;an tu exposici&oacute;n oral: diapositivas,
+                                        im&aacute;genes, diagramas, gr&aacute;ficos, videos, animaciones o demostraciones. Su funci&oacute;n no es
+                                        reemplazarte, sino reforzar el mensaje para que la audiencia entienda con mayor rapidez.
+                                    </p>
+                                    <div class="grid sm:grid-cols-2 gap-4">
+                                        <div class="choice-card rounded-2xl border border-green-100 bg-green-50 p-4">
+                                            <h4 class="font-bold text-green-800 mb-2">Muestran</h4>
+                                            <p class="text-sm text-slate-700">Procesos, pantallas, relaciones o datos que ser&iacute;an m&aacute;s dif&iacute;ciles de explicar solo con palabras.</p>
+                                        </div>
+                                        <div class="choice-card rounded-2xl border border-green-100 bg-green-50 p-4">
+                                            <h4 class="font-bold text-green-800 mb-2">Resaltan</h4>
+                                            <p class="text-sm text-slate-700">La idea principal cuando ubican la mirada en un punto, un contraste o una secuencia espec&iacute;fica.</p>
+                                        </div>
+                                        <div class="choice-card rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                                            <h4 class="font-bold text-blue-700 mb-2">Sintetizan</h4>
+                                            <p class="text-sm text-slate-700">Informaci&oacute;n extensa para volverla m&aacute;s breve, legible y recordable.</p>
+                                        </div>
+                                        <div class="choice-card rounded-2xl border border-yellow-100 bg-yellow-50 p-4">
+                                            <h4 class="font-bold text-yellow-800 mb-2">Conectan</h4>
+                                            <p class="text-sm text-slate-700">La teor&iacute;a con ejemplos concretos del entorno profesional o acad&eacute;mico.</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 rounded-2xl bg-green-900 text-white p-5">
+                                        <p class="text-sm text-green-300 mb-2">Funci&oacute;n principal</p>
+                                        <p>Reforzar el mensaje del expositor sin desplazarlo del centro de la presentaci&oacute;n.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-accordion bg-white rounded-3xl border border-slate-200 p-5" data-accordion>
+                        <button class="accordion-trigger w-full flex items-center justify-between gap-4 text-left" type="button">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800">Principios del dise&ntilde;o visual</h3>
+                            </div>
+                            <span class="accordion-icon text-2xl text-green-700">⌄</span>
+                        </button>
+                        <div class="accordion-panel pt-5">
+                            <div class="grid gap-6 items-start">
+                                <div>
+                                    <p class="text-slate-700 leading-relaxed mb-5">
+                                        El dise&ntilde;o visual debe apoyarse en la forma en que las personas procesan la informaci&oacute;n.
+                                        Richard E. Mayer plantea que el aprendizaje multimedia mejora cuando se reduce la carga cognitiva
+                                        y se presenta solo lo necesario para entender el mensaje.
+                                    </p>
+                                    <div class="grid sm:grid-cols-2 gap-4">
+                                        <div class="concept-item rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 to-white overflow-hidden" data-concept>
+                                            <button class="concept-toggle w-full flex items-center justify-between gap-4 p-4 text-left" type="button">
+                                                <div>
+                                                    <p class="text-xs font-bold text-green-700 mb-2">Principio</p>
+                                                    <h4 class="font-bold text-green-800 text-lg">Coherencia</h4>
+                                                </div>
+                                                <span class="concept-icon text-3xl leading-none text-green-700">+</span>
+                                            </button>
+                                            <div class="concept-panel px-4 pb-4">
+                                                <div class="rounded-2xl bg-white/80 border border-green-100 p-4">
+                                                    <p class="text-sm text-slate-700">Elimina adornos, texto o sonidos que no aportan comprensi&oacute;n.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="concept-item rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 to-white overflow-hidden" data-concept>
+                                            <button class="concept-toggle w-full flex items-center justify-between gap-4 p-4 text-left" type="button">
+                                                <div>
+                                                    <p class="text-xs font-bold text-green-700 mb-2">Principio</p>
+                                                    <h4 class="font-bold text-green-800 text-lg">Simplicidad</h4>
+                                                </div>
+                                                <span class="concept-icon text-3xl leading-none text-green-700">+</span>
+                                            </button>
+                                            <div class="concept-panel px-4 pb-4">
+                                                <div class="rounded-2xl bg-white/80 border border-green-100 p-4">
+                                                    <p class="text-sm text-slate-700">Reduce el contenido a ideas clave, palabras gu&iacute;a y visuales limpios.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="concept-item rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white overflow-hidden" data-concept>
+                                            <button class="concept-toggle w-full flex items-center justify-between gap-4 p-4 text-left" type="button">
+                                                <div>
+                                                    <p class="text-xs font-bold text-blue-700 mb-2">Principio</p>
+                                                    <h4 class="font-bold text-blue-700 text-lg">Se&ntilde;alizaci&oacute;n</h4>
+                                                </div>
+                                                <span class="concept-icon text-3xl leading-none text-blue-700">+</span>
+                                            </button>
+                                            <div class="concept-panel px-4 pb-4">
+                                                <div class="rounded-2xl bg-white/80 border border-blue-100 p-4">
+                                                    <p class="text-sm text-slate-700">Usa color, tama&ntilde;o o disposici&oacute;n para indicar qu&eacute; debe mirar primero la audiencia.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="concept-item rounded-3xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-white overflow-hidden" data-concept>
+                                            <button class="concept-toggle w-full flex items-center justify-between gap-4 p-4 text-left" type="button">
+                                                <div>
+                                                    <p class="text-xs font-bold text-yellow-700 mb-2">Principio</p>
+                                                    <h4 class="font-bold text-yellow-800 text-lg">Contig&uuml;idad</h4>
+                                                </div>
+                                                <span class="concept-icon text-3xl leading-none text-yellow-700">+</span>
+                                            </button>
+                                            <div class="concept-panel px-4 pb-4">
+                                                <div class="rounded-2xl bg-white/80 border border-yellow-100 p-4">
+                                                    <p class="text-sm text-slate-700">Coloca juntos los elementos relacionados para evitar b&uacute;squedas innecesarias.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 rounded-2xl border border-yellow-200 bg-yellow-50 p-5">
+                                        <p class="text-slate-700">
+                                            Una diapositiva eficaz no muestra todo lo que sabes. Muestra lo indispensable para que la audiencia siga tu explicaci&oacute;n.
+                                        </p>
+                                    </div>
+                                    <div class="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                                        <img src="img/principios-diseno.png" alt="Principios del dise&ntilde;o visual para presentaciones" class="w-full rounded-2xl border border-white shadow-sm" loading="lazy">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-accordion bg-white rounded-3xl border border-slate-200 p-5" data-accordion>
+                        <button class="accordion-trigger w-full flex items-center justify-between gap-4 text-left" type="button">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800">Dise&ntilde;o efectivo de las diapositivas</h3>
+                            </div>
+                            <span class="accordion-icon text-2xl text-green-700">⌄</span>
+                        </button>
+                        <div class="accordion-panel pt-5">
+                            <div class="grid lg:grid-cols-[1.06fr_0.94fr] gap-6 items-start mb-6">
+                                <div>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="rounded-3xl border border-green-100 bg-green-50 p-5">
+                                            <h4 class="text-lg font-bold text-green-800 mb-3">Buenas pr&aacute;cticas</h4>
+                                            <ul class="space-y-2 text-slate-700">
+                                                <li>• Usa palabras clave en lugar de p&aacute;rrafos extensos.</li>
+                                                <li>• Mant&eacute;n pocas ideas por diapositiva.</li>
+                                                <li>• Selecciona tipograf&iacute;as legibles y con contraste suficiente.</li>
+                                                <li>• Integra im&aacute;genes o gr&aacute;ficos que expliquen, no que decoren.</li>
+                                            </ul>
+                                        </div>
+                                        <div class="rounded-3xl border border-red-100 bg-red-50 p-5">
+                                            <h4 class="text-lg font-bold text-red-800 mb-3">Errores comunes</h4>
+                                            <ul class="space-y-2 text-slate-700">
+                                                <li>• Saturar la diapositiva con texto y detalles secundarios.</li>
+                                                <li>• Usar demasiados colores, efectos o animaciones.</li>
+                                                <li>• Elegir im&aacute;genes poco relacionadas con el tema.</li>
+                                                <li>• Convertir la pantalla en un guion para leer.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 rounded-2xl bg-green-900 text-white p-5">
+                                        <p class="text-sm text-green-300 mb-2">Criterio r&aacute;pido</p>
+                                        <p>Si la audiencia puede entender la l&aacute;mina sin quedar atrapada leyendo, vas por buen camino.</p>
+                                    </div>
+                                </div>
+                                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                                    <img src="img/buenas-practicas-diapositivas.png" alt="Buenas pr&aacute;cticas para dise&ntilde;ar diapositivas" class="w-full rounded-2xl border border-white shadow-sm" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-accordion bg-white rounded-3xl border border-slate-200 p-5" data-accordion>
+                        <button class="accordion-trigger w-full flex items-center justify-between gap-4 text-left" type="button">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800">Uso estrat&eacute;gico de recursos audiovisuales</h3>
+                            </div>
+                            <span class="accordion-icon text-2xl text-green-700">⌄</span>
+                        </button>
+                        <div class="accordion-panel pt-5">
+                            <div class="grid lg:grid-cols-[0.96fr_1.04fr] gap-6 items-start">
+                                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                                    <img src="img/uso-estrategico-audiovisual.png" alt="Uso estrat&eacute;gico de im&aacute;genes, gr&aacute;ficos y videos" class="w-full rounded-2xl border border-white shadow-sm" loading="lazy">
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="scenario-card rounded-2xl border border-green-100 bg-green-50 p-4">
+                                        <h4 class="font-bold text-green-800 mb-2">Im&aacute;genes o capturas</h4>
+                                        <p class="text-slate-700 text-sm">Sirven para mostrar interfaces, estados de una aplicaci&oacute;n, flujos o evidencias visuales.</p>
+                                    </div>
+                                    <div class="scenario-card rounded-2xl border border-green-100 bg-green-50 p-4">
+                                        <h4 class="font-bold text-green-800 mb-2">Gr&aacute;ficos y diagramas</h4>
+                                        <p class="text-slate-700 text-sm">Ayudan a explicar tendencias, comparaciones, arquitectura o relaciones entre componentes.</p>
+                                    </div>
+                                    <div class="scenario-card rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                                        <h4 class="font-bold text-blue-700 mb-2">Videos o animaciones</h4>
+                                        <p class="text-slate-700 text-sm">Conviene usarlos cuando el movimiento o la demostraci&oacute;n agregan comprensi&oacute;n real.</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-yellow-200 bg-yellow-50 p-5">
+                                        <p class="text-sm font-semibold text-yellow-800 mb-2">Regla de uso</p>
+                                        <p class="text-slate-700">Deben ser breves, relevantes y estar conectados con el punto que est&aacute;s explicando en ese momento.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-accordion bg-white rounded-3xl border border-slate-200 p-5" data-accordion>
+                        <button class="accordion-trigger w-full flex items-center justify-between gap-4 text-left" type="button">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800">Integraci&oacute;n entre discurso y visuales</h3>
+                            </div>
+                            <span class="accordion-icon text-2xl text-green-700">⌄</span>
+                        </button>
+                        <div class="accordion-panel pt-5">
+                            <div class="grid lg:grid-cols-[1.02fr_0.98fr] gap-6 items-start">
+                                <div>
+                                    <p class="text-slate-700 leading-relaxed mb-5">
+                                        Una presentaci&oacute;n efectiva combina dos capas al mismo tiempo: lo que dices y lo que muestras.
+                                        Ambas deben estar sincronizadas para que la audiencia relacione la explicaci&oacute;n con el apoyo visual.
+                                    </p>
+                                    <div class="grid sm:grid-cols-3 gap-4 mb-5">
+                                        <div class="rounded-2xl border border-green-100 bg-green-50 p-4">
+                                            <p class="font-bold text-green-800 mb-2">Nombra</p>
+                                            <p class="text-sm text-slate-700">Explica qu&eacute; debe mirar la audiencia antes de profundizar.</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-green-100 bg-green-50 p-4">
+                                            <p class="font-bold text-green-800 mb-2">Interpreta</p>
+                                            <p class="text-sm text-slate-700">Aclara qu&eacute; significa el dato, la imagen o el diagrama.</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                                            <p class="font-bold text-blue-700 mb-2">Conecta</p>
+                                            <p class="text-sm text-slate-700">Relaciona el apoyo visual con la conclusi&oacute;n o acci&oacute;n que buscas provocar.</p>
+                                        </div>
+                                    </div>
+                                    <div class="rounded-3xl border border-red-200 bg-red-50 p-5">
+                                        <p class="text-sm font-semibold text-red-800 mb-2">Error frecuente</p>
+                                        <p class="text-slate-700">Leer la diapositiva rompe la conexi&oacute;n con la audiencia y vuelve innecesario tu papel como expositor.</p>
+                                    </div>
+                                </div>
+                                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                                    <img src="img/comunica-efectivamente.png" alt="Factores para comunicar de forma efectiva" class="w-full rounded-2xl border border-white shadow-sm" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-accordion bg-white rounded-3xl border border-slate-200 p-5" data-accordion>
+                        <button class="accordion-trigger w-full flex items-center justify-between gap-4 text-left" type="button">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800">Aplicaci&oacute;n en desarrollo de software</h3>
+                            </div>
+                            <span class="accordion-icon text-2xl text-green-700">⌄</span>
+                        </button>
+                        <div class="accordion-panel pt-5">
+                            <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+                                <div class="rounded-3xl border border-green-100 bg-green-50 p-5">
+                                    <p class="text-3xl mb-3">🖥️</p>
+                                    <h4 class="font-bold text-green-800 mb-2">Interfaces UI/UX</h4>
+                                    <p class="text-sm text-slate-700">Capturas o prototipos permiten mostrar c&oacute;mo se ve y se navega el producto.</p>
+                                </div>
+                                <div class="rounded-3xl border border-green-100 bg-green-50 p-5">
+                                    <p class="text-3xl mb-3">🧭</p>
+                                    <h4 class="font-bold text-green-800 mb-2">Arquitectura</h4>
+                                    <p class="text-sm text-slate-700">Diagramas simples ayudan a explicar capas, servicios, APIs y flujos de datos.</p>
+                                </div>
+                                <div class="rounded-3xl border border-blue-100 bg-blue-50 p-5">
+                                    <p class="text-3xl mb-3">📈</p>
+                                    <h4 class="font-bold text-blue-700 mb-2">Resultados</h4>
+                                    <p class="text-sm text-slate-700">Gr&aacute;ficos comparativos permiten evidenciar mejoras, tiempos o conversiones.</p>
+                                </div>
+                                <div class="rounded-3xl border border-yellow-100 bg-yellow-50 p-5">
+                                    <p class="text-3xl mb-3">⚙️</p>
+                                    <h4 class="font-bold text-yellow-800 mb-2">Funcionalidades</h4>
+                                    <p class="text-sm text-slate-700">Una demo corta suele ser m&aacute;s convincente que una descripci&oacute;n abstracta.</p>
+                                </div>
+                            </div>
+                            <div class="rounded-3xl bg-green-900 text-white p-5">
+                                <p class="text-sm text-green-300 mb-2">Ejemplo aplicado</p>
+                                <p>
+                                    Si presentas un nuevo m&oacute;dulo, mostrar un prototipo o una interfaz navegable suele comunicar mejor el valor del proyecto
+                                    que describirlo con texto t&eacute;cnico.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="actividades" class="content-pane">
+                <section class="mb-8">
+                    <h2 class="text-3xl font-bold text-green-800 mb-3">Actividades</h2>
+                    <p class="text-slate-600 max-w-3xl">
+                        Practica la selecci&oacute;n de apoyos visuales, detecta errores de dise&ntilde;o y organiza una secuencia de diapositivas sobre el ciclo cliente-servidor.
+                    </p>
+                </section>
+
+                <div class="grid gap-6">
+                    <section class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                            <div>
+                                <p class="text-sm font-semibold text-green-700 mb-1">Actividad 1</p>
+                                <h3 class="text-2xl font-bold text-slate-800">Diagn&oacute;stico de dise&ntilde;o visual</h3>
+                            </div>
+                            <p class="text-sm text-slate-600 max-w-xl">Marca si cada situaci&oacute;n representa una buena pr&aacute;ctica o un error al dise&ntilde;ar diapositivas.</p>
+                        </div>
+                        <div class="grid xl:grid-cols-5 gap-4 mb-5">
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">La diapositiva presenta t&iacute;tulo, un diagrama y tres palabras clave.</p>
+                                <select class="audit-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="good">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="good">Buena pr&aacute;ctica</option>
+                                    <option value="bad">Error com&uacute;n</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">El expositor copia en pantalla todo lo que planea decir.</p>
+                                <select class="audit-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="bad">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="good">Buena pr&aacute;ctica</option>
+                                    <option value="bad">Error com&uacute;n</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Se resalta en color el dato principal de un gr&aacute;fico de rendimiento.</p>
+                                <select class="audit-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="good">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="good">Buena pr&aacute;ctica</option>
+                                    <option value="bad">Error com&uacute;n</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Cada diapositiva mezcla muchos colores, transiciones y animaciones.</p>
+                                <select class="audit-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="bad">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="good">Buena pr&aacute;ctica</option>
+                                    <option value="bad">Error com&uacute;n</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Una captura de interfaz se usa para explicar un flujo real de usuario.</p>
+                                <select class="audit-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="good">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="good">Buena pr&aacute;ctica</option>
+                                    <option value="bad">Error com&uacute;n</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <button id="check-audit" class="inline-flex items-center justify-center rounded-full bg-green-700 px-6 py-3 text-white font-semibold shadow-sm hover:bg-green-800 transition-colors" type="button">Revisar respuestas</button>
+                            <p id="audit-feedback" class="text-sm text-slate-600"></p>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                            <div>
+                                <p class="text-sm font-semibold text-green-700 mb-1">Actividad 2</p>
+                                <h3 class="text-2xl font-bold text-slate-800">Organiza la secuencia de 5 diapositivas</h3>
+                            </div>
+                            <p class="text-sm text-slate-600 max-w-xl">Construye el orden ideal para explicar el ciclo de solicitud y respuesta entre cliente y servidor.</p>
+                        </div>
+                        <div class="rounded-3xl border border-green-100 bg-green-50 p-5 mb-5">
+                            <p class="text-slate-700 leading-relaxed">
+                                Situaci&oacute;n base: cuando escribes una direcci&oacute;n en el navegador y presionas Enter, el cliente env&iacute;a una solicitud HTTP al servidor,
+                                el servidor procesa la petici&oacute;n y devuelve una respuesta con archivos como HTML, CSS y JavaScript; luego el navegador interpreta ese c&oacute;digo
+                                y construye la p&aacute;gina visible.
+                            </p>
+                        </div>
+                        <div class="grid lg:grid-cols-[1fr_0.95fr] gap-6 items-start">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-600 mb-3">Elige los bloques en el orden correcto:</p>
+                                <div class="grid sm:grid-cols-2 gap-4" id="sequence-pool">
+                                    <button class="sequence-card text-left rounded-2xl border border-slate-200 bg-slate-50 p-4" type="button" data-step="render">
+                                        <p class="font-bold text-slate-800 mb-2">La p&aacute;gina aparece en pantalla</p>
+                                        <p class="text-sm text-slate-600">El navegador interpreta el c&oacute;digo y renderiza la interfaz.</p>
+                                    </button>
+                                    <button class="sequence-card text-left rounded-2xl border border-slate-200 bg-slate-50 p-4" type="button" data-step="request">
+                                        <p class="font-bold text-slate-800 mb-2">El navegador env&iacute;a la solicitud HTTP</p>
+                                        <p class="text-sm text-slate-600">El cliente inicia la conversaci&oacute;n con el servidor.</p>
+                                    </button>
+                                    <button class="sequence-card text-left rounded-2xl border border-slate-200 bg-slate-50 p-4" type="button" data-step="response">
+                                        <p class="font-bold text-slate-800 mb-2">El servidor devuelve la respuesta</p>
+                                        <p class="text-sm text-slate-600">Entrega archivos y datos para construir la p&aacute;gina.</p>
+                                    </button>
+                                    <button class="sequence-card text-left rounded-2xl border border-slate-200 bg-slate-50 p-4" type="button" data-step="url">
+                                        <p class="font-bold text-slate-800 mb-2">El usuario escribe una URL y presiona Enter</p>
+                                        <p class="text-sm text-slate-600">La acci&oacute;n dispara el proceso completo.</p>
+                                    </button>
+                                    <button class="sequence-card text-left rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:col-span-2" type="button" data-step="server">
+                                        <p class="font-bold text-slate-800 mb-2">El servidor procesa la petici&oacute;n</p>
+                                        <p class="text-sm text-slate-600">Busca archivos, consulta bases de datos o ejecuta l&oacute;gica de negocio.</p>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                <p class="text-sm font-semibold text-slate-600 mb-3">Tu secuencia:</p>
+                                <div id="selected-sequence" class="flex flex-wrap gap-3 min-h-[96px]"></div>
+                                <p id="sequence-placeholder" class="text-sm text-slate-600 mt-4">Haz clic sobre cada bloque para agregarlo. Si quieres quitar uno, haz clic sobre la etiqueta creada.</p>
+                                <div class="mt-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                                    <button id="check-sequence" class="inline-flex items-center justify-center rounded-full bg-green-700 px-6 py-3 text-white font-semibold shadow-sm hover:bg-green-800 transition-colors" type="button">Validar secuencia</button>
+                                    <button id="reset-sequence" class="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-slate-700 font-semibold hover:bg-slate-100 transition-colors" type="button">Reiniciar</button>
+                                </div>
+                                <p id="sequence-feedback" class="text-sm text-slate-600 mt-4"></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                            <div>
+                                <p class="text-sm font-semibold text-green-700 mb-1">Actividad 3</p>
+                                <h3 class="text-2xl font-bold text-slate-800">Elige el apoyo visual m&aacute;s pertinente</h3>
+                            </div>
+                            <p class="text-sm text-slate-600 max-w-xl">Relaciona cada situaci&oacute;n con el recurso audiovisual que mejor ayuda a comprenderla.</p>
+                        </div>
+                        <div class="grid xl:grid-cols-4 gap-4 mb-5">
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Presentar una nueva interfaz m&oacute;vil y su flujo de navegaci&oacute;n.</p>
+                                <select class="scenario-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="prototipo">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="prototipo">Captura o prototipo navegable</option>
+                                    <option value="video">Video largo sin explicaci&oacute;n</option>
+                                    <option value="parrafo">P&aacute;rrafo de texto t&eacute;cnico</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Explicar c&oacute;mo interact&uacute;an frontend, backend y base de datos.</p>
+                                <select class="scenario-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="diagrama">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="captura">Captura aislada de una pantalla</option>
+                                    <option value="diagrama">Diagrama simple de arquitectura</option>
+                                    <option value="animacion">Animaciones decorativas</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Comparar tiempos de carga antes y despu&eacute;s de una optimizaci&oacute;n.</p>
+                                <select class="scenario-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="grafico">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="grafico">Gr&aacute;fico comparativo</option>
+                                    <option value="texto">Lista larga de cifras en texto</option>
+                                    <option value="video">Video promocional</option>
+                                </select>
+                            </label>
+                            <label class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p class="font-semibold text-slate-800 mb-3">Demostrar una funcionalidad clave que ocurre paso a paso.</p>
+                                <select class="scenario-select w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-700" data-answer="demo">
+                                    <option value="">Selecciona una opci&oacute;n</option>
+                                    <option value="tabla">Tabla extensa de caracter&iacute;sticas</option>
+                                    <option value="demo">Demo corta o video breve</option>
+                                    <option value="parrafo">Bloque de texto corrido</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <button id="check-scenarios" class="inline-flex items-center justify-center rounded-full bg-green-700 px-6 py-3 text-white font-semibold shadow-sm hover:bg-green-800 transition-colors" type="button">Comprobar selecci&oacute;n</button>
+                            <p id="scenario-feedback" class="text-sm text-slate-600"></p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="evaluacion" class="content-pane">
+                <section class="mb-8">
+                    <h2 class="text-3xl font-bold text-green-800 mb-3">Evaluaci&oacute;n</h2>
+                    <p class="text-slate-600 max-w-3xl">
+                        Responde el cuestionario para comprobar si distingues la funci&oacute;n de los medios audiovisuales, sus principios de dise&ntilde;o y su aplicaci&oacute;n en software.
+                    </p>
+                </section>
+
+                <section class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                    <div id="quiz-container" class="space-y-5"></div>
+                    <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <button id="check-quiz" class="inline-flex items-center justify-center rounded-full bg-green-700 px-6 py-3 text-white font-semibold shadow-sm hover:bg-green-800 transition-colors" type="button">Calificar cuestionario</button>
+                        <p id="quiz-score" class="text-sm text-slate-600"></p>
+                    </div>
+                </section>
+            </div>
+
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre medios audiovisuales en presentaciones, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Video: Toastmasters: How to Use Visual Aids</h3>
+                            <p class="text-slate-600 mb-2">Recurso en video sobre c&oacute;mo usar apoyos visuales sin perder contacto con la audiencia ni desplazar la voz del expositor.</p>
+                            <a href="https://www.toastmasters.org/Resources/Video-Library/how-to-use-visual-aids" target="_blank" rel="noreferrer" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-toastmasters-visual-aids-video.png" alt="QR Video: Toastmasters How to Use Visual Aids" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Lectura: Toastmasters: Ayudas visuales y accesorios</h3>
+                            <p class="text-slate-600 mb-2">Lectura en espa&ntilde;ol con orientaciones para integrar objetos, l&aacute;minas o apoyos visuales de forma pertinente dentro de una presentaci&oacute;n.</p>
+                            <a href="https://www.toastmasters.org/es-es/resources/public-speaking-tips/visual-aids-and-props" target="_blank" rel="noreferrer" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-toastmasters-visual-aids-props-es.png" alt="QR Lectura: Toastmasters Ayudas visuales y accesorios" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Videos: TED-Ed: Public Speaking 101</h3>
+                            <p class="text-slate-600 mb-2">Colecci&oacute;n de lecciones en video para fortalecer la presentaci&oacute;n oral, la construcci&oacute;n del mensaje y la relaci&oacute;n con la audiencia.</p>
+                            <a href="https://ed.ted.com/ted_ed_collections/public-speaking-101" target="_blank" rel="noreferrer" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-teded-public-speaking-101.png" alt="QR Videos: TED-Ed Public Speaking 101" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Art&iacute;culo: Toastmasters Magazine: Back to the Basics: Visual Aids</h3>
+                            <p class="text-slate-600 mb-2">Art&iacute;culo centrado en el valor de los recursos visuales y en las decisiones b&aacute;sicas que mejoran su uso durante una intervenci&oacute;n oral.</p>
+                            <a href="https://www.toastmasters.org/magazine/magazine-issues/2023/apr/back-to-the-basics-visual-aids" target="_blank" rel="noreferrer" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-toastmasters-back-to-basics-visual-aids.png" alt="QR Artículo: Back to the Basics Visual Aids" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Gu&iacute;a pr&aacute;ctica: Microsoft Support: Tips for Creating and Delivering an Effective Presentation</h3>
+                            <p class="text-slate-600 mb-2">Gu&iacute;a de apoyo para revisar estructura, dise&ntilde;o y entrega de una presentaci&oacute;n antes de exponerla en clase o en un entorno profesional.</p>
+                            <a href="https://support.microsoft.com/en-us/office/tips-for-creating-and-delivering-an-effective-presentation-f43156b0-20d2-4c51-8345-0c337cefb88b" target="_blank" rel="noreferrer" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-microsoft-effective-presentation.png" alt="QR Guía práctica: Microsoft Support sobre presentaciones efectivas" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliograf&iacute;a</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Alley, M. (2013). <em>The craft of scientific presentations</em>. Springer.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Duarte, N. (2010). <em>Resonate: Present visual stories that transform audiences</em>. Wiley.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Gallo, C. (2014). <em>Talk like TED</em>. St. Martin&rsquo;s Press.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mayer, R. E. (2009). <em>Multimedia learning</em> (2nd ed.). Cambridge University Press.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Reynolds, G. (2012). <em>Presentation Zen</em>. New Riders.</span>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Creditos institucionales -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+    <script>
+        const sidebarLinks = Array.from(document.querySelectorAll('.sidebar-link'));
+        const panes = Array.from(document.querySelectorAll('.content-pane'));
+        const mobileNav = document.getElementById('mobile-nav');
+
+        function showPane(targetId) {
+            panes.forEach((pane) => {
+                pane.classList.toggle('active', pane.id === targetId);
+            });
+
+            sidebarLinks.forEach((link) => {
+                link.classList.toggle('active', link.dataset.target === targetId);
+            });
+
+            if (mobileNav) {
+                mobileNav.value = targetId;
+            }
+
+            if (typeof window.scormTrackSection === 'function') {
+                window.scormTrackSection(targetId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        sidebarLinks.forEach((link) => {
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                showPane(link.dataset.target);
+            });
+        });
+
+        if (mobileNav) {
+            mobileNav.addEventListener('change', (event) => {
+                showPane(event.target.value);
+            });
+        }
+
+        const accordions = Array.from(document.querySelectorAll('[data-accordion]'));
+        accordions.forEach((accordion, index) => {
+            const trigger = accordion.querySelector('.accordion-trigger');
+            const panel = accordion.querySelector('.accordion-panel');
+
+            if (index === 0) {
+                accordion.classList.add('open');
+                panel.classList.add('open');
+            }
+
+            trigger.addEventListener('click', () => {
+                const isOpen = accordion.classList.contains('open');
+                accordion.classList.toggle('open', !isOpen);
+                panel.classList.toggle('open', !isOpen);
+            });
+        });
+
+        const conceptItems = Array.from(document.querySelectorAll('[data-concept]'));
+        conceptItems.forEach((item) => {
+            const trigger = item.querySelector('.concept-toggle');
+            const panel = item.querySelector('.concept-panel');
+
+            trigger.addEventListener('click', () => {
+                const isOpen = item.classList.contains('open');
+                item.classList.toggle('open', !isOpen);
+                panel.classList.toggle('open', !isOpen);
+            });
+        });
+
+        const auditButton = document.getElementById('check-audit');
+        const auditFeedback = document.getElementById('audit-feedback');
+        if (auditButton) {
+            auditButton.addEventListener('click', () => {
+                const selects = Array.from(document.querySelectorAll('.audit-select'));
+                let correctCount = 0;
+
+                selects.forEach((select) => {
+                    select.classList.remove('correct', 'incorrect');
+                    if (select.value === select.dataset.answer) {
+                        select.classList.add('correct');
+                        correctCount += 1;
+                    } else {
+                        select.classList.add('incorrect');
+                    }
+                });
+
+                auditFeedback.textContent = `Obtuviste ${correctCount} de ${selects.length} aciertos. Revisa si tus decisiones favorecen claridad, s&iacute;ntesis y relevancia.`;
+            });
+        }
+
+        const sequenceOrder = ['url', 'request', 'server', 'response', 'render'];
+        const sequenceCards = Array.from(document.querySelectorAll('.sequence-card'));
+        const selectedSequenceContainer = document.getElementById('selected-sequence');
+        const sequencePlaceholder = document.getElementById('sequence-placeholder');
+        const sequenceFeedback = document.getElementById('sequence-feedback');
+        const checkSequenceButton = document.getElementById('check-sequence');
+        const resetSequenceButton = document.getElementById('reset-sequence');
+        let selectedSequence = [];
+
+        function stepLabel(step) {
+            const labels = {
+                url: '1. Usuario escribe la URL',
+                request: '2. El navegador env&iacute;a la solicitud',
+                server: '3. El servidor procesa la petici&oacute;n',
+                response: '4. El servidor responde',
+                render: '5. El navegador renderiza la p&aacute;gina'
+            };
+            return labels[step] || step;
+        }
+
+        function renderSelectedSequence(marking = []) {
+            selectedSequenceContainer.innerHTML = '';
+
+            selectedSequence.forEach((step, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'selected-sequence-item';
+                if (marking[index]) {
+                    button.classList.add(marking[index]);
+                }
+                button.innerHTML = `<span>${stepLabel(step)}</span><span class="text-xs font-bold">✕</span>`;
+                button.addEventListener('click', () => {
+                    selectedSequence.splice(index, 1);
+                    const sourceCard = document.querySelector(`.sequence-card[data-step="${step}"]`);
+                    if (sourceCard) {
+                        sourceCard.classList.remove('used');
+                    }
+                    sequenceFeedback.textContent = '';
+                    renderSelectedSequence();
+                });
+                selectedSequenceContainer.appendChild(button);
+            });
+
+            sequencePlaceholder.classList.toggle('hidden', selectedSequence.length > 0);
+        }
+
+        sequenceCards.forEach((card) => {
+            card.addEventListener('click', () => {
+                if (card.classList.contains('used')) {
+                    return;
+                }
+                selectedSequence.push(card.dataset.step);
+                card.classList.add('used');
+                sequenceFeedback.textContent = '';
+                renderSelectedSequence();
+            });
+        });
+
+        if (checkSequenceButton) {
+            checkSequenceButton.addEventListener('click', () => {
+                if (selectedSequence.length !== sequenceOrder.length) {
+                    sequenceFeedback.textContent = 'Completa los cinco pasos antes de validar la secuencia.';
+                    renderSelectedSequence();
+                    return;
+                }
+
+                const marking = selectedSequence.map((step, index) => (step === sequenceOrder[index] ? 'correct' : 'incorrect'));
+                const isCorrect = selectedSequence.every((step, index) => step === sequenceOrder[index]);
+                renderSelectedSequence(marking);
+                sequenceFeedback.textContent = isCorrect
+                    ? 'La secuencia es correcta. La explicaci&oacute;n va desde la acci&oacute;n del usuario hasta la visualizaci&oacute;n final en pantalla.'
+                    : 'Hay pasos fuera de orden. Piensa primero en la acci&oacute;n del usuario, luego en la solicitud, el procesamiento, la respuesta y el renderizado.';
+            });
+        }
+
+        if (resetSequenceButton) {
+            resetSequenceButton.addEventListener('click', () => {
+                selectedSequence = [];
+                sequenceCards.forEach((card) => card.classList.remove('used'));
+                sequenceFeedback.textContent = '';
+                renderSelectedSequence();
+            });
+        }
+
+        const scenarioButton = document.getElementById('check-scenarios');
+        const scenarioFeedback = document.getElementById('scenario-feedback');
+        if (scenarioButton) {
+            scenarioButton.addEventListener('click', () => {
+                const selects = Array.from(document.querySelectorAll('.scenario-select'));
+                let correctCount = 0;
+
+                selects.forEach((select) => {
+                    select.classList.remove('correct', 'incorrect');
+                    if (select.value === select.dataset.answer) {
+                        select.classList.add('correct');
+                        correctCount += 1;
+                    } else {
+                        select.classList.add('incorrect');
+                    }
+                });
+
+                scenarioFeedback.textContent = `Aciertos: ${correctCount} de ${selects.length}. El mejor apoyo visual depende de si necesitas mostrar una interfaz, una relaci&oacute;n, una comparaci&oacute;n o una demostraci&oacute;n.`;
+            });
+        }
+
+        const quizQuestions = [
+            {
+                prompt: '&iquest;Cu&aacute;l es la funci&oacute;n principal de los medios audiovisuales en una presentaci&oacute;n?',
+                options: [
+                    'Reemplazar al expositor',
+                    'Llenar el tiempo de la presentaci&oacute;n',
+                    'Apoyar y reforzar el mensaje del expositor',
+                    'Mostrar toda la informaci&oacute;n posible'
+                ],
+                answer: 2
+            },
+            {
+                prompt: 'Seg&uacute;n los principios de dise&ntilde;o, &iquest;qu&eacute; se debe evitar en una diapositiva?',
+                options: [
+                    'Uso de im&aacute;genes',
+                    'Informaci&oacute;n innecesaria o excesiva',
+                    'Uso de palabras clave',
+                    'Tipograf&iacute;a legible'
+                ],
+                answer: 1
+            },
+            {
+                prompt: '&iquest;Cu&aacute;l es una buena pr&aacute;ctica al dise&ntilde;ar diapositivas?',
+                options: [
+                    'Incluir p&aacute;rrafos largos',
+                    'Leer todo el contenido',
+                    'Utilizar palabras clave y elementos visuales',
+                    'Usar muchas animaciones'
+                ],
+                answer: 2
+            },
+            {
+                prompt: '&iquest;Qu&eacute; principio indica que se deben eliminar elementos que no aportan al mensaje?',
+                options: [
+                    'Principio de se&ntilde;alizaci&oacute;n',
+                    'Principio de coherencia',
+                    'Principio de contig&uuml;idad',
+                    'Principio de repetici&oacute;n'
+                ],
+                answer: 1
+            },
+            {
+                prompt: 'En una presentaci&oacute;n de software, &iquest;cu&aacute;l es el uso m&aacute;s adecuado de los medios audiovisuales?',
+                options: [
+                    'Mostrar solo texto t&eacute;cnico',
+                    'Leer las diapositivas completas',
+                    'Utilizar im&aacute;genes, prototipos o gr&aacute;ficos para explicar el proyecto',
+                    'Usar muchas diapositivas sin explicaci&oacute;n'
+                ],
+                answer: 2
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const quizScore = document.getElementById('quiz-score');
+        const quizSelections = {};
+
+        function renderQuiz() {
+            quizContainer.innerHTML = quizQuestions.map((question, questionIndex) => `
+                <article class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                    <p class="text-sm font-semibold text-green-700 mb-2">Pregunta ${questionIndex + 1}</p>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">${question.prompt}</h3>
+                    <div class="grid gap-3">
+                        ${question.options.map((option, optionIndex) => `
+                            <button
+                                type="button"
+                                class="quiz-option text-left rounded-2xl border border-slate-200 bg-white p-4"
+                                data-question="${questionIndex}"
+                                data-option="${optionIndex}"
+                            >
+                                ${String.fromCharCode(65 + optionIndex)}. ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                </article>
+            `).join('');
+
+            Array.from(document.querySelectorAll('.quiz-option')).forEach((button) => {
+                button.addEventListener('click', () => {
+                    const questionIndex = button.dataset.question;
+                    const optionIndex = Number(button.dataset.option);
+                    quizSelections[questionIndex] = optionIndex;
+
+                    Array.from(document.querySelectorAll(`.quiz-option[data-question="${questionIndex}"]`)).forEach((optionButton) => {
+                        optionButton.classList.remove('selected');
+                    });
+
+                    button.classList.add('selected');
+                });
+            });
+        }
+
+        renderQuiz();
+
+        const checkQuizButton = document.getElementById('check-quiz');
+        if (checkQuizButton) {
+            checkQuizButton.addEventListener('click', () => {
+                let score = 0;
+
+                quizQuestions.forEach((question, questionIndex) => {
+                    const optionButtons = Array.from(document.querySelectorAll(`.quiz-option[data-question="${questionIndex}"]`));
+                    optionButtons.forEach((button) => {
+                        button.classList.remove('correct', 'incorrect');
+                    });
+
+                    const selected = quizSelections[questionIndex];
+                    optionButtons.forEach((button) => {
+                        const optionIndex = Number(button.dataset.option);
+                        if (optionIndex === question.answer) {
+                            button.classList.add('correct');
+                        }
+                        if (selected === optionIndex && optionIndex !== question.answer) {
+                            button.classList.add('incorrect');
+                        }
+                    });
+
+                    if (selected === question.answer) {
+                        score += 1;
+                    }
+                });
+
+                quizScore.textContent = `Resultado: ${score} de ${quizQuestions.length}.`;
+            });
+        }
+
+    </script>
+    <!-- Plugin institucional de accesibilidad -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
