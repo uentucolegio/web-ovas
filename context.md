@@ -200,7 +200,7 @@ Este plugin no se debe omitir, modificar ni mover de posición.
 ### Proceso para crear un nuevo OVA
 
 1. Tomar como base la carpeta **`_template/`** del repositorio (`_template/index.html`), que es la plantilla vacía oficial con toda la estructura base lista.
-2. Copiar la carpeta `_template/` y ubicarla en la ruta jerárquica correcta con el nombre del OVA (ej: `tecnico/semestre-1/matematicas/unidad-2/trigonometria/`).
+2. Copiar la carpeta `_template/` y ubicarla en la ruta jerárquica correcta con el nombre del OVA (ej: `tecnico/semestre-1/matematica-basica/unidad-2/trigonometria/`).
 3. Reemplazar únicamente el contenido de las secciones **Contenido** y **Actividades**, siguiendo las reglas de gamificación obligatorias.
 4. Verificar que el logo, créditos, navegación y estilos globales permanezcan intactos.
 5. Ajustar los textos de navegación (nombres de secciones en el menú) solo si el tema lo requiere, sin alterar el estilo visual.
