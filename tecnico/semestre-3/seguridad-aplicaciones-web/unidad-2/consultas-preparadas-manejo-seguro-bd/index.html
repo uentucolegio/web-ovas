@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Consultas Preparadas y Manejo Seguro de Bases de Datos</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .zoom-container { position: relative; display: block; }
+        .zoom-btn {
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(255,255,255,0.9); border: 1px solid #cbd5e1;
+            border-radius: 9999px; width: 2.25rem; height: 2.25rem;
+            cursor: pointer; font-size: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .zoom-btn:hover { background: #f0fdf4; }
+        #zoom-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            align-items: center; justify-content: center; padding: 2rem;
+            cursor: zoom-out;
+        }
+        #zoom-overlay.active { display: flex; }
+        #zoom-overlay img { max-width: 100%; max-height: 100%; border-radius: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🗄️ Consultas Preparadas y Manejo Seguro de Bases de Datos</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Mientras que el tema anterior de esta unidad introdujo el concepto y la lógica de las consultas preparadas como mecanismo de prevención de inyección SQL, este tema profundiza en su implementación práctica completa, abarcando las cuatro operaciones fundamentales de manipulación de datos (CRUD: Create, Read, Update, Delete) y extendiendo el análisis hacia otros aspectos críticos del manejo seguro de bases de datos: la gestión de credenciales y el cifrado de datos sensibles.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La gestión inadecuada de credenciales de bases de datos, incluyendo contraseñas codificadas directamente en el código fuente (hardcoded) y posteriormente subidas a repositorios públicos de GitHub, ha sido la causa de numerosos incidentes de seguridad documentados públicamente a nivel global. Este riesgo no es exclusivo de grandes corporaciones: pequeñas y medianas empresas que suben accidentalmente las credenciales completas de sus bases de datos de producción a repositorios públicos exponen directamente la información de sus clientes, un escenario particularmente relevante para el tejido empresarial de ciudades intermedias como Montería, donde muchos sistemas se desarrollan sin la supervisión de especialistas en seguridad.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Para el técnico en programación web de la Universidad de Córdoba, dominar el manejo seguro de bases de datos en su totalidad —desde la consulta individual hasta la gestión de credenciales y el cifrado de información sensible— constituye el cierre natural de las competencias técnicas centrales del curso.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA sabrás implementar CRUD completo con consultas preparadas, gestionar credenciales mediante variables de entorno, y comprenderás cuándo y cómo cifrar datos sensibles. <span class="text-xl">🔐</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Aplicar consultas preparadas mediante Node.js (pg/mysql2) en operaciones CRUD completas, integrándolas de forma consistente en la interacción con la base de datos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Gestionar de forma segura las credenciales de conexión a bases de datos mediante variables de entorno, evitando su exposición en el código fuente.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Diseñar esquemas de acceso a datos robustos aplicando los principios de cifrado de datos tanto en tránsito como en reposo.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Justificar por qué cifrar la totalidad de los campos de una base de datos no constituye necesariamente una práctica recomendada, a pesar del beneficio aparente en seguridad.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🔄 Ciclo de Ejecución de una Consulta Preparada</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Comprender el ciclo completo de ejecución interno de una consulta preparada permite entender con mayor profundidad por qué este mecanismo previene estructuralmente la inyección SQL, más allá de la simple recomendación de "usar consultas parametrizadas en lugar de concatenar strings".</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig1.png" alt="Ciclo de ejecución de una consulta preparada" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Las cuatro fases del ciclo de ejecución de una consulta preparada: preparar, vincular, ejecutar y recuperar resultados. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🧩</span> La separación temporal entre la fase de <strong>preparación</strong> (donde el motor analiza y compila la estructura de la consulta) y la fase de <strong>vinculación</strong> de valores (donde los datos del usuario se incorporan exclusivamente como parámetros literales) es la razón estructural por la cual ningún valor proporcionado por el usuario puede alterar la lógica SQL, sin importar qué caracteres especiales contenga. <span class="text-xl">🔒</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🔑 Gestión Segura de Credenciales de Base de Datos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Las credenciales de acceso a la base de datos —usuario, contraseña, host y nombre de la base de datos— representan información extremadamente sensible que, de ser expuesta, otorga a un atacante acceso directo y completo a todos los datos de la aplicación, haciendo irrelevantes todas las demás medidas de seguridad implementadas en el código.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig2.png" alt="Credenciales hardcoded vs variables de entorno" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Comparación entre la práctica insegura de codificar credenciales directamente en el código fuente y la práctica segura de utilizar variables de entorno externas al repositorio. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">📁 La práctica recomendada consiste en almacenar las credenciales en un archivo de variables de entorno (típicamente <code class="bg-slate-100 px-1 rounded">.env</code>) que se excluye explícitamente del control de versiones mediante el archivo <code class="bg-slate-100 px-1 rounded">.gitignore</code>, de modo que estas nunca lleguen a un repositorio compartido.</p>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🏦</span> En entornos de producción profesionales, estas credenciales se gestionan idealmente mediante servicios especializados de gestión de secretos (<em>vaults</em>) que añaden capas adicionales de control de acceso y auditoría. <span class="text-xl">🔐</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🛠️ Operaciones CRUD Implementadas con Consultas Preparadas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Las cuatro operaciones fundamentales de manipulación de datos en una aplicación web —crear, leer, actualizar y eliminar registros— deben implementarse de forma consistente utilizando consultas preparadas en todos los casos, sin excepción, independientemente de si el dato de entrada proviene directamente de un formulario o de un cálculo interno de la aplicación.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig3.png" alt="Operaciones CRUD con consultas preparadas" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 3. Las cuatro operaciones CRUD (Create, Read, Update, Delete) implementadas mediante consultas preparadas con parámetros vinculados. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">📏 Es una práctica recomendable establecer como estándar de equipo que ninguna consulta SQL se escriba jamás mediante concatenación directa de variables, sin importar cuán "seguro" parezca el origen del dato, ya que la disciplina consistente reduce significativamente el riesgo de errores humanos.</p>
+
+                                <p class="text-slate-700 mb-3">El siguiente ejemplo integra todo lo desarrollado en esta guía en una clase de acceso a datos (Data Access Object) completa, que centraliza las cuatro operaciones CRUD para una entidad, gestionando la conexión mediante variables de entorno y utilizando exclusivamente consultas parametrizadas:</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">const { Pool } = require("pg");
+
+class UsuarioDAO {
+    constructor() {
+        this.pool = new Pool({
+            host: process.env.DB_HOST,
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+        });
+    }
+
+    async crear(nombre, email) {
+        const resultado = await this.pool.query(
+            "INSERT INTO usuarios (nombre, email) VALUES ($1, $2) RETURNING id",
+            [nombre, email]
+        );
+        return resultado.rows[0].id;
+    }
+
+    async obtenerPorId(id) {
+        const resultado = await this.pool.query(
+            "SELECT * FROM usuarios WHERE id = $1",
+            [id]
+        );
+        return resultado.rows[0] || null;
+    }
+
+    async actualizar(id, nombre) {
+        const resultado = await this.pool.query(
+            "UPDATE usuarios SET nombre = $1 WHERE id = $2",
+            [nombre, id]
+        );
+        return resultado.rowCount > 0;
+    }
+
+    async eliminar(id) {
+        const resultado = await this.pool.query(
+            "DELETE FROM usuarios WHERE id = $1",
+            [id]
+        );
+        return resultado.rowCount > 0;
+    }
+}
+
+module.exports = UsuarioDAO;</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Clase de acceso a datos (DAO) con las cuatro operaciones CRUD implementadas mediante consultas parametrizadas en Node.js (pg).</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🔒 Cifrado de Datos: en Tránsito y en Reposo</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">La protección integral de los datos de una aplicación requiere considerar dos estados distintos en los que la información puede encontrarse vulnerable: mientras viaja por la red (en tránsito) y mientras permanece almacenada en el servidor (en reposo), cada uno requiriendo mecanismos de cifrado específicos.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig4.png" alt="Cifrado en tránsito vs en reposo" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Comparación entre el cifrado de datos en tránsito (protocolo TLS/HTTPS) y el cifrado de datos en reposo (almacenamiento cifrado en base de datos). Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">🌐 El cifrado en tránsito se implementa principalmente mediante el protocolo <strong>TLS</strong>, que protege HTTPS y también puede configurarse para cifrar la conexión específica entre la aplicación y el servidor de base de datos.</p>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">💾</span> El cifrado en reposo protege los datos almacenados físicamente en disco, e incluye desde el <strong>hash irreversible</strong> de contraseñas (que técnicamente no es cifrado sino una transformación unidireccional) hasta el <strong>cifrado simétrico</strong> de campos específicamente sensibles como números de documento de identidad o información médica. <span class="text-xl">🧬</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🧬 Anatomía de una Cadena de Conexión Segura</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Más allá de usar consultas preparadas, la seguridad del acceso a la base de datos depende también de cómo se configura la conexión misma, siendo importante comprender el propósito específico de cada componente de las credenciales de conexión.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig5.png" alt="Componentes de una cadena de conexión segura" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Componentes de una cadena de conexión segura a base de datos: host, nombre de base de datos, usuario y contraseña. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚠️</span> Cada uno de estos cuatro componentes representa una superficie de ataque potencial si se gestiona incorrectamente: un host expuesto directamente a internet sin restricciones de firewall, un usuario con privilegios excesivos, o una contraseña débil o filtrada en un repositorio público, pueden anular por completo todas las demás medidas de seguridad implementadas en el código. <span class="text-xl">🛡️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Implementación Completa de CRUD Seguro (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Desarrolla una clase <strong>Node.js</strong> de acceso a datos (Data Access Object) para una entidad de tu elección (por ejemplo, "Producto" o "Cliente") que implemente las cuatro operaciones CRUD completas utilizando exclusivamente consultas preparadas mediante <code class="bg-slate-100 px-1 rounded">pg</code> o <code class="bg-slate-100 px-1 rounded">mysql2</code>, gestionando las credenciales de conexión a través de variables de entorno.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Clase DAO completa con las 4 operaciones CRUD, archivo <code class="bg-white px-1 rounded">.env</code> de ejemplo (sin credenciales reales) y evidencia de que la conexión funciona correctamente.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Ejercicio Evaluado de Consultas Preparadas (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3 estudiantes, resuelvan un conjunto de 8 ejercicios proporcionados por el docente donde deben transformar consultas SQL vulnerables (construidas por concatenación) en consultas preparadas equivalentes.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Las 8 consultas refactorizadas, identificando además qué campos de la tabla involucrada deberían considerarse para cifrado en reposo según su sensibilidad.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🤔 Actividad 3: Cuestionario de Autoevaluación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Antes de responder, procura repasar los conceptos clave (inyección SQL, hashing vs. cifrado, variables de entorno) y redacta tus respuestas de forma clara y fundamentada, evitando definiciones memorizadas sin contexto:
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 mb-4 text-slate-700">
+                            <li>Explica por qué la separación entre la fase de "preparar" y la fase de "ejecutar" en una consulta preparada es la razón técnica fundamental de su efectividad contra inyección SQL.</li>
+                            <li>Un repositorio de GitHub de un proyecto académico contiene un archivo de configuración con la contraseña real de la base de datos de producción. Aplica un protocolo de respuesta ante incidentes y describe los pasos que deberías tomar inmediatamente al descubrir esta situación.</li>
+                            <li>Analiza la diferencia entre el hash de una contraseña y el cifrado de un dato sensible como un número de tarjeta de crédito, considerando por qué uno es irreversible y el otro debe poder revertirse.</li>
+                            <li><em>(Nivel avanzado)</em> Evalúa por qué cifrar TODOS los campos de una base de datos no es una práctica recomendada, a pesar de que en principio parecería ofrecer mayor seguridad.</li>
+                        </ul>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Documento escrito con las 4 respuestas argumentadas, cubriendo desde la comprensión técnica hasta el análisis crítico de decisiones de diseño.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📖 MySQL 8.0 Reference Manual — Prepared Statements</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial de MySQL/Oracle sobre el funcionamiento interno de las consultas preparadas del lado del servidor.</p>
+                            <a href="https://dev.mysql.com/doc/refman/8.0/en/sql-prepared-statements.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-mysql-prepared.png" alt="QR MySQL Prepared Statements" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🔑 Password Storage Cheat Sheet — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial de OWASP sobre el almacenamiento correcto de contraseñas mediante hashing (Argon2id, bcrypt, PBKDF2).</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-owasp-password-storage.png" alt="QR OWASP Password Storage Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">⚙️ The Twelve-Factor App — Config</h3>
+                            <p class="text-slate-600 mb-2">Metodología de referencia que establece por qué la configuración (incluidas las credenciales) debe vivir en variables de entorno, nunca en el código.</p>
+                            <a href="https://12factor.net/config" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-12factor-config.png" alt="QR Twelve-Factor App Config" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MySQL. (2024). <i>MySQL 8.0 Reference Manual: 15.5 Prepared Statements</i>. Oracle Corporation.<br>
+                            <a href="https://dev.mysql.com/doc/refman/8.0/en/sql-prepared-statements.html" class="text-green-700 underline break-all" target="_blank">https://dev.mysql.com/doc/refman/8.0/en/sql-prepared-statements.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (s.f.). <i>Password Storage Cheat Sheet</i>.<br>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" class="text-green-700 underline break-all" target="_blank">https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (s.f.). <i>Cryptographic Storage Cheat Sheet</i>.<br>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html" class="text-green-700 underline break-all" target="_blank">https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Wiggins, A. (2017). <i>The Twelve-Factor App: Config</i>.<br>
+                            <a href="https://12factor.net/config" class="text-green-700 underline break-all" target="_blank">https://12factor.net/config</a>
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Overlay de zoom para imágenes — usado por el JS de zoom -->
+    <div id="zoom-overlay">
+        <img id="zoom-overlay-img" src="" alt="Imagen ampliada">
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Por qué la separación entre la fase de 'preparar' y la fase de 'ejecutar' es la razón técnica fundamental de la efectividad de las consultas preparadas?",
+                options: [
+                    "Porque hace que las consultas se ejecuten más rápido",
+                    "Porque el motor compila la estructura de la consulta antes de recibir los valores, que luego se tratan exclusivamente como datos literales",
+                    "Porque elimina la necesidad de una base de datos",
+                    "Porque cifra automáticamente los datos sensibles"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la práctica recomendada para gestionar las credenciales de conexión a una base de datos?",
+                options: [
+                    "Escribirlas directamente en el código fuente para mayor claridad",
+                    "Almacenarlas en variables de entorno (.env) excluidas del control de versiones mediante .gitignore",
+                    "Enviarlas por correo electrónico al equipo de desarrollo",
+                    "Guardarlas en un comentario dentro del código"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la diferencia fundamental entre el hash de una contraseña y el cifrado de un número de tarjeta de crédito?",
+                options: [
+                    "No hay diferencia, ambos son el mismo proceso",
+                    "El hash es reversible y el cifrado no",
+                    "El hash es una transformación irreversible; el cifrado de la tarjeta debe poder revertirse para su uso posterior",
+                    "El hash solo se usa en bases de datos NoSQL"
+                ],
+                correct: 2
+            },
+            {
+                question: "¿Qué protocolo se utiliza principalmente para el cifrado de datos EN TRÁNSITO?",
+                options: [
+                    "Hash bcrypt",
+                    "TLS (que protege HTTPS y puede cifrar la conexión con la base de datos)",
+                    "Base64",
+                    "AES únicamente en el disco duro"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Por qué cifrar TODOS los campos de una base de datos no es necesariamente una práctica recomendada?",
+                options: [
+                    "Porque el cifrado está prohibido por ley en Colombia",
+                    "Porque introduce complejidad y costo de rendimiento innecesarios en campos que no son sensibles, sin aportar beneficio real de seguridad",
+                    "Porque las bases de datos modernas no permiten cifrar ningún campo",
+                    "Porque el cifrado elimina automáticamente la necesidad de autenticación"
+                ],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Zoom de imágenes: click en el botón 🔍 abre la imagen en un overlay ampliado
+        const zoomOverlay = document.getElementById('zoom-overlay');
+        const zoomOverlayImg = document.getElementById('zoom-overlay-img');
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const img = this.previousElementSibling;
+                zoomOverlayImg.src = img.src;
+                zoomOverlayImg.alt = img.alt;
+                zoomOverlay.classList.add('active');
+            });
+        });
+        zoomOverlay.addEventListener('click', () => zoomOverlay.classList.remove('active'));
+    </script>
+
+    <!-- Resaltado de sintaxis para los bloques de código Node.js/JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

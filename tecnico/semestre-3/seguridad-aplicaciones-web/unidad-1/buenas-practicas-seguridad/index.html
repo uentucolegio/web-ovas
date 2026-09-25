@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: 🌐 Buenas prácticas básicas de seguridad</title>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+          /* =============================================
+              ESTILOS PERSONALIZADOS DEL OVA
+              Agrega aquí los estilos propios de este OVA
+              ============================================= */
+          .zoom-container { position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 48rem; }
+          .zoom-container img { display: block; margin-left: auto; margin-right: auto; }
+          .zoom-btn {
+                position: absolute;
+                top: 0.5rem;
+                right: 0.5rem;
+                background: rgba(0,0,0,0.6);
+                color: #fff;
+                border: none;
+                padding: 0.35rem 0.5rem;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35rem;
+                font-size: 0.9rem;
+                backdrop-filter: blur(4px);
+          }
+          .zoom-btn:hover { background: rgba(0,0,0,0.75); }
+            /* Modal de zoom */
+            #zoom-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 60; }
+            #zoom-modal.open { display: flex; }
+            #zoom-modal .modal-inner { max-width: 90%; max-height: 90%; }
+            #zoom-modal img { max-width: 100%; max-height: 100%; border-radius: 0.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+            #zoom-modal .close-btn { position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.9); border: none; padding: 0.5rem 0.75rem; border-radius: 0.375rem; cursor: pointer; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🌐 Buenas prácticas básicas de seguridad</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Las buenas prácticas de seguridad no son un conjunto de reglas aisladas, sino principios fundamentales que, aplicados de forma consistente, reducen sistemáticamente la superficie de ataque de cualquier aplicación web. En este OVA consolidamos principios transversales como el principio de menor privilegio, la defensa en profundidad y la integración de seguridad en el ciclo de desarrollo (DevSecOps).
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    A través de ejemplos, tablas resumidas y actividades prácticas, aprenderás a identificar y aplicar controles verificables que mejoren la seguridad de tus proyectos y te preparen para adoptar prácticas de DevSecOps en entornos reales.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al finalizar, podrás aplicar un checklist de buenas prácticas y diseñar esquemas de permisos con menor privilegio. <span class="text-xl">🔐</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔍</span>
+                        <span>Aplicar los principios de menor privilegio y defensa en profundidad en el diseño de aplicaciones web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛠️</span>
+                        <span>Incorporar un checklist de buenas prácticas de seguridad verificables en el desarrollo de software.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Comprender el enfoque DevSecOps para integrar la seguridad a lo largo del ciclo de desarrollo.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- Subtema 1: Principio de Menor Privilegio -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>Principio de Menor Privilegio</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">El principio de menor privilegio establece que todo usuario, proceso o componente debe tener únicamente los permisos mínimos necesarios para realizar su función. Aplicarlo reduce el impacto de cuentas comprometidas y limita el daño ante fallos.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig2.png" alt="Jerarquía de niveles de acceso" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Jerarquía de niveles de acceso ilustrando el principio de menor privilegio.</div>
+                                <p class="mt-4 mb-4">🗄️ Aplicar este principio implica, por ejemplo, que el usuario de base de datos que utiliza la aplicación web <strong>no debería tener privilegios de administrador (root)</strong> capaces de crear o eliminar bases de datos completas, sino únicamente los permisos de lectura y escritura sobre las tablas específicas que la aplicación necesita consultar.</p>
+                                <p class="mb-4">👥 De igual manera, dentro de la aplicación misma, <strong>no todos los usuarios autenticados deberían tener el mismo nivel de acceso</strong> a todas las funcionalidades.</p>
+                                <p class="text-sm text-slate-700 mt-4">Ejemplo práctico: en lugar de usar la cuenta de administración de la BD para la aplicación, crea un usuario `app_seguridad` con permisos `SELECT, INSERT, UPDATE, DELETE` sobre las tablas necesarias.</p>
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-sql">-- Crear un usuario de aplicacion con permisos minimos necesarios
+CREATE USER 'app_seguridad'@'localhost' IDENTIFIED BY 'Clave_Segura_2026!';
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+    ON seguridad_web.* TO 'app_seguridad'@'localhost';
+
+FLUSH PRIVILEGES;
+</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. SQL de ejemplo: creación de usuario restringido (ilustrativo).</div>
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🚫</span> Nunca uses <code class="bg-green-100 px-1 rounded">GRANT ALL PRIVILEGES ON *.*</code> para la cuenta de la aplicación en producción. Aunque parezca más rápido para "que todo funcione", multiplica el daño potencial si esa cuenta se ve comprometida. <span class="text-xl">🔐</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- Subtema 2: Defensa en Profundidad -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>Defensa en Profundidad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">La defensa en profundidad propone implementar múltiples capas de protección independientes —red, transporte (TLS), autenticación, validación de inputs, autorización y cifrado en reposo— de modo que si una capa falla, las restantes sigan ofreciendo defensa.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig3.png" alt="Modelo defensa en profundidad" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Modelo de defensa en profundidad con múltiples capas concéntricas.</div>
+                                <p class="mt-4 mb-3 font-semibold text-slate-800">🧅 En una aplicación web típica, estas capas incluyen:</p>
+                                <ul class="list-disc list-inside space-y-2 mb-4">
+                                    <li>🧱 Seguridad perimetral de red (<strong>firewall</strong>)</li>
+                                    <li>🔒 Cifrado en tránsito (<strong>HTTPS/TLS</strong>)</li>
+                                    <li>🔑 Mecanismos de <strong>autenticación</strong></li>
+                                    <li>✅ Validación rigurosa de las <strong>entradas del usuario</strong></li>
+                                    <li>🚦 Controles de <strong>autorización</strong> dentro de la lógica de negocio</li>
+                                    <li>🗃️ Cifrado de los <strong>datos en la base de datos</strong></li>
+                                </ul>
+                                <div class="mt-2 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⛓️</span> Ninguna capa individual debe considerarse suficiente por sí sola: si un atacante logra superar una, las capas adicionales siguen ofreciendo protección. <span class="text-xl">🛡️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- Subtema 3: Checklist esencial de buenas prácticas -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>Checklist esencial de buenas prácticas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">A continuación se presenta un resumen práctico que todo desarrollador debe revisar antes de pasar a producción.</p>
+                                <div class="mt-4 overflow-x-auto">
+                                    <div class="zoom-container mx-auto max-w-3xl mb-4">
+                                        <img src="img/fig4.png" alt="Checklist de buenas prácticas" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                        <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                    </div>
+                                    <table class="min-w-full bg-white border border-slate-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-slate-100 text-left">
+                                                <th class="px-4 py-3 border-b">Buena práctica</th>
+                                                <th class="px-4 py-3 border-b">¿Por qué es importante?</th>
+                                                <th class="px-4 py-3 border-b">Herramienta / Ejemplo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Validar y sanitizar todo input</td>
+                                                <td class="px-4 py-3 border-b">Previene inyección (A03) y XSS al no confiar en datos externos</td>
+                                                <td class="px-4 py-3 border-b">Validación en frontend y backend</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Usar HTTPS en toda la aplicación</td>
+                                                <td class="px-4 py-3 border-b">Evita que credenciales y datos viajen en texto plano</td>
+                                                <td class="px-4 py-3 border-b">Certificado TLS/SSL</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Almacenar contraseñas con hash</td>
+                                                <td class="px-4 py-3 border-b">Protege credenciales aunque la base de datos sea comprometida</td>
+                                                <td class="px-4 py-3 border-b">bcrypt, Argon2</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Rate limiting en login y APIs</td>
+                                                <td class="px-4 py-3 border-b">Mitiga ataques de fuerza bruta y abuso automatizado</td>
+                                                <td class="px-4 py-3 border-b">express-rate-limit, API Gateway</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Mantener dependencias actualizadas</td>
+                                                <td class="px-4 py-3 border-b">Evita explotación de vulnerabilidades conocidas</td>
+                                                <td class="px-4 py-3 border-b">npm audit, composer audit</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">🙈 No exponer errores técnicos</td>
+                                                <td class="px-4 py-3 border-b">Evita revelar información útil para un atacante</td>
+                                                <td class="px-4 py-3 border-b">Mensajes de error genéricos</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">🧾 Configurar cabeceras de seguridad</td>
+                                                <td class="px-4 py-3 border-b">Refuerza protección contra XSS, clickjacking y downgrade</td>
+                                                <td class="px-4 py-3 border-b">CSP, X-Frame-Options, HSTS</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">👀 Revisiones de código en seguridad</td>
+                                                <td class="px-4 py-3 border-b">Detecta fallos antes de llegar a producción</td>
+                                                <td class="px-4 py-3 border-b">Code review, SAST</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">📝 Registrar y monitorear eventos</td>
+                                                <td class="px-4 py-3 border-b">Permite detectar y responder ante incidentes a tiempo</td>
+                                                <td class="px-4 py-3 border-b">Logs de acceso y errores</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">🔐 Aplicar menor privilegio en roles</td>
+                                                <td class="px-4 py-3 border-b">Limita el impacto si una cuenta es comprometida</td>
+                                                <td class="px-4 py-3 border-b">RBAC por rol de usuario</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 4: DevSecOps y automatización -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>DevSecOps: seguridad integrada</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">DevSecOps integra la seguridad en cada etapa del ciclo de desarrollo (SAST, DAST, escaneo de imágenes, monitoreo). Implementar estas prácticas ayuda a detectar fallos tempranamente y automatizar controles.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig5.png" alt="Ciclo DevSecOps" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Ciclo continuo DevSecOps integrando prácticas de seguridad en cada fase.</div>
+                                <p class="mt-4 mb-4">🔁 Este enfoque incorpora herramientas automatizadas como el <strong>análisis estático de código (SAST)</strong> durante el desarrollo, <strong>pruebas dinámicas de seguridad (DAST)</strong> durante la fase de pruebas, <strong>escaneo de vulnerabilidades en imágenes de contenedores</strong> antes del despliegue, y sistemas de <strong>monitoreo continuo</strong> con alertas automáticas una vez la aplicación está en producción, cerrando el ciclo con retroalimentación constante hacia las fases de planeación y desarrollo.</p>
+                                <div class="mb-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🌱</span> La adopción de DevSecOps no requiere grandes inversiones desde el inicio: equipos pequeños, como los típicos de proyectos académicos o startups emergentes de la región Caribe colombiana, pueden comenzar con herramientas gratuitas de análisis de código y listas de verificación manuales, escalando gradualmente hacia la automatización completa. <span class="text-xl">🚀</span></p>
+                                </div>
+                                <div class="mt-4 overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-slate-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-slate-100 text-left">
+                                                <th class="px-4 py-3 border-b">Término</th>
+                                                <th class="px-4 py-3 border-b">Explicación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">SAST</td>
+                                                <td class="px-4 py-3 border-b">Revisión automática del código fuente en busca de vulnerabilidades, sin necesidad de ejecutarlo.</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">DAST</td>
+                                                <td class="px-4 py-3 border-b">Pruebas de seguridad sobre la aplicación en ejecución, simulando ataques reales desde fuera.</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">🐳 Escaneo de contenedores</td>
+                                                <td class="px-4 py-3 border-b">Análisis de imágenes Docker en busca de librerías o dependencias con vulnerabilidades conocidas antes de desplegarlas.</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">📡 Monitoreo continuo</td>
+                                                <td class="px-4 py-3 border-b">Supervisión constante de la aplicación en producción, con alertas automáticas ante actividad sospechosa.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 5: Madurez de seguridad -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>Madurez de seguridad: de lo reactivo a lo optimizado</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La madurez de seguridad mide cómo una organización avanza desde prácticas reactivas hacia procesos optimizados basados en datos, identificando oportunidades para mejorar políticas, formación y automatización.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig6.png" alt="Pirámide de madurez de seguridad" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Pirámide de madurez de seguridad organizacional.</div>
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">📍</span> La mayoría de las pequeñas y medianas empresas de la región de Córdoba que están iniciando su transformación digital se ubican en los niveles <strong>inicial o gestionado</strong> de esta pirámide. <span class="text-xl">📈</span></p>
+                                </div>
+                                <p class="mt-4 mb-4">💼 Esto representa una <strong>oportunidad significativa</strong> para los técnicos en programación web egresados, quienes pueden aportar valor inmediato ayudando a estas organizaciones a avanzar hacia niveles superiores de madurez mediante la implementación de las prácticas estudiadas en esta guía.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Auditoría de Buenas Prácticas</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Selecciona un proyecto de desarrollo web previo y aplica el checklist de la Figura 3. Documenta cuántos ítems se cumplen, cuáles no y propone un plan de mejora priorizado.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Informe con la auditoría y plan de mejora (PDF o Markdown) junto con evidencias en el repositorio.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Diseño de esquema de roles</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3, diseñen el esquema de permisos de base de datos para una aplicación ecommerce, indicando qué usuario y permisos (SELECT, INSERT, UPDATE, DELETE) debe tener cada componente.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Matriz de permisos y justificación técnica.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📖 Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1: OWASP Top 10 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🌐 OWASP Top 10 (2021) - Versión en español</h3>
+                            <p class="text-slate-600 mb-2">Resumen de las 10 vulnerabilidades más críticas en aplicaciones web y guías prácticas para mitigarlas.</p>
+                            <a href="https://owasp.org/Top10/2021/es/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso (OWASP Top 10)</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/fig7.png" alt="QR OWASP Top 10" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: Principio del menor privilegio (WeLiveSecurity) -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🔒 Principio del menor privilegio — WeLiveSecurity (ESET)</h3>
+                            <p class="text-slate-600 mb-2">Artículo que explica el principio del menor privilegio y ejemplos prácticos para su aplicación en entornos reales.</p>
+                            <a href="https://www.welivesecurity.com/la-es/2018/06/08/principio-menor-privilegio-limitar-acceso-imprescindible/" target="_blank" class="underline text-slate-700 hover:text-green-700">Leer artículo (WeLiveSecurity)</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/fig8.png" alt="QR Principio menor privilegio" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- (Se removió recurso extra para alinear con los 3 anexos del DOCX) -->
+
+                    <!-- Recurso 4: Adoptando DevSecOps — INCIBE -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🚀 Adoptando DevSecOps — INCIBE</h3>
+                            <p class="text-slate-600 mb-2">Artículo de INCIBE sobre cómo integrar prácticas de seguridad desde el código hasta la producción, con recomendaciones para equipos pequeños.</p>
+                            <a href="https://www.incibe.es/incibe-cert/blog/adoptando-devsecops-seguridad-integrada-desde-el-codigo-hasta-la-produccion" target="_blank" class="underline text-slate-700 hover:text-green-700">Leer (INCIBE)</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/fig9.png" alt="QR DevSecOps INCIBE" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2021). <i>OWASP Top 10:2021 (versión en español)</i>. https://owasp.org/Top10/2021/es/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Mendoza, M. A. (2018). <i>Principio del menor privilegio: la estrategia de limitar el acceso a lo que es imprescindible</i>. WeLiveSecurity, ESET. https://www.welivesecurity.com/la-es/2018/06/08/principio-menor-privilegio-limitar-acceso-imprescindible/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Raggi, N. (2021). <i>Defensa en profundidad: cómo implementar esta estrategia de ciberseguridad</i>. WeLiveSecurity, ESET. https://www.welivesecurity.com/la-es/2021/03/26/defensa-profundidad-que-es-como-implementar-estrategia-ciberseguridad/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            INCIBE. (2025). <i>Adoptando DevSecOps: Seguridad integrada desde el código hasta la producción</i>. INCIBE-CERT. https://www.incibe.es/incibe-cert/blog/adoptando-devsecops-seguridad-integrada-desde-el-codigo-hasta-la-produccion
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el objetivo principal del principio de menor privilegio?",
+                options: ["Asegurar que todos los usuarios tengan acceso administrativo", "Limitar permisos al mínimo necesario", "Registrar todas las acciones de los usuarios", "Cifrar la base de datos completa"],
+                correct: 1
+            },
+            {
+                question: "¿Qué describe mejor la estrategia 'defensa en profundidad'?",
+                options: ["Usar una única barrera de seguridad bien configurada", "Implementar múltiples capas de seguridad independientes", "Confiar únicamente en autenticación multifactor", "Desactivar puertos no usados"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es una práctica recomendada para almacenar contraseñas?",
+                options: ["Almacenarlas en texto plano en un archivo seguro", "Usar cifrado reversible con clave compartida", "Aplicar hashing seguro como bcrypt o Argon2", "Enviar por email al usuario"],
+                correct: 2
+            },
+            {
+                question: "¿Qué herramientas corresponden a SAST y DAST?",
+                options: ["SAST: análisis en ejecución; DAST: análisis estático", "SAST: análisis estático del código; DAST: pruebas en ejecución", "Ambos son tipos de firewalls", "SAST es para redes; DAST para hardware"],
+                correct: 1
+            },
+            {
+                question: "¿Por qué es importante usar HTTPS en toda la aplicación?",
+                options: ["Mejora únicamente el SEO", "Evita que datos sensibles viajen en texto plano", "Permite acceso sin autenticación", "Reduce el uso de ancho de banda"],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+
+    <!-- Modal de zoom para imágenes -->
+    <div id="zoom-modal" aria-hidden="true">
+        <div class="modal-inner">
+            <button id="zoom-modal-close" class="close-btn" aria-label="Cerrar">✕</button>
+            <img id="zoom-modal-image" src="" alt="Imagen ampliada">
+        </div>
+    </div>
+
+    <!-- Prism JS -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+
+    <script>
+        // Zoom modal handlers
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomImage = document.getElementById('zoom-modal-image');
+        const zoomClose = document.getElementById('zoom-modal-close');
+
+        function openZoom(src, alt) {
+            zoomImage.src = src;
+            zoomImage.alt = alt || '';
+            zoomModal.classList.add('open');
+            zoomModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeZoom() {
+            zoomModal.classList.remove('open');
+            zoomModal.setAttribute('aria-hidden', 'true');
+            zoomImage.src = '';
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.zoom-btn');
+            if (btn) {
+                const container = btn.closest('.zoom-container');
+                const img = container && container.querySelector('img');
+                if (img) openZoom(img.src, img.alt);
+            }
+        });
+
+        zoomClose.addEventListener('click', closeZoom);
+        zoomModal.addEventListener('click', (e) => {
+            if (e.target === zoomModal) closeZoom();
+        });
+
+        // Make images open on double-click as well
+        document.querySelectorAll('.zoomable').forEach(img => {
+            img.addEventListener('dblclick', () => openZoom(img.src, img.alt));
+        });
+
+    </script>
+</body>
+</html>
