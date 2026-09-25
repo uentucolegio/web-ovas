@@ -109,7 +109,7 @@ for (const dir of ovas) {
   if (partes.length !== 5) {
     err(rel,
       `La carpeta del OVA está en el nivel equivocado: tiene ${partes.length} niveles de carpetas y deben ser exactamente 5.`,
-      'Mueve la carpeta del OVA a la ruta programa/semestre-N/materia/unidad-N/ova/. Ejemplo: tecnico/semestre-1/matematicas/unidad-1/ecuaciones/.');
+      'Mueve la carpeta del OVA a la ruta programa/semestre-N/materia/unidad-N/ova/. Ejemplo: tecnico/semestre-1/matematica-basica/unidad-1/ecuaciones/.');
   } else {
     const [prog, sem, mat, uni, ova] = partes;
     if (!PROGRAMAS.includes(prog))
