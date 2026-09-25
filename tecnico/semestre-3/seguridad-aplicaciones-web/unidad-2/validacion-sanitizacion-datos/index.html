@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Validación y Sanitización de Datos</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .zoom-container { position: relative; display: block; }
+        .zoom-btn {
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(255,255,255,0.9); border: 1px solid #cbd5e1;
+            border-radius: 9999px; width: 2.25rem; height: 2.25rem;
+            cursor: pointer; font-size: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .zoom-btn:hover { background: #f0fdf4; }
+        #zoom-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            align-items: center; justify-content: center; padding: 2rem;
+            cursor: zoom-out;
+        }
+        #zoom-overlay.active { display: flex; }
+        #zoom-overlay img { max-width: 100%; max-height: 100%; border-radius: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🛡️ Validación y Sanitización de Datos</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Toda entrada de datos proveniente de un usuario o sistema externo debe considerarse, por principio, <strong>no confiable</strong> hasta que se demuestre lo contrario. Esta máxima, conocida en la industria como <em>"never trust user input"</em>, constituye el fundamento conceptual de la validación y sanitización de datos, y es la primera línea de defensa contra la inmensa mayoría de las vulnerabilidades incluidas en el OWASP Top 10, incluyendo inyección SQL, Cross-Site Scripting (XSS) y diversas formas de manipulación de datos.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el desarrollo backend con <strong>Node.js (Express)</strong> y bases de datos relacionales —stack tecnológico ampliamente utilizado en el ecosistema empresarial actual por su rendimiento en operaciones de E/S y la disponibilidad de talento capacitado— la validación y sanitización correcta de datos es particularmente crítica, dado que JavaScript, por su naturaleza de tipado dinámico, facilita errores sutiles si el desarrollador no es riguroso en la verificación explícita de los datos recibidos a través de formularios, parámetros de URL o cuerpos de petición JSON.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Para el técnico en programación web de la Universidad de Córdoba, dominar estas técnicas es una competencia de aplicación inmediata: prácticamente todo formulario web, desde un simple registro de usuario hasta un sistema complejo de gestión empresarial, requiere validar y sanitizar los datos antes de procesarlos o almacenarlos.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA sabrás distinguir cuándo validar y cuándo sanitizar, y aplicarás ambos procesos con herramientas reales de Node.js en cada capa de tu aplicación. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Comparar los conceptos de validación y sanitización de datos de entrada, reconociendo el propósito y alcance de cada uno dentro del ciclo de vida de una petición web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Implementar validaciones efectivas en las distintas capas de una aplicación web (cliente, servidor y base de datos), evitando depender de una sola línea de defensa.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Aplicar funciones de validación, sanitización y escape de salida, protegiendo las aplicaciones contra datos maliciosos o malformados provenientes de fuentes no confiables.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Justificar la necesidad de aplicar validaciones también a nivel de base de datos (constraints), aun cuando ya exista una validación rigurosa del lado del servidor.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🔍 Validación versus Sanitización: Diferencias Fundamentales</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Aunque frecuentemente se mencionan en conjunto, <strong>validación</strong> y <strong>sanitización</strong> son procesos complementarios pero distintos que cumplen funciones diferentes dentro del flujo de procesamiento de datos de una aplicación.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig1.png" alt="Diferencias entre validación y sanitización" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Diferencias conceptuales entre validación (verificar corrección) y sanitización (limpiar el dato) de entradas de usuario. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">✅ La <strong>validación</strong> responde a la pregunta <em>"¿es correcto este dato?"</em> y su resultado es binario: el dato se acepta o se rechaza según cumpla o no con las reglas establecidas (formato, tipo, rango, longitud).</p>
+                                <p class="mb-4">🧹 La <strong>sanitización</strong>, en cambio, responde a la pregunta <em>"¿cómo hago seguro este dato?"</em> y su resultado es una transformación del dato original, eliminando o neutralizando los elementos potencialmente peligrosos sin necesariamente rechazar la entrada completa.</p>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">💡</span> Ejemplo rápido: un nombre de usuario con espacios de más se <strong>sanitiza</strong> (se recorta); un correo sin arroba se <strong>rechaza</strong> por validación. <span class="text-xl">🔀</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🏗️ Validación en Múltiples Capas: Cliente, Servidor y Base de Datos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Una estrategia de validación robusta no se limita a una única capa de la aplicación, sino que distribuye responsabilidades específicas entre el cliente, el servidor y la base de datos, reconociendo que cada capa cumple un propósito distinto y que únicamente la validación del lado del servidor puede considerarse una medida de seguridad real.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig2.png" alt="Validación en tres capas" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Validación distribuida en las tres capas de una aplicación web: cliente, servidor y base de datos. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">💻 La validación en el <strong>cliente</strong> (JavaScript) mejora la experiencia de usuario al proporcionar retroalimentación inmediata, pero puede ser fácilmente eludida por un atacante que envíe peticiones directamente al servidor sin pasar por la interfaz web.</p>
+                                <p class="mb-4">🖥️ La validación en el <strong>servidor</strong> es, por tanto, obligatoria y constituye la verdadera fuente de verdad de seguridad.</p>
+                                <p class="mb-4">🗄️ Finalmente, las restricciones (<em>constraints</em>) a nivel de <strong>base de datos</strong>, como <code class="bg-slate-100 px-1 rounded">NOT NULL</code>, <code class="bg-slate-100 px-1 rounded">CHECK</code> o claves foráneas, actúan como la última barrera de protección ante cualquier dato que, por error de programación, haya logrado eludir las capas anteriores.</p>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚠️</span> Comprender esta arquitectura de defensa en capas evita el error común de desarrolladores principiantes que, al confiar exclusivamente en la validación del lado del cliente, exponen su aplicación a manipulaciones triviales mediante herramientas como las consolas de desarrollador del navegador o clientes HTTP como Postman. <span class="text-xl">🛑</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>📋 Tipos Comunes de Validación de Datos de Entrada</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Existen patrones de validación recurrentes que se aplican según la naturaleza del dato que se está procesando, cada uno con su propia técnica de implementación en JavaScript/Node.js.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig3.png" alt="Seis tipos de validación" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 3. Seis tipos comunes de validación de datos de entrada con ejemplos de implementación en JavaScript/Node.js. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">🏳️ Entre estos tipos, la validación por <strong>lista blanca (whitelist)</strong> es considerada la práctica más segura cuando es aplicable, ya que en lugar de intentar anticipar y bloquear todos los valores posibles maliciosos (lista negra), únicamente permite explícitamente los valores que se sabe que son legítimos, reduciendo significativamente el riesgo de que un valor inesperado o malicioso pase desapercibido.</p>
+
+                                <p class="text-slate-700 mb-3">El siguiente fragmento integra varias funciones de validación y sanitización vistas en esta sección, aplicadas en conjunto al procesamiento de un formulario de registro de usuario, mostrando el flujo completo desde la recepción del dato hasta su almacenamiento seguro:</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">// Validación y sanitización combinadas de un formulario de registro
+const errores = [];
+
+// 1. Sanitizar y validar el nombre
+const nombre = (req.body.nombre || "").trim();
+if (nombre.length < 2 || nombre.length > 80) {
+    errores.push("El nombre debe tener entre 2 y 80 caracteres");
+}
+
+// 2. Validar formato de email
+const email = validator.normalizeEmail(req.body.email || "");
+if (!validator.isEmail(email)) {
+    errores.push("El correo electrónico no es válido");
+}
+
+// 3. Validar edad dentro de un rango lógico
+const edad = Number(req.body.edad);
+if (!Number.isInteger(edad) || edad < 0 || edad > 120) {
+    errores.push("La edad debe ser un número entre 0 y 120");
+}
+
+if (errores.length === 0) {
+    // proceder a almacenar los datos validados y sanitizados
+}</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Validación y sanitización combinadas de los campos de un formulario de registro en Node.js.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🧰 Funciones de Sanitización Esenciales en Node.js</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">El ecosistema de Node.js ofrece bibliotecas ampliamente utilizadas para sanitizar y validar diferentes tipos de datos de entrada, las cuales todo desarrollador backend debe conocer y utilizar de forma sistemática.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig4.png" alt="Funciones de sanitización en Node.js" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Funciones de sanitización y validación más utilizadas en el desarrollo backend con Node.js. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">🚫 Es importante destacar que la función <code class="bg-slate-100 px-1 rounded">validator.escape()</code> es esencial para prevenir ataques de <strong>Cross-Site Scripting (XSS)</strong> al momento de mostrar datos proporcionados por el usuario en una página HTML.</p>
+                                <p class="mb-4">🔗 Las <strong>consultas parametrizadas</strong> mediante bibliotecas como <code class="bg-slate-100 px-1 rounded">pg</code> o <code class="bg-slate-100 px-1 rounded">mysql2</code> no son técnicamente una función de "sanitización", sino un mecanismo de separación entre código y datos que previene la inyección SQL de forma estructural.</p>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🧠</span> Regla práctica: sanitiza lo que vas a <strong>mostrar</strong> (escape), valida lo que vas a <strong>guardar</strong> (isEmail, isInt...), y parametriza lo que vas a <strong>consultar</strong> en la base de datos. <span class="text-xl">✅</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🔄 Visión Integral del Flujo de Procesamiento de Datos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Habiendo estudiado por separado los conceptos de validación, sanitización y las capas donde estas se aplican, resulta útil consolidar todo el proceso en un único flujo visual que muestre la secuencia completa que sigue un dato desde que ingresa a la aplicación hasta que se almacena de forma segura.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig5.png" alt="Flujo completo de procesamiento seguro" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Flujo completo de procesamiento seguro de un dato de entrada, desde su ingreso hasta su almacenamiento en base de datos. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🎯</span> Este flujo debe aplicarse de forma consistente a <strong>cada dato</strong> proporcionado por el usuario, sin excepciones, incluso en aquellos campos que parezcan de bajo riesgo a primera vista: la experiencia de la industria demuestra que los atacantes frecuentemente explotan precisamente los campos que los desarrolladores consideraron menos críticos y por tanto validaron con menor rigor. <span class="text-xl">🕵️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Implementación de Validación en Capas (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Desarrolla un formulario de registro de usuario (nombre, email, contraseña, edad) que implemente: validación con un componente React en el cliente para retroalimentación inmediata, validación en Node.js/Express en el servidor que rechace datos inválidos con mensajes específicos por campo, y restricciones a nivel de base de datos (<code class="bg-slate-100 px-1 rounded">NOT NULL</code>, <code class="bg-slate-100 px-1 rounded">CHECK</code> de rango de edad).
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Formulario funcional con las tres capas de validación implementadas y evidencia (capturas o video) de que un dato inválido es rechazado incluso si se elude la validación del cliente (por ejemplo, mediante Postman).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Auditoría de Sanitización de Código Existente (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3 estudiantes, a partir del siguiente fragmento de código, resuelvan el proceso indicado al final.
+                        </p>
+                        <p class="text-sm text-slate-600 italic mb-2">Fragmento de código a auditar:</p>
+                        <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">// Formulario de inscripción a un evento académico - SIN validación ni sanitización
+app.post("/inscribir", (req, res) => {
+    const nombre = req.body.nombre;
+    const correo = req.body.correo;
+    const edad = req.body.edad;
+    const comentario = req.body.comentario;
+
+    const sql = "INSERT INTO inscritos (nombre, correo, edad, comentario) VALUES ('"
+        + nombre + "', '" + correo + "', '" + edad + "', '" + comentario + "')";
+    conexion.query(sql);
+
+    res.send("Gracias " + nombre + ", tu comentario fue: " + comentario);
+});</code></pre>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Identifiquen todos los puntos del fragmento donde se requiere intervención y reescriban el código aplicando: consultas parametrizadas (con <code class="bg-white px-1 rounded">pg</code> o <code class="bg-white px-1 rounded">mysql2</code>) para evitar la inyección SQL, las funciones de sanitización y validación apropiadas para cada campo (nombre, correo, edad y comentario), y el escape de salida mediante <code class="bg-white px-1 rounded">validator.escape()</code> necesario para prevenir ataques XSS al mostrar el comentario del usuario en pantalla.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🤔 Actividad 3: Cuestionario de Autoevaluación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Responde cada pregunta con tus propias palabras, apoyándote en ejemplos concretos siempre que sea posible:
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 mb-4 text-slate-700">
+                            <li>Explica con un ejemplo propio la diferencia entre validar y sanitizar un campo de "nombre de usuario" en un formulario web.</li>
+                            <li>Un formulario de contacto de una empresa de Montería solo valida los datos con un componente React del lado del cliente. Explica por qué esto es insuficiente y qué riesgo concreto representa.</li>
+                            <li>Analiza por qué la validación por lista blanca (whitelist) se considera generalmente más segura que la validación por lista negra (blacklist), y propón un escenario donde la lista blanca no sea aplicable.</li>
+                            <li>Evalúa la importancia relativa de validar datos a nivel de base de datos (constraints SQL) cuando ya existe una validación rigurosa en el servidor. ¿Es esta capa adicional realmente necesaria?</li>
+                        </ul>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Documento escrito con las 4 respuestas argumentadas, cubriendo desde la comprensión básica de los conceptos hasta el análisis crítico de estrategias de validación.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🔍 Input Validation Cheat Sheet — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial de OWASP con las mejores prácticas de validación de entradas: normalización, listas blancas y validación sintáctica/semántica.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-owasp-validation.png" alt="QR Input Validation Cheat Sheet OWASP" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🧰 validator.js — Documentación oficial</h3>
+                            <p class="text-slate-600 mb-2">Repositorio y documentación de la biblioteca de validación y sanitización de cadenas más usada en el ecosistema Node.js.</p>
+                            <a href="https://github.com/validatorjs/validator.js" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-validatorjs.png" alt="QR validator.js" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🧼 Cross-Site Scripting (XSS) Prevention Cheat Sheet — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía de referencia sobre técnicas de escape y sanitización de salida para prevenir ataques XSS al mostrar datos de usuario.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-owasp-xss.png" alt="QR OWASP XSS Prevention Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OpenJS Foundation. (s.f.). <i>Express.js, Guía oficial de enrutamiento y middleware</i>. Recuperado en 2026, de<br>
+                            <a href="https://expressjs.com/" class="text-green-700 underline break-all" target="_blank">https://expressjs.com/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2021). <i>OWASP Top Ten 2021</i>.<br>
+                            <a href="https://owasp.org/Top10/2021/" class="text-green-700 underline break-all" target="_blank">https://owasp.org/Top10/2021/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Anaya Multimedia.<br>
+                            <a href="https://www.anayamultimedia.es/libro/manuales-imprescindibles/curso-de-desarrollo-web-html-css-y-javascript-edicion-2021-mario-rubiales-gomez-9788441544147/" class="text-green-700 underline break-all" target="_blank">Ver publicación</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            validator.js. (s.f.). <i>Documentación de la biblioteca de validación y sanitización de cadenas para Node.js</i>. Recuperado en 2026, de<br>
+                            <a href="https://github.com/validator-js/validator.js" class="text-green-700 underline break-all" target="_blank">https://github.com/validator-js/validator.js</a>
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Overlay de zoom para imágenes — usado por el JS de zoom -->
+    <div id="zoom-overlay">
+        <img id="zoom-overlay-img" src="" alt="Imagen ampliada">
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es la diferencia fundamental entre validación y sanitización?",
+                options: [
+                    "Son sinónimos, ambas rechazan datos incorrectos",
+                    "La validación acepta o rechaza el dato; la sanitización lo transforma para hacerlo seguro",
+                    "La sanitización solo se aplica en el cliente y la validación solo en el servidor",
+                    "La validación es opcional y la sanitización es obligatoria"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Por qué la validación del lado del cliente (JavaScript) no debe considerarse una medida de seguridad real?",
+                options: [
+                    "Porque JavaScript no soporta expresiones regulares",
+                    "Porque solo funciona en navegadores Chrome",
+                    "Porque puede ser eludida fácilmente enviando peticiones directas al servidor (por ejemplo, con Postman)",
+                    "Porque siempre es más lenta que la validación del servidor"
+                ],
+                correct: 2
+            },
+            {
+                question: "¿Por qué la validación por lista blanca (whitelist) es generalmente más segura que la lista negra (blacklist)?",
+                options: [
+                    "Porque es más rápida de ejecutar",
+                    "Porque solo permite explícitamente valores conocidos como legítimos, en vez de intentar anticipar todos los valores maliciosos posibles",
+                    "Porque no requiere validación en el servidor",
+                    "Porque bloquea automáticamente cualquier dirección IP sospechosa"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el propósito principal de la función validator.escape() en Node.js?",
+                options: [
+                    "Cifrar contraseñas antes de guardarlas en la base de datos",
+                    "Prevenir ataques de Cross-Site Scripting (XSS) al mostrar datos del usuario en HTML",
+                    "Validar que un correo electrónico tenga un formato correcto",
+                    "Eliminar espacios en blanco al inicio y final de una cadena"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Por qué las consultas parametrizadas (con pg o mysql2) no se consideran técnicamente una 'sanitización'?",
+                options: [
+                    "Porque no previenen ningún tipo de ataque",
+                    "Porque solo funcionan con bases de datos NoSQL",
+                    "Porque son un mecanismo que separa el código SQL de los datos, previniendo la inyección de forma estructural, en lugar de limpiar el dato",
+                    "Porque requieren desactivar la validación del servidor"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Zoom de imágenes: click en el botón 🔍 abre la imagen en un overlay ampliado
+        const zoomOverlay = document.getElementById('zoom-overlay');
+        const zoomOverlayImg = document.getElementById('zoom-overlay-img');
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const img = this.previousElementSibling;
+                zoomOverlayImg.src = img.src;
+                zoomOverlayImg.alt = img.alt;
+                zoomOverlay.classList.add('active');
+            });
+        });
+        zoomOverlay.addEventListener('click', () => zoomOverlay.classList.remove('active'));
+    </script>
+
+    <!-- Resaltado de sintaxis para los bloques de código Node.js/JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

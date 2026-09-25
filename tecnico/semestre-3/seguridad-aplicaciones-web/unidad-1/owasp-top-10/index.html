@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: ☁️ Fundamentos de Seguridad en Aplicaciones Web - OWASP Top 10</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        /* Estilos para botón de zoom sobre imágenes */
+        .zoom-container { position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 48rem; }
+        .zoom-container img { display: block; margin-left: auto; margin-right: auto; }
+        .zoom-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+        }
+        .zoom-btn:hover { background: rgba(0,0,0,0.75); }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">☁️ Fundamentos de Seguridad en Aplicaciones Web — OWASP Top 10</h2>
+
+                    <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                    <p class="text-slate-700 leading-relaxed mb-4">
+                        El proyecto OWASP (Open Worldwide Application Security Project) es la referencia internacional en seguridad de aplicaciones web. En esta unidad estudiaremos el OWASP Top 10 (versión 2021), la lista consensuada de las diez categorías de vulnerabilidades más críticas que afectan aplicaciones web a nivel global.
+                    </p>
+                    <p class="text-slate-700 leading-relaxed mb-4">
+                        Dominar el OWASP Top 10 permite anticipar errores comunes desde el diseño y el desarrollo, facilitando prácticas seguras que reducen riesgos en aplicaciones reales. A lo largo de esta unidad analizaremos cada categoría, su causa raíz, impacto y medidas de mitigación prácticas.
+                    </p>
+                    <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                        <p class="text-green-800">
+                            <span class="text-xl">✨</span> Al finalizar esta unidad podrás identificar, analizar y proponer mitigaciones para las vulnerabilidades más frecuentes en aplicaciones web. <span class="text-xl">🚀</span>
+                        </p>
+                    </div>
+                    <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧭</span>
+                        <span>Identificar las diez categorías de vulnerabilidades definidas en el estándar OWASP Top 10.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔎</span>
+                        <span>Comprender la causa raíz y el funcionamiento de cada categoría de vulnerabilidad.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">⚖️</span>
+                        <span>Analizar el impacto potencial de estas vulnerabilidades en aplicaciones web reales.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛡️</span>
+                        <span>Reconocer y proponer mecanismos de mitigación aplicables en diseño, desarrollo y pruebas.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEONES EXTRAÍDOS DEL DOCX] -->
+                    <!-- Subtema 1: Panorama general -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🌐 Panorama general del OWASP Top 10 (2021)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La edición 2021 del OWASP Top 10 reorganiza y actualiza las categorías para reflejar incidentes reales. Algunas categorías se fusionaron y otras emergieron para enfatizar diseño inseguro y fallos de integridad de software.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig1.png" alt="Ranking OWASP Top 10 (2021)" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Ranking de incidencia relativa de las diez categorías OWASP Top 10 (2021) en aplicaciones web analizadas. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🥇 <strong>A01:2021 Broken Access Control</strong> (Pérdida de Control de Acceso) ascendió a la primera posición, reflejando que las fallas en los controles de quién puede acceder a qué recurso son hoy el problema más extendido.</p>
+                                <p class="mb-4">🔐 <strong>A02:2021 Cryptographic Failures</strong> (antes <em>Sensitive Data Exposure</em>) enfatiza los fallos relacionados con el cifrado inadecuado o ausente.</p>
+                                <p class="mb-4">💉 <strong>A03:2021 Injection</strong> mantiene su criticidad histórica, incluyendo ahora también <em>Cross-Site Scripting (XSS)</em> dentro de esta categoría unificada.</p>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">💡</span> Dato clave: la edición 2021 no solo reordenó categorías, también <strong>fusionó vulnerabilidades relacionadas</strong> (como XSS dentro de Injection) para simplificar el panorama de riesgos. <span class="text-xl">🌐</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 2: Inyección (Anatomía) -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>💉 Anatomía de un ataque de inyección (SQL)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">🎯 En el ejemplo, el atacante introduce el texto <code class="bg-slate-100 px-1 rounded">' OR '1'='1' --</code> en lugar de un correo electrónico válido. Dado que la aplicación concatena directamente el input del usuario dentro de la sentencia SQL sin ningún tipo de validación o sanitización, la condición resultante se evalúa siempre como <strong>verdadera</strong>, permitiendo al atacante autenticarse sin conocer credenciales legítimas. Este mismo principio de "romper" la sintaxis esperada del comando es la base conceptual de todas las variantes de inyección.</p>
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig2.png" alt="Ejemplo inyección SQL" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Ejemplo de manipulación de una consulta SQL vulnerable mediante inyección de código malicioso en el campo de entrada. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="text-slate-700 mb-3">El siguiente fragmento ilustra un ejemplo pedagógico en <strong>Node.js</strong>: arriba se muestra una forma vulnerable de construir una consulta SQL concatenando directamente la entrada del usuario; abajo se muestra la corrección recomendada usando consultas parametrizadas con la librería <code class="bg-slate-100 px-1 rounded">mysql2</code>. Objetivo: identificar patrones de riesgo y aprender la mitigación mediante parámetros vinculados.</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">// VULNERABLE: concatenación directa de input del usuario (A03 Injection)
+app.get('/productos', async (req, res) => {
+    const id = req.query.id;
+    const sql = "SELECT * FROM productos WHERE id = " + id;
+    const [resultado] = await conexion.query(sql); // riesgo de inyección SQL
+    res.json(resultado);
+});
+
+// CORREGIDO: consulta parametrizada con mysql2
+app.get('/productos', async (req, res) => {
+    const id = req.query.id;
+    const [resultado] = await conexion.query(
+        "SELECT * FROM productos WHERE id = ?",
+        [id]
+    );
+    res.json(resultado);
+});</code></pre>
+
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Comparación entre una consulta SQL vulnerable y su corrección mediante <code>mysql2</code> con parámetros vinculados (Node.js).</div>
+                                <div class="zoom-container mx-auto max-w-xl mt-4">
+                                    <img src="img/code-sql.png" alt="Ejemplo de código SQL ilustrativo" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 6. Captura ilustrativa del código SQL relacionado con el ejemplo anterior.</div>
+                                <p class="mt-6 mb-3 font-semibold text-slate-800">🛠️ Aplicación práctica del OWASP Top 10 en el ciclo de desarrollo:</p>
+                                <ul class="list-disc list-inside space-y-2 mb-4">
+                                    <li>🧩 <strong>Durante el diseño:</strong> realizar modelado de amenazas considerando explícitamente las diez categorías del OWASP Top 10 como checklist de riesgos a evitar.</li>
+                                    <li>⌨️ <strong>Durante el desarrollo:</strong> utilizar herramientas de análisis estático de código (SAST) que detecten automáticamente patrones asociados a estas vulnerabilidades.</li>
+                                    <li>🧪 <strong>Durante las pruebas:</strong> incluir casos de prueba específicos para cada categoría relevante al tipo de aplicación que se está construyendo.</li>
+                                    <li>🚀 <strong>Durante el despliegue:</strong> verificar que la configuración del servidor no introduzca vulnerabilidades de la categoría A05 (Security Misconfiguration).</li>
+                                </ul>
+                                <div class="mt-2 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">✅</span> La solución técnica a la inyección es conceptualmente simple (parámetros vinculados), pero requiere un <strong>cambio deliberado</strong> en la forma de construir cada consulta. <span class="text-xl">🔒</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 3: Clasificación por dominio técnico -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🧭 Clasificación de las categorías por dominio técnico</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Agrupar las categorías por dominio técnico ayuda a priorizar controles según áreas del desarrollo: entrada/validación, autenticación, configuración, cifrado y diseño.</p>
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig3.png" alt="Agrupación de categorías OWASP" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 3. Agrupación de las categorías OWASP Top 10 según el dominio técnico de la aplicación al que pertenecen. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🧠</span> Pensarlo por dominio técnico (entrada/validación, autenticación, configuración, cifrado, diseño) te ayuda a saber <strong>dónde reforzar primero</strong> según el tipo de proyecto que estés construyendo. <span class="text-xl">🧭</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 4: Evolución del ranking -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>📈 Evolución del ranking: 2017 → 2021</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Comparar ediciones permite identificar tendencias y ver qué categorías han ganado relevancia, por ejemplo la subida de Broken Access Control a la primera posición en 2021.</p>
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig4.png" alt="Evolución 2017-2021" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Comparativa de la posición relativa de las categorías de vulnerabilidad entre las ediciones 2017 y 2021 del OWASP Top 10. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🔀 Vulnerabilidades como <strong>XML External Entities (XXE)</strong> y <strong>Cross-Site Scripting (XSS)</strong> fueron absorbidas o fusionadas dentro de categorías más amplias (A05 Security Misconfiguration y A03 Injection, respectivamente).</p>
+                                <p class="mb-4">🆕 Categorías nuevas como <strong>A04 Insecure Design</strong> y <strong>A08 Software and Data Integrity Failures</strong> reflejan una preocupación creciente por incorporar la seguridad desde las fases tempranas del diseño del software, y no únicamente como una capa de protección añadida al final del desarrollo.</p>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">📚</span> Lección para tu carrera: el panorama de amenazas no es estático. Un desarrollador profesional debe mantenerse actualizado consultando periódicamente las publicaciones oficiales de OWASP, en lugar de asumir que el conocimiento adquirido en su formación inicial permanecerá vigente para siempre. <span class="text-xl">🔄</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 5: Ciclo de vida de una vulnerabilidad -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🔁 Ciclo de vida de una vulnerabilidad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Entender el proceso desde el descubrimiento hasta el parche (CVE, ventana de exposición) es clave para priorizar respuestas y despliegues seguros.</p>
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig5.png" alt="Ciclo de vida de la vulnerabilidad" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Ciclo de vida de una vulnerabilidad de seguridad, desde su descubrimiento hasta la aplicación efectiva del parche correspondiente. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🏷️ Un <strong>CVE</strong> (Common Vulnerabilities and Exposures) es un identificador público y único que se asigna a una vulnerabilidad conocida, con el fin de que empresas, desarrolladores y equipos de seguridad de todo el mundo puedan reconocerla de forma estandarizada y aplicar las correcciones correspondientes.</p>
+                                <p class="mb-4">⏳ La <strong>ventana de exposición</strong> que se genera entre la publicación pública de un CVE y la aplicación del parche correspondiente es el período de mayor riesgo, ya que los atacantes suelen desarrollar exploits automatizados poco después de que una vulnerabilidad se hace pública.</p>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🚨</span> Por eso, mantener los sistemas y dependencias actualizados de forma oportuna es una práctica de seguridad <strong>crítica y no negociable</strong>, no un "cuando tengas tiempo". <span class="text-xl">🩹</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACORDEONES EXTRAÍDOS DEL DOCX] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Mapeo de vulnerabilidades en aplicaciones reales</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Selecciona tres aplicaciones web colombianas que utilices habitualmente (por ejemplo banca en línea, comercio electrónico, redes sociales locales). Sin realizar ataques, identifica observacionalmente qué medidas de seguridad visibles aplican (uso de HTTPS, mensajes de error genéricos, políticas de contraseñas) y asócialas a las categorías del OWASP Top 10.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Un informe breve (1–2 páginas) con las tres aplicaciones analizadas, evidencias observacionales y el mapeo a las categorías OWASP.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Taller de clasificación de vulnerabilidades</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3 personas, clasifiquen 10 fragmentos de código en Node.js (JavaScript) proporcionados por el docente según la categoría del OWASP Top 10. Para cada fragmento expliquen la causa técnica y propongan la corrección correspondiente.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Un documento por equipo con la clasificación, explicación técnica y corrección propuesta para cada fragmento.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📖 Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1: OWASP Top 10 oficial -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🌐 OWASP Top 10 (oficial)</h3>
+                            <p class="text-slate-600 mb-2">Página oficial del proyecto OWASP con información y recursos sobre el Top 10.</p>
+                            <a href="https://owasp.org/Top10/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-owasp-top10.png" alt="QR OWASP Top 10" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: Guía de inyección SQL (OWASP) -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">💉 Guía: Inyección SQL (OWASP)</h3>
+                            <p class="text-slate-600 mb-2">Explicación y ejemplos sobre ataques de inyección y recomendaciones de mitigación.</p>
+                            <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-sql-injection.png" alt="QR Guía Inyección SQL" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: OWASP Cheat Sheet Series -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📘 OWASP Cheat Sheet Series</h3>
+                            <p class="text-slate-600 mb-2">Colección de guías prácticas para implementar controles de seguridad específicos.</p>
+                            <a href="https://cheatsheetseries.owasp.org/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-cheatsheet.png" alt="QR OWASP Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2021). <i>OWASP Top 10:2021</i> (versión en español). https://owasp.org/Top10/2021/es/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2021). <i>A03:2021 – Inyección</i>. OWASP Top 10. https://owasp.org/Top10/2021/es/A03_2021-Injection/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            INCIBE-CERT. (2024). Vulnerabilidades. Instituto Nacional de Ciberseguridad (INCIBE). https://www.incibe.es/incibe-cert/alerta-temprana/vulnerabilidades
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Zoom modal para imágenes -->
+    <div id="zoom-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 p-4">
+        <div class="relative max-w-4xl w-full">
+            <button id="zoom-modal-close" class="absolute top-2 right-2 text-white bg-black bg-opacity-40 rounded-full p-2">✕</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded shadow-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+        // Zoom modal: abrir imagen al hacer clic en imágenes con clase .zoomable o en botones .zoom-btn
+        (function(){
+            const modal = document.getElementById('zoom-modal');
+            const modalImage = document.getElementById('zoom-modal-image');
+            const closeBtn = document.getElementById('zoom-modal-close');
+
+            function openModalWithSrc(src){
+                modalImage.src = src;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            document.addEventListener('click', function(e){
+                const t = e.target;
+                // click directly on image
+                if (t && t.classList && t.classList.contains('zoomable')){
+                    openModalWithSrc(t.src);
+                    return;
+                }
+                // click on zoom button
+                const btn = t.closest && t.closest('.zoom-btn');
+                if (btn) {
+                    const container = btn.parentElement;
+                    const img = container && container.querySelector && container.querySelector('img');
+                    if (img && img.src) openModalWithSrc(img.src);
+                }
+            });
+
+            closeBtn.addEventListener('click', function(){
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modalImage.src = '';
+            });
+
+            modal.addEventListener('click', function(e){
+                if (e.target === modal) { closeBtn.click(); }
+            });
+        })();
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Por qué OWASP integró Cross-Site Scripting (XSS) dentro de A03:2021 Injection en la edición 2021?",
+                options: [
+                    "Porque XSS comparte la misma raíz técnica de manipulación de entrada y por eso se agrupa como inyección",
+                    "Para reducir el número total de categorías a efectos de presentación",
+                    "Porque XSS dejó de ser relevante en aplicaciones modernas",
+                    "Porque XSS solo afecta APIs y no interfaces web"
+                ],
+                correct: 0
+            },
+            {
+                question: "Una aplicación permite a un usuario autenticado cambiar el identificador en la URL y ver los datos de otro usuario. ¿A qué categoría del OWASP Top 10 corresponde?",
+                options: [
+                    "Cryptographic Failures",
+                    "Broken Access Control",
+                    "Injection",
+                    "Security Misconfiguration"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál de las siguientes describe mejor A02:2021 Cryptographic Failures?",
+                options: [
+                    "Fallos en el uso o ausencia de cifrado para proteger datos en tránsito o en reposo",
+                    "Errores en las políticas de control de acceso",
+                    "Vulnerabilidades derivadas de entradas no validadas",
+                    "Configuraciones inseguras del servidor"
+                ],
+                correct: 0
+            },
+            {
+                question: "¿Por qué es importante que OWASP Top 10 se actualice periódicamente?",
+                options: [
+                    "Porque el panorama de amenazas y las prácticas de explotación evolucionan con el tiempo",
+                    "Porque las empresas lo exigen anualmente por contrato",
+                    "Porque los estándares de programación cambian cada mes",
+                    "Porque las estadísticas antiguas se eliminan automáticamente"
+                ],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+</body>
+</html>
