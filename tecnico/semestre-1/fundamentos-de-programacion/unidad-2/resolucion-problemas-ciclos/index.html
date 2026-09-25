@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: 🧠 Resolución de Problemas con Ciclos</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .zoom-image-wrap {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .zoom-image-wrap img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .zoom-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 2;
+            background: rgba(22, 101, 52, 0.92);
+            color: #fff;
+            border: 0;
+            border-radius: 9999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .zoom-btn:hover { background: rgba(21, 128, 61, 0.98); transform: translateY(-1px); }
+        .zoom-btn:focus { outline: 2px solid #86efac; outline-offset: 2px; }
+        .zoom-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+        }
+        .zoom-modal.active { display: flex; }
+        .zoom-modal-content {
+            position: relative;
+            width: min(96vw, 1100px);
+            max-height: 92vh;
+            overflow: auto;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        }
+        .zoom-modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            border: 0;
+            border-radius: 9999px;
+            background: #14532d;
+            color: white;
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .zoom-modal-close:hover { background: #166534; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🧠 Resolución de problemas con ciclos</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                                <p class="mb-4">Comprender la sintaxis de un bucle es solo el primer paso; el verdadero reto para quien aprende a programar es reconocer qué tipo de problema tiene delante y qué patrón de repetición le corresponde. La mayoría de los problemas que un programador resuelve en su día a día —sumar valores, contar elementos que cumplen una condición, buscar un dato específico o validar que el usuario ingrese información correcta— no son distintos entre sí en su estructura profunda: todos se apoyan en un pequeño conjunto de patrones que, una vez interiorizados, permiten resolver una enorme variedad de situaciones con seguridad y rapidez.</p>
+                                <p class="mb-4">En el contexto de pequeños negocios y entidades de Montería y la región del Sinú, estos patrones aparecen constantemente: una tienda que necesita calcular el total y el promedio de ventas del día, una cooperativa agrícola que cuenta cuántos productores entregaron más de determinada cantidad de cosecha, o un sistema escolar que busca el registro de un estudiante específico dentro de una lista.</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Dominar estos patrones de resolución de problemas con ciclos es una competencia directamente aplicable a las necesidades reales del entorno productivo local. <span class="text-xl">🌱</span>
+                    </p>
+                </div>
+
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>Aplicar estructuras iterativas en la resolución de problemas que requieren repetición controlada.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔍</span>
+                        <span>Identificar y utilizar los patrones más frecuentes de acumulación, conteo y búsqueda de datos.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Seleccionar la estructura de control (Para, Mientras o Repetir Mientras Que) más adecuada según el problema.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📊</span>
+                        <span>Aplicar bucles anidados y validación de datos en la resolución de problemas bidimensionales.</span>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>➕ 1. Patrón de acumulación (suma y promedio)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">El <strong>patrón de acumulación</strong> se emplea cuando es necesario combinar sucesivamente varios valores en un único resultado, típicamente mediante una suma. Requiere una variable acumuladora que se inicializa en el elemento neutro de la operación —cero para la suma— y que se actualiza en cada iteración del bucle sumándole el nuevo valor leído. Calcular un promedio es una extensión directa de este patrón: se acumula la suma de los valores y, de forma independiente, se cuenta cuántos valores se procesaron, dividiendo al final la suma entre el conteo.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig1.png" data-zoom-alt="Patrón de acumulación">🔍 Ampliar</button>
+                                        <img src="img/fig1.png" alt="Patrón de acumulación" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Diagrama de flujo del patrón de acumulación para calcular la suma de un conjunto de valores.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">➕</span> Una tienda de insumos agrícolas de Montería que registra sus ventas diarias en una lista puede usar este patrón para calcular el total vendido y el promedio por venta.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🔢 2. Patrón de conteo (contador condicional)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">El <strong>patrón de conteo condicional</strong> se utiliza cuando se necesita saber cuántos elementos de un conjunto cumplen una determinada condición, sin importar sus valores exactos. A diferencia del acumulador, aquí la variable contador solo se incrementa en uno cuando la condición evaluada resulta verdadera; el resto de las iteraciones no modifican su valor. Este patrón responde a preguntas del tipo '¿cuántos productos superan cierto precio?' o '¿cuántos estudiantes aprobaron la evaluación?'.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig2.png" data-zoom-alt="Patrón de conteo condicional">🔍 Ampliar</button>
+                                        <img src="img/fig2.png" alt="Patrón de conteo condicional" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Diagrama de flujo del patrón de contador condicional, que incrementa la cuenta solo cuando se cumple una condición.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔢</span> Una biblioteca municipal de Montería puede usar este patrón para saber cuántos libros de una lista pertenecen a la categoría 'Ciencia Ficción'.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🔎 3. Patrón de búsqueda (búsqueda lineal)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">El <strong>patrón de búsqueda lineal</strong> recorre los elementos de una lista, uno por uno, comparando cada elemento con el valor buscado, hasta encontrar una coincidencia o hasta agotar todos los elementos disponibles. Requiere dos variables de control: un índice que avanza en cada iteración y un indicador booleano que señala si el elemento ya fue encontrado, de modo que el bucle pueda detenerse tan pronto como se produzca la coincidencia, sin recorrer elementos innecesarios.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig3.png" data-zoom-alt="Búsqueda lineal en una lista">🔍 Ampliar</button>
+                                        <img src="img/fig3.png" alt="Búsqueda lineal en una lista" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Diagrama de flujo del algoritmo de búsqueda lineal sobre una lista de elementos.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔎</span> Detener el bucle en cuanto se encuentra el elemento buscado evita recorrer innecesariamente el resto de la lista, lo que hace la búsqueda más eficiente que un recorrido simple sin condición de parada.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>⚙️ 4. Selección de la estructura de control adecuada</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Reconocer el patrón del problema es solo la mitad del análisis: también es necesario decidir qué estructura de control (Para, Mientras o Repetir Mientras Que) es la más adecuada para implementarlo. Esta decisión depende principalmente de si el número de repeticiones se conoce con anticipación o si, por el contrario, depende de una condición que solo puede evaluarse durante la ejecución del algoritmo.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig4.png" data-zoom-alt="Selección de la estructura de control">🔍 Ampliar</button>
+                                        <img src="img/fig4.png" alt="Selección de la estructura de control" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Criterios para seleccionar entre el bucle Para y los bucles Mientras/Repetir según la naturaleza del problema.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚙️</span> En la práctica, muchos algoritmos combinan ambas lógicas: por ejemplo, un bucle Para puede recorrer una lista de tamaño conocido mientras que, dentro de él, un bucle Mientras controla la validación de cada dato individual antes de procesarlo.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>📊 5. Bucles anidados y validación de datos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Cuando el problema involucra una estructura de dos dimensiones, como una matriz, una tabla o un tablero, es necesario anidar dos bucles: el bucle externo recorre una dimensión (por ejemplo, las filas) y, por cada iteración del bucle externo, el bucle interno recorre completamente la otra dimensión (las columnas). Es fundamental utilizar variables de control distintas para cada bucle, de modo que no interfieran entre sí.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig5.png" data-zoom-alt="Recorrido de una matriz con bucles anidados">🔍 Ampliar</button>
+                                        <img src="img/fig5.png" alt="Recorrido de una matriz con bucles anidados" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Visualización del orden de recorrido de una matriz de 4 filas por 5 columnas mediante bucles anidados.</figcaption>
+                                </figure>
+
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Bucles de validación de entrada</h3>
+                                        <p class="text-sm">Un uso particularmente frecuente del bucle Repetir Mientras Que es la validación de datos ingresados por el usuario: el bloque de instrucciones solicita el dato y se repite hasta que el valor ingresado cumpla con el criterio esperado.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🧩</span> La habilidad para combinar correctamente bucles anidados y validación de datos es lo que distingue a un algoritmo robusto de uno frágil ante datos inesperados.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🌾 Actividad 1: Trazabilidad de patrones (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Una tienda de insumos agrícolas de Montería registra las ventas diarias en una lista de valores. Diseña en PSeInt un algoritmo que, usando el patrón de acumulación, calcule el total vendido y el promedio por venta, y que además, usando el patrón de contador condicional, indique cuántas ventas superaron los $100.000. Documenta en comentarios cuál variable cumple el rol de acumulador y cuál el de contador.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> pseudocódigo del algoritmo con ambos patrones aplicados y comentarios identificando cada variable.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">🔎 Enfoque:</span> distinguir con claridad el rol del acumulador frente al del contador condicional.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Búsqueda y validación en equipo (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3 estudiantes, desarrollen un algoritmo que reciba una lista de códigos de productos y busque, mediante búsqueda lineal, si un código ingresado por el usuario existe en la lista. El código a buscar debe solicitarse mediante un bucle de validación que obligue a ingresar solo códigos de 4 dígitos numéricos. Presenten la traza de ejecución para un caso donde el código exista y otro donde no exista.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> pseudocódigo del algoritmo y traza de ejecución para ambos casos (código encontrado y no encontrado).
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">👥 Modalidad:</span> trabajo colaborativo en equipos de tres estudiantes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Cuestionario de autoevaluación sobre los patrones de acumulación, conteo condicional y búsqueda lineal, la selección de estructuras de control y los bucles anidados.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📎 Anexos</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Material complementario asociado a los conceptos desarrollados en esta unidad.</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — ANEXOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">📘 Contadores y acumuladores en PSeInt</h3>
+                            <p class="text-slate-600 mb-2">Explicación con ejemplos prácticos sobre el uso de contadores y acumuladores en programación, de PSeIntLab (2024).</p>
+                            <a href="https://pseintlab.com/contadores-acumuladores-programacion-pseint/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-1.png" alt="QR 📘 Contadores y acumuladores en PSeInt" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🔍 Búsqueda lineal: algoritmo y ejemplos</h3>
+                            <p class="text-slate-600 mb-2">Recurso de StudySmarter (2024) sobre el algoritmo de búsqueda lineal en ciencias de la computación.</p>
+                            <a href="https://www.studysmarter.es/resumenes/ciencias-de-la-computacion/algoritmos-en-ciencias-de-la-computacion/busqueda-lineal/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-2.png" alt="QR 🔍 Búsqueda lineal: algoritmo y ejemplos" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🔁 Estructura Repetir - Hasta que</h3>
+                            <p class="text-slate-600 mb-2">Guía de PSeIntLab (2024) sobre la estructura de control repetitiva Repetir - Hasta Que (validación de datos).</p>
+                            <a href="https://pseintlab.com/repetir-hasta-estructura-control-repetitiva/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-3.png" alt="QR 🔁 Estructura Repetir - Hasta que" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — ANEXOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Joyanes Aguilar, L. (2020). <i>Fundamentos de programación: algoritmos, estructura de datos y objetos</i> (5.ª ed.). McGraw-Hill Interamericana de España.
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PSeIntLab. (2024). <i>Contadores y acumuladores en programación: explicación fácil con ejemplos en PSeInt</i>. https://pseintlab.com/contadores-acumuladores-programacion-pseint/
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            StudySmarter. (2024). <i>Búsqueda lineal: algoritmo y ejemplos</i>. https://www.studysmarter.es/resumenes/ciencias-de-la-computacion/algoritmos-en-ciencias-de-la-computacion/busqueda-lineal/
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PSeIntLab. (2024). <i>Repetir - Hasta que: estructura de control repetitiva</i>. https://pseintlab.com/repetir-hasta-estructura-control-repetitiva/
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="zoom-modal" class="zoom-modal" aria-hidden="true">
+        <div class="zoom-modal-content">
+            <button type="button" class="zoom-modal-close" id="zoom-modal-close" aria-label="Cerrar imagen ampliada">×</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es la diferencia principal entre un acumulador y un contador condicional?",
+                options: ["No hay ninguna diferencia entre ambos", "El acumulador suma valores procesados; el contador condicional solo se incrementa cuando se cumple una condición", "El contador siempre inicia en 1 y el acumulador en 0", "El acumulador solo se usa con ciclos Para"],
+                correct: 1
+            },
+            {
+                question: "Una biblioteca municipal quiere saber cuántos libros de una lista pertenecen a la categoría 'Ciencia Ficción' y, además, el total de páginas de todos los libros. ¿Qué patrones de resolución de problemas aplicarías?",
+                options: ["Solo el patrón de búsqueda lineal", "Patrón de contador condicional (para la categoría) y patrón de acumulación (para el total de páginas)", "Solo el patrón de acumulación", "Ninguno, se resuelve sin bucles"],
+                correct: 1
+            },
+            {
+                question: "¿Qué ventaja ofrece detener un bucle de búsqueda lineal en cuanto se encuentra el elemento buscado, en comparación con un recorrido simple sin condición de parada?",
+                options: ["Ninguna, el resultado es el mismo", "Evita recorrer elementos innecesarios una vez hallada la coincidencia, haciendo la búsqueda más eficiente", "Hace que el algoritmo use más memoria", "Impide que el algoritmo pueda usarse con listas grandes"],
+                correct: 1
+            },
+            {
+                question: "¿Por qué un bucle de validación de entrada debería implementarse con la estructura Repetir Mientras Que en lugar de con la estructura Mientras?",
+                options: ["Porque Repetir Mientras Que no permite leer datos", "Porque Repetir Mientras Que ejecuta el bloque al menos una vez, asegurando que se solicite el dato incluso si el usuario no ha ingresado nada todavía", "Porque son exactamente iguales y da lo mismo cuál usar", "Porque Mientras solo funciona con números negativos"],
+                correct: 1
+            },
+            {
+                question: "En un recorrido de una matriz de 4 filas por 5 columnas con bucles anidados (bucle externo: filas, bucle interno: columnas), ¿cuántas veces se ejecutará el bucle interno en total?",
+                options: ["4", "5", "9", "20"],
+                correct: 3
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+
+        // Zoom de imágenes del contenido
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomModalImage = document.getElementById('zoom-modal-image');
+        const zoomModalClose = document.getElementById('zoom-modal-close');
+
+        function closeZoomModal() {
+            zoomModal.classList.remove('active');
+            zoomModal.setAttribute('aria-hidden', 'true');
+            zoomModalImage.src = '';
+            zoomModalImage.alt = '';
+        }
+
+        document.querySelectorAll('.zoom-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                zoomModalImage.src = button.dataset.zoomImage;
+                zoomModalImage.alt = button.dataset.zoomAlt || 'Imagen ampliada';
+                zoomModal.classList.add('active');
+                zoomModal.setAttribute('aria-hidden', 'false');
+            });
+        });
+
+        zoomModalClose.addEventListener('click', closeZoomModal);
+        zoomModal.addEventListener('click', event => {
+            if (event.target === zoomModal) closeZoomModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && zoomModal.classList.contains('active')) closeZoomModal();
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

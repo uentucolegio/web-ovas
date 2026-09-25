@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: 🔍 Identificación y análisis de problemas</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .zoom-image-wrap {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .zoom-image-wrap img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .zoom-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 2;
+            background: rgba(22, 101, 52, 0.92);
+            color: #fff;
+            border: 0;
+            border-radius: 9999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .zoom-btn:hover { background: rgba(21, 128, 61, 0.98); transform: translateY(-1px); }
+        .zoom-btn:focus { outline: 2px solid #86efac; outline-offset: 2px; }
+        .zoom-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+        }
+        .zoom-modal.active { display: flex; }
+        .zoom-modal-content {
+            position: relative;
+            width: min(96vw, 1100px);
+            max-height: 92vh;
+            overflow: auto;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        }
+        .zoom-modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            border: 0;
+            border-radius: 9999px;
+            background: #14532d;
+            color: white;
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .zoom-modal-close:hover { background: #166534; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🔍 Identificación y análisis de problemas: operadores, tipos de datos y modelado</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                                <p class="mb-4">Antes de escribir un algoritmo es necesario comprender bien el problema que se quiere resolver. Para lograrlo, un programador necesita herramientas que le permitan expresar condiciones, comparar valores y clasificar la información con la que trabaja.</p>
+                                <p class="mb-4">En este tema estudiaremos los <strong>operadores aritméticos, relacionales y lógicos</strong>, los <strong>tipos de datos</strong> que puede manejar un algoritmo, y la forma de <strong>identificar entradas, restricciones, condiciones, procesos y salidas</strong> de un problema, como paso previo a diseñar la solución.</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Analizar correctamente un problema antes de programarlo evita errores y ahorra tiempo: entender qué se tiene, qué se necesita y qué reglas aplican es la mitad del trabajo. <span class="text-xl">🧠</span>
+                    </p>
+                </div>
+
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧮</span>
+                        <span>Reconocer y aplicar los operadores aritméticos, relacionales y lógicos utilizados en algoritmos.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔤</span>
+                        <span>Identificar los tipos de datos primitivos y su uso en variables y constantes.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📐</span>
+                        <span>Comprender la prioridad de los operadores y el uso de paréntesis en expresiones.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>Identificar entradas, restricciones, condiciones, procesos y salidas al analizar un problema.</span>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🧮 1. Operadores aritméticos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Los <strong>operadores aritméticos</strong> permiten realizar cálculos matemáticos dentro de un algoritmo: sumas, restas, multiplicaciones, divisiones y el cálculo del residuo de una división (módulo).</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig1.png" data-zoom-alt="Operadores aritméticos">🔍 Ampliar</button>
+                                        <img src="img/fig1.png" alt="Operadores aritméticos" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Operadores aritméticos y ejemplos de uso.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">➗</span> La división real ( / ) siempre entrega un resultado con decimales, mientras que el módulo ( % o mod ) entrega únicamente el residuo de la división entre dos números.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>⚖️ 2. Operadores relacionales y lógicos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Los <strong>operadores relacionales</strong> comparan dos valores y devuelven un resultado lógico (verdadero o falso). Son la base para construir condiciones dentro de un algoritmo.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig2.png" data-zoom-alt="Operadores relacionales">🔍 Ampliar</button>
+                                        <img src="img/fig2.png" alt="Operadores relacionales" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Operadores relacionales y ejemplos de comparación.</figcaption>
+                                </figure>
+                                <p class="mt-4 mb-2">Por su parte, los <strong>operadores lógicos</strong> (Y/AND, O/OR, NO/NOT) permiten combinar varias condiciones relacionales en una sola expresión, para evaluar situaciones más complejas.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig3.png" data-zoom-alt="Operadores lógicos">🔍 Ampliar</button>
+                                        <img src="img/fig3.png" alt="Operadores lógicos" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Operadores lógicos AND, OR y NOT.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔗</span> Ejemplo: 'edad >= 18 AND tieneCarnet == Verdadero' solo es verdadero si ambas condiciones se cumplen al mismo tiempo.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🔢 3. Prioridad de operadores y uso de paréntesis</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Cuando una expresión combina varios operadores, el resultado depende del orden en que se evalúan: primero se resuelven las operaciones dentro de los <strong>paréntesis</strong>, luego las multiplicaciones y divisiones, después las sumas y restas, y por último las comparaciones relacionales y lógicas.</p>
+
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Sin paréntesis</h3>
+                                        <p class="text-sm">5 + 3 * 2 → primero 3 * 2 = 6, luego 5 + 6 → resultado: 11</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Con paréntesis</h3>
+                                        <p class="text-sm">(5 + 3) * 2 → primero 5 + 3 = 8, luego 8 * 2 → resultado: 16</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">📐</span> Usar paréntesis de forma explícita evita ambigüedades y hace que una expresión sea más clara para cualquier persona que lea el algoritmo.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🔤 4. Tipos de datos, variables y constantes</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Toda <strong>variable</strong> o <strong>constante</strong> dentro de un algoritmo almacena un valor de un <strong>tipo de dato</strong> específico. Elegir el tipo correcto evita errores y hace que el algoritmo utilice la memoria de forma adecuada.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig4.png" data-zoom-alt="Tipos de datos primitivos">🔍 Ampliar</button>
+                                        <img src="img/fig4.png" alt="Tipos de datos primitivos" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Tipos de datos primitivos — enteros, reales, cadenas, caracteres y lógicos.</figcaption>
+                                </figure>
+
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Variable</h3>
+                                        <p class="text-sm">Espacio de memoria cuyo valor puede cambiar durante la ejecución del algoritmo. Ej.: edad, precio, nombre.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Constante</h3>
+                                        <p class="text-sm">Espacio de memoria cuyo valor permanece fijo durante toda la ejecución. Ej.: PI = 3.1416.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🧩 5. Identificación de restricciones y condiciones en un problema</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Analizar un problema antes de programarlo consiste en identificar cinco elementos clave: las <strong>entradas</strong> (datos disponibles), las <strong>restricciones</strong> (condiciones que deben cumplir esos datos), la <strong>condición</strong> que gobierna el problema, el <strong>proceso</strong> necesario para resolverlo y la <strong>salida</strong> esperada.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig5.png" data-zoom-alt="Modelo de un problema: parqueadero por horas">🔍 Ampliar</button>
+                                        <img src="img/fig5.png" alt="Modelo de un problema: parqueadero por horas" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Identificación de entradas, restricciones, condición, proceso y salida — ejemplo de un parqueadero por horas.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🅿️</span> En el ejemplo del parqueadero: se identifican las horas y la tarifa como entradas, se valida que ambas sean mayores que cero, se aplica un descuento si el cliente permanece 8 horas o más, y finalmente se calcula y muestra el total a pagar.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🎬 Actividad 1: Descuento en el cine escolar (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Un cine escolar del municipio ofrece un descuento del 20% en la boleta a los estudiantes que presenten su carnet vigente. Identifica las entradas, la restricción, la condición, el proceso y la salida de este problema, y calcula el valor final de una boleta de $8.000 con y sin descuento.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> identificación escrita de los cinco elementos del problema (entrada, restricción, condición, proceso, salida) y el cálculo de ambos valores finales.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">🔎 Enfoque:</span> aplicar operadores aritméticos, relacionales y lógicos al analizar un problema real.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Tienda local y envío por volumen (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En grupos de máximo tres integrantes, analicen las siguientes situaciones: (1) una tienda local del municipio aplica un descuento del 10% si el cliente compra más de $50.000 en productos; (2) una empresa de envíos cobra una tarifa adicional si el paquete supera los 20 kg de peso. Para cada situación, identifiquen entradas, restricciones, condición, proceso y salida, y expresen la condición usando operadores relacionales y lógicos.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> cuadro comparativo con los cinco elementos identificados para cada situación y la expresión lógica de la condición correspondiente.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">👥 Modalidad:</span> trabajo colaborativo en equipos de máximo tres estudiantes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Cuestionario de autoevaluación sobre operadores aritméticos, relacionales y lógicos, tipos de datos, prioridad de operadores e identificación de elementos de un problema.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📎 Anexos</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Material complementario asociado a los conceptos desarrollados en esta unidad.</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — ANEXOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">📗 Lógica de programación</h3>
+                            <p class="text-slate-600 mb-2">Libro de referencia de Trejos Buriticá (2023) sobre los fundamentos de la lógica de programación.</p>
+                            <a href="https://edicionesdelau.com/producto/logica-de-programacion-2a-edicion/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-1.png" alt="QR 📗 Lógica de programación" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">📘 Solucionario en pseudocódigo</h3>
+                            <p class="text-slate-600 mb-2">Ejercicios resueltos de lógica de programación en pseudocódigo, de Trejos Buriticá (2021).</p>
+                            <a href="https://edicionesdelau.com/producto/logica-de-programacion-solucionario-en-pseudocodigo-ejercicios-resueltos/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-2.png" alt="QR 📘 Solucionario en pseudocódigo" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">📙 Fundamentos de programación usando PSeInt</h3>
+                            <p class="text-slate-600 mb-2">Texto de apoyo de García Santillán (2014) para practicar algoritmos con la herramienta PSeInt.</p>
+                            <a href="https://www.publicacionesupec.org/index.php/carchi/catalog/book/64" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-3.png" alt="QR 📙 Fundamentos de programación usando PSeInt" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — ANEXOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Trejos Buriticá, O. I. (2023). <i>Lógica de programación</i>. Ediciones de la U.
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Trejos Buriticá, O. I. (2021). <i>Lógica de programación: solucionario en pseudocódigo. Ejercicios resueltos</i>. Ediciones de la U.
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            García Santillán, I. (Ed.). (2014). <i>Fundamentos de programación usando PSeInt</i>. Unidad de Producción y Difusión Científica y Académica.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="zoom-modal" class="zoom-modal" aria-hidden="true">
+        <div class="zoom-modal-content">
+            <button type="button" class="zoom-modal-close" id="zoom-modal-close" aria-label="Cerrar imagen ampliada">×</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué operador se utiliza para obtener el residuo de una división entre dos números?",
+                options: ["/  (división real)", "*  (multiplicación)", "%  o  mod  (módulo)", "-  (resta)"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál de los siguientes es un operador relacional?",
+                options: ["AND", ">=", "%", "NOT"],
+                correct: 1
+            },
+            {
+                question: "Al evaluar la expresión (5 + 3) * 2, ¿cuál es el resultado?",
+                options: ["11", "16", "13", "10"],
+                correct: 1
+            },
+            {
+                question: "¿Qué tipo de dato es más adecuado para almacenar el valor 'Verdadero' o 'Falso'?",
+                options: ["Entero", "Real", "Cadena", "Lógico"],
+                correct: 3
+            },
+            {
+                question: "En el análisis de un problema, ¿qué elemento representa el resultado final que se debe mostrar al usuario?",
+                options: ["La entrada", "La restricción", "La salida", "La condición"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+
+        // Zoom de imágenes del contenido
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomModalImage = document.getElementById('zoom-modal-image');
+        const zoomModalClose = document.getElementById('zoom-modal-close');
+
+        function closeZoomModal() {
+            zoomModal.classList.remove('active');
+            zoomModal.setAttribute('aria-hidden', 'true');
+            zoomModalImage.src = '';
+            zoomModalImage.alt = '';
+        }
+
+        document.querySelectorAll('.zoom-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                zoomModalImage.src = button.dataset.zoomImage;
+                zoomModalImage.alt = button.dataset.zoomAlt || 'Imagen ampliada';
+                zoomModal.classList.add('active');
+                zoomModal.setAttribute('aria-hidden', 'false');
+            });
+        });
+
+        zoomModalClose.addEventListener('click', closeZoomModal);
+        zoomModal.addEventListener('click', event => {
+            if (event.target === zoomModal) closeZoomModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && zoomModal.classList.contains('active')) closeZoomModal();
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
