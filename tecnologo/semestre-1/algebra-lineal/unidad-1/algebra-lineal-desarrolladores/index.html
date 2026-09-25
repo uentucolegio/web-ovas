@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Álgebra Lineal para Desarrolladores</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MathJax para fórmulas LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'mathjax'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .content-pane { display: none; }
+        .content-pane.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .sidebar-link.active { background-color: #dcfce7; color: #166534; border-left: 4px solid #22c55e; font-weight: 600; }
+        .sidebar-link:hover { background-color: #f0fdf4; }
+        .accordion-btn.open span { transform: rotate(45deg); }
+        .speech-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+        code { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; }
+        .mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+        .step-card { border-left: 4px solid #22c55e; background-color: #ffffff; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 mathjax">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col no-mathjax">
+            <div class="p-4 text-center border-b border-slate-100">
+                <div style="width: 130px; height: 130px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo CINTIA" class="w-5/6 h-5/6 object-contain" onerror="this.src='https://placehold.co/150x150/FFFFFF/22c55e?text=CINTIA'">
+                </div>
+                <p class="text-[10px] font-bold text-green-800 mt-3 uppercase tracking-tighter">Tecnología en Desarrollo de Software</p>
+            </div>
+            <nav class="mt-4 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="java"><span class="mr-3 text-xl">💻</span> Lógica en Java</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Herramientas</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 no-mathjax text-center">
+                 <select id="mobile-nav" class="w-full p-2 border rounded-md bg-white shadow-sm font-bold text-green-800">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Guía Didáctica</option>
+                    <option value="java">💻 Lógica en Java</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Herramientas</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">¿Hacia dónde vamos? Direcciones en Software</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-slate-700 leading-relaxed mb-4 text-lg">
+                        Imagina que estás programando un videojuego. Tienes un personaje y una linterna. ¿Cómo sabe el juego si la luz está iluminando una pared? La respuesta no es una simple suma; es la <strong>geometría de los vectores</strong>.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="p-5 bg-gradient-to-br from-green-50 to-white border border-green-100 rounded-xl shadow-sm">
+                            <span class="text-3xl mb-2 block">🤝</span>
+                            <h4 class="font-bold text-green-800">Producto Escalar</h4>
+                            <p class="text-sm text-slate-600 italic">Mide qué tan "alineados" están dos vectores. Útil para similitud de perfiles o visión de NPCs.</p>
+                        </div>
+                        <div class="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-xl shadow-sm">
+                            <span class="text-3xl mb-2 block">🏹</span>
+                            <h4 class="font-bold text-blue-800">Producto Vectorial</h4>
+                            <p class="text-sm text-slate-600 italic">Crea una dirección totalmente nueva. Útil para el rebote de física y sombreado 3D.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-6 no-mathjax" data-target="introduccion">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center shadow-md"><span class="mr-2">🔊</span> Leer introducción</button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full" disabled>⏸️</button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded-full" disabled>⏹️</button>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6 uppercase tracking-tight">Ruta de Aprendizaje</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="flex items-center p-4 bg-white rounded-lg shadow-sm border-l-8 border-green-500">
+                        <p class="text-slate-700"><strong>Calcular</strong> el ángulo entre dos vectores para sistemas de recomendación.</p>
+                    </div>
+                    <div class="flex items-center p-4 bg-white rounded-lg shadow-sm border-l-8 border-green-400">
+                        <p class="text-slate-700"><strong>Generar</strong> vectores normales para modelado 3D y motores físicos.</p>
+                    </div>
+                    <div class="flex items-center p-4 bg-white rounded-lg shadow-sm border-l-8 border-green-300">
+                        <p class="text-slate-700"><strong>Implementar</strong> algoritmos iterativos eficientes en Java para estas operaciones.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido Didáctico -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+                    <!-- Producto Escalar -->
+                    <div class="mb-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mr-3 shadow-lg">1</div>
+                            <h3 class="text-2xl font-bold text-green-800">Producto Escalar: ¿Estamos en sintonía?</h3>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <p class="text-slate-600">El <strong>Producto Escalar</strong> (o punto) nos dice cuánto de un vector "se proyecta" sobre otro. El resultado es siempre un <strong>número</strong>, no una flecha.</p>
+                                    <div class="bg-slate-50 p-4 rounded-lg border-dashed border-2 border-slate-300">
+                                        <p class="font-bold text-sm text-slate-500 mb-2 uppercase">Algoritmo Manual:</p>
+                                        <ol class="list-decimal ml-5 text-sm space-y-2">
+                                            <li>Multiplica los componentes $x$ entre sí.</li>
+                                            <li>Multiplica los componentes $y$ entre sí.</li>
+                                            <li>Multiplica los componentes $z$ (si existen) entre sí.</li>
+                                            <li><strong>Suma todos los resultados anteriores.</strong></li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col justify-center bg-slate-50 p-6 rounded-xl border">
+                                    $$\mathbf{u} \cdot \mathbf{v} = u_x v_x + u_y v_y + u_z v_z$$
+                                    <div class="mt-4 p-3 bg-amber-50 rounded border border-amber-100 text-xs">
+                                        <strong>💡 Tip Didáctico:</strong> Si el resultado es 0, los vectores forman una "L" perfecta (son perpendiculares). ¡Útil para detectar colisiones laterales!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Producto Vectorial -->
+                    <div class="mb-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mr-3 shadow-lg">2</div>
+                            <h3 class="text-2xl font-bold text-blue-800">Producto Vectorial: Creando el "Arriba"</h3>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                            <p class="text-slate-600">A diferencia del anterior, el <strong>Producto Cruz</strong> nos entrega un <strong>Vector</strong>. Este nuevo vector siempre es perpendicular a la superficie formada por los dos originales.</p>
+                            
+                            <div class="step-card bg-blue-50">
+                                <h4 class="font-bold text-blue-800 mb-2">La Regla de la Mano Derecha ✋</h4>
+                                <p class="text-sm">Si tus dedos siguen la dirección de $\mathbf{u}$ y luego cierran hacia $\mathbf{v}$, tu pulgar apuntará en la dirección del producto $\mathbf{u} \times \mathbf{v}$. ¡Es la brújula del 3D!</p>
+                            </div>
+
+                            <div class="bg-slate-50 p-6 rounded-xl border text-center">
+                                <p class="text-xs font-bold text-slate-400 mb-4 uppercase">Cálculo por Determinante</p>
+                                $$\mathbf{w} = \begin{vmatrix} \mathbf{i} & \mathbf{j} & \mathbf{k} \\ u_x & u_y & u_z \\ v_x & v_y & v_z \end{vmatrix}$$
+                                <p class="text-sm text-slate-500 mt-2">Este método nos da los componentes exactos para programar el rebote de una bala o el reflejo del agua.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lógica en Java con Explicación -->
+            <div id="java" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Traduciendo a Código</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border mb-6">
+                    <p class="text-slate-700 mb-4">Para un desarrollador, la matemática es una <strong>función</strong>. Aquí tienes cómo implementar estos "motores" de cálculo en Java:</p>
+                    
+                    <div class="bg-slate-900 rounded-xl p-5 overflow-x-auto no-mathjax">
+<pre class="text-xs sm:text-sm leading-relaxed">
+<span class="text-pink-400">// Método para el Producto Escalar (Dot Product)</span>
+<span class="text-blue-400">public double</span> calcularPunto(<span class="text-blue-400">double</span>[] u, <span class="text-blue-400">double</span>[] v) {
+    <span class="text-blue-400">double</span> resultado = 0;
+    <span class="text-gray-500">// Iteramos por cada dimensión (X, Y, Z...)</span>
+    <span class="text-purple-400">for</span> (<span class="text-blue-400">int</span> i = 0; i < u.length; i++) {
+        resultado += u[i] * v[i]; <span class="text-gray-500">// Acumulamos la sumatoria</span>
+    }
+    <span class="text-purple-400">return</span> resultado;
+}
+
+<span class="text-pink-400">// Método para el Producto Vectorial (Solo en R3)</span>
+<span class="text-blue-400">public double</span>[] calcularCruz(<span class="text-blue-400">double</span>[] u, <span class="text-blue-400">double</span>[] v) {
+    <span class="text-blue-400">double</span>[] w = <span class="text-blue-400">new double</span>[3];
+    <span class="text-gray-500">// Aplicamos la fórmula del determinante</span>
+    w[0] = (u[1] * v[2]) - (u[2] * v[1]); <span class="text-gray-500">// Componente X</span>
+    w[1] = (u[2] * v[0]) - (u[0] * v[2]); <span class="text-gray-500">// Componente Y</span>
+    w[2] = (u[0] * v[1]) - (u[1] * v[0]); <span class="text-gray-500">// Componente Z</span>
+    <span class="text-purple-400">return</span> w;
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6 uppercase">Prueba tu Lógica</h2>
+                <div class="space-y-6">
+                    <!-- Reto del Dron -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl mr-3">🚁</span>
+                            <h3 class="text-xl font-bold text-slate-800">El Sensor del Dron</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4">Un dron vuela hacia el Norte $\mathbf{d} = (0, 1, 0)$. Su sensor detecta un obstáculo en $\mathbf{p} = (1, 0, 0)$. Calcula el <strong>Producto Escalar</strong> para saber si el obstáculo está frente a él o a su lado.</p>
+                        
+                        <div class="flex flex-wrap gap-4 items-center no-mathjax">
+                            <input type="number" id="drone-ans" class="p-3 border-2 rounded-lg w-full sm:w-32 focus:border-green-500 outline-none" placeholder="Resultado">
+                            <button onclick="checkDrone()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition-colors shadow-lg">Validar Cálculo</button>
+                        </div>
+                        <div id="drone-fb" class="mt-4 p-4 rounded-lg hidden"></div>
+                    </div>
+
+                    <!-- Reto de la Pared -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl mr-3">🧱</span>
+                            <h3 class="text-xl font-bold text-slate-800">El Rebote de Física</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4">Necesitas calcular la dirección exacta hacia la que debe rebotar una pelota al tocar una pared inclinada. Tienes dos vectores que definen la superficie de la pared. ¿Qué operación es la correcta?</p>
+                        <div class="flex flex-wrap gap-3 no-mathjax">
+                            <button onclick="validarColab('punto')" class="bg-slate-200 text-slate-700 px-5 py-3 rounded-lg font-bold hover:bg-slate-300 transition-colors uppercase text-sm">Producto Escalar</button>
+                            <button onclick="validarColab('cruz')" class="bg-blue-600 text-white px-5 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-md uppercase text-sm">Producto Vectorial</button>
+                        </div>
+                        <div id="colab-fb" class="mt-4 p-4 rounded-lg hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Comprobación de Conocimientos</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md border">
+                    <div id="quiz-container" class="space-y-8">
+                        <div class="quiz-question">
+                            <p class="font-bold text-slate-800 mb-3 text-lg">1. Si el Producto Escalar de dos vectores de velocidad es negativo, ¿qué significa físicamente?</p>
+                            <div class="grid grid-cols-1 gap-2 no-mathjax">
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <input type="radio" name="q1" value="wrong" class="mr-3 w-5 h-5"> Se mueven en la misma dirección.
+                                </label>
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <input type="radio" name="q1" value="correct" class="mr-3 w-5 h-5"> Se mueven en direcciones opuestas (hacia atrás).
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="quiz-question">
+                            <p class="font-bold text-slate-800 mb-3 text-lg">2. ¿Por qué el Producto Cruz es vital para los motores de iluminación 3D?</p>
+                            <div class="grid grid-cols-1 gap-2 no-mathjax">
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <input type="radio" name="q2" value="correct" class="mr-3 w-5 h-5"> Porque permite hallar el vector "Normal" (perpendicular) de cada polígono.
+                                </label>
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <input type="radio" name="q2" value="wrong" class="mr-3 w-5 h-5"> Porque suma las intensidades de luz de todas las fuentes.
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="submit-quiz-btn" class="mt-10 bg-green-600 text-white font-bold py-4 px-10 rounded-xl hover:bg-green-700 transition-all w-full md:w-auto shadow-xl">Finalizar Evaluación</button>
+                    <div id="quiz-result" class="mt-6 text-xl text-center font-bold no-mathjax"></div>
+                </div>
+            </div>
+
+            <!-- Herramientas -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Herramientas del Desarrollador</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 no-mathjax">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-5 hover:shadow-md transition-shadow">
+                        <div class="bg-green-100 p-4 rounded-2xl">
+                            <img src="img/qr1.png" alt="QR GeoGebra" class="w-20 h-20">
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-green-800">GeoGebra 3D</h3>
+                            <p class="text-xs text-slate-500 mb-3">Dibuja tus vectores y comprueba la normal visualmente.</p>
+                            <a href="https://www.geogebra.org/3d" target="_blank" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block">Probar ahora</a>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-5 hover:shadow-md transition-shadow">
+                        <div class="bg-blue-100 p-4 rounded-2xl">
+                            <img src="img/qr2.png" alt="QR Wolfram" class="w-20 h-20">
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-blue-800">Wolfram Alpha</h3>
+                            <p class="text-xs text-slate-500 mb-3">Verifica cálculos de matrices y determinantes complejos.</p>
+                            <a href="https://www.wolframalpha.com/" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block">Calcular</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-white rounded shadow-sm text-sm text-slate-700 italic border-l-4 border-slate-300">
+                        Grossman, S., & Flores, J. (2012). <i>Álgebra lineal</i> (7.ª ed.). McGraw-Hill.
+                    </div>
+                    <div class="p-4 bg-white rounded shadow-sm text-sm text-slate-700 italic border-l-4 border-slate-300">
+                        Larson, R. (2017). <i>Fundamentos de álgebra lineal</i> (8.ª ed.). Cengage Learning.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-16 pt-8 border-t border-slate-200 text-center no-mathjax">
+                <p class="text-slate-500 font-medium text-sm mb-1 uppercase tracking-widest">Unidad: Álgebra para el Desarrollo de Software</p>
+                <p class="text-green-800 font-bold text-lg">Universidad de Córdoba</p>
+                <p class="text-slate-400 text-xs">Montería, Colombia - 2026</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const mobileNav = document.getElementById('mobile-nav');
+        const contentPanes = document.querySelectorAll('.content-pane');
+
+        function switchPane(targetId) {
+            window.speechSynthesis.cancel();
+            contentPanes.forEach(pane => pane.classList.remove('active'));
+            const activePane = document.getElementById(targetId);
+            if (activePane) activePane.classList.add('active');
+
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.target === targetId) link.classList.add('active');
+            });
+            if (mobileNav.value !== targetId) mobileNav.value = targetId;
+            if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
+        }
+
+        sidebarLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); switchPane(link.dataset.target); }));
+        mobileNav.addEventListener('change', () => switchPane(mobileNav.value));
+
+        // --- Accordions ---
+        document.querySelectorAll('.accordion-btn').forEach(btn => btn.addEventListener('click', () => {
+            const target = document.querySelector(btn.dataset.target);
+            const isOpen = btn.classList.contains('open');
+            target.classList.toggle('hidden');
+            btn.classList.toggle('open');
+            btn.querySelector('span').textContent = isOpen ? '➕' : '➖';
+            if (!isOpen && window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
+        }));
+
+        // --- Speech ---
+        document.querySelectorAll('.speech-controls').forEach(control => {
+            const playBtn = control.querySelector('.play-btn');
+            playBtn.addEventListener('click', () => {
+                window.speechSynthesis.cancel();
+                const text = document.getElementById(control.dataset.target).innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-CO';
+                window.speechSynthesis.speak(utterance);
+                control.querySelector('.pause-btn').disabled = false;
+                control.querySelector('.stop-btn').disabled = false;
+            });
+            control.querySelector('.pause-btn').addEventListener('click', () => window.speechSynthesis.pause());
+            control.querySelector('.stop-btn').addEventListener('click', () => window.speechSynthesis.cancel());
+        });
+
+        // --- Quiz ---
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            const qCount = document.querySelectorAll('.quiz-question').length;
+            document.querySelectorAll('input[type="radio"]:checked').forEach(ans => {
+                if (ans.value === 'correct') score++;
+            });
+            const res = document.getElementById('quiz-result');
+            res.innerHTML = `✅ Obtuviste ${score} de ${qCount} correctas. ${score === qCount ? '¡Eres un experto en vectores!' : 'Sigue repasando la teoría.'}`;
+            res.style.color = score === qCount ? "#166534" : "#991b1b";
+        });
+    });
+
+    function checkDrone() {
+        const val = document.getElementById('drone-ans').value;
+        const fb = document.getElementById('drone-fb');
+        fb.classList.remove('hidden', 'bg-green-100', 'bg-red-100', 'text-green-800', 'text-red-800');
+        
+        if (val == 0) {
+            fb.innerHTML = "<strong>🎯 ¡Excelente!</strong> El producto escalar es 0. Esto significa que los vectores son perpendiculares. El dron detecta que el objeto está a su derecha ($90^\circ$), no frente a él.";
+            fb.classList.add('bg-green-100', 'text-green-800');
+        } else {
+            fb.innerHTML = "<strong>❌ Inténtalo de nuevo.</strong> Recuerda multiplicar: $(0 \times 1) + (1 \times 0) + (0 \times 0)$.";
+            fb.classList.add('bg-red-100', 'text-red-800');
+        }
+        fb.classList.remove('hidden');
+    }
+
+    function validarColab(op) {
+        const fb = document.getElementById('colab-fb');
+        fb.classList.remove('hidden', 'bg-green-100', 'bg-red-100', 'text-green-800', 'text-red-800');
+        
+        if (op === 'cruz') {
+            fb.innerHTML = "<strong>🌟 ¡Correcto!</strong> El Producto Cruz genera el <em>vector normal</em>. Los motores físicos lo usan para calcular el ángulo de incidencia y reflejar la pelota hacia la dirección opuesta.";
+            fb.classList.add('bg-green-100', 'text-green-800');
+        } else {
+            fb.innerHTML = "<strong>⚠️ No es la opción ideal.</strong> El producto punto te daría un número (similitud), pero para rebotar necesitas una <em>nueva dirección</em> (un vector).";
+            fb.classList.add('bg-red-100', 'text-red-800');
+        }
+        fb.classList.remove('hidden');
+    }
+    </script>
+
+<!-- Plugin de accesibilidad -->
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
