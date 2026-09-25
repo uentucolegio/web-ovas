@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Fundamentos de arquitectura de sistemas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="tailwind.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            color: #334155;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+        button, select, input { font-family: inherit; font-size: inherit; }
+        button { border: none; cursor: pointer; }
+        
+        body { -webkit-user-select: none; user-select: none; }
+        .text-slate-700, .leading-relaxed, p, label, textarea, input { -webkit-user-select: text; user-select: text; }
+        
+        /* ===== LAYOUT ===== */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .min-h-screen { min-height: 100vh; }
+        .w-full { width: 100%; }
+        .w-64 { width: 16rem; }
+        .w-24 { width: 6rem; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        .h-screen { height: 100vh; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .hidden { display: none; }
+        .block { display: block; }
+        .relative { position: relative; }
+        .sticky { position: sticky; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        
+        /* ===== SPACING ===== */
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-5 { margin-top: 1.25rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .mr-1 { margin-right: 0.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .mr-3 { margin-right: 0.75rem; }
+        .ml-2 { margin-left: 0.5rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        
+        /* ===== TYPOGRAPHY ===== */
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .text-7xl { font-size: 4.5rem; line-height: 1; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .italic { font-style: italic; }
+        .leading-relaxed { line-height: 1.625; }
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .cursor-pointer { cursor: pointer; }
+        .list-disc { list-style-type: disc; }
+        .list-decimal { list-style-type: decimal; }
+        .list-inside { list-style-position: inside; }
+        
+        /* ===== COLORS - Backgrounds ===== */
+        .bg-slate-50 { background-color: #f8fafc; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-white { background-color: #ffffff; }
+        .bg-green-100 { background-color: #dcfce7; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-green-700 { background-color: #15803d; }
+        .bg-green-800 { background-color: #166534; }
+        .bg-yellow-100 { background-color: #fef9c3; }
+        .bg-yellow-500 { background-color: #eab308; }
+        .bg-yellow-600 { background-color: #ca8a04; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-gray-500 { background-color: #6b7280; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .bg-gray-700 { background-color: #374151; }
+        
+        /* ===== COLORS - Text ===== */
+        .text-white { color: #ffffff; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-700 { color: #334155; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .text-green-600 { color: #16a34a; }
+        .text-green-700 { color: #15803d; }
+        .text-green-800 { color: #166534; }
+        .text-green-100 { color: #dcfce7; }
+        .text-yellow-600 { color: #ca8a04; }
+        .text-yellow-700 { color: #a16207; }
+        .text-yellow-800 { color: #854d0e; }
+        .text-red-800 { color: #991b1b; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-blue-700 { color: #1d4ed8; }
+        
+        /* ===== BORDERS ===== */
+        .border { border-width: 1px; border-style: solid; border-color: #e5e7eb; }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-l-4 { border-left-width: 4px; border-left-style: solid; }
+        .border-green-200 { border-color: #bbf7d0; }
+        .border-green-500 { border-color: #22c55e; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-yellow-500 { border-color: #eab308; }
+        .border-red-500 { border-color: #ef4444; }
+        .border-blue-500 { border-color: #3b82f6; }
+        
+        /* ===== BORDER RADIUS ===== */
+        .rounded { border-radius: 0.25rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        
+        /* ===== SHADOWS ===== */
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        
+        /* ===== TRANSITIONS ===== */
+        .transition-colors { transition-property: background-color, border-color, color; transition-duration: 150ms; transition-timing-function: ease-in-out; }
+        .transition-shadow { transition-property: box-shadow; transition-duration: 300ms; }
+        .duration-300 { transition-duration: 300ms; }
+        
+        /* ===== HOVER STATES ===== */
+        .hover\:bg-green-700:hover { background-color: #15803d; }
+        .hover\:bg-yellow-600:hover { background-color: #ca8a04; }
+        .hover\:bg-red-600:hover { background-color: #dc2626; }
+        .hover\:bg-gray-700:hover { background-color: #374151; }
+        .hover\:bg-white:hover { background-color: #ffffff; }
+        .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .hover\:shadow-green-400:hover { box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.3); }
+        button:hover { opacity: 0.9; }
+        
+        /* ===== RESPONSIVE - sm (640px+) ===== */
+        @media (min-width: 640px) {
+            .sm\:p-6 { padding: 1.5rem; }
+            .sm\:flex-row { flex-direction: row; }
+            .sm\:items-center { align-items: center; }
+            .sm\:mt-0 { margin-top: 0; }
+            .sm\:ml-6 { margin-left: 1.5rem; }
+        }
+        
+        /* ===== FIXED SIDEBAR ===== */
+        .ova-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* ===== RESPONSIVE - md (768px+) ===== */
+        @media (min-width: 768px) {
+            .md\:flex { display: flex; }
+            .md\:flex-row { flex-direction: row; }
+            .md\:flex-col { flex-direction: column; }
+            .md\:hidden { display: none; }
+            .md\:w-64 { width: 16rem; }
+            .md\:w-auto { width: auto; }
+            .md\:p-10 { padding: 2.5rem; }
+            .ova-main {
+                margin-left: 16rem; /* w-64 = 16rem */
+            }
+        }
+        
+        /* ===== MOBILE HEADER FIXED ===== */
+        .ova-mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 767px) {
+            .ova-main {
+                padding-top: 13rem;
+            }
+            .ova-mobile-header {
+                margin-bottom: 0 !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .text-slate-700 ul,
+            .text-slate-700 ol {
+                margin-left: 1rem;
+                padding-right: 0.5rem;
+            }
+            main {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .ova-columns-row {
+                flex-direction: column !important;
+            }
+            .ova-columns-row .ova-column {
+                flex: 1 1 100% !important;
+            }
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+        }
+        
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        
+        /* ===== CONTENT PANES ===== */
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .content-pane.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== IMAGE MODAL ===== */
+        .image-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .expand-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(34, 197, 94, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+        
+        .image-container:hover .expand-btn {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .image-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border: 4px solid white;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            padding: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* ===== SPEECH CONTROLS ===== */
+        .speech-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .speech-controls button {
+            min-width: 90px;
+            max-width: fit-content;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 480px) {
+            .speech-controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 8px;
+            }
+            .speech-controls button {
+                width: 100%;
+            }
+        }
+        
+        /* ===== RICH TEXT CONTENT ===== */
+        .text-slate-700 {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .text-slate-700 ul,
+        .text-slate-700 ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .text-slate-700 ul { list-style-type: disc; }
+        .text-slate-700 ol { list-style-type: decimal; }
+        .text-slate-700 li { margin-bottom: 0.5rem; }
+        .text-slate-700 strong { font-weight: 600; }
+        .text-slate-700 em { font-style: italic; }
+        
+        .text-slate-700 a {
+            color: #16a34a;
+            text-decoration: underline;
+        }
+        .text-slate-700 a:hover { color: #15803d; }
+        
+        .text-slate-700 h1,
+        .text-slate-700 h2,
+        .text-slate-700 h3 {
+            font-weight: 700;
+            color: #166534;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .text-slate-700 h1 { font-size: 2rem; }
+        .text-slate-700 h2 { font-size: 1.5rem; }
+        .text-slate-700 h3 { font-size: 1.25rem; }
+        .text-slate-700 p { margin-bottom: 0.75rem; }
+        
+        /* ===== MOBILE HEADER ===== */
+        .md\:hidden.mb-6 {
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* ===== CODE BLOCK ===== */
+        .code-block-wrapper {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2d2d2d;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .code-block-lang {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        
+        .code-copy-btn {
+            background: #404040;
+            color: #d4d4d4;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .code-copy-btn:hover {
+            background: #525252;
+            opacity: 1 !important;
+        }
+        
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem 1.25rem;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.7;
+            tab-size: 4;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .code-block code {
+            font-family: inherit;
+            white-space: pre;
+        }
+        
+        /* ===== SYNTAX HIGHLIGHTING (Prism tokens) ===== */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a9955; }
+        .token.punctuation { color: #d4d4d4; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #b5cea8; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #ce9178; }
+        .token.operator, .token.entity, .token.url { color: #d4d4d4; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #569cd6; }
+        .token.function, .token.class-name { color: #dcdcaa; }
+        .token.regex, .token.important, .token.variable { color: #d16969; }
+        
+        /* ===== TABLE ===== */
+        .overflow-x-auto { overflow-x: auto; }
+        
+        .ova-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ova-table th {
+            background-color: #166534;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        
+        .ova-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .ova-table tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .ova-table tbody tr:hover {
+            background-color: #f0fdf4;
+        }
+        
+        .ova-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* ===== NAV ITEMS ===== */
+        .nav-item:hover { background-color: #15803d; }
+        .nav-item.active { background-color: #166534; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col ova-sidebar">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1 overflow-y-auto">
+                
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion">
+                    <span class="mr-3 text-xl">🚀</span> Introducción
+                </a>
+                <a href="#" class="sidebar-link  flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos">
+                    <span class="mr-3 text-xl">🎯</span> Objetivos
+                </a>
+                <a href="#" class="sidebar-link  flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido">
+                    <span class="mr-3 text-xl">📚</span> Contenido
+                </a>
+                <a href="#" class="sidebar-link  flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades">
+                    <span class="mr-3 text-xl">✍️</span> Actividades
+                </a>
+                <a href="#" class="sidebar-link  flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion">
+                    <span class="mr-3 text-xl">✔️</span> Evaluación
+                </a>
+                <a href="#" class="sidebar-link  flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos">
+                    <span class="mr-3 text-xl">📖</span> Recursos
+                </a>
+                <a href="#" class="sidebar-link  flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia">
+                    <span class="mr-3 text-xl">📚</span> Bibliografía
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 w-full md:w-auto p-4 sm:p-6 md:p-10 bg-gray-50 ova-main">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center ova-mobile-header">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <div data-speech-segment="introduccion-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Fundamentos de arquitectura de sistemas</h3></div>
+<div data-speech-segment="introduccion-0"><div class="text-slate-700 leading-relaxed mb-4"><p>Cuando desarrollas un sistema (una app, una web o un software de escritorio), no solo importa que “funcione”: también importa que sea fácil de mantener, que pueda crecer si llegan más usuarios y que no se vuelva lento o difícil de actualizar. La arquitectura es, en pocas palabras, el “plano” que organiza las partes del sistema: qué va junto, qué se separa y cómo se comunican los componentes.</p><p>En esta temática abordaremos cuatro arquitecturas muy usadas (monolítica, cliente-servidor, multicapa y SOA). Las aprenderás con ejemplos sencillos y criterios prácticos para elegir la mejor según el problema. Al final, aplicarás lo aprendido a un caso de análisis.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-introduccion-0" data-segment-index="0">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-introduccion-0" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-introduccion-0" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane ">
+                <div data-speech-segment="objetivos-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Objetivos de aprendizaje</h3></div>
+<div data-speech-segment="objetivos-0">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">🧠 Definir qué es la arquitectura de un sistema de información y describir sus elementos generales.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">🔍 Diferenciar las arquitecturas monolíticas, cliente-servidor, multicapa y orientada a servicios (SOA) según estructura, ventajas, limitaciones y casos de uso.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">📝 Identificar la arquitectura más adecuada para necesidades básicas de software a partir de escenarios o requerimientos dados.</span>
+                    </li>
+                </ul></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-objetivos-0" data-segment-index="0">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-objetivos-0" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-objetivos-0" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane ">
+                <div data-speech-segment="contenido-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Fundamentos de arquitectura de sistemas</h3></div>
+<div data-speech-segment="contenido-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">¿Qué es la arquitectura de Información?</h3></div>
+<div data-speech-segment="contenido-0"><div class="text-slate-700 leading-relaxed mb-4"><p>La arquitectura de un sistema de información es el conjunto de decisiones de alto nivel que define: cómo se organiza el software, cómo se comunican sus partes, y cómo se gestionan los datos, para cumplir requisitos funcionales (lo que hace el sistema) y no funcionales (rendimiento, seguridad, disponibilidad, escalabilidad, entre otros).</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-0" data-segment-index="0">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-0" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-0" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-1">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig1.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig1.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-1"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Conceptos base</h3></div>
+<div data-speech-segment="contenido-1"><div class="text-slate-700 leading-relaxed mb-4"><p><strong>Componente: </strong>pieza del sistema con una responsabilidad clara (módulo, servicio, base de datos, interfaz).</p><p><strong>Interfaz / contrato: </strong>forma acordada de comunicarse entre componentes (por ejemplo, una API).</p><p><strong>Capa:</strong> agrupación por responsabilidades (presentación, negocio, datos).</p><p><strong>Acoplamiento:</strong> qué tanto depende un componente de otro; a menor acoplamiento, suele ser más fácil cambiar.</p><p><strong>Cohesión:</strong> qué tan relacionadas están las responsabilidades dentro de un mismo componente; mayor cohesión es deseable.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-1" data-segment-index="1">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-1" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-1" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-2">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig2.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig2.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-2"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">¿Cómo reconocer una arquitectura?</h3></div>
+<div data-speech-segment="contenido-2"><div class="text-slate-700 leading-relaxed mb-4"><p>Una forma rápida es dibujar el sistema con cajas y flechas: las cajas son componentes (o capas/servicios) y las flechas son comunicaciones. Si todo está dentro de una sola caja, suele ser monolítico; si hay cliente y servidor separados, es cliente-servidor; si además se distinguen capas, es multicapa; y si hay varios servicios independientes con contratos, es SOA.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-2" data-segment-index="2">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-2" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-2" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-3">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig3.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig3.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-3"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Arquitectura monolítica</h3></div>
+<div data-speech-segment="contenido-3"><div class="text-slate-700 leading-relaxed mb-4"><p>En la arquitectura monolítica, la mayor parte de la funcionalidad se implementa y se despliega como una sola unidad. Normalmente se empaqueta una aplicación que incluye interfaz, lógica de negocio y acceso a datos.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-3" data-segment-index="3">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-3" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-3" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-4"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Esquema:</h3></div>
+<div data-speech-segment="contenido-4">
+                <div class="code-block-wrapper my-6">
+                    <div class="code-block-header">
+                        <span class="code-block-lang">text</span>
+                        <button class="code-copy-btn" onclick="copyCode(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar</button>
+                    </div>
+                    <pre class="code-block"><code>[ Interfaz + Lógica de negocio + Acceso a datos ]  →  Base de datos</code></pre>
+                </div></div>
+<div data-speech-segment="contenido-4"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">💡Ejemplo:</h3></div>
+<div data-speech-segment="contenido-4"><div class="text-slate-700 leading-relaxed mb-4"><p>Un sistema pequeño para registrar ventas en una tienda (un solo equipo de trabajo, pocos usuarios, cambios poco frecuentes). Se puede crear una aplicación única que guarde todo en una base de datos local o en la nube.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-4" data-segment-index="4">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-4" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-4" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-5">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig4.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig4.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-5"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">👍Ventajas</h3></div>
+<div data-speech-segment="contenido-5">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Sencilla para iniciar: menos piezas, menos configuración y despliegue rápido.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Depuración directa: el flujo de ejecución suele ser más fácil de seguir.</span>
+                    </li>
+                </ul></div>
+<div data-speech-segment="contenido-5"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">📉Limitaciones</h3></div>
+<div data-speech-segment="contenido-5">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Cuando crece, aumenta el acoplamiento y se dificulta modificar sin afectar otras partes.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Escalar implica replicar toda la aplicación, aunque solo una parte necesite más recursos.</span>
+                    </li>
+                </ul></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-5" data-segment-index="5">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-5" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-5" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-6"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Arquitectura cliente - servidor</h3></div>
+<div data-speech-segment="contenido-6"><div class="text-slate-700 leading-relaxed mb-4"><p>En este modelo se separa la aplicación en dos roles principales: cliente (presentación e interacción) y servidor (procesamiento, reglas del negocio y acceso a datos). El cliente realiza solicitudes y el servidor responde.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-6" data-segment-index="6">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-6" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-6" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-7"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Esquema:</h3></div>
+<div data-speech-segment="contenido-7">
+                <div class="code-block-wrapper my-6">
+                    <div class="code-block-header">
+                        <span class="code-block-lang">text</span>
+                        <button class="code-copy-btn" onclick="copyCode(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar</button>
+                    </div>
+                    <pre class="code-block"><code>Cliente (web/app)  ↔  Servidor (API / aplicación)  ↔  Base de datos</code></pre>
+                </div></div>
+<div data-speech-segment="contenido-7"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">💡Ejemplo:</h3></div>
+<div data-speech-segment="contenido-7"><div class="text-slate-700 leading-relaxed mb-4"><p>Una app móvil de pedidos donde el celular (cliente) consulta productos y envía pedidos, mientras que el servidor valida el pedido, calcula totales y guarda la información en la base de datos.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-7" data-segment-index="7">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-7" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-7" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-8">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig5.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig5.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-8"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">👍Ventajas</h3></div>
+<div data-speech-segment="contenido-8">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Centraliza datos y reglas en el servidor, facilitando control y actualizaciones</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Permite múltiples clientes (web, móvil) consumiendo el mismo servidor.</span>
+                    </li>
+                </ul></div>
+<div data-speech-segment="contenido-8"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">📉Limitaciones</h3></div>
+<div data-speech-segment="contenido-8">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Si el servidor no se diseña bien, puede convertirse en cuello de botella o punto único de falla.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Requiere gestionar red, seguridad y disponibilidad del servidor.</span>
+                    </li>
+                </ul></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-8" data-segment-index="8">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-8" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-8" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-9"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Arquitectura multicapa (3 capas / n-capas)</h3></div>
+<div data-speech-segment="contenido-9"><div class="text-slate-700 leading-relaxed mb-4"><p>La arquitectura multicapa organiza el sistema en capas con responsabilidades claras. La versión más común es 3 capas: presentación (interfaz), negocio (reglas/casos de uso) y datos (persistencia).</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-9" data-segment-index="9">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-9" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-9" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-10"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Esquema:</h3></div>
+<div data-speech-segment="contenido-10">
+                <div class="code-block-wrapper my-6">
+                    <div class="code-block-header">
+                        <span class="code-block-lang">text</span>
+                        <button class="code-copy-btn" onclick="copyCode(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar</button>
+                    </div>
+                    <pre class="code-block"><code>Presentación  →  Negocio  →  Datos  →  Base de datos</code></pre>
+                </div></div>
+<div data-speech-segment="contenido-10">
+                <div class="my-6 overflow-x-auto" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                    <p class="font-semibold text-green-800 mb-2">Tabla de Esquema Simplificado</p>
+                    <table class="ova-table">
+                        <thead>
+                            <tr>
+                                <th>Capa</th><th>Responsabilidad principal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td>Presentación</td><td>Interacción con el usuario (pantallas, formularios, validaciones básicas).</td>
+                            </tr>
+                            <tr>
+                                <td>Negocio</td><td>Reglas, casos de uso, lógica central del sistema (qué se puede y qué no se puede hacer).</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td><td>Acceso a base de datos, consultas, repositorios, persistencia.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-10" data-segment-index="10">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-10" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-10" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-11"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">💡Ejemplo:</h3></div>
+<div data-speech-segment="contenido-11"><div class="text-slate-700 leading-relaxed mb-4"><p>Un sistema académico: la interfaz permite registrar notas (presentación), la capa de negocio valida reglas (por ejemplo, rangos de calificación y permisos), y la capa de datos guarda y consulta en la base de datos.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-11" data-segment-index="11">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-11" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-11" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-12">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig6.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig6.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-12"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">👍Ventajas</h3></div>
+<div data-speech-segment="contenido-12">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Mejora el mantenimiento: cambios en una capa impactan menos a las otras.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Facilita pruebas y organización del trabajo (por responsabilidades).</span>
+                    </li>
+                </ul></div>
+<div data-speech-segment="contenido-12"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">📉Limitaciones</h3></div>
+<div data-speech-segment="contenido-12">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Mayor complejidad inicial que un monolito simple.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Puede aumentar la cantidad de código y la necesidad de buenas prácticas de diseño.</span>
+                    </li>
+                </ul></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-12" data-segment-index="12">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-12" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-12" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-13"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Arquitectura orientada a servicios (SOA)</h3></div>
+<div data-speech-segment="contenido-13"><div class="text-slate-700 leading-relaxed mb-4"><p>SOA organiza el sistema como un conjunto de servicios independientes que exponen funcionalidades a través de contratos (interfaces). Cada servicio se centra en una capacidad del negocio y puede ser usado por otros sistemas.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-13" data-segment-index="13">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-13" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-13" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-14"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Esquema:</h3></div>
+<div data-speech-segment="contenido-14">
+                <div class="code-block-wrapper my-6">
+                    <div class="code-block-header">
+                        <span class="code-block-lang">text</span>
+                        <button class="code-copy-btn" onclick="copyCode(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar</button>
+                    </div>
+                    <pre class="code-block"><code>Servicio A ↔ Servicio B ↔ Servicio C  (cada uno con su contrato)  +  Integración entre sistemas</code></pre>
+                </div></div>
+<div data-speech-segment="contenido-14"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">💡Ejemplo:</h3></div>
+<div data-speech-segment="contenido-14"><div class="text-slate-700 leading-relaxed mb-4"><p>Una organización que tiene varios sistemas (inventario, facturación, atención al cliente) y necesita que se integren. Un servicio de “clientes” puede ser utilizado por varios aplicativos sin duplicar la información.</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-14" data-segment-index="14">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-14" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-14" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-15">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig7.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig7.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-15"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">👍Ventajas</h3></div>
+<div data-speech-segment="contenido-15">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Reutilización: un servicio puede ser consumido por diferentes sistemas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Escala organizacional: facilita integración y evolución por módulos de negocio.</span>
+                    </li>
+                </ul></div>
+<div data-speech-segment="contenido-15"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">📉Limitaciones</h3></div>
+<div data-speech-segment="contenido-15">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Mayor esfuerzo de diseño y gobernanza (versionado, contratos, monitoreo).</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0">✓</span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">La comunicación entre servicios puede añadir complejidad y latencia.</span>
+                    </li>
+                </ul></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-15" data-segment-index="15">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-15" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-15" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-16"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Criterios prácticos para seleccionar arquitecturas</h3></div>
+<div data-speech-segment="contenido-16"><div class="text-slate-700 leading-relaxed mb-4"><p>Para seleccionar una arquitectura de sistemas adecuada, es necesario analizar el contexto del proyecto y las necesidades reales de la solución, considerando aspectos como el tipo de aplicación, el número de usuarios, el nivel de escalabilidad requerido, la seguridad, el rendimiento, la facilidad de mantenimiento y los recursos disponibles (tiempo, presupuesto e infraestructura).</p></div></div>
+
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-speech-id="speech-contenido-16" data-segment-index="16">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="rate-speech-contenido-16" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="rate-speech-contenido-16" min="0.5" max="2" step="0.1" value="1" style="width:96px;">
+                    </div>
+                </div>
+<div data-speech-segment="contenido-17">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center;">
+                    <div class="image-container relative" style="display: inline-block; max-width: 800px;">
+                        <img src="img/fig8.webp" 
+                             alt="Descripción de la imagen" 
+                             class="rounded-lg cursor-pointer"
+                             style="display: block; max-width: 100%; max-height: 600px; height: auto; object-fit: contain;"
+                             onclick="openImageModal(this.src)">
+                        <button class="expand-btn" onclick="openImageModal('img/fig8.webp')">🔍</button>
+                    </div>
+                    
+                </div></div>
+<div data-speech-segment="contenido-17">
+                <div class="my-6" style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                    <iframe src="https://www.youtube.com/embed/hVsYllKn6gA?si=YDBUOjOFoEdMBwsk" 
+                            title="Contenido embebido"
+                            class="w-full rounded-lg border-2 border-green-200"
+                            style="height: 600px">
+                    </iframe>
+                </div></div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="content-pane ">
+                <div data-speech-segment="actividades-0">
+                <div class="bg-white border-l-4 border-green-500 p-6 my-6 rounded-lg shadow-sm">
+                    <h3 class="font-bold text-green-800 text-xl mb-3">✍️ “Diagnóstico de arquitectura por casos de estudio”</h3>
+                    <div class="text-slate-700 mb-3"><p><strong>Propósito:</strong> Que el estudiante identifique, a partir de necesidades reales, cuál arquitectura conviene implementar (Monolítica, Cliente–Servidor, Multicapa, SOA) y sustente su elección con criterios técnicos.</p><p><strong>Modalidad:</strong> Individual o en parejas</p><p>&nbsp;</p><p><strong>Instrucciones:</strong></p><ol type="1"><li><p>Lee cada caso y elige una arquitectura: Monolítica / Cliente–Servidor / Multicapa / SOA.</p></li><li><p>Justifica tu elección con mínimo 3 criterios (por ejemplo: número de usuarios, escalabilidad, mantenimiento, etc.).</p></li><li><p>Indica un riesgo de tu elección y una mitigación (cómo lo reducirías).</p></li></ol><p><strong>&nbsp;</strong></p><p><strong>Casos de estudio.</strong></p><p><strong>Caso 1: Cafetería del campus</strong></p><p>Una cafetería necesita registrar productos, ventas diarias y cierres de caja. Solo lo usarán 2 personas en 1 computador. No hay acceso externo ni integraciones. Cambios muy ocasionales.</p><p><strong>Caso 2: Turnos para atención en ventanilla</strong></p><p>Una oficina requiere una consola para asignar turnos y una pantalla para mostrarlos. Debe guardar historial diario y generar reportes semanales. Se usará en 3 puntos de atención del mismo edificio.</p><p>&nbsp;</p><p><strong>Caso 3: Pedidos para restaurante (móvil + panel interno)</strong></p><p>Clientes hacen pedidos desde una app móvil. Cocina y caja usan un panel web interno. Debe manejar autenticación, estados del pedido y registro de ventas en base de datos. Se espera crecer a 2 sedes en 6 meses.</p><p><strong>Caso 4: Sistema académico con reglas</strong></p><p>Sistema para matrículas, notas, asistencia, boletines y reportes. Hay reglas (prerrequisitos, rangos de calificación, permisos por rol). Cambios frecuentes por ajustes internos del instituto.</p><p><strong>Caso 5: Portal institucional por módulos</strong></p><p>Una universidad quiere un portal único con módulos: admisiones, biblioteca, bienestar y egresados. Deben compartir usuarios/roles, pero cada módulo evoluciona a ritmos distintos. El equipo quiere trabajar por módulos sin “romper” el resto.</p><p><strong>Caso 6: Integración de sistemas (legacy + nuevos)</strong></p><p>Una empresa ya tiene inventario (antiguo), contabilidad (ERP) y un nuevo sistema de ventas. Necesitan unificar consulta de clientes/productos sin duplicar datos, y permitir que los sistemas intercambien información con <strong>contratos claros</strong>.</p><p><strong>Caso 7: Servicios compartidos institucionales</strong></p><p>Varias aplicaciones deben consumir servicios centrales: <strong>autenticación</strong>, <strong>notificaciones</strong> y <strong>pagos</strong>. Se exige control de versiones, monitoreo y reglas claras para cambios sin afectar a las aplicaciones consumidoras. </p><p><strong>Caso 8: Interoperabilidad entre organizaciones</strong></p><p>Dos instituciones necesitan intercambiar información (por ejemplo, estudiantes/prácticas). Cada una mantiene su base de datos. Se requiere seguridad, auditoría, trazabilidad y acuerdos estandarizados de intercambio.&nbsp; </p></div>
+                    <p class="text-sm text-green-700 italic">💡 Pista: Debes escoger una de las arquitecturas vista y aplicarla a cada caso, luego justifica tu respuesta.</p>
+                </div></div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane ">
+                <div data-speech-segment="evaluacion-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Evaluación</h3></div>
+<div data-speech-segment="evaluacion-0"><div class="text-slate-700 leading-relaxed mb-4"><p><strong>Instrucciones:</strong> Lee cada pregunta con atención. Solo una de las opciones es correcta.</p><p><strong>Objetivo:</strong> Evaluar la comprensión de conceptos clave y los tipos de arquitectura vistos en esta temática.</p></div></div>
+<div data-speech-segment="evaluacion-0">
+            <div class="bg-white border-l-4 border-green-500 p-6 my-6 rounded-lg shadow-sm" id="quiz-container-XdhKPqvcwmSfyT2jsNPgh"
+                 data-correct='[2,1,2,0,2,0,1,0]'
+                 data-feedback-correct='["","","","","","","",""]'
+                 data-feedback-incorrect='["","","","","","","",""]'>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">❓</span>
+                    <h3 class="font-semibold text-green-800 text-xl">Evaluación</h3>
+                </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="0">
+                        <p class="font-semibold text-gray-800 mb-3">1. ¿Qué define fundamentalmente la arquitectura de un sistema de información?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q0" value="0" class="text-green-600">
+                                    <span class="text-gray-700">La elección del lenguaje de programación y el diseño de los colores de la interfaz.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q0" value="1" class="text-green-600">
+                                    <span class="text-gray-700">El proceso de instalación del software en los equipos locales de los usuarios.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q0" value="2" class="text-green-600">
+                                    <span class="text-gray-700">Las decisiones de alto nivel sobre cómo se organiza el software, se comunican sus partes y se gestionan los datos</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q0" value="3" class="text-green-600">
+                                    <span class="text-gray-700">El dibujo de cajas y flechas que se entrega al cliente al final del proyecto.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-0" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="1">
+                        <p class="font-semibold text-gray-800 mb-3">2. En el diseño de componentes, ¿cuál es la combinación ideal para que un sistema sea fácil de cambiar y mantener?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q1" value="0" class="text-green-600">
+                                    <span class="text-gray-700">Alto acoplamiento y baja cohesión</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q1" value="1" class="text-green-600">
+                                    <span class="text-gray-700">Bajo acoplamiento y alta cohesión</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q1" value="2" class="text-green-600">
+                                    <span class="text-gray-700">Alto acoplamiento y alta cohesión</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q1" value="3" class="text-green-600">
+                                    <span class="text-gray-700">Bajo acoplamiento y baja cohesión</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-1" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="2">
+                        <p class="font-semibold text-gray-800 mb-3">3. ¿Cuál es la principal limitación de una arquitectura monolítica cuando el sistema necesita crecer significativamente?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q2" value="0" class="text-green-600">
+                                    <span class="text-gray-700">No permite realizar pruebas unitarias ni depurar el código.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q2" value="1" class="text-green-600">
+                                    <span class="text-gray-700">Requiere obligatoriamente una conexión a internet permanente para funcionar.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q2" value="2" class="text-green-600">
+                                    <span class="text-gray-700">Escalar implica replicar toda la aplicación completa, aunque solo una parte necesite más recursos.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q2" value="3" class="text-green-600">
+                                    <span class="text-gray-700">Es imposible de empaquetar en una sola unidad de despliegue.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-2" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="3">
+                        <p class="font-semibold text-gray-800 mb-3">4. En la arquitectura Cliente - Servidor, ¿cuál es la responsabilidad primordial del &quot;Cliente&quot;?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q3" value="0" class="text-green-600">
+                                    <span class="text-gray-700">Gestionar las reglas de negocio y procesar el acceso a los datos.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q3" value="1" class="text-green-600">
+                                    <span class="text-gray-700">Responder a las solicitudes de información enviadas por el servidor central.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q3" value="2" class="text-green-600">
+                                    <span class="text-gray-700">Encargarse de la presentación, la interfaz y la interacción directa con el usuario.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q3" value="3" class="text-green-600">
+                                    <span class="text-gray-700">Centralizar la base de datos para que todos los nodos puedan verla.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-3" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="4">
+                        <p class="font-semibold text-gray-800 mb-3">5. Un sistema académico, construido bajo la arquitectura multicapas, valida que una nota esté en el rango de 0.0 a 5.0 antes de guardarla. ¿En qué capa ocurre específicamente esta validación de reglas?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q4" value="0" class="text-green-600">
+                                    <span class="text-gray-700">Capa de Presentación.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q4" value="1" class="text-green-600">
+                                    <span class="text-gray-700">Capa de Datos.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q4" value="2" class="text-green-600">
+                                    <span class="text-gray-700">Capa de Negocio.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q4" value="3" class="text-green-600">
+                                    <span class="text-gray-700">Capa de Persistencia.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-4" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="5">
+                        <p class="font-semibold text-gray-800 mb-3">6. ¿Qué se entiende por &quot;contrato&quot; o &quot;interfaz&quot; dentro del paradigma de SOA?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q5" value="0" class="text-green-600">
+                                    <span class="text-gray-700">La forma acordada (como una API) para que los componentes o servicios se comuniquen entre sí.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q5" value="1" class="text-green-600">
+                                    <span class="text-gray-700"> El documento legal que firman el proveedor de servicios y el cliente.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q5" value="2" class="text-green-600">
+                                    <span class="text-gray-700">El código fuente interno que resuelve la lógica de cada módulo independiente.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q5" value="3" class="text-green-600">
+                                    <span class="text-gray-700">La base de datos única que comparten todos los servicios de la organización.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-5" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="6">
+                        <p class="font-semibold text-gray-800 mb-3">7. Si se requiere desarrollar un sistema para una cafetería pequeña, que solo usarán 2 personas en un computador sin acceso externo, la arquitectura más adecuada es:</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q6" value="0" class="text-green-600">
+                                    <span class="text-gray-700">Arquitectura SOA, para permitir futuras integraciones con otros países.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q6" value="1" class="text-green-600">
+                                    <span class="text-gray-700">Arquitectura Monolítica, por su sencillez inicial y despliegue rápido.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q6" value="2" class="text-green-600">
+                                    <span class="text-gray-700">Arquitectura Multicapa distribuida en la nube, para garantizar alta disponibilidad.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q6" value="3" class="text-green-600">
+                                    <span class="text-gray-700">Arquitectura Cliente-Servidor con múltiples servidores de respaldo.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-6" class="mt-2"></div>
+                    </div>
+                
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-quiz-question="7">
+                        <p class="font-semibold text-gray-800 mb-3">8. ¿Cuál de las siguientes arquitecturas destaca por permitir que un servicio (ej. &quot;pagos&quot; o &quot;notificaciones&quot;) sea consumido por diferentes sistemas de una organización sin duplicar información?</p>
+                        <div class="space-y-2">
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q7" value="0" class="text-green-600">
+                                    <span class="text-gray-700">Monolítica.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q7" value="1" class="text-green-600">
+                                    <span class="text-gray-700">Cliente-Servidor.</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q7" value="2" class="text-green-600">
+                                    <span class="text-gray-700">SOA (Orientada a Servicios).</span>
+                                </label>
+                            
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                                    <input type="radio" name="quiz-XdhKPqvcwmSfyT2jsNPgh-q7" value="3" class="text-green-600">
+                                    <span class="text-gray-700">Multicapa simple.</span>
+                                </label>
+                            
+                        </div>
+                        <div id="quiz-feedback-XdhKPqvcwmSfyT2jsNPgh-7" class="mt-2"></div>
+                    </div>
+                
+                <button onclick="checkQuiz('XdhKPqvcwmSfyT2jsNPgh')" 
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-semibold">
+                    Verificar Respuestas
+                </button>
+                <div id="quiz-result-XdhKPqvcwmSfyT2jsNPgh" class="mt-4"></div>
+            </div></div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane ">
+                <div data-speech-segment="recursos-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Recursos para profundizar</h3></div>
+<div data-speech-segment="recursos-0">
+                <ul class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;">
+                        <div style="flex:1;min-width:0;">
+                            <h3 class="font-bold text-green-700">Guía de Arquitectura de Sistemas para Desarrolladores</h3>
+                            <div class="text-slate-600 text-sm mb-2"><p>Infografía sobre fundamentos de arquitectura de sistemas</p></div>
+                            <a href="https://drive.google.com/file/d/1dmuoiiPSVZ-dfl1XjPV2zMcc1-ZcgKP-/view?usp=drivesdk" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div style="margin-left:1.5rem;flex-shrink:0;">
+                            <div style="width:2cm;height:2cm;padding:5px;background-color:#f0fdf4;border:1px solid #86efac;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                                <img src="img/qr-1.png" alt="QR Guía de Arquitectura de Sistemas para Desarrolladores" style="max-width:100%;max-height:100%;object-fit:contain;" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;">
+                        <div style="flex:1;min-width:0;">
+                            <h3 class="font-bold text-green-700">Arquitectura Código Sólido</h3>
+                            <div class="text-slate-600 text-sm mb-2"><p>Video explicativo sobre la temática</p></div>
+                            <a href="https://drive.google.com/file/d/1x2UP6TsunpjpSIILDMYKRhru_9K05ndq/view?usp=drivesdk" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div style="margin-left:1.5rem;flex-shrink:0;">
+                            <div style="width:2cm;height:2cm;padding:5px;background-color:#f0fdf4;border:1px solid #86efac;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                                <img src="img/qr-2.png" alt="QR Arquitectura Código Sólido" style="max-width:100%;max-height:100%;object-fit:contain;" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul></div>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane ">
+                <div data-speech-segment="bibliografia-0"><h3 class="text-xl font-bold text-green-800 mb-3 mt-6">Bibliografía</h3></div>
+<div data-speech-segment="bibliografia-0">
+                <ol class="space-y-4 mb-6" style="max-width: 100%; list-style: none; padding: 4px 4px 8px 4px; overflow: visible;">
+                    
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Bass, L., Clements, P., &amp; Kazman, R. (2013). Software Architecture in Practice (3rd ed.). Addison-Wesley / SEI Series. https://ptgmedia.pearsoncmg.com/images/9780321815736/samplepages/0321815734.pdf?</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Cervantes, H., Velasco, P., &amp; Castro, L. (2016). Arquitectura de software. Conceptos y ciclo de desarrollo. México, DF: Cengage Learning Editores. https://bibliotecadigital.utn.edu.ec/files/original/648e625c1a4cb5f7b35322d92fb8f4d20055d38c.pdf</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">García de Zuñiga, F. (2025). Todo sobre la arquitectura cliente-servidor. Arsys. Recuperado de: https://www.arsys.es/blog/todo-sobre-la-arquitectura-cliente-servidor</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Gonzaga, E. A., Cedillo, J. A. Á., &amp; Mejía, A. G. (2006). Arquitecturas en n-Capas: Un Sistema Adaptivo. Polibits, (34), 34-37. https://www.redalyc.org/pdf/4026/402640447007.pdf</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Guimarey, A. (2020). Beneficios y riesgos de migrar una arquitectura monolítica a microservicios. Recuperado de: https://www.researchgate.net/publication/348309479_Beneficios_y_riesgos_de_migrar_una_arquitectura_monolitica_a_microservicios</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">IBM. (2024), ¿Qué es la arquitectura monolítica?. Recuperado de: |https://www.ibm.com/think/topics/monolithic-architecture.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">RedHat. (2026) SOA: ¿Qué es la arquitectura orientada a los servicios?. Recuperado de: https://www.redhat.com/es/topics/cloud-native-apps/what-is-service-oriented-architecture</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">OASIS. (2006). Reference Model for Service Oriented Architecture 1.0 (C. M. MacKenzie et al.). OASIS Standard. Recuperado de:  https://docs.oasis-open.org/soa-rm/v1.0/soa-rm.pdf</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Software Engineering Institute (SEI), Carnegie Mellon University. (2013). Architecture and Design of Service-Oriented Systems (Part 1). Recuperado de: https://www.sei.cmu.edu/documents/5462/2013_018_101_60977.pdf</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Microsoft. (2025). N-tier architecture style (Azure Architecture Center). Recuperado de: https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/n-tier?</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow" style="max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; border-left: 4px solid #22c55e; cursor: default;">
+                        <span class="text-green-700 mr-3 text-2xl flex-shrink-0"></span>
+                        <span style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">Microsoft. (2023). Common web application architectures (.NET Architecture). Recuperado de: https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures?</span>
+                    </li>
+                </ol></div>
+            </div>
+        
+            <!-- Creditos institucionales -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        // Speech synthesis - based on proven speech.js pattern
+        document.addEventListener('DOMContentLoaded', function() {
+            var synth = window.speechSynthesis;
+            var activeReaders = {};
+            var spanishVoice = null;
+            
+            function loadVoices() {
+                var voices = synth.getVoices();
+                spanishVoice = voices.find(function(v) { return v.name.includes('Paulina'); });
+                if (!spanishVoice) {
+                    spanishVoice = voices.find(function(v) { return v.lang.startsWith('es'); });
+                }
+            }
+            
+            if (synth.onvoiceschanged !== undefined) {
+                synth.onvoiceschanged = loadVoices;
+            }
+            loadVoices();
+            
+            function removeEmojis(text) {
+                return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '');
+            }
+            
+            function updateButtons(controls, isPlaying) {
+                var playBtn = controls.querySelector('.play-btn');
+                var pauseBtn = controls.querySelector('.pause-btn');
+                var stopBtn = controls.querySelector('.stop-btn');
+                if (playBtn) playBtn.disabled = isPlaying;
+                if (pauseBtn) pauseBtn.disabled = !isPlaying;
+                if (stopBtn) stopBtn.disabled = !isPlaying;
+            }
+            
+            document.querySelectorAll('.speech-controls').forEach(function(controls) {
+                var playBtn = controls.querySelector('.play-btn');
+                var pauseBtn = controls.querySelector('.pause-btn');
+                var stopBtn = controls.querySelector('.stop-btn');
+                var rateInput = controls.querySelector('.speech-rate');
+                var speechId = controls.getAttribute('data-speech-id');
+                var segmentIndex = parseInt(controls.getAttribute('data-segment-index'));
+                
+                var parts = speechId.split('-');
+                parts.shift();
+                parts.pop();
+                var sectionId = parts.join('-');
+                var segmentSelector = '[data-speech-segment="' + sectionId + '-' + segmentIndex + '"]';
+                
+                function collectText() {
+                    var segments = document.querySelectorAll(segmentSelector);
+                    var textParts = [];
+                    segments.forEach(function(el) {
+                        // Clone to process headings and paragraphs for pauses
+                        var clone = el.cloneNode(true);
+                        
+                        // Remove speech controls from clone
+                        var ctrls = clone.querySelectorAll('.speech-controls');
+                        ctrls.forEach(function(c) { c.parentNode.removeChild(c); });
+                        
+                        // Add pauses after headings
+                        var headings = clone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                        headings.forEach(function(h) {
+                            var t = h.textContent;
+                            if (!t.endsWith('.') && !t.endsWith(':') && !t.endsWith('?')) {
+                                h.textContent = t + '. ... ';
+                            } else {
+                                h.textContent = t + ' ... ';
+                            }
+                        });
+                        
+                        // Add pauses between paragraphs
+                        var paragraphs = clone.querySelectorAll('p');
+                        paragraphs.forEach(function(p) {
+                            var t = p.textContent.trim();
+                            if (t && !t.endsWith('.') && !t.endsWith('?') && !t.endsWith('!')) {
+                                p.textContent = t + '. ';
+                            }
+                        });
+                        
+                        var t = clone.innerText.trim();
+                        if (t) textParts.push(t);
+                    });
+                    var text = textParts.join('. ... ');
+                    text = removeEmojis(text);
+                    // Normalize whitespace but preserve pause markers
+                    text = text.replace(/[ \t]{2,}/g, ' ').trim();
+                    // Add natural pauses: after periods, question/exclamation marks
+                    text = text.replace(/([.!?])\s+/g, '$1 ... ');
+                    // Add slight pause after commas
+                    text = text.replace(/,\s*/g, ', ');
+                    return text;
+                }
+                
+                playBtn.addEventListener('click', function() {
+                    var reader = activeReaders[speechId];
+                    
+                    // If paused, resume
+                    if (reader && reader.isPaused) {
+                        synth.resume();
+                        reader.isPaused = false;
+                        updateButtons(controls, true);
+                        playBtn.innerHTML = '<span class="mr-1">▶️</span> Leer';
+                        return;
+                    }
+                    
+                    // Stop any previous reading
+                    synth.cancel();
+                    Object.keys(activeReaders).forEach(function(key) {
+                        var ctrl = document.querySelector('.speech-controls[data-speech-id="' + key + '"]');
+                        if (ctrl) updateButtons(ctrl, false);
+                    });
+                    activeReaders = {};
+                    
+                    // Get text
+                    var text = collectText();
+                    if (!text) return;
+                    
+                    // Create utterance
+                    var utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = parseFloat(rateInput.value);
+                    if (spanishVoice) utterance.voice = spanishVoice;
+                    
+                    utterance.onend = function() {
+                        updateButtons(controls, false);
+                        playBtn.innerHTML = '<span class="mr-1">▶️</span> Leer';
+                        delete activeReaders[speechId];
+                    };
+                    
+                    utterance.onerror = function(e) {
+                        if (e.error !== 'canceled') {
+                            updateButtons(controls, false);
+                            playBtn.innerHTML = '<span class="mr-1">▶️</span> Leer';
+                            delete activeReaders[speechId];
+                        }
+                    };
+                    
+                    activeReaders[speechId] = {
+                        isPaused: false,
+                        rateValue: rateInput.value
+                    };
+                    
+                    synth.speak(utterance);
+                    updateButtons(controls, true);
+                });
+                
+                pauseBtn.addEventListener('click', function() {
+                    var reader = activeReaders[speechId];
+                    if (reader && !reader.isPaused && synth.speaking) {
+                        synth.pause();
+                        reader.isPaused = true;
+                        playBtn.disabled = false;
+                        playBtn.innerHTML = '<span class="mr-1">▶️</span> Continuar';
+                        pauseBtn.disabled = true;
+                    }
+                });
+                
+                stopBtn.addEventListener('click', function() {
+                    synth.cancel();
+                    delete activeReaders[speechId];
+                    updateButtons(controls, false);
+                    playBtn.innerHTML = '<span class="mr-1">▶️</span> Leer';
+                });
+                
+                rateInput.addEventListener('change', function() {
+                    var reader = activeReaders[speechId];
+                    if (reader) {
+                        reader.rateValue = this.value;
+                        if (synth.speaking) {
+                            synth.cancel();
+                            var text = collectText();
+                            if (!text) return;
+                            var utterance = new SpeechSynthesisUtterance(text);
+                            utterance.lang = 'es-ES';
+                            utterance.rate = parseFloat(this.value);
+                            if (spanishVoice) utterance.voice = spanishVoice;
+                            utterance.onend = function() {
+                                updateButtons(controls, false);
+                                playBtn.innerHTML = '<span class="mr-1">▶️</span> Leer';
+                                delete activeReaders[speechId];
+                            };
+                            utterance.onerror = function(e) {
+                                if (e.error !== 'canceled') {
+                                    updateButtons(controls, false);
+                                    delete activeReaders[speechId];
+                                }
+                            };
+                            activeReaders[speechId] = { isPaused: false, rateValue: this.value };
+                            synth.speak(utterance);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        // Copy code functionality
+        function copyCode(btn) {
+            var codeBlock = btn.closest('.code-block-wrapper').querySelector('code');
+            var text = codeBlock.textContent;
+            navigator.clipboard.writeText(text).then(function() {
+                var original = btn.innerHTML;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>Copiado';
+                setTimeout(function() { btn.innerHTML = original; }, 2000);
+            }).catch(function() {
+                // Fallback for older browsers
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                var original = btn.innerHTML;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>Copiado';
+                setTimeout(function() { btn.textContent = original; }, 2000);
+            });
+        }
+
+        // Quiz validation functionality
+        function checkQuiz(quizId) {
+            var container = document.getElementById('quiz-container-' + quizId);
+            if (!container) return;
+            var correctAnswers = JSON.parse(container.getAttribute('data-correct') || '[]');
+            var feedbackCorrect = JSON.parse(container.getAttribute('data-feedback-correct') || '[]');
+            var feedbackIncorrect = JSON.parse(container.getAttribute('data-feedback-incorrect') || '[]');
+            
+            var questionDivs = container.querySelectorAll('[data-quiz-question]');
+            var quizQuestions = [];
+            questionDivs.forEach(function(div) {
+                quizQuestions.push(div);
+            });
+            
+            var correctCount = 0;
+            var totalQuestions = quizQuestions.length;
+            
+            quizQuestions.forEach(function(qDiv, idx) {
+                var radios = qDiv.querySelectorAll('input[type="radio"]');
+                var selectedRadio = null;
+                radios.forEach(function(r) { if (r.checked) selectedRadio = r; });
+                
+                var isCorrect = selectedRadio && parseInt(selectedRadio.value) === correctAnswers[idx];
+                if (isCorrect) correctCount++;
+                
+                // Show per-question feedback
+                var feedbackDiv = document.getElementById('quiz-feedback-' + quizId + '-' + idx);
+                if (feedbackDiv) {
+                    if (!selectedRadio) {
+                        feedbackDiv.innerHTML = '<p class="text-sm text-yellow-700 italic">⚠️ No seleccionaste una respuesta</p>';
+                    } else if (isCorrect) {
+                        var msg = feedbackCorrect && feedbackCorrect[idx] ? feedbackCorrect[idx] : '¡Respuesta correcta!';
+                        feedbackDiv.innerHTML = '<p class="text-sm text-green-700 font-semibold p-2 bg-green-100 rounded mt-1">✅ ' + msg + '</p>';
+                    } else {
+                        var msg = feedbackIncorrect && feedbackIncorrect[idx] ? feedbackIncorrect[idx] : 'Respuesta incorrecta.';
+                        feedbackDiv.innerHTML = '<p class="text-sm text-red-700 font-semibold p-2 bg-red-100 rounded mt-1">❌ ' + msg + '</p>';
+                    }
+                }
+            });
+            
+            // Display overall result
+            var resultDiv = document.getElementById('quiz-result-' + quizId);
+            var percentage = Math.round((correctCount / totalQuestions) * 100);
+            
+            var resultClass = 'bg-red-100 border-red-500 text-red-800';
+            var resultEmoji = '❌';
+            var resultMessage = 'Necesitas mejorar';
+            
+            if (percentage >= 80) {
+                resultClass = 'bg-green-100 border-green-500 text-green-800';
+                resultEmoji = '✅';
+                resultMessage = '¡Excelente!';
+            } else if (percentage >= 60) {
+                resultClass = 'bg-yellow-100 border-yellow-500 text-yellow-800';
+                resultEmoji = '⚠️';
+                resultMessage = 'Bien, pero puedes mejorar';
+            }
+            
+            // SCORM: report quiz score
+            if (typeof window.scormTrackQuizScore === 'function') {
+                window.scormTrackQuizScore(correctCount, totalQuestions);
+            }
+
+            resultDiv.innerHTML = '<div class="p-4 rounded-lg border-l-4 ' + resultClass + '">' +
+                '<p class="font-bold text-lg">' + resultEmoji + ' ' + resultMessage + '</p>' +
+                '<p class="mt-2">Respuestas correctas: ' + correctCount + ' de ' + totalQuestions + ' (' + percentage + '%)</p>' +
+                '<button onclick="resetQuiz(' + "'" + quizId + "'" + ')" class="mt-3 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">' +
+                '🔄 Reintentar' +
+                '</button>' +
+                '</div>';
+        }
+        
+        function resetQuiz(quizId) {
+            // Clear all radio selections
+            var radios = document.querySelectorAll('[name^="quiz-' + quizId + '-"]');
+            radios.forEach(function(radio) {
+                radio.checked = false;
+            });
+            
+            // Clear per-question feedback
+            var feedbackDivs = document.querySelectorAll('[id^="quiz-feedback-' + quizId + '-"]');
+            feedbackDivs.forEach(function(div) {
+                div.innerHTML = '';
+            });
+            
+            // Clear overall result
+            var resultDiv = document.getElementById('quiz-result-' + quizId);
+            resultDiv.innerHTML = '';
+        }
+        
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const contentPanes = document.querySelectorAll('.content-pane');
+            const mobileNav = document.getElementById('mobile-nav');
+            
+            function switchPane(targetId) {
+                contentPanes.forEach(function(pane) {
+                    pane.classList.remove('active');
+                });
+                
+                var targetPane = document.getElementById(targetId);
+                if (targetPane) {
+                    targetPane.classList.add('active');
+                }
+
+                // SCORM: track section visit
+                if (typeof window.scormTrackSection === 'function') {
+                    window.scormTrackSection(targetId);
+                }
+                
+                sidebarLinks.forEach(function(link) {
+                    link.classList.remove('active');
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                if (mobileNav && mobileNav.value !== targetId) {
+                    mobileNav.value = targetId;
+                }
+            }
+            
+            sidebarLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.dataset.target;
+                    switchPane(targetId);
+                });
+            });
+            
+            if (mobileNav) {
+                mobileNav.addEventListener('change', function(e) {
+                    switchPane(e.target.value);
+                });
+            }
+        });
+        
+        // Image modal functionality
+        function openImageModal(src) {
+            let modal = document.getElementById('image-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'image-modal';
+                modal.className = 'image-modal';
+                modal.innerHTML = '<div class="modal-content">' +
+                    '<img src="" alt="Imagen ampliada">' +
+                    '<button class="close-modal" onclick="closeImageModal()">✕</button>' +
+                    '</div>';
+                document.body.appendChild(modal);
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeImageModal();
+                    }
+                });
+            }
+            
+            const img = modal.querySelector('img');
+            img.src = src;
+            modal.classList.add('active');
+        }
+        
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script>
+        // Render KaTeX formulas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render block formulas
+            document.querySelectorAll('.katex-formula').forEach(function(el) {
+                var latex = el.getAttribute('data-latex');
+                if (latex) {
+                    try {
+                        katex.render(latex, el, { throwOnError: false, displayMode: true });
+                    } catch(e) {
+                        el.textContent = latex;
+                    }
+                }
+            });
+
+            // Render inline math in text content: $...$ for inline
+            document.querySelectorAll('.text-slate-700').forEach(function(el) {
+                var html = el.innerHTML;
+                // Match $...$ but not $$...$$
+                html = html.replace(/(?<![\$])\$(?!\$)(.+?)(?<![\$])\$(?!\$)/g, function(match, latex) {
+                    try {
+                        return katex.renderToString(latex.trim(), { throwOnError: false, displayMode: false });
+                    } catch(e) {
+                        return match;
+                    }
+                });
+                el.innerHTML = html;
+            });
+        });
+    </script>
+    <!-- Plugin institucional de accesibilidad -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
