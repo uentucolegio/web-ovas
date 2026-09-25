@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Reading Strategies for Technical Documentation</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back { display: none; }
+        .reveal-card.opened .reveal-back { display: block; }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .doc-mock {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        .doc-mock .doc-title { color: #4ade80; font-weight: bold; }
+        .doc-mock .doc-heading { color: #86efac; font-weight: bold; }
+        .doc-mock .doc-comment { color: #94a3b8; }
+        .doc-mock .doc-warning { color: #fca5a5; }
+        .doc-tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0 0.4rem;
+            border-radius: 9999px;
+            background-color: #dcfce7;
+            color: #166534;
+            vertical-align: middle;
+            font-family: 'Poppins', sans-serif;
+        }
+        .mission-card.completed {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🔎 Don't read everything — read smart</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Casi toda la documentación del mundo del software está escrita en inglés: el README de una librería, la página de ayuda de un editor de código, la guía de instalación de una herramienta. Cuando un desarrollador principiante abre uno de esos documentos, su primer impulso suele ser traducir palabra por palabra… y ahí es donde se pierde: el texto parece enorme, lento y lleno de términos desconocidos.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La buena noticia es que la documentación técnica <strong>no se lee como una novela</strong>. Tiene una estructura predecible (title, requirements, steps, examples, notes, warnings) y existen estrategias de lectura — <strong>skimming</strong>, <strong>scanning</strong>, uso de <strong>cognados</strong> y <strong>palabras clave</strong> — que te permiten encontrar exactamente lo que necesitas en segundos, aunque no conozcas todas las palabras. En este OVA vas a entrenar esas estrategias leyendo fragmentos reales de un README y de páginas de ayuda sencillas.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Reading documentation strategically — not word by word — is a beginner developer's superpower. <span class="text-xl">🦸</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔍</span>
+                        <span>Aplicar las estrategias de lectura <em>skimming</em> y <em>scanning</em> para comprender mensajes breves en inglés relacionados con herramientas, comandos e interfaces de desarrollo de software.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>Reconocer cognados, falsos amigos y palabras clave frecuentes de la documentación técnica (requirements, install, usage, example, note, warning, error).</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📄</span>
+                        <span>Identificar la estructura típica de un README o página de ayuda en inglés: título, requisitos, pasos, ejemplos y advertencias.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Interpretar un fragmento sencillo de documentación en inglés para extraer datos específicos (versiones, comandos, archivos) sin leerlo palabra por palabra.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🗺️ Misión de lectura: explora las 3 estaciones y suma puntos</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Skimming vs Scanning -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-estrategias">
+                            <span>🔍 Skimming vs Scanning: two ways to read a docs page</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-estrategias" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="estrategias-intro" class="content-section">
+                                <p class="mb-4">
+                                    Imagina que abres la página de instalación de una herramienta. Tienes dos preguntas posibles: <em>"¿De qué trata esta página?"</em> y <em>"¿Qué versión de Python necesito?"</em>. Cada pregunta se responde con una estrategia distinta:
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                    <div class="p-4 bg-green-50 border border-green-300 rounded-lg">
+                                        <p class="font-bold text-green-800 mb-1">🛩️ Skimming — vista de pájaro</p>
+                                        <p class="text-sm">Leer <strong>rápido y por encima</strong> para captar la idea general: recorres el título, los encabezados (Requirements, Installation, Usage…) y la primera línea de cada párrafo. En 30 segundos sabes de qué trata la página y si te sirve.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-50 border border-green-300 rounded-lg">
+                                        <p class="font-bold text-green-800 mb-1">🎯 Scanning — radar de datos</p>
+                                        <p class="text-sm">Buscar <strong>un dato específico</strong> ignorando todo lo demás: un número de versión, un comando, un nombre de archivo. Tus ojos "escanean" el texto buscando números, palabras en negrita o bloques de código.</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada tarjeta para descubrir cómo se aplica en una página de documentación (+4 puntos la primera vez):</p>
+                                <div id="reveal-estrategias" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="estrategias-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">🧩 Mini reto: Skimming or Scanning?</h4>
+                                <p class="mb-3 text-sm">Haz click en una situación y luego en la estrategia que usarías (+4 pts por acierto).</p>
+                                <div id="estrategias-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button class="estrategia-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="skimming">🛩️ Skimming</button>
+                                    <button class="estrategia-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="scanning">🎯 Scanning</button>
+                                </div>
+                                <p id="estrategias-msg" class="text-sm mt-3 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: Cognados, falsos amigos y palabras clave -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-cognados">
+                            <span>🧩 Cognates, false friends and keywords</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-cognados" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="cognados-intro" class="content-section">
+                                <p class="mb-4">
+                                    Como hispanohablante ya conoces muchas palabras del inglés técnico sin saberlo: los <strong>cognados</strong> son palabras casi iguales en ambos idiomas (application/aplicación, version/versión, error/error, program/programa, system/sistema, connection/conexión). ¡Úsalos como anclas al leer! Pero cuidado: también existen <strong>falsos amigos</strong> que parecen una cosa y significan otra.
+                                    </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada tarjeta para descubrir el falso amigo o la palabra clave (+4 puntos la primera vez):</p>
+                                <div id="reveal-cognados" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <div class="mt-6 p-4 bg-slate-100 border border-slate-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🔑 Palabras clave que verás en casi toda la documentación:</p>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+                                        <p><strong class="text-green-700">requirements</strong> = requisitos</p>
+                                        <p><strong class="text-green-700">install</strong> = instalar</p>
+                                        <p><strong class="text-green-700">usage</strong> = modo de uso</p>
+                                        <p><strong class="text-green-700">example</strong> = ejemplo</p>
+                                        <p><strong class="text-green-700">note</strong> = nota</p>
+                                        <p><strong class="text-green-700">warning</strong> = advertencia</p>
+                                        <p><strong class="text-green-700">error</strong> = error</p>
+                                        <p><strong class="text-green-700">run</strong> = ejecutar</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="cognados-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Mini reto (+5 pts): in software, the English word "library" means…</p>
+                                <div id="choice-cognados" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-cognados-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Anatomía de un README -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-readme">
+                            <span>📄 Anatomy of a README / help page</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-readme" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="readme-intro" class="content-section">
+                                <p class="mb-4">
+                                    Casi todos los README y páginas de ayuda siguen el mismo esqueleto. Si reconoces las partes, sabes exactamente <strong>dónde mirar</strong> según lo que necesites. Observa este README de ejemplo de una herramienta imaginaria pero realista, <em>TaskLite</em>, con cada parte etiquetada:
+                                </p>
+                                <div class="doc-mock mb-4">
+<pre># TaskLite  <span class="doc-tag">TITLE</span>
+<span class="doc-comment">A simple command-line tool to manage your to-do lists.</span>  <span class="doc-tag">DESCRIPTION</span>
+
+<span class="doc-heading">## Requirements</span>  <span class="doc-tag">REQUIREMENTS</span>
+- Python 3.10 or higher
+- pip 23 or higher
+- 50 MB of free disk space
+
+<span class="doc-heading">## Installation</span>  <span class="doc-tag">STEPS</span>
+1. Open your terminal.
+2. Run: pip install tasklite
+3. Verify the installation: tasklite --version
+
+<span class="doc-heading">## Usage</span>  <span class="doc-tag">EXAMPLE</span>
+$ tasklite add "Study English"
+$ tasklite list
+
+<span class="doc-heading">## Note</span>  <span class="doc-tag">NOTE</span>
+TaskLite saves your tasks in a local file called tasks.json.
+
+<span class="doc-warning">## Warning</span>  <span class="doc-tag">WARNING</span>
+<span class="doc-warning">Do not delete tasks.json while the program is running.
+You may lose your data.</span></pre>
+                                </div>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz click en cada parte para descubrir qué buscar allí (+4 puntos la primera vez):</p>
+                                <div id="reveal-readme" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="readme-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">❓ Mini reto (+5 pts): you want to know what to type in the terminal to install TaskLite. Which section do you scan?</p>
+                                <div id="choice-readme" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-readme-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Completa las 2 misiones de lectura y gana tus insignias</p>
+                        <p class="text-green-800 font-semibold">🏅 Insignias: <span id="insignias-ganadas">—</span></p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1: Scanning contrarreloj -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">⏱️ Actividad 1: Scanning Race</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Vas a poner a prueba tu radar de datos. Al pulsar <strong>Start</strong> aparecerá un fragmento de documentación de una herramienta imaginaria (<em>PixelBot</em>) y un cronómetro empezará a contar. <strong>No leas todo</strong>: escanea el texto buscando solo el dato que pide cada pregunta. El cronómetro es amistoso — no pierdes por demorarte, pero un buen tiempo mejora tu insignia.
+                        </p>
+                        <div class="flex flex-wrap items-center gap-4 mb-4">
+                            <button id="scan-start-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">▶️ Start</button>
+                            <p class="text-green-800 font-semibold">⏱️ Tiempo: <span id="scan-timer">0</span> s</p>
+                            <p class="text-green-800 font-semibold">⭐ Aciertos: <span id="scan-score">0</span>/5</p>
+                        </div>
+                        <div id="scan-zone" class="hidden">
+                            <div class="doc-mock mb-4">
+<pre># PixelBot
+<span class="doc-comment">A command-line tool to resize and convert images.</span>
+
+<span class="doc-heading">## Requirements</span>
+- Node.js 18 or higher
+- 120 MB of free disk space
+
+<span class="doc-heading">## Installation</span>
+1. Open your terminal.
+2. Run: npm install -g pixelbot
+3. Check the version: pixelbot --version
+
+<span class="doc-heading">## Usage</span>
+$ pixelbot resize photo.png --width 800
+<span class="doc-comment">Resized images are saved in the ./output folder.</span>
+
+<span class="doc-warning">## Warning</span>
+<span class="doc-warning">Do not close the terminal while PixelBot is converting images.</span></pre>
+                            </div>
+                            <div id="scan-preguntas" class="space-y-5"></div>
+                            <div id="scan-resultado" class="mt-4 text-base font-bold"></div>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2: Clasificar frases por sección -->
+                    <div class="mission-card bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-mission="2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🗂️ Actividad 2: Where does it belong?</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Un README se desordenó y sus frases quedaron sueltas. Léelas y decide a qué sección pertenece cada una: haz click en una frase y luego en la sección correcta (<strong>Requirements</strong>, <strong>Steps</strong>, <strong>Example</strong> o <strong>Warning</strong>). Cada acierto suma 1 punto; al clasificarlas todas recibirás tu insignia.
+                        </p>
+                        <p class="text-green-800 font-semibold mb-3">⭐ Aciertos: <span id="clasifica-score">0</span>/8</p>
+                        <div id="clasifica-frases" class="flex flex-wrap gap-2 mb-4"></div>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="seccion-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="requirements">📋 Requirements</button>
+                            <button class="seccion-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="steps">🔢 Steps</button>
+                            <button class="seccion-btn bg-teal-100 border border-teal-400 text-teal-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="example">💻 Example</button>
+                            <button class="seccion-btn bg-red-100 border border-red-400 text-red-800 font-semibold py-2 px-3 rounded-lg text-sm" data-tipo="warning">⚠️ Warning</button>
+                        </div>
+                        <p id="clasifica-msg" class="text-sm mt-3 font-semibold"></p>
+                        <div id="clasifica-resultado" class="mt-3 text-base font-bold"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: British Council Reading -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Practise English reading skills (British Council)</h3>
+                            <p class="text-slate-600 mb-2">Textos de práctica de lectura organizados por niveles (A1 a C1) con actividades interactivas gratuitas. Empieza por los niveles A1 y A2.</p>
+                            <a href="https://learnenglish.britishcouncil.org/skills/reading" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-1.png" alt="QR Practise English reading skills British Council" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: Cambridge Dictionary -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Cambridge Dictionary</h3>
+                            <p class="text-slate-600 mb-2">Diccionario inglés-español gratuito con pronunciación y ejemplos. Úsalo para confirmar cognados y desenmascarar falsos amigos mientras lees documentación.</p>
+                            <a href="https://dictionary.cambridge.org/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-2.png" alt="QR Cambridge Dictionary" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: Oxford Learner's Dictionaries -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Oxford Learner's Dictionaries</h3>
+                            <p class="text-slate-600 mb-2">Diccionario para estudiantes de inglés con definiciones sencillas, audio y ejemplos de uso reales. Ideal para el vocabulario clave de las páginas de ayuda.</p>
+                            <a href="https://www.oxfordlearnersdictionaries.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-3.png" alt="QR Oxford Learner's Dictionaries" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Murphy, R. (2019). <i>English Grammar in Use</i> (5th ed.). Cambridge University Press.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Glendinning, E. H. &amp; McEwan, J. (2013). <i>Oxford English for Information Technology</i>. Oxford University Press.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            British Council. (s. f.). <i>LearnEnglish</i>.<br>
+                            <a href="https://learnenglish.britishcouncil.org/" class="text-green-700 underline break-all" target="_blank">https://learnenglish.britishcouncil.org/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            British Council. (s. f.). <i>Practise English reading skills</i>. LearnEnglish.<br>
+                            <a href="https://learnenglish.britishcouncil.org/skills/reading" class="text-green-700 underline break-all" target="_blank">https://learnenglish.britishcouncil.org/skills/reading</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cambridge University Press &amp; Assessment. (s. f.). <i>Cambridge Dictionary</i>.<br>
+                            <a href="https://dictionary.cambridge.org/" class="text-green-700 underline break-all" target="_blank">https://dictionary.cambridge.org/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Oxford University Press. (s. f.). <i>Oxford Learner's Dictionaries</i>.<br>
+                            <a href="https://www.oxfordlearnersdictionaries.com/" class="text-green-700 underline break-all" target="_blank">https://www.oxfordlearnersdictionaries.com/</a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "You only need to find the version of Node.js required by a tool. Which reading strategy do you use?",
+                options: ["Skimming", "Scanning", "Reading word by word", "Translating the whole page"],
+                correct: 1
+            },
+            {
+                question: "What is \"skimming\"?",
+                options: ["Reading slowly to memorize every word", "Reading quickly to get the general idea of a text", "Searching for one specific number", "Copying the examples into the terminal"],
+                correct: 1
+            },
+            {
+                question: "In software, the English word \"library\" means…",
+                options: ["A place that sells books (librería)", "A collection of reusable code", "A free e-book", "A reading room"],
+                correct: 1
+            },
+            {
+                question: "You want to know what you need BEFORE installing a tool. Which section of the README do you check?",
+                options: ["Usage", "Warning", "Requirements", "Note"],
+                correct: 2
+            },
+            {
+                question: "Which section of a docs page usually shows commands you can copy and run?",
+                options: ["Example / Usage", "Title", "Requirements", "Description"],
+                correct: 0
+            },
+            {
+                question: "A README says: \"Warning: Do not delete tasks.json\". What does this mean?",
+                options: ["It is an optional suggestion", "It alerts you about an action that can cause problems", "It is the first installation step", "It lists a requirement"],
+                correct: 1
+            },
+            {
+                question: "Which of these words is a cognate (very similar in English and Spanish)?",
+                options: ["warning", "run", "application", "file"],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // --- Helper genérico para tarjetas "revelar" ---
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // --- Helper genérico para preguntas rápidas de una sola respuesta ---
+        function renderChoice(containerId, msgId, opciones, correcta, feedbackOk, feedbackNo, puntos, columnas) {
+            const container = document.getElementById(containerId);
+            let respondido = false;
+            opciones.forEach((op, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer text-sm';
+                btn.textContent = op;
+                btn.addEventListener('click', () => {
+                    if (respondido) return;
+                    respondido = true;
+                    const msg = document.getElementById(msgId);
+                    if (i === correcta) {
+                        btn.classList.add('selected');
+                        msg.textContent = feedbackOk;
+                        msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        btn.classList.add('bg-red-100', 'border-red-400');
+                        msg.textContent = feedbackNo;
+                        msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                    }
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        // --- Estación 1: Skimming vs Scanning — reveal ---
+        renderReveal('reveal-estrategias', [
+            { titulo: "🛩️ Skim: read the headings first", texto: "Antes de leer nada más, recorre los encabezados: Requirements, Installation, Usage, Warning. En 10 segundos ya conoces el mapa de la página." },
+            { titulo: "🛩️ Skim: first line of each paragraph", texto: "La primera oración de cada párrafo suele resumirlo. Léela y decide si el resto del párrafo te interesa o lo saltas." },
+            { titulo: "🎯 Scan: hunt for numbers and code", texto: "¿Buscas una versión o un comando? Ignora las oraciones completas y busca dígitos (3.10, 18), bloques de código y texto con formato especial." },
+            { titulo: "🎯 Scan: use Ctrl+F like a pro", texto: "En una página de ayuda real puedes usar el buscador del navegador (Ctrl+F) con la palabra clave: \"version\", \"install\", \"error\". Es scanning asistido." }
+        ], 4);
+
+        // --- Estación 1: mini reto clasificar situaciones ---
+        (function() {
+            const frases = [
+                { texto: "Quiero saber de qué trata esta página de ayuda.", tipo: "skimming" },
+                { texto: "Necesito el número de versión de pip que piden.", tipo: "scanning" },
+                { texto: "¿Este tutorial me sirve o busco otro?", tipo: "skimming" },
+                { texto: "¿Cuál es el comando exacto para instalar?", tipo: "scanning" }
+            ];
+            let seleccion = null;
+            const container = document.getElementById('estrategias-frases');
+            frases.forEach((f, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+                chip.textContent = f.texto;
+                chip.dataset.index = i;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('chip-done-correct') || this.classList.contains('chip-done-wrong')) return;
+                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                    this.classList.add('chip-selected');
+                    seleccion = this;
+                });
+                container.appendChild(chip);
+            });
+            document.querySelectorAll('.estrategia-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!seleccion) return;
+                    const idx = parseInt(seleccion.dataset.index);
+                    const msg = document.getElementById('estrategias-msg');
+                    seleccion.classList.remove('chip-selected');
+                    if (frases[idx].tipo === btn.dataset.tipo) {
+                        seleccion.classList.add('chip-done-correct');
+                        msg.textContent = '✅ Correct!';
+                        msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                        sumarPuntos(4);
+                    } else {
+                        seleccion.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ Not quite. ¿Buscas la idea general (skimming) o un dato puntual (scanning)?';
+                        msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                    }
+                    seleccion = null;
+                });
+            });
+        })();
+
+        // --- Estación 2: cognados y falsos amigos — reveal ---
+        renderReveal('reveal-cognados', [
+            { titulo: "⚠️ library ≠ librería", texto: "En software, una \"library\" es una colección de código reutilizable (biblioteca). La tienda de libros es \"bookstore\"." },
+            { titulo: "⚠️ actually ≠ actualmente", texto: "\"Actually\" significa \"en realidad\". Para decir \"actualmente\" usa \"currently\": \"The tool currently supports Windows\"." },
+            { titulo: "⚠️ command ≠ comando (militar)", texto: "En documentación, \"command\" es una orden que escribes en la terminal: \"Run the following command\". ¡Aquí sí coincide con nuestro \"comando\" técnico!" },
+            { titulo: "✅ Cognados que te salvan", texto: "application/aplicación, version/versión, error/error, program/programa, system/sistema, connection/conexión, document/documento. Al verlos, ya entiendes media oración." }
+        ], 4);
+
+        // --- Estación 2: mini reto ---
+        renderChoice('choice-cognados', 'choice-cognados-msg',
+            ["A place that sells books (una librería)", "A collection of reusable code (una biblioteca de código)", "A free online book"],
+            1,
+            '✅ Correct! "Library" es un falso amigo: en software significa biblioteca de código.',
+            '❌ Careful — "library" is a false friend. Piensa en pip install o npm install.',
+            5);
+
+        // --- Estación 3: anatomía del README — reveal ---
+        renderReveal('reveal-readme', [
+            { titulo: "📌 Title + description", texto: "Te dicen QUÉ es la herramienta en una línea. Con skimming del título ya sabes si esta página te sirve." },
+            { titulo: "📋 Requirements", texto: "Lo que necesitas ANTES de instalar: versiones (Python 3.10 or higher), espacio en disco, sistema operativo. Escanea aquí los números." },
+            { titulo: "🔢 Steps (Installation)", texto: "Pasos numerados en imperativo: Open…, Run…, Verify… Síguelos en orden. Los comandos aparecen tras \"Run:\" o en bloques de código." },
+            { titulo: "💻 Usage / Example", texto: "Ejemplos listos para copiar: las líneas que empiezan con $ se escriben en la terminal. Es la sección favorita para el scanning." },
+            { titulo: "📝 Note", texto: "Información útil pero no peligrosa: dónde se guardan los archivos, opciones extra. Léela cuando algo no funcione como esperabas." },
+            { titulo: "⚠️ Warning", texto: "¡Nunca la ignores! Advierte acciones que pueden dañar tu trabajo: \"Do not delete…\", \"You may lose your data\". Suele usar Do not / Don't." }
+        ], 4);
+
+        // --- Estación 3: mini reto ---
+        renderChoice('choice-readme', 'choice-readme-msg',
+            ["Requirements", "Installation", "Note", "Warning"],
+            1,
+            '✅ Correct! Installation contiene los pasos y el comando pip install tasklite.',
+            '❌ Look again: necesitas los pasos con el comando, no los requisitos ni las notas.',
+            5);
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // --- Insignias y barra de progreso ---
+        const insigniasGanadas = [];
+        function otorgarInsignia(nombre) {
+            insigniasGanadas.push(nombre);
+            document.getElementById('insignias-ganadas').textContent = insigniasGanadas.join(' ');
+            document.getElementById('actividades-barra').style.width = Math.min(insigniasGanadas.length, 2) / 2 * 100 + '%';
+        }
+
+        // --- Actividad 1: Scanning Race ---
+        const scanPreguntas = [
+            { texto: "1. What version of Node.js is required?", opciones: ["16 or higher", "18 or higher", "20 or higher"], correcta: 1 },
+            { texto: "2. How much free disk space do you need?", opciones: ["50 MB", "120 MB", "500 MB"], correcta: 1 },
+            { texto: "3. Which command installs PixelBot?", opciones: ["pip install pixelbot", "npm install -g pixelbot", "pixelbot --install"], correcta: 1 },
+            { texto: "4. Where are resized images saved?", opciones: ["In the ./output folder", "In the Downloads folder", "In tasks.json"], correcta: 0 },
+            { texto: "5. What should you NOT do while PixelBot is converting images?", opciones: ["Open another photo", "Close the terminal", "Check the version"], correcta: 1 }
+        ];
+        let scanSegundos = 0, scanInterval = null, scanAciertos = 0, scanRespondidas = 0, scanIniciado = false;
+
+        document.getElementById('scan-start-btn').addEventListener('click', function() {
+            if (scanIniciado) return;
+            scanIniciado = true;
+            this.disabled = true;
+            this.classList.add('opacity-50');
+            this.textContent = '👀 Scanning...';
+            document.getElementById('scan-zone').classList.remove('hidden');
+            scanInterval = setInterval(() => {
+                scanSegundos++;
+                document.getElementById('scan-timer').textContent = scanSegundos;
+            }, 1000);
+        });
+
+        const scanContainer = document.getElementById('scan-preguntas');
+        scanPreguntas.forEach((p) => {
+            const div = document.createElement('div');
+            const preguntaHtml = document.createElement('p');
+            preguntaHtml.className = 'font-semibold text-slate-800 mb-2';
+            preguntaHtml.textContent = p.texto;
+            div.appendChild(preguntaHtml);
+            const optsDiv = document.createElement('div');
+            optsDiv.className = 'grid grid-cols-1 sm:grid-cols-3 gap-2';
+            div.appendChild(optsDiv);
+            const msg = document.createElement('p');
+            msg.className = 'text-sm mt-1 font-semibold';
+            div.appendChild(msg);
+            let respondido = false;
+            p.opciones.forEach((op, oi) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option border-2 border-slate-200 rounded-lg p-2 text-sm cursor-pointer';
+                btn.textContent = op;
+                btn.addEventListener('click', () => {
+                    if (respondido) return;
+                    respondido = true;
+                    scanRespondidas++;
+                    if (oi === p.correcta) {
+                        scanAciertos++;
+                        btn.classList.add('selected');
+                        msg.textContent = '✅ Correct!';
+                        msg.className = 'text-sm mt-1 font-semibold text-green-700';
+                    } else {
+                        btn.classList.add('bg-red-100', 'border-red-400');
+                        msg.textContent = '❌ Scan the text again — the answer is there.';
+                        msg.className = 'text-sm mt-1 font-semibold text-red-600';
+                    }
+                    document.getElementById('scan-score').textContent = scanAciertos;
+                    if (scanRespondidas === scanPreguntas.length) finalizarScan();
+                });
+                optsDiv.appendChild(btn);
+            });
+            scanContainer.appendChild(div);
+        });
+
+        function finalizarScan() {
+            clearInterval(scanInterval);
+            const resultado = document.getElementById('scan-resultado');
+            let insignia, mensaje;
+            if (scanAciertos === 5 && scanSegundos <= 90) {
+                insignia = '🥇 Scanner Master';
+                mensaje = `¡Perfecto! 5/5 en ${scanSegundos} segundos. Tu radar de datos funciona a toda máquina.`;
+            } else if (scanAciertos >= 4) {
+                insignia = '🥈 Data Hunter';
+                mensaje = `¡Muy bien! ${scanAciertos}/5 aciertos en ${scanSegundos} segundos. Ya escaneas como desarrollador.`;
+            } else if (scanAciertos >= 3) {
+                insignia = '🥉 Rookie Scanner';
+                mensaje = `${scanAciertos}/5 aciertos en ${scanSegundos} segundos. Buen comienzo: recuerda buscar números y comandos, no leerlo todo.`;
+            } else {
+                insignia = '🔄 Keep practicing';
+                mensaje = `${scanAciertos}/5 aciertos. Vuelve a la estación "Skimming vs Scanning" del Contenido y reintenta recargando la página.`;
+            }
+            resultado.textContent = `${insignia} — ${mensaje}`;
+            resultado.className = 'mt-4 text-base font-bold ' + (scanAciertos >= 3 ? 'text-green-700' : 'text-red-600');
+            otorgarInsignia(insignia.split(' ')[0]);
+            document.querySelector('[data-mission="1"]').classList.add('completed');
+        }
+
+        // --- Actividad 2: Where does it belong? ---
+        const clasificaFrases = [
+            { texto: "Python 3.10 or higher", tipo: "requirements" },
+            { texto: "Do not close the terminal during installation.", tipo: "warning" },
+            { texto: "2. Run: pip install tasklite", tipo: "steps" },
+            { texto: "$ tasklite add \"Buy milk\"", tipo: "example" },
+            { texto: "50 MB of free disk space", tipo: "requirements" },
+            { texto: "1. Open your terminal.", tipo: "steps" },
+            { texto: "You may lose your data.", tipo: "warning" },
+            { texto: "Output: Task added successfully.", tipo: "example" }
+        ];
+        let clasificaSeleccion = null, clasificaAciertos = 0, clasificaHechas = 0;
+        const clasificaContainer = document.getElementById('clasifica-frases');
+        clasificaFrases.forEach((f, i) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+            chip.textContent = f.texto;
+            chip.dataset.index = i;
+            chip.addEventListener('click', function() {
+                if (this.classList.contains('chip-done-correct') || this.classList.contains('chip-done-wrong')) return;
+                clasificaContainer.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                this.classList.add('chip-selected');
+                clasificaSeleccion = this;
+            });
+            clasificaContainer.appendChild(chip);
+        });
+        document.querySelectorAll('.seccion-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!clasificaSeleccion) return;
+                const idx = parseInt(clasificaSeleccion.dataset.index);
+                const msg = document.getElementById('clasifica-msg');
+                clasificaSeleccion.classList.remove('chip-selected');
+                clasificaHechas++;
+                if (clasificaFrases[idx].tipo === btn.dataset.tipo) {
+                    clasificaSeleccion.classList.add('chip-done-correct');
+                    clasificaAciertos++;
+                    msg.textContent = '✅ Correct!';
+                    msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                } else {
+                    clasificaSeleccion.classList.add('chip-done-wrong');
+                    msg.textContent = '❌ Not quite. Pista: los pasos van numerados, los ejemplos empiezan con $ o muestran salidas, las advertencias usan "Do not" o hablan de perder datos.';
+                    msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                }
+                document.getElementById('clasifica-score').textContent = clasificaAciertos;
+                clasificaSeleccion = null;
+                if (clasificaHechas === clasificaFrases.length) finalizarClasifica();
+            });
+        });
+        function finalizarClasifica() {
+            const resultado = document.getElementById('clasifica-resultado');
+            let insignia, mensaje;
+            if (clasificaAciertos === 8) {
+                insignia = '🥇 README Architect';
+                mensaje = '¡8/8! Conoces la anatomía de un README de memoria.';
+            } else if (clasificaAciertos >= 6) {
+                insignia = '🥈 Section Sorter';
+                mensaje = `${clasificaAciertos}/8 aciertos. Casi perfecto: repasa la estación "Anatomy of a README".`;
+            } else if (clasificaAciertos >= 4) {
+                insignia = '🥉 Doc Explorer';
+                mensaje = `${clasificaAciertos}/8 aciertos. Vas por buen camino, vuelve al ejemplo de TaskLite y observa las etiquetas.`;
+            } else {
+                insignia = '🔄 Keep practicing';
+                mensaje = `${clasificaAciertos}/8 aciertos. Recarga la página y vuelve a intentarlo después de repasar el Contenido.`;
+            }
+            resultado.textContent = `${insignia} — ${mensaje}`;
+            resultado.className = 'mt-3 text-base font-bold ' + (clasificaAciertos >= 4 ? 'text-green-700' : 'text-red-600');
+            otorgarInsignia(insignia.split(' ')[0]);
+            document.querySelector('[data-mission="2"]').classList.add('completed');
+        }
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

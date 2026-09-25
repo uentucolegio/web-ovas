@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Integración Frontend-Backend y Autenticación</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        code {
+            background-color: #f1f5f9;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: #166534;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .reto-opcion {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .reto-opcion:hover { background-color: #f0fdf4; }
+        .reto-opcion.correcta {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .reto-opcion.incorrecta {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .flow-step {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .flow-step.step-ok {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .flow-step.step-shake {
+            animation: shake 0.3s ease;
+            border-color: #ef4444;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .insignia {
+            display: none;
+        }
+        .insignia.ganada {
+            display: flex;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🔗 Es hora de unir las dos mitades de tu proyecto</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Hasta ahora tu proyecto web ha vivido en dos mundos separados. Por un lado está el <strong>frontend</strong>: las pantallas con HTML, CSS y JavaScript que construiste en la Unidad 2, capaces de validar formularios y consumir APIs públicas. Por el otro está el <strong>backend</strong> que tu equipo viene desarrollando en esta unidad: la lógica de negocio, la base de datos y los servicios que exponen la información del proyecto. En este tema vas a conectar esas dos mitades para que funcionen como una sola aplicación.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    ¿Qué significa que el frontend "hable" con tu propia API? Que cuando el usuario abre la página, el navegador ya no muestra datos inventados ni simulados: hace una petición HTTP a un servicio construido por tu equipo, el backend consulta la base de datos y devuelve una respuesta en JSON que el frontend convierte en tarjetas, tablas o listas reales. Y cuando el usuario llena un formulario, esos datos viajan al servidor y quedan guardados de verdad.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Pero conectar no es solo mostrar datos. Una aplicación real necesita saber <strong>quién</strong> la usa (autenticación), decidir <strong>qué puede hacer</strong> cada persona (autorización) y responder con claridad cuando algo sale mal (manejo de errores). En esta guía, que corresponde al Tema 2 de la Unidad 3, trabajarás la integración frontend–backend con <code>fetch</code>, el flujo básico de login con token, los roles de usuario y administrador, los códigos de estado HTTP en la práctica y los criterios mínimos de seguridad que todo proyecto debe cumplir.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Todo lo que veas aquí lo aplicarás directamente en el proyecto integrador de tu equipo: al terminar, tu frontend deberá listar y crear registros usando tu propia API, proteger al menos una funcionalidad con login y mostrar mensajes de error útiles cuando el servidor responda con un problema. Ese es el corazón del resultado de aprendizaje de esta unidad. 🔗
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Cuando tu formulario guarde un registro en tu propia base de datos y tu página lo muestre al recargar, habrás cruzado la línea que separa una maqueta de una aplicación web real. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔌</span>
+                        <span>Integrar el frontend del proyecto web con su propia API mediante peticiones <code>fetch</code> (GET para listar y POST con JSON para crear), mostrando las respuestas en la interfaz.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🪪</span>
+                        <span>Distinguir autenticación de autorización y explicar el flujo básico de un login con token, incluyendo el manejo de roles de usuario y administrador.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🚦</span>
+                        <span>Aplicar el manejo de errores en la comunicación frontend–backend, interpretando los códigos HTTP (400, 401, 403, 404, 500) y mostrando mensajes útiles al usuario con <code>try/catch</code>.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛡️</span>
+                        <span>Reconocer criterios básicos de seguridad web —contraseñas cifradas, validación en el servidor y uso de HTTPS— y aplicarlos en el proyecto integrador del equipo.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🧭 Misión de lectura: explora las 4 estaciones (+5 pts por abrir cada una) y resuelve su mini reto (+5 pts)</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span>/40</p>
+                    </div>
+
+                    <!-- Acordeón 1: Integración frontend-backend -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-integracion">
+                            <span>🔌 Estación 1 — Integración: tu frontend habla con tu propia API</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-integracion" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    En la Unidad 2 consumiste APIs públicas de internet. La diferencia ahora es que la API es <strong>tuya</strong>: la construyó tu equipo y expone los datos del proyecto. El mecanismo es el mismo <code>fetch</code> que ya conoces, pero apuntando a las rutas de tu backend, por ejemplo <code>/api/productos</code>.
+                                </p>
+                                <p class="mb-4">
+                                    El <strong>ciclo petición–respuesta</strong> siempre sigue estos pasos: el navegador envía una petición HTTP → el backend la recibe, ejecuta la lógica de negocio y consulta la base de datos → el backend responde con JSON y un código de estado → el frontend convierte ese JSON en elementos del DOM.
+                                </p>
+                                <h4 class="font-bold text-green-800 mb-2">📥 GET: listar registros de tu API</h4>
+<pre class="mb-4"><code>// Listar los productos que guarda tu backend
+async function cargarProductos() {
+  const respuesta = await fetch('/api/productos');
+  const productos = await respuesta.json();
+  const lista = document.getElementById('lista-productos');
+  lista.innerHTML = productos
+    .map(p =&gt; `&lt;li&gt;${p.nombre} — $${p.precio}&lt;/li&gt;`)
+    .join('');
+}</code></pre>
+                                <h4 class="font-bold text-green-800 mb-2">📤 POST: crear un registro enviando JSON</h4>
+<pre class="mb-4"><code>// Enviar los datos del formulario al backend
+const nuevo = { nombre: 'Camiseta', precio: 45000 };
+const respuesta = await fetch('/api/productos', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(nuevo)
+});
+if (respuesta.ok) {
+  mostrarMensaje('✅ Producto guardado correctamente');
+  cargarProductos(); // refresca la lista con el dato nuevo
+}</code></pre>
+                                <p class="mb-4">
+                                    Observa los tres ingredientes del POST: el <code>method</code>, el header <code>Content-Type: application/json</code> (le dice al backend en qué formato viaja el cuerpo) y el <code>body</code> convertido a texto con <code>JSON.stringify()</code>. Al final, el frontend <strong>renderiza</strong> el resultado en el DOM: la aplicación se siente viva porque lo que se guarda, se ve.
+                                </p>
+                            </div>
+                            <div class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): ¿qué header le indica al backend que el cuerpo de la petición viene en formato JSON?</p>
+                                <div id="reto-integracion" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="reto-integracion-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: Autenticación vs autorización -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-auth">
+                            <span>🪪 Estación 2 — Autenticación y autorización: ¿quién eres y qué puedes hacer?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-auth" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    Son dos preguntas distintas que suelen confundirse. La <strong>autenticación</strong> responde <em>"¿quién eres?"</em>: verifica la identidad del usuario, normalmente con correo y contraseña. La <strong>autorización</strong> responde <em>"¿qué puedes hacer?"</em>: decide si ese usuario, ya identificado, tiene permiso para una acción concreta.
+                                </p>
+                                <p class="mb-4">
+                                    Piensa en un concierto 🎫: mostrar tu cédula en la entrada es <strong>autenticación</strong> (demuestras quién eres); la pulsera VIP que te deja o no pasar al backstage es <strong>autorización</strong> (define hasta dónde llegas).
+                                </p>
+                                <h4 class="font-bold text-green-800 mb-2">🔑 Flujo básico de login con token</h4>
+                                <ol class="list-decimal ml-6 space-y-2 mb-4">
+                                    <li>El usuario escribe correo y contraseña en el <strong>formulario de login</strong>.</li>
+                                    <li>El frontend envía esos datos con <code>POST /login</code> (cuerpo en JSON).</li>
+                                    <li>El backend <strong>verifica las credenciales</strong> contra la base de datos.</li>
+                                    <li>Si son correctas, el backend genera y devuelve un <strong>token</strong>: una credencial temporal (la idea detrás de las sesiones y de los JWT) que representa "este usuario ya inició sesión".</li>
+                                    <li>El frontend guarda el token y lo <strong>adjunta en cada petición</strong> siguiente, en el header <code>Authorization</code>.</li>
+                                    <li>Las <strong>rutas protegidas</strong> del backend revisan el token antes de responder: sin token válido, no hay datos.</li>
+                                </ol>
+                                <h4 class="font-bold text-green-800 mb-2">👥 Roles: usuario y administrador</h4>
+                                <p class="mb-4">
+                                    En un proyecto típico bastan dos roles. El <strong>usuario</strong> puede ver el catálogo, registrarse y crear sus propios registros. El <strong>administrador</strong> puede además editar o eliminar cualquier registro y gestionar a los demás usuarios. El backend guarda el rol junto con la cuenta y lo consulta en cada ruta protegida: la interfaz puede ocultar un botón, pero la decisión final de permitir o negar la acción <strong>siempre la toma el servidor</strong>.
+                                </p>
+                            </div>
+                            <div class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): un usuario con sesión iniciada intenta eliminar un producto y el sistema se lo niega porque su rol no lo permite. ¿Qué mecanismo actuó?</p>
+                                <div id="reto-auth" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="reto-auth-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Manejo de errores -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-errores">
+                            <span>🚦 Estación 3 — Manejo de errores: códigos HTTP y mensajes útiles</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-errores" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    Cuando frontend y backend conversan, las cosas fallan: datos incompletos, sesiones vencidas, rutas equivocadas, errores del servidor. El backend comunica qué pasó con <strong>códigos de estado HTTP</strong>. Estos cinco aparecerán una y otra vez en tu proyecto:
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">400 Bad Request</span> — la petición está mal formada o faltan datos: el formulario envió un campo vacío o un JSON inválido.</div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">401 Unauthorized</span> — no estás autenticado: falta el token o ya venció. Toca iniciar sesión de nuevo.</div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">403 Forbidden</span> — estás autenticado, pero tu rol no tiene permiso para esta acción.</div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">404 Not Found</span> — el recurso o la ruta no existe: revisa la URL o el id que pediste.</div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg sm:col-span-2"><span class="font-bold text-green-700">500 Internal Server Error</span> — el error ocurrió dentro del backend (una excepción, la base de datos caída). El usuario no tiene la culpa: hay que revisar los logs del servidor.</div>
+                                </div>
+                                <h4 class="font-bold text-green-800 mb-2">🧯 try/catch + respuesta.ok en la práctica</h4>
+<pre class="mb-4"><code>async function cargarProductos() {
+  try {
+    const respuesta = await fetch('/api/productos');
+    if (!respuesta.ok) {
+      // fetch NO lanza error con 404 o 500: hay que revisarlo
+      throw new Error('El servidor respondió ' + respuesta.status);
+    }
+    const datos = await respuesta.json();
+    renderizarLista(datos);
+  } catch (error) {
+    // Aquí caen los fallos de red y el throw de arriba
+    mostrarMensaje('⚠️ No pudimos cargar los productos. Intenta de nuevo.');
+    console.error(error); // el detalle técnico va a la consola, no al usuario
+  }
+}</code></pre>
+                                <p class="mb-4">
+                                    Dos reglas de oro. Primera: los <strong>mensajes al usuario</strong> deben decir qué pasó y qué hacer ("Tu sesión venció, inicia sesión de nuevo"), nunca jerga técnica como "Error 500 undefined". Segunda: la <strong>validación va en ambos lados</strong> — el frontend valida para dar respuesta inmediata y buena experiencia, y el backend vuelve a validar todo, porque cualquiera puede saltarse el formulario y enviar la petición directamente.
+                                </p>
+                            </div>
+                            <div class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): tu API respondió con estado 404, pero el <code>catch</code> no se ejecutó y la página intentó renderizar igual. ¿Qué faltó en el código?</p>
+                                <div id="reto-errores" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="reto-errores-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Seguridad básica -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-seguridad">
+                            <span>🛡️ Estación 4 — Criterios básicos de seguridad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-seguridad" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">
+                                    No necesitas ser experto en ciberseguridad para proteger tu proyecto, pero sí cumplir tres criterios mínimos que se evalúan en esta unidad:
+                                </p>
+                                <ul class="space-y-3 mb-4">
+                                    <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">🔒 Nunca guardes contraseñas en texto plano.</span> En la base de datos solo se almacena el <strong>hash</strong> de la contraseña (con funciones como bcrypt). Al hacer login, el backend compara hashes: si alguien roba la base de datos, no obtiene las contraseñas reales.</li>
+                                    <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">🙅 No confíes en el cliente.</span> Todo lo que llega del navegador puede haber sido manipulado: con las herramientas de desarrollo cualquiera cambia el HTML, se salta tus validaciones o inventa peticiones. Por eso el backend valida los datos y verifica los permisos <strong>siempre</strong>, aunque el frontend ya lo haya hecho.</li>
+                                    <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><span class="font-bold text-green-700">🔐 Usa HTTPS en producción.</span> Con HTTP plano, las contraseñas y los tokens viajan legibles por la red. HTTPS cifra la comunicación entre navegador y servidor; las plataformas de despliegue actuales lo ofrecen sin costo.</li>
+                                </ul>
+                                <p class="mb-4">
+                                    Un extra que te ahorrará sustos: nunca escribas llaves secretas ni credenciales de la base de datos en el código del frontend, porque todo lo que llega al navegador es público. Los secretos viven en el backend, en variables de entorno.
+                                </p>
+                            </div>
+                            <div class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): tu formulario ya valida que el precio sea un número positivo. Según los criterios de seguridad, ¿el backend también debe validarlo?</p>
+                                <div id="reto-seguridad" class="grid grid-cols-1 gap-3"></div>
+                                <p id="reto-seguridad-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Desafío de integración: completa los 4 retos y gana las 2 insignias</p>
+                        <p class="text-green-800 font-semibold">🏅 Retos: <span id="actividades-completados">0</span>/4 · ⭐ Puntos: <span id="actividades-puntos">0</span></p>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-green-300">
+                        <div id="actividades-barra" class="bg-green-500 h-3 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🕵️ Actividad 1: ¿Quién eres y qué código te responde?</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Pon a prueba los conceptos de la Estación 2 y la Estación 3. Primero clasifica cada situación; luego empareja cada escenario con el código HTTP que devolvería el backend.
+                        </p>
+
+                        <div class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">Parte A — ¿Autenticación o autorización? (+5 pts por acierto)</h4>
+                            <p class="mb-3 text-sm">Haz clic en una situación y luego en la categoría correcta.</p>
+                            <div id="clasifica-situaciones" class="flex flex-wrap gap-2 mb-4"></div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="clasifica-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-4 rounded-lg" data-tipo="autenticacion">🪪 Autenticación</button>
+                                <button type="button" class="clasifica-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-4 rounded-lg" data-tipo="autorizacion">🔐 Autorización</button>
+                            </div>
+                            <p id="clasifica-msg" class="text-sm mt-3 font-semibold"></p>
+                        </div>
+
+                        <div class="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">Parte B — Empareja el escenario con su código HTTP (+4 pts por acierto)</h4>
+                            <p class="mb-3 text-sm">Haz clic en un escenario y luego en el código de estado que devolvería el backend.</p>
+                            <div id="codigos-escenarios" class="flex flex-wrap gap-2 mb-4"></div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="codigo-btn bg-amber-100 border border-amber-400 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-codigo="400">400</button>
+                                <button type="button" class="codigo-btn bg-amber-100 border border-amber-400 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-codigo="401">401</button>
+                                <button type="button" class="codigo-btn bg-amber-100 border border-amber-400 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-codigo="403">403</button>
+                                <button type="button" class="codigo-btn bg-amber-100 border border-amber-400 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-codigo="404">404</button>
+                                <button type="button" class="codigo-btn bg-amber-100 border border-amber-400 text-amber-800 font-semibold py-2 px-4 rounded-lg" data-codigo="500">500</button>
+                            </div>
+                            <p id="codigos-msg" class="text-sm mt-3 font-semibold"></p>
+                        </div>
+
+                        <div id="insignia-guardian" class="insignia items-center gap-3 p-4 bg-green-50 border-2 border-green-400 rounded-lg">
+                            <span class="text-3xl">🛡️</span>
+                            <div>
+                                <p class="font-bold text-green-800">¡Insignia ganada: Guardián de Accesos!</p>
+                                <p class="text-sm text-green-700">Dominas la diferencia entre autenticación y autorización y sabes leer los códigos HTTP.</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> captura de pantalla de ambas partes completadas y, en tu proyecto de equipo, una lista escrita de qué rutas de su API serán públicas y cuáles quedarán protegidas por rol.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔗 Actividad 2: Arma el login y caza el error</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Demuestra que entiendes el flujo completo de un inicio de sesión y que puedes detectar fallos de integración en código real.
+                        </p>
+
+                        <div class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">Parte A — Ordena el flujo del login (+3 pts por paso correcto)</h4>
+                            <p class="mb-3 text-sm">Haz clic en los pasos en el orden correcto, del primero al último. Si te equivocas, el paso vibrará y podrás intentarlo de nuevo.</p>
+                            <div id="flujo-login" class="grid grid-cols-1 gap-2 mb-3"></div>
+                            <p id="flujo-msg" class="text-sm font-semibold"></p>
+                            <button type="button" id="flujo-reiniciar" class="mt-2 text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-1 px-4 rounded-lg">🔄 Reiniciar</button>
+                        </div>
+
+                        <div class="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">Parte B — Caza el error (+5 pts por acierto)</h4>
+                            <p class="mb-3 text-sm">Cada fragmento tiene un problema de integración o de seguridad. Selecciona el diagnóstico correcto.</p>
+                            <div id="caza-errores" class="space-y-5"></div>
+                            <p id="caza-msg" class="text-sm mt-3 font-semibold"></p>
+                        </div>
+
+                        <div id="insignia-integrador" class="insignia items-center gap-3 p-4 bg-green-50 border-2 border-green-400 rounded-lg">
+                            <span class="text-3xl">🔗</span>
+                            <div>
+                                <p class="font-bold text-green-800">¡Insignia ganada: Integrador Full-Stack!</p>
+                                <p class="text-sm text-green-700">Sabes armar el flujo de login de principio a fin y detectar errores de integración.</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> en el proyecto de tu equipo, un formulario del frontend que cree un registro real en su API con POST + JSON, con manejo de errores con <code>try/catch</code> y un mensaje claro al usuario cuando el servidor falle.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Fetch API — MDN Web Docs</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial en español de la Fetch API: peticiones, opciones de método, headers y manejo de respuestas, la base de la integración frontend–backend.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/API/Fetch_API" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-1.png" alt="QR Fetch API MDN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Códigos de estado de respuesta HTTP — MDN Web Docs</h3>
+                            <p class="text-slate-600 mb-2">Referencia completa de los códigos de estado HTTP (400, 401, 403, 404, 500 y todos los demás), con el significado exacto de cada uno.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Status" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-2.png" alt="QR Códigos de estado HTTP MDN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Seguridad en la Web — MDN Web Docs</h3>
+                            <p class="text-slate-600 mb-2">Guías de seguridad web: autenticación, ataques comunes y defensas, y buenas prácticas para proteger sitios y aplicaciones en producción.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/Security" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-3.png" alt="QR Seguridad en la Web MDN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript</i>. Anaya Multimedia.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cabezas Granado, L. M. &amp; González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i>. Anaya Multimedia.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Mozilla Developer Network. (s. f.). <i>Fetch API</i>. MDN Web Docs.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Web/API/Fetch_API" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Web/API/Fetch_API</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Mozilla Developer Network. (s. f.). <i>Códigos de estado de respuesta HTTP</i>. MDN Web Docs.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Status" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Web/HTTP/Status</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Mozilla Developer Network. (s. f.). <i>Seguridad en la Web</i>. MDN Web Docs.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Web/Security" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Web/Security</a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "En el proyecto de tu equipo, el formulario de registro debe guardar un nuevo usuario en la base de datos a través de la API. ¿Qué petición corresponde?",
+                options: ["GET /api/usuarios sin body", "POST /api/usuarios con el body en JSON y el header Content-Type: application/json", "Un enlace <a> que apunte a la base de datos", "Guardar el usuario en localStorage, porque el navegador ya persiste los datos"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la diferencia entre autenticación y autorización?",
+                options: ["Son sinónimos: ambas verifican la contraseña del usuario", "La autenticación verifica quién es el usuario; la autorización decide qué puede hacer según sus permisos o rol", "La autorización ocurre siempre antes que la autenticación", "La autenticación la hace el frontend y la autorización el diseñador de la interfaz"],
+                correct: 1
+            },
+            {
+                question: "El frontend pide GET /api/pedidos sin enviar ningún token. La ruta está protegida. ¿Qué código de estado debería devolver el backend?",
+                options: ["200, pero con la lista vacía", "404, porque la ruta no existe para ese usuario", "401, porque el usuario no está autenticado", "500, porque es un error interno del servidor"],
+                correct: 2
+            },
+            {
+                question: "En un fetch, ¿qué comprueba exactamente la propiedad respuesta.ok?",
+                options: ["Que hubo conexión a internet durante la petición", "Que el JSON recibido no tiene errores de sintaxis", "Que el código de estado HTTP está entre 200 y 299", "Que el servidor usó HTTPS en lugar de HTTP"],
+                correct: 2
+            },
+            {
+                question: "Según los criterios básicos de seguridad, ¿cómo deben guardarse las contraseñas en la base de datos?",
+                options: ["En texto plano, para poder recordárselas al usuario si las olvida", "Cifradas como hash (por ejemplo con bcrypt), de modo que nunca se almacene la contraseña real", "En un archivo JavaScript del frontend, protegido con un comentario", "En una cookie del navegador de cada usuario"],
+                correct: 1
+            },
+            {
+                question: "Un administrador reporta que al abrir el listado de productos aparece \"Error 500\". ¿Qué indica ese código?",
+                options: ["Que el usuario escribió mal la URL", "Que el rol del administrador no tiene permisos suficientes", "Que la petición del navegador estaba mal formada", "Que ocurrió un error interno en el backend y hay que revisar los logs del servidor"],
+                correct: 3
+            },
+            {
+                question: "Tu formulario ya valida los datos con JavaScript antes de enviarlos. ¿Por qué el backend debe validarlos de nuevo?",
+                options: ["Porque no se puede confiar en el cliente: cualquiera puede saltarse el formulario y enviar la petición directamente al servidor", "Porque JavaScript del frontend no sabe comparar cadenas de texto", "No debe validarlos de nuevo: sería trabajo duplicado e ineficiente", "Porque el backend necesita registrar el doble de validaciones para las pruebas"],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ============================================================
+        // GAMIFICACIÓN DE CONTENIDO: misión de lectura + mini retos
+        // ============================================================
+        let contenidoPuntos = 0;
+        const contenidoPuntosEl = document.getElementById('contenido-puntos');
+        function sumarContenido(pts) {
+            contenidoPuntos += pts;
+            contenidoPuntosEl.textContent = contenidoPuntos;
+        }
+
+        // Misión de lectura: +5 puntos la primera vez que se abre cada estación
+        const estacionesAbiertas = new Set();
+        document.querySelectorAll('#contenido .accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.target;
+                if (!estacionesAbiertas.has(id)) {
+                    estacionesAbiertas.add(id);
+                    sumarContenido(5);
+                }
+            });
+        });
+
+        // Mini retos por estación (elección única con feedback)
+        const miniRetos = [
+            {
+                contenedor: 'reto-integracion',
+                msg: 'reto-integracion-msg',
+                opciones: ['Authorization', 'Content-Type: application/json', 'Accept-Language', 'X-Frame-Options'],
+                correcta: 1,
+                feedbackOk: '✅ ¡Correcto! Content-Type le dice al backend cómo interpretar el body. +5 pts',
+                feedbackNo: '❌ Ese header cumple otra función. La respuesta correcta es Content-Type: application/json.'
+            },
+            {
+                contenedor: 'reto-auth',
+                msg: 'reto-auth-msg',
+                opciones: ['La autenticación: el usuario no demostró quién es', 'La autorización: el usuario está identificado, pero su rol no tiene ese permiso', 'El manejo de errores: el servidor falló internamente', 'El HTTPS: la conexión no estaba cifrada'],
+                correcta: 1,
+                feedbackOk: '✅ ¡Exacto! Está autenticado, pero no autorizado: es un caso típico de 403. +5 pts',
+                feedbackNo: '❌ Revisa la analogía del concierto: aquí la identidad ya estaba verificada. Es la autorización.'
+            },
+            {
+                contenedor: 'reto-errores',
+                msg: 'reto-errores-msg',
+                opciones: ['Un segundo await antes del catch', 'La comprobación de respuesta.ok (o de respuesta.status) con un throw', 'Cambiar el try/catch por un if/else', 'Usar GET en lugar de POST'],
+                correcta: 1,
+                feedbackOk: '✅ ¡Correcto! fetch solo rechaza por fallos de red: los códigos 4xx/5xx hay que revisarlos con respuesta.ok. +5 pts',
+                feedbackNo: '❌ Recuerda: fetch no lanza excepción con 404. Falta comprobar respuesta.ok y lanzar el error.'
+            },
+            {
+                contenedor: 'reto-seguridad',
+                msg: 'reto-seguridad-msg',
+                opciones: ['No: si el frontend valida, el backend puede confiar en el dato', 'Sí: el backend valida siempre, porque cualquiera puede saltarse el formulario y enviar la petición directamente', 'Solo si el usuario es administrador'],
+                correcta: 1,
+                feedbackOk: '✅ ¡Exacto! Nunca se confía en el cliente: la validación del servidor es la definitiva. +5 pts',
+                feedbackNo: '❌ Recuerda el criterio "no confíes en el cliente": el backend valida siempre.'
+            }
+        ];
+
+        miniRetos.forEach(reto => {
+            const cont = document.getElementById(reto.contenedor);
+            const msg = document.getElementById(reto.msg);
+            let resuelto = false;
+            reto.opciones.forEach((texto, i) => {
+                const div = document.createElement('div');
+                div.className = 'reto-opcion border-2 border-slate-200 rounded-lg p-3 text-sm bg-white';
+                div.textContent = texto;
+                div.addEventListener('click', () => {
+                    if (resuelto) return;
+                    if (i === reto.correcta) {
+                        resuelto = true;
+                        div.classList.add('correcta');
+                        msg.textContent = reto.feedbackOk;
+                        msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                        sumarContenido(5);
+                    } else {
+                        div.classList.add('incorrecta');
+                        msg.textContent = reto.feedbackNo;
+                        msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                    }
+                });
+                cont.appendChild(div);
+            });
+        });
+
+        // ============================================================
+        // GAMIFICACIÓN DE ACTIVIDADES: retos, puntos, barra e insignias
+        // ============================================================
+        let actividadesPuntos = 0;
+        let retosCompletados = 0;
+        function sumarActividad(pts) {
+            actividadesPuntos += pts;
+            document.getElementById('actividades-puntos').textContent = actividadesPuntos;
+        }
+        function completarReto() {
+            retosCompletados++;
+            document.getElementById('actividades-completados').textContent = retosCompletados;
+            document.getElementById('actividades-barra').style.width = (retosCompletados / 4 * 100) + '%';
+        }
+        // Estado de las 4 partes para otorgar insignias
+        const partes = { clasifica: false, codigos: false, flujo: false, caza: false };
+        function revisarInsignias() {
+            if (partes.clasifica && partes.codigos) {
+                document.getElementById('insignia-guardian').classList.add('ganada');
+            }
+            if (partes.flujo && partes.caza) {
+                document.getElementById('insignia-integrador').classList.add('ganada');
+            }
+        }
+
+        // ------------------------------------------------------------
+        // ACTIVIDAD 1 — Parte A: clasificar autenticación / autorización
+        // ------------------------------------------------------------
+        const situaciones = [
+            { texto: 'Escribir correo y contraseña en el formulario de login', tipo: 'autenticacion' },
+            { texto: 'El sistema niega a un usuario común el botón de eliminar productos', tipo: 'autorizacion' },
+            { texto: 'El backend compara el hash de la contraseña con el de la base de datos', tipo: 'autenticacion' },
+            { texto: 'Solo el rol administrador puede ver el panel de gestión de usuarios', tipo: 'autorizacion' },
+            { texto: 'Iniciar sesión con la huella digital en una app del banco', tipo: 'autenticacion' },
+            { texto: 'Un token válido de usuario común recibe 403 al intentar editar registros ajenos', tipo: 'autorizacion' }
+        ];
+        let situacionSeleccionada = null;
+        let situacionesResueltas = 0;
+        const contSituaciones = document.getElementById('clasifica-situaciones');
+        const clasificaMsg = document.getElementById('clasifica-msg');
+
+        situaciones.forEach((s, i) => {
+            const chip = document.createElement('span');
+            chip.className = 'chip border-2 border-slate-300 bg-white rounded-full py-2 px-4 text-sm';
+            chip.textContent = s.texto;
+            chip.dataset.index = i;
+            chip.addEventListener('click', () => {
+                if (chip.classList.contains('chip-done-correct') || chip.classList.contains('chip-done-wrong')) return;
+                document.querySelectorAll('#clasifica-situaciones .chip').forEach(c => c.classList.remove('chip-selected'));
+                chip.classList.add('chip-selected');
+                situacionSeleccionada = i;
+                clasificaMsg.textContent = 'Ahora elige la categoría 👇';
+                clasificaMsg.className = 'text-sm mt-3 font-semibold text-slate-600';
+            });
+            contSituaciones.appendChild(chip);
+        });
+
+        document.querySelectorAll('.clasifica-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (situacionSeleccionada === null) {
+                    clasificaMsg.textContent = 'Primero haz clic en una situación de la lista.';
+                    clasificaMsg.className = 'text-sm mt-3 font-semibold text-amber-600';
+                    return;
+                }
+                const chip = contSituaciones.querySelector(`[data-index="${situacionSeleccionada}"]`);
+                const correcta = situaciones[situacionSeleccionada].tipo === btn.dataset.tipo;
+                chip.classList.remove('chip-selected');
+                if (correcta) {
+                    chip.classList.add('chip-done-correct');
+                    sumarActividad(5);
+                    clasificaMsg.textContent = '✅ ¡Correcto! +5 pts';
+                    clasificaMsg.className = 'text-sm mt-3 font-semibold text-green-700';
+                } else {
+                    chip.classList.add('chip-done-wrong');
+                    clasificaMsg.textContent = '❌ No era esa categoría. Recuerda: autenticación = quién eres; autorización = qué puedes hacer.';
+                    clasificaMsg.className = 'text-sm mt-3 font-semibold text-red-600';
+                }
+                situacionSeleccionada = null;
+                situacionesResueltas++;
+                if (situacionesResueltas === situaciones.length) {
+                    partes.clasifica = true;
+                    completarReto();
+                    clasificaMsg.textContent += ' — Parte A completada 🏁';
+                    revisarInsignias();
+                }
+            });
+        });
+
+        // ------------------------------------------------------------
+        // ACTIVIDAD 1 — Parte B: emparejar códigos HTTP con escenarios
+        // ------------------------------------------------------------
+        const escenarios = [
+            { texto: 'El formulario envió el campo precio vacío y el backend rechaza la petición', codigo: '400' },
+            { texto: 'Se intenta ver los pedidos sin haber iniciado sesión (sin token)', codigo: '401' },
+            { texto: 'Un usuario autenticado con rol común intenta entrar al panel de administración', codigo: '403' },
+            { texto: 'El frontend pide /api/producto/999 pero ese id no existe', codigo: '404' },
+            { texto: 'La base de datos se cayó y la API lanzó una excepción sin controlar', codigo: '500' }
+        ];
+        let escenarioSeleccionado = null;
+        let escenariosResueltos = 0;
+        const contEscenarios = document.getElementById('codigos-escenarios');
+        const codigosMsg = document.getElementById('codigos-msg');
+
+        escenarios.forEach((e, i) => {
+            const chip = document.createElement('span');
+            chip.className = 'chip border-2 border-slate-300 bg-white rounded-full py-2 px-4 text-sm';
+            chip.textContent = e.texto;
+            chip.dataset.index = i;
+            chip.addEventListener('click', () => {
+                if (chip.classList.contains('chip-done-correct') || chip.classList.contains('chip-done-wrong')) return;
+                document.querySelectorAll('#codigos-escenarios .chip').forEach(c => c.classList.remove('chip-selected'));
+                chip.classList.add('chip-selected');
+                escenarioSeleccionado = i;
+                codigosMsg.textContent = 'Ahora elige el código de estado 👇';
+                codigosMsg.className = 'text-sm mt-3 font-semibold text-slate-600';
+            });
+            contEscenarios.appendChild(chip);
+        });
+
+        document.querySelectorAll('.codigo-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (escenarioSeleccionado === null) {
+                    codigosMsg.textContent = 'Primero haz clic en un escenario de la lista.';
+                    codigosMsg.className = 'text-sm mt-3 font-semibold text-amber-600';
+                    return;
+                }
+                const chip = contEscenarios.querySelector(`[data-index="${escenarioSeleccionado}"]`);
+                const correcta = escenarios[escenarioSeleccionado].codigo === btn.dataset.codigo;
+                chip.classList.remove('chip-selected');
+                if (correcta) {
+                    chip.classList.add('chip-done-correct');
+                    sumarActividad(4);
+                    codigosMsg.textContent = '✅ ¡Correcto! +4 pts';
+                    codigosMsg.className = 'text-sm mt-3 font-semibold text-green-700';
+                } else {
+                    chip.classList.add('chip-done-wrong');
+                    codigosMsg.textContent = `❌ El código correcto era ${escenarios[escenarioSeleccionado].codigo}. Repasa la Estación 3.`;
+                    codigosMsg.className = 'text-sm mt-3 font-semibold text-red-600';
+                }
+                escenarioSeleccionado = null;
+                escenariosResueltos++;
+                if (escenariosResueltos === escenarios.length) {
+                    partes.codigos = true;
+                    completarReto();
+                    codigosMsg.textContent += ' — Parte B completada 🏁';
+                    revisarInsignias();
+                }
+            });
+        });
+
+        // ------------------------------------------------------------
+        // ACTIVIDAD 2 — Parte A: ordenar el flujo del login
+        // ------------------------------------------------------------
+        const pasosLogin = [
+            'El usuario escribe correo y contraseña en el formulario',
+            'El frontend envía POST /login con las credenciales en JSON',
+            'El backend verifica las credenciales contra la base de datos',
+            'El backend genera un token y lo devuelve al frontend',
+            'El frontend guarda el token y lo envía en el header Authorization',
+            'El backend valida el token y responde con los datos de la ruta protegida'
+        ];
+        const ordenMezclado = [2, 5, 0, 3, 1, 4]; // orden fijo de presentación (mezclado)
+        let siguientePaso = 0;
+        const contFlujo = document.getElementById('flujo-login');
+        const flujoMsg = document.getElementById('flujo-msg');
+
+        function pintarFlujo() {
+            contFlujo.innerHTML = '';
+            siguientePaso = 0;
+            flujoMsg.textContent = '';
+            ordenMezclado.forEach(idx => {
+                const div = document.createElement('div');
+                div.className = 'flow-step border-2 border-slate-300 bg-white rounded-lg p-3 text-sm';
+                div.textContent = pasosLogin[idx];
+                div.dataset.paso = idx;
+                div.addEventListener('click', () => {
+                    if (div.classList.contains('step-ok')) return;
+                    if (parseInt(div.dataset.paso) === siguientePaso) {
+                        div.classList.add('step-ok');
+                        div.textContent = (siguientePaso + 1) + '. ' + pasosLogin[siguientePaso];
+                        siguientePaso++;
+                        sumarActividad(3);
+                        if (siguientePaso === pasosLogin.length) {
+                            flujoMsg.textContent = '🎉 ¡Flujo completo! Así viaja un login desde el formulario hasta la ruta protegida. +18 pts en total';
+                            flujoMsg.className = 'text-sm font-semibold text-green-700';
+                            if (!partes.flujo) {
+                                partes.flujo = true;
+                                completarReto();
+                                revisarInsignias();
+                            }
+                        } else {
+                            flujoMsg.textContent = '✅ Paso correcto. ¿Cuál sigue?';
+                            flujoMsg.className = 'text-sm font-semibold text-green-700';
+                        }
+                    } else {
+                        div.classList.add('step-shake');
+                        setTimeout(() => div.classList.remove('step-shake'), 400);
+                        flujoMsg.textContent = '❌ Ese paso no va todavía. Piensa qué ocurre primero en el ciclo petición–respuesta.';
+                        flujoMsg.className = 'text-sm font-semibold text-red-600';
+                    }
+                });
+                contFlujo.appendChild(div);
+            });
+        }
+        pintarFlujo();
+        document.getElementById('flujo-reiniciar').addEventListener('click', pintarFlujo);
+
+        // ------------------------------------------------------------
+        // ACTIVIDAD 2 — Parte B: caza el error en fragmentos de código
+        // ------------------------------------------------------------
+        const fragmentos = [
+            {
+                codigo: "const r = await fetch('/api/productos', {\n  method: 'POST',\n  body: { nombre: 'Camiseta', precio: 45000 }\n});",
+                pregunta: '¿Cuál es el error de este POST?',
+                opciones: [
+                    'El body debe convertirse con JSON.stringify() y falta el header Content-Type',
+                    'POST no acepta body: los datos van en la URL',
+                    'La ruta /api/productos debe escribirse en mayúsculas'
+                ],
+                correcta: 0,
+                explica: 'El body de fetch viaja como texto: sin JSON.stringify() y sin Content-Type el backend no puede interpretarlo.'
+            },
+            {
+                codigo: "// En el frontend (script.js del navegador)\nconst CLAVE_BD = 'admin123';\nconst conexion = 'mysql://root:admin123@servidor/tienda';",
+                pregunta: '¿Cuál es el problema de seguridad?',
+                opciones: [
+                    'Las variables deberían llamarse en inglés',
+                    'Las credenciales están en el código del frontend: todo lo que llega al navegador es público',
+                    'Falta un punto y coma al final de la primera línea'
+                ],
+                correcta: 1,
+                explica: 'Los secretos viven en el backend (variables de entorno). Nunca en el JavaScript que se descarga el navegador.'
+            },
+            {
+                codigo: "const r = await fetch('/api/perfil');\nconst datos = await r.json();\nmostrarPerfil(datos);\n// A veces el usuario ve una pantalla rota al vencer su sesión",
+                pregunta: '¿Qué le falta a esta integración?',
+                opciones: [
+                    'Un segundo fetch para confirmar la petición',
+                    'Cambiar GET por POST para leer el perfil',
+                    'Revisar r.ok / r.status (un 401 debería llevar al login) dentro de un try/catch con mensaje claro'
+                ],
+                correcta: 2,
+                explica: 'Sin revisar el estado, un 401 por sesión vencida intenta renderizar un error como si fuera el perfil.'
+            }
+        ];
+        let fragmentosResueltos = 0;
+        const contCaza = document.getElementById('caza-errores');
+        const cazaMsg = document.getElementById('caza-msg');
+
+        fragmentos.forEach((f, fi) => {
+            const bloque = document.createElement('div');
+            bloque.className = 'border border-slate-200 rounded-lg p-3 bg-white';
+            const pre = document.createElement('pre');
+            pre.className = 'mb-3';
+            const code = document.createElement('code');
+            code.textContent = f.codigo;
+            pre.appendChild(code);
+            const p = document.createElement('p');
+            p.className = 'text-sm font-semibold text-slate-700 mb-2';
+            p.textContent = (fi + 1) + '. ' + f.pregunta;
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 gap-2';
+            const fb = document.createElement('p');
+            fb.className = 'text-sm mt-2 font-semibold';
+            let resuelto = false;
+            f.opciones.forEach((op, oi) => {
+                const div = document.createElement('div');
+                div.className = 'reto-opcion border-2 border-slate-200 rounded-lg p-3 text-sm bg-white';
+                div.textContent = op;
+                div.addEventListener('click', () => {
+                    if (resuelto) return;
+                    if (oi === f.correcta) {
+                        resuelto = true;
+                        div.classList.add('correcta');
+                        fb.textContent = '✅ ¡Bien cazado! +5 pts — ' + f.explica;
+                        fb.className = 'text-sm mt-2 font-semibold text-green-700';
+                        sumarActividad(5);
+                        fragmentosResueltos++;
+                        if (fragmentosResueltos === fragmentos.length) {
+                            partes.caza = true;
+                            completarReto();
+                            cazaMsg.textContent = '🏁 Parte B completada: cazaste los 3 errores.';
+                            cazaMsg.className = 'text-sm mt-3 font-semibold text-green-700';
+                            revisarInsignias();
+                        }
+                    } else {
+                        div.classList.add('incorrecta');
+                        fb.textContent = '❌ Ese no es el problema principal. Vuelve a leer el fragmento.';
+                        fb.className = 'text-sm mt-2 font-semibold text-red-600';
+                    }
+                });
+                grid.appendChild(div);
+            });
+            bloque.appendChild(pre);
+            bloque.appendChild(p);
+            bloque.appendChild(grid);
+            bloque.appendChild(fb);
+            contCaza.appendChild(bloque);
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
