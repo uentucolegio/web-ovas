@@ -228,27 +228,63 @@ for (const dir of ovas) {
   // (Nivel B), no de texto. Queda fuera del Nivel A para no dar falsos positivos.
 
   // E6) Cuestionario de evaluación con al menos 5 preguntas.
-  // Reconocemos los DOS motores de quiz usados en el repo:
+  // Reconocemos los CUATRO motores de quiz que conviven hoy en el repo. Los
+  // dos últimos se agregaron porque 7 OVAs con su autoevaluación completa
+  // salían reportadas como si no tuvieran ninguna:
   //   a) arreglo JS "quizData = [ { question/pregunta … } ]" (inline o en js/quiz.js)
-  //   b) contenedor con data-correct='[…]' (un valor por pregunta)
+  //   b) un solo atributo con todas las respuestas: data-correct='[0,1,2,…]'
+  //   c) arreglo JS con otro nombre (quizQuestions, preguntas, questions…),
+  //      que además usa claves prompt/enunciado para el texto de la pregunta
+  //   d) una respuesta por pregunta, cada una en su tarjeta: data-correct="B"
+  //   e) formulario con grupos de radio/checkbox, un name por pregunta
   // Miramos codigoOva (HTML + JS local) y nos quedamos con el mayor conteo.
   let tieneQuiz = false, preguntas = 0;
-  if (/\bquizData\b/.test(codigoOva)) {
+
+  // (a) y (c): cualquier arreglo JS de preguntas, se llame como se llame.
+  if (/\b(?:quizData|quizQuestions|preguntas|questions)\s*=\s*\[/.test(codigoOva) || /\bquizData\b/.test(codigoOva)) {
     tieneQuiz = true;
-    preguntas = Math.max(preguntas, (codigoOva.match(/\b(?:pregunta|question)\s*:/gi) || []).length);
+    preguntas = Math.max(preguntas, (codigoOva.match(/\b(?:pregunta|question|prompt|enunciado)\s*:/gi) || []).length);
   }
+
+  // (b) todas las respuestas en un solo atributo.
   for (const m of codigoOva.matchAll(/data-correct=['"]\s*\[([^\]]*)\]/g)) {
     tieneQuiz = true;
     preguntas = Math.max(preguntas, m[1].split(',').map(s => s.trim()).filter(Boolean).length);
   }
+
+  // Los dos motores que siguen viven en el HTML, así que miramos SOLO la
+  // sección de evaluación: los mismos atributos aparecen en las actividades,
+  // y sumarlo todo daría por buena una autoevaluación demasiado corta.
+  const secEvaluacion = contenidoSeccion(htmlSinComentarios, 'evaluacion');
+
+  // (d) una respuesta por pregunta, cada una en su tarjeta.
+  const sueltas = (secEvaluacion.match(/data-correct=['"](?!\s*\[)[^'"]+['"]/g) || []).length;
+  if (sueltas) {
+    tieneQuiz = true;
+    preguntas = Math.max(preguntas, sueltas);
+  }
+
+  // (e) formulario clásico: cada pregunta es un grupo de opciones que comparten
+  // el atributo name (<input type="radio"|"checkbox" name="q1">). Contamos
+  // cuántos nombres distintos hay, que es cuántas preguntas se responden.
+  const grupos = new Set();
+  for (const re_ of [/<input[^>]*type=["'](?:radio|checkbox)["'][^>]*name=["']([^"']+)["']/gi,
+                     /<input[^>]*name=["']([^"']+)["'][^>]*type=["'](?:radio|checkbox)["']/gi]) {
+    for (const m of secEvaluacion.matchAll(re_)) grupos.add(m[1]);
+  }
+  if (grupos.size) {
+    tieneQuiz = true;
+    preguntas = Math.max(preguntas, grupos.size);
+  }
+
   if (!tieneQuiz) {
     warn(rel,
-      'No se encontró la autoevaluación (ni un arreglo "quizData" ni un contenedor con data-correct) en la sección de evaluación.',
-      'Implementa el cuestionario con al menos 5 preguntas (arreglo quizData inline/en js/quiz.js, o el motor con data-correct). Puedes guiarte por el _template.');
+      'No se encontró la autoevaluación en la sección de evaluación (ni un arreglo JS de preguntas ni respuestas marcadas con data-correct).',
+      'Implementa el cuestionario con al menos 5 preguntas: un arreglo JS (quizData, quizQuestions…) o el motor con data-correct. Puedes guiarte por el _template.');
   } else if (preguntas > 0 && preguntas < 5) {
     warn(rel,
       `La autoevaluación tiene solo ${preguntas} pregunta(s). Se recomiendan al menos 5.`,
-      'Agrega más preguntas hasta llegar a 5 o más (en el arreglo quizData o en el motor con data-correct).');
+      'Agrega más preguntas hasta llegar a 5 o más (en el arreglo de preguntas o en el motor con data-correct).');
   }
 
   // === REGLAS DE ESTILO — SEGUNDO LOTE (estructura y diseño de secciones) ===
