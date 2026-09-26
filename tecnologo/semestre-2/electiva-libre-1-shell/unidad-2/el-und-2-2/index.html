@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Redireccionamiento, tuberías y filtros básicos en Linux</title>
+    <meta name="description"
+        content="Aprende a redirigir la entrada y salida de comandos, construir tuberías con | y usar filtros básicos como cat, less, head, tail, grep, sort, wc, uniq y cut en Linux.">
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;"
+                    class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;"
+                    class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- ===================== INTRODUCCIÓN ===================== -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">
+                    Redireccionamiento, tuberías y filtros básicos
+                </h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    El redireccionamiento, las tuberías y los filtros son herramientas fundamentales de la terminal de
+                    Linux que permiten gestionar y procesar información de forma eficiente. Estas funcionalidades se
+                    utilizan con frecuencia en tareas como el análisis de archivos de registro, la automatización de
+                    procesos, la administración de servidores y el despliegue de aplicaciones web.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Su dominio facilita el trabajo con proyectos reales desarrollados con tecnologías como
+                    <strong>Git</strong>, <strong>Node.js</strong>, <strong>Docker</strong> y <strong>Nginx</strong>,
+                    permitiendo combinar comandos como <code class="bg-slate-100 px-1 rounded">grep</code>,
+                    <code class="bg-slate-100 px-1 rounded">sort</code>, <code class="bg-slate-100 px-1 rounded">wc</code>
+                    o <code class="bg-slate-100 px-1 rounded">cut</code> mediante el operador
+                    <code class="bg-slate-100 px-1 rounded">|</code> para obtener resultados de manera rápida y precisa.
+                </p>
+
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <i class="fa-solid fa-shuffle"></i> <strong>¡Combina comandos con criterio! Las tuberías
+                            conectan herramientas pequeñas y especializadas, pero redirigir con &gt; reemplaza el
+                            contenido de un archivo: verifica siempre el destino antes de ejecutar.
+                            <i class="fa-brands fa-linux"></i> <i class="fa-solid fa-laptop-code"></i>
+                            <i class="fa-solid fa-shield-halved"></i></strong>
+                    </p>
+                </div>
+
+                <!-- Síntesis de voz -->
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4"
+                    data-target="introduccion">
+                    <button
+                        class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button
+                        class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button
+                        class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-introduccion" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-introduccion" min="0.5" max="2"
+                            step="0.1" value="1" class="w-24">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== OBJETIVOS ===================== -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-share-nodes"></i></span>
+                        <span>
+                            Aplicar operadores de redireccionamiento
+                            (<code class="bg-slate-100 px-1 rounded">&gt;</code>,
+                            <code class="bg-slate-100 px-1 rounded">&gt;&gt;</code>,
+                            <code class="bg-slate-100 px-1 rounded">&lt;</code>) para guardar resultados y reutilizar
+                            información entre comandos.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-link"></i></span>
+                        <span>
+                            Construir tuberías utilizando el operador
+                            <code class="bg-slate-100 px-1 rounded">|</code> para combinar múltiples comandos.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-filter"></i></span>
+                        <span>
+                            Utilizar filtros básicos como
+                            <code class="bg-slate-100 px-1 rounded">cat</code>,
+                            <code class="bg-slate-100 px-1 rounded">less</code>,
+                            <code class="bg-slate-100 px-1 rounded">head</code>,
+                            <code class="bg-slate-100 px-1 rounded">tail</code>,
+                            <code class="bg-slate-100 px-1 rounded">grep</code>,
+                            <code class="bg-slate-100 px-1 rounded">sort</code>,
+                            <code class="bg-slate-100 px-1 rounded">wc</code>,
+                            <code class="bg-slate-100 px-1 rounded">uniq</code> y
+                            <code class="bg-slate-100 px-1 rounded">cut</code> para procesar información.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-chart-column"></i></span>
+                        <span>
+                            Analizar archivos de registro y resultados de comandos mediante combinaciones de tuberías
+                            y filtros.
+                        </span>
+                    </li>
+                </ul>
+
+                <!-- Síntesis de voz -->
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4"
+                    data-target="objetivos">
+                    <button
+                        class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button
+                        class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button
+                        class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-objetivos" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-objetivos" min="0.5" max="2" step="0.1"
+                            value="1" class="w-24">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== CONTENIDO ===================== -->
+            <div id="contenido" class="content-pane">
+                <!-- Hero banner -->
+                <div class="ux-hero">
+                    <h2 style="display: flex; align-items: center; gap: 10px;">
+                        <div
+                            style="width: 45px; height: 45px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img src="img/manometro.gif" alt="Manómetro" style="width: 32px; height: 32px; object-fit: contain;">
+                        </div>
+                        Redireccionamiento, tuberías y filtros básicos
+                    </h2>
+                    <p>Domina los operadores &gt;, &gt;&gt;, &lt; y |, junto con los filtros cat, less, head, tail, grep,
+                        sort, wc, uniq y cut: las herramientas esenciales para procesar información en la terminal de Linux.</p>
+                </div>
+
+                <!-- Progress dots -->
+                <div class="prog-dots" id="ux-prog">
+                    <div class="prog-dot done" title="Redireccionamiento"></div>
+                    <div class="prog-dot" title="Tuberías"></div>
+                    <div class="prog-dot" title="Filtros de visualización"></div>
+                    <div class="prog-dot" title="Filtros de procesamiento"></div>
+                    <span class="section-counter" id="ux-counter">Tema 1 de 4</span>
+                </div>
+
+                <!-- TABS de navegación -->
+                <div class="ux-tabs" role="tablist">
+                        <button class="ux-tab-btn active" onclick="showUxSection('redir',0)" id="tab-redir">
+                            <i class="fa-solid fa-share-nodes ux-tab-icon" aria-hidden="true"></i>
+                            <span>Redireccionar: <code>&gt;</code> <code>&gt;&gt;</code> <code>&lt;</code></span>
+                        </button>
+                        <button class="ux-tab-btn" onclick="showUxSection('tuberias',1)" id="tab-tuberias">
+                            <i class="fa-solid fa-link ux-tab-icon" aria-hidden="true"></i>
+                            <span>Tuberías: <code>|</code></span>
+                        </button>
+                        <button class="ux-tab-btn" onclick="showUxSection('visualizar',2)" id="tab-visualizar">
+                            <i class="fa-solid fa-eye ux-tab-icon" aria-hidden="true"></i>
+                            <span>Visualizar: <code>cat</code> <code>less</code> <code>head</code> <code>tail</code></span>
+                        </button>
+                        <button class="ux-tab-btn" onclick="showUxSection('procesar',3)" id="tab-procesar">
+                            <i class="fa-solid fa-filter ux-tab-icon" aria-hidden="true"></i>
+                            <span>Procesar: <code>grep</code> <code>sort</code> <code>wc</code> <code>cut</code></span>
+                        </button>
+                </div>
+
+                <!-- ===== SECCIÓN 1: REDIRECCIONAMIENTO ===== -->
+                <div class="ux-section active" id="sec-redir">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#508C46;margin-bottom:16px;"><i
+                            class="fa-solid fa-share-nodes"></i>
+                        Redireccionamiento de entrada y salida: <code>&gt;</code>, <code>&gt;&gt;</code> y <code>&lt;</code></h3>
+
+                    <div class="uber-analogy">
+                        <div class="uber-icon"><i class="fa-solid fa-shuffle" style="color:#F89F32;"></i></div>
+                        <div>
+                            <strong style="color:#7A5C00;font-size:1rem;">Imagínalo así:</strong>
+                            <p style="margin:6px 0 0;color:#7A5C00;font-size:.9rem;">
+                                La mayoría de los comandos de Linux trabajan con tres flujos estándar: <strong>entrada
+                                    estándar (stdin)</strong>, <strong>salida estándar (stdout)</strong> y <strong>salida
+                                    de errores (stderr)</strong>. El redireccionamiento es como cambiar las tuberías de
+                                una casa: modificas el destino o el origen de esos flujos <em>sin alterar el
+                                    funcionamiento del comando</em>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            Esta característica resulta especialmente útil para <strong>guardar resultados</strong>,
+                            <strong>registrar errores</strong> durante un despliegue o <strong>reutilizar
+                                información</strong> previamente almacenada.
+                        </p>
+                        <p style="font-size:.95rem;color:#508C46;font-weight:600;margin:0 0 8px;">Sintaxis y ejemplos:</p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> tree ~/proyectos/tienda-online &gt; estructura.txt<br>
+                            <span class="code-comment"># Guarda el árbol del proyecto; si el archivo existe, lo reemplaza por completo</span><br>
+                            <span class="code-prompt">$</span> date &gt;&gt; despliegues.log<br>
+                            <span class="code-comment"># Agrega la fecha al final del archivo, conservando el contenido anterior</span><br>
+                            <span class="code-prompt">$</span> wc -l &lt; access.log<br>
+                            <span class="code-comment"># wc lee su entrada desde el archivo en lugar del teclado y cuenta sus líneas</span>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin-bottom:12px;"><i
+                            class="fa-solid fa-table-list"></i> ¿Qué hace cada
+                        operador?</h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">Haz clic en cada fila para resaltarla:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>⌨️ Sintaxis</th>
+                                    <th>📄 Resultado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>comando &gt; archivo</code></td>
+                                    <td>Envía la salida estándar a un archivo; si existe, reemplaza su contenido</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>comando &gt;&gt; archivo</code></td>
+                                    <td>Agrega la salida al final del archivo conservando el contenido (bitácoras)</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>comando &lt; archivo</code></td>
+                                    <td>El comando lee su información desde un archivo en lugar del teclado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ejemplo-aplicado">
+                        <div class="ejemplo-header">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>Ejemplo aplicado — registrar la fecha de cada despliegue</span>
+                        </div>
+                        <p style="margin:0 0 10px;font-size:.9rem;color:#374151;">
+                            Cada ejecución agregará una nueva línea al archivo, manteniendo una bitácora completa:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> date &gt;&gt; despliegues.log<br>
+                            <span class="code-prompt">$</span> cat despliegues.log<br>
+                            <span class="code-comment"># sáb 08 ago 2026 10:15:22</span><br>
+                            <span class="code-comment"># sáb 08 ago 2026 11:42:07</span>
+                        </div>
+                    </div>
+
+                    <div class="alerta-riesgo" style="margin-top:20px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                        <div>
+                            <strong><i class="fa-solid fa-triangle-exclamation"></i> Error común:</strong> ejecutar <code>ls &gt; package.json</code> sobrescribe el
+                            archivo <code>package.json</code>, eliminando su contenido. Antes de utilizar
+                            <code>&gt;</code>, verifique cuidadosamente el nombre del archivo destino.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 2: TUBERÍAS ===== -->
+                <div class="ux-section" id="sec-tuberias">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#16BAAF;margin-bottom:16px;"><i
+                            class="fa-solid fa-link"></i> Tuberías (pipes):
+                        el operador <code>|</code></h3>
+
+                    <div class="uber-analogy">
+                        <div class="uber-icon"><i class="fa-solid fa-industry" style="color:#F89F32;"></i></div>
+                        <div>
+                            <strong style="color:#7A5C00;font-size:1rem;">Imagínalo así:</strong>
+                            <p style="margin:6px 0 0;color:#7A5C00;font-size:.9rem;">
+                                Una tubería funciona como una <em>cadena de montaje</em>: la salida de un comando se
+                                conecta directamente con la entrada del siguiente, sin almacenar resultados intermedios
+                                en archivos temporales. Los datos fluyen directamente entre procesos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            El operador <code>|</code> conecta la salida de un comando con la entrada del siguiente.
+                            Este mecanismo constituye una de las características más potentes de Linux y permite
+                            construir <strong>procesos complejos mediante la combinación de herramientas pequeñas y
+                                especializadas</strong>.
+                        </p>
+                        <p style="font-size:.95rem;color:#16BAAF;font-weight:600;margin:0 0 8px;">Sintaxis y ejemplo:</p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> comando1 | comando2<br>
+                            <span class="code-prompt">$</span> find ~/proyectos/tienda-online -name "*" | grep ".js"<br>
+                            <span class="code-comment"># find lista todos los archivos; grep filtra únicamente los que contienen .js</span>
+                        </div>
+                    </div>
+
+                    <!-- Desglose interactivo de una tubería -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#16BAAF;margin-bottom:12px;"><i
+                            class="fa-solid fa-magnifying-glass"></i> Desglose
+                        interactivo: haz clic en cada parte de la tubería</h4>
+                    <p style="font-size:.85rem;color:#4b5563;margin-bottom:16px;">
+                        Analiza cómo fluye la información en una tubería real de análisis de registros:
+                    </p>
+                    <div class="chmod-desglose">
+                        <div class="chmod-parte" id="dp-origen" onclick="showPipeInfo('origen')">
+                            <span class="chmod-token">cat access.log</span>
+                            <span class="chmod-label">Origen</span>
+                        </div>
+                        <div class="chmod-parte" id="dp-pipe" onclick="showPipeInfo('pipe')">
+                            <span class="chmod-token">|</span>
+                            <span class="chmod-label">Tubería</span>
+                        </div>
+                        <div class="chmod-parte" id="dp-filtro" onclick="showPipeInfo('filtro')">
+                            <span class="chmod-token">grep "500"</span>
+                            <span class="chmod-label">Filtro</span>
+                        </div>
+                        <div class="chmod-parte" id="dp-conteo" onclick="showPipeInfo('conteo')">
+                            <span class="chmod-token">sort | uniq -c</span>
+                            <span class="chmod-label">Orden y conteo</span>
+                        </div>
+                    </div>
+                    <div id="chmod-info-panel" class="chmod-info-panel" style="display:none;"></div>
+
+                    <div class="ux-nota">
+                        <span style="font-size:1.4rem;"><i class="fa-solid fa-triangle-exclamation"
+                                style="color:#F89F32;"></i></span>
+                        <span><strong>Error común:</strong> no respetar el orden lógico de los comandos. Por ejemplo,
+                            <code>grep package.json | ls</code> no tiene efecto, porque <code>ls</code> no utiliza la
+                            entrada estándar.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 3: FILTROS DE VISUALIZACIÓN ===== -->
+                <div class="ux-section" id="sec-visualizar">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#08AFE6;margin-bottom:16px;"><i
+                            class="fa-solid fa-eye"></i> Filtros de
+                        visualización: <code>cat</code>, <code>less</code>, <code>head</code> y <code>tail</code></h3>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            Los filtros procesan texto recibido desde un archivo o desde una tubería. Este grupo se
+                            especializa en <strong>mostrar contenido</strong>: completo, por partes o en tiempo real.
+                        </p>
+                        <p style="font-size:.95rem;color:#08AFE6;font-weight:600;margin:0 0 8px;">Ejemplos:</p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> cat package.json<br>
+                            <span class="code-prompt">$</span> less /var/log/nginx/access.log<br>
+                            <span class="code-prompt">$</span> head -15 package-lock.json<br>
+                            <span class="code-prompt">$</span> tail -f /var/log/nginx/error.log
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#08AFE6;margin-bottom:12px;"><i
+                            class="fa-solid fa-table-list"></i> ¿Qué hace cada
+                        filtro?</h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">Haz clic en cada fila para resaltarla:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>⌨️ Comando</th>
+                                    <th>📄 Qué hace</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>cat archivo</code></td>
+                                    <td>Muestra (y concatena) el contenido de archivos; <code>-n</code> numera líneas y
+                                        <code>-b</code> numera solo líneas con contenido</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>less archivo</code></td>
+                                    <td>Recorre archivos largos sin cargarlos completamente en pantalla</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>head -20 archivo</code></td>
+                                    <td>Muestra las primeras líneas del archivo (20 en este caso)</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>tail -f archivo</code></td>
+                                    <td>Muestra las últimas líneas y monitorea el archivo en tiempo real</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ejemplo-aplicado">
+                        <div class="ejemplo-header">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>Ejemplo aplicado — monitorear errores de Nginx en vivo</span>
+                        </div>
+                        <p style="margin:0 0 10px;font-size:.9rem;color:#374151;">
+                            Mientras pruebas tu aplicación, observa los errores a medida que ocurren:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> tail -f /var/log/nginx/error.log<br>
+                            <span class="code-comment"># La terminal queda "escuchando": cada nuevo error aparece al instante</span>
+                        </div>
+                    </div>
+
+                    <div class="ux-nota">
+                        <span style="font-size:1.4rem;"><i class="fa-solid fa-thumbtack" style="color:#F89F32;"></i></span>
+                        <span>Usa <code>less</code> para revisar logs, leer configuraciones extensas y examinar
+                            documentación <strong>sin saturar la pantalla</strong>: el archivo se carga por partes a
+                            medida que te desplazas.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 4: FILTROS DE PROCESAMIENTO ===== -->
+                <div class="ux-section" id="sec-procesar">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#6752A0;margin-bottom:16px;"><i
+                            class="fa-solid fa-filter"></i> Filtros de
+                        procesamiento: <code>grep</code>, <code>sort</code>, <code>wc</code>, <code>uniq</code> y
+                        <code>cut</code></h3>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            Este grupo de filtros <strong>busca, ordena, cuenta y extrae</strong> información de
+                            archivos o de la salida de otros comandos. Combinados con tuberías, permiten responder
+                            preguntas concretas sobre tus datos en segundos.
+                        </p>
+                        <p style="font-size:.95rem;color:#6752A0;font-weight:600;margin:0 0 8px;">Ejemplos:</p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> grep -rn "express" ~/proyectos/api-node<br>
+                            <span class="code-comment"># Busca recursivamente referencias a Express en el proyecto</span><br>
+                            <span class="code-prompt">$</span> cut -d "," -f2 usuarios.csv<br>
+                            <span class="code-comment"># Extrae únicamente los nombres de usuario de un archivo CSV</span><br>
+                            <span class="code-prompt">$</span> sort dependencias.txt<br>
+                            <span class="code-comment"># Ordena alfabéticamente las líneas del archivo</span>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#6752A0;margin-bottom:12px;"><i
+                            class="fa-solid fa-table-list"></i> ¿Qué hace cada
+                        filtro?</h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">Haz clic en cada fila para resaltarla:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>⌨️ Comando</th>
+                                    <th>📄 Función</th>
+                                    <th>⚙️ Opciones frecuentes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>grep patrón archivo</code></td>
+                                    <td>Localiza líneas que contienen un texto determinado</td>
+                                    <td><code>-i</code> ignora mayúsculas, <code>-n</code> muestra número de línea,
+                                        <code>-r</code> busca recursivamente</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>sort archivo</code></td>
+                                    <td>Ordena líneas alfabética o numéricamente</td>
+                                    <td><code>-r</code> orden descendente, <code>-n</code> orden numérico</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>wc archivo</code></td>
+                                    <td>Cuenta líneas, palabras y caracteres</td>
+                                    <td><code>-l</code> líneas, <code>-w</code> palabras, <code>-c</code> bytes</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>uniq</code></td>
+                                    <td>Elimina líneas duplicadas consecutivas</td>
+                                    <td>Se combina con <code>sort</code> para obtener valores únicos</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>cut -d "," -f2 archivo</code></td>
+                                    <td>Extrae columnas de un archivo delimitado</td>
+                                    <td><code>-d</code> delimitador, <code>-f</code> campo a extraer</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ejemplo-aplicado">
+                        <div class="ejemplo-header">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>Ejemplo aplicado — contar cuántas veces aparece cada error</span>
+                        </div>
+                        <p style="margin:0 0 10px;font-size:.9rem;color:#374151;">
+                            Combinando filtros en una tubería se obtiene un resumen estadístico del registro:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> grep "ERROR" application.log | sort | uniq -c<br>
+                            <span class="code-comment"># 3 ERROR: fallo la conexión a la base de datos</span><br>
+                            <span class="code-comment"># 1 ERROR: timeout al consultar la API</span>
+                        </div>
+                    </div>
+
+                    <div class="ux-nota">
+                        <span style="font-size:1.4rem;"><i class="fa-solid fa-lightbulb" style="color:#F89F32;"></i></span>
+                        <span>Los filtros brillan cuando se <strong>combinan en tuberías</strong>: cada herramienta hace
+                            una sola cosa bien y los datos fluyen de una a otra, por ejemplo
+                            <code>wc -l src/routes/index.js</code> para contar las líneas del enrutador.</span>
+                    </div>
+                </div>
+
+                <!-- Botones de navegación -->
+                <div style="display:flex;justify-content:space-between;margin-top:28px;flex-wrap:wrap;gap:10px;">
+                    <button id="ux-prev" onclick="navigateUx(-1)"
+                        style="display:none;background:#E7F3E4;color:#508C46;border:none;border-radius:50px;padding:10px 22px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:all .2s;"
+                        onmouseover="this.style.background='#D3E9CE'" onmouseout="this.style.background='#E7F3E4'">←
+                        Anterior</button>
+                    <button id="ux-next" onclick="navigateUx(1)"
+                        style="margin-left:auto;background:#508C46;color:#fff;border:none;border-radius:50px;padding:10px 22px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:all .2s;"
+                        onmouseover="this.style.background='#3E7036'"
+                        onmouseout="this.style.background='#508C46'">Siguiente →</button>
+                </div>
+
+                <!-- Lógica JS del contenido -->
+                <script>
+                    (function () {
+                        const sections = ['redir', 'tuberias', 'visualizar', 'procesar'];
+                        const labels = ['Redireccionamiento', 'Tuberías', 'Filtros de visualización', 'Filtros de procesamiento'];
+                        let current = 0;
+
+                        window.showUxSection = function (id, idx) {
+                            sections.forEach(s => {
+                                document.getElementById('sec-' + s)?.classList.remove('active');
+                                document.getElementById('tab-' + s)?.classList.remove('active');
+                            });
+                            document.getElementById('sec-' + id)?.classList.add('active');
+                            document.getElementById('tab-' + id)?.classList.add('active');
+                            current = idx;
+                            updateNav();
+                        };
+
+                        window.navigateUx = function (dir) {
+                            let next = Math.min(Math.max(current + dir, 0), sections.length - 1);
+                            showUxSection(sections[next], next);
+                            document.getElementById('tab-' + sections[next])?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        };
+
+                        function updateNav() {
+                            const prev = document.getElementById('ux-prev');
+                            const next = document.getElementById('ux-next');
+                            const dots = document.querySelectorAll('#ux-prog .prog-dot');
+                            const counter = document.getElementById('ux-counter');
+                            if (prev) prev.style.display = current > 0 ? 'block' : 'none';
+                            if (next) next.innerHTML = current < sections.length - 1 ? 'Siguiente →' : '<i class="fa-solid fa-circle-check"></i> Completado';
+                            if (counter) counter.textContent = 'Tema ' + (current + 1) + ' de ' + sections.length;
+                            dots.forEach((d, i) => d.classList.toggle('done', i <= current));
+                        }
+
+                        window.highlightRow = function (row) {
+                            const table = row.closest('table');
+                            if (!table) return;
+                            const rows = table.querySelectorAll('tbody tr');
+                            rows.forEach(r => r.querySelectorAll('td').forEach(td => td.style.background = ''));
+                            row.querySelectorAll('td').forEach(td => td.style.background = '#D3E9CE');
+                        };
+
+                        // Desglose interactivo de la tubería: cat access.log | grep "500" | sort | uniq -c
+                        const pipeData = {
+                            origen: {
+                                title: '<code>cat access.log</code> — Origen de datos',
+                                color: '#16BAAF',
+                                icon: '<i class="fa-solid fa-file-lines"></i>',
+                                desc: 'El comando <strong>cat</strong> lee el archivo de registro y envía su contenido completo a la <strong>salida estándar</strong>. Es el punto de partida de la tubería: sin un origen de datos, los filtros no tendrían nada que procesar.',
+                                verify: 'man cat'
+                            },
+                            pipe: {
+                                title: '<code>|</code> — Tubería (pipe)',
+                                color: '#F89F32',
+                                icon: '<i class="fa-solid fa-link"></i>',
+                                desc: 'El operador <strong>|</strong> conecta la salida estándar del comando de la izquierda con la <strong>entrada estándar</strong> del comando de la derecha. Los datos fluyen directamente entre procesos, <em>sin archivos temporales</em>.',
+                                verify: 'comando1 | comando2'
+                            },
+                            filtro: {
+                                title: '<code>grep "500"</code> — Filtro',
+                                color: '#6752A0',
+                                icon: '<i class="fa-solid fa-magnifying-glass"></i>',
+                                desc: 'El comando <strong>grep</strong> recibe las líneas del registro y deja pasar únicamente las que contienen el texto <strong>"500"</strong> (por ejemplo, errores HTTP 500 del servidor). El resto se descarta.',
+                                verify: 'man grep'
+                            },
+                            conteo: {
+                                title: '<code>sort | uniq -c</code> — Orden y conteo',
+                                color: '#08AFE6',
+                                icon: '<i class="fa-solid fa-chart-column"></i>',
+                                desc: '<strong>sort</strong> ordena las líneas resultantes para agrupar los duplicados, y <strong>uniq -c</strong> los elimina mostrando <em>cuántas veces se repite cada línea</em>. El resultado es un resumen estadístico de los errores.',
+                                verify: 'man sort y man uniq'
+                            }
+                        };
+
+                        window.showPipeInfo = function (part) {
+                            const panel = document.getElementById('chmod-info-panel');
+                            const data = pipeData[part];
+                            if (!data) return;
+
+                            // Toggle si ya está activo
+                            document.querySelectorAll('.chmod-parte').forEach(p => p.classList.remove('chmod-active'));
+                            document.getElementById('dp-' + part)?.classList.add('chmod-active');
+
+                            panel.style.display = 'block';
+                            panel.style.borderLeftColor = data.color;
+                            panel.innerHTML = `
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                    <span style="font-size:1.5rem;">${data.icon}</span>
+                                    <strong style="color:${data.color};font-size:1rem;">${data.title}</strong>
+                                </div>
+                                <p style="color:#374151;font-size:.9rem;margin:0 0 10px;">${data.desc}</p>
+                                <div style="font-size:.8rem;color:#6b7280;background:#f8fafc;border-radius:6px;padding:6px 10px;">
+                                    <i class="fa-solid fa-lightbulb"></i> <em>Para verificar:</em> <code>${data.verify}</code>
+                                </div>
+                            `;
+                        };
+
+                        updateNav();
+                    })();
+                </script>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== ACTIVIDADES ===================== -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+
+                <!-- ===== ACTIVIDAD 1: ESTRUCTURAR UN PROYECTO WEB ===== -->
+                <div class="terminal-activity bg-white border-l-4 rounded-lg p-6 mb-8 relative overflow-hidden"
+                    style="border-left-color:#508C46;border-top:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+                    <div class="absolute -top-4 -right-4 p-4 opacity-10 pointer-events-none text-9xl"
+                        style="color:#508C46;"><i class="fa-solid fa-folder-tree"></i></div>
+                    <h3 class="text-xl font-bold mb-2" style="color:#508C46;">Actividad 1. Analizar los registros de una aplicación Node.js</h3>
+                    <p class="text-slate-600 mb-4">
+                        <strong>Caso propuesto:</strong> crea un laboratorio de análisis llamado
+                        <code>laboratorio-logs-node</code>, genera un archivo de registro de una aplicación Node.js y
+                        extrae información usando redireccionamiento (<code>&gt;</code>, <code>&gt;&gt;</code>),
+                        tuberías (<code>|</code>) y filtros (<code>grep</code>, <code>wc</code>, <code>less</code>)
+                        en la terminal simulada.
+                    </p>
+
+                    <!-- Reto actual A1 -->
+                    <div id="a1-challenge" class="mb-4 p-4 rounded-xl"
+                        style="background:#E7F3E4;border:1px solid #B7D9AF;">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl" style="color:#508C46;"><i class="fa-solid fa-bullseye"></i></span>
+                            <span class="font-bold text-lg" style="color:#508C46;">Reto <span id="a1-num">1</span> de
+                                <span id="a1-total">6</span></span>
+                        </div>
+                        <p id="a1-text" class="font-medium" style="color:#3E7036;"></p>
+                        <p id="a1-hint" class="text-sm mt-1 italic" style="color:#508C46;"></p>
+                    </div>
+
+                    <!-- Terminal A1 -->
+                    <div class="terminal-window rounded-xl overflow-hidden border border-slate-700">
+                        <div class="terminal-titlebar bg-slate-800 px-4 py-2 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="text-slate-400 text-xs ml-3 font-mono">estudiante@linux:~</span>
+                        </div>
+                        <div id="a1-body"
+                            class="bg-slate-900 p-4 font-mono text-sm text-green-400 min-h-[220px] max-h-[350px] overflow-y-auto">
+                            <div class="term-line text-slate-400"><i class="fa-brands fa-linux"></i> Terminal Linux
+                                simulada — Actividad 1: análisis de
+                                registros</div>
+                            <div class="term-line text-slate-400">Escribe el comando indicado en el reto.</div>
+                            <div class="term-line text-slate-400">─────────────────────────────────────────</div>
+                        </div>
+                        <div class="bg-slate-900 px-4 pb-4 flex items-center gap-2">
+                            <span class="text-green-400 font-mono text-sm font-bold"
+                                id="a1-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a1-input"
+                                class="flex-1 bg-transparent border-none outline-none text-green-300 font-mono text-sm caret-green-400"
+                                placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 items-center mt-4 border-t pt-4">
+                        <button id="a1-reset"
+                            class="bg-slate-200 text-slate-700 font-bold py-2.5 px-6 rounded-lg hover:bg-slate-300 transition-all active:scale-95">Reiniciar</button>
+                        <div
+                            class="flex-1 min-w-[200px] ml-auto bg-slate-100 rounded-full h-5 overflow-hidden flex items-center border border-slate-200">
+                            <div id="a1-progress"
+                                class="h-full w-0 transition-all duration-500 text-xs text-white font-bold flex items-center justify-center"
+                                style="background:#508C46;"></div>
+                        </div>
+                        <span id="a1-score" class="font-bold w-14 text-center" style="color:#508C46;">0/7</span>
+                    </div>
+                    <div id="a1-feedback"
+                        class="mt-4 text-center font-bold text-lg h-10 transition-all flex items-center justify-center rounded-lg">
+                    </div>
+                </div>
+
+                <!-- ===== ACTIVIDAD 2: SIMULAR EL DESPLIEGUE DE ARCHIVOS ===== -->
+                <div class="terminal-activity bg-white border-l-4 rounded-lg p-6 mb-8 relative overflow-hidden"
+                    style="border-left-color:#08AFE6;border-top:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+                    <div class="absolute -top-4 -right-4 p-4 opacity-10 pointer-events-none text-9xl"
+                        style="color:#08AFE6;"><i class="fa-solid fa-server"></i></div>
+                    <h3 class="text-xl font-bold mb-2" style="color:#08AFE6;">Actividad 2. Generar un inventario de
+                        archivos para un proyecto web</h3>
+                    <p class="text-slate-600 mb-4">
+                        <strong>Caso real:</strong> reproduce la preparación de un inventario técnico previo al
+                        despliegue de una aplicación web. Genera diferentes reportes sobre la estructura del proyecto
+                        usando redireccionamiento (<code>&gt;</code>), tuberías (<code>|</code>) y filtros como
+                        <code>grep</code>, <code>wc</code>, <code>head</code> y <code>less</code>.
+                    </p>
+
+                    <!-- Reto actual A2 -->
+                    <div id="a2-challenge" class="mb-4 p-4 rounded-xl"
+                        style="background:#E3F5FD;border:1px solid #9ADCF5;">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl" style="color:#08AFE6;"><i class="fa-solid fa-bullseye"></i></span>
+                            <span class="font-bold text-lg" style="color:#08AFE6;">Reto <span id="a2-num">1</span> de
+                                <span id="a2-total">9</span></span>
+                        </div>
+                        <p id="a2-text" class="font-medium" style="color:#0679A6;"></p>
+                        <p id="a2-hint" class="text-sm mt-1 italic" style="color:#08AFE6;"></p>
+                    </div>
+
+                    <!-- Terminal A2 -->
+                    <div class="terminal-window rounded-xl overflow-hidden border border-slate-700">
+                        <div class="terminal-titlebar bg-slate-800 px-4 py-2 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="text-slate-400 text-xs ml-3 font-mono">estudiante@linux:~</span>
+                        </div>
+                        <div id="a2-body"
+                            class="bg-slate-900 p-4 font-mono text-sm text-green-400 min-h-[220px] max-h-[350px] overflow-y-auto">
+                            <div class="term-line text-slate-400"><i class="fa-brands fa-linux"></i> Terminal Linux
+                                simulada — Actividad 2: inventario de
+                                archivos</div>
+                            <div class="term-line text-slate-400">Escribe el comando indicado en el reto.</div>
+                            <div class="term-line text-slate-400">─────────────────────────────────────────</div>
+                        </div>
+                        <div class="bg-slate-900 px-4 pb-4 flex items-center gap-2">
+                            <span class="text-green-400 font-mono text-sm font-bold"
+                                id="a2-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a2-input"
+                                class="flex-1 bg-transparent border-none outline-none text-green-300 font-mono text-sm caret-green-400"
+                                placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 items-center mt-4 border-t pt-4">
+                        <button id="a2-reset"
+                            class="bg-slate-200 text-slate-700 font-bold py-2.5 px-6 rounded-lg hover:bg-slate-300 transition-all active:scale-95">Reiniciar</button>
+                        <div
+                            class="flex-1 min-w-[200px] ml-auto bg-slate-100 rounded-full h-5 overflow-hidden flex items-center border border-slate-200">
+                            <div id="a2-progress"
+                                class="h-full w-0 transition-all duration-500 text-xs text-white font-bold flex items-center justify-center"
+                                style="background:#08AFE6;"></div>
+                        </div>
+                        <span id="a2-score" class="font-bold w-14 text-center" style="color:#08AFE6;">0/8</span>
+                    </div>
+                    <div id="a2-feedback"
+                        class="mt-4 text-center font-bold text-lg h-10 transition-all flex items-center justify-center rounded-lg">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== EVALUACIÓN ===================== -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación. Preguntas de selección
+                    múltiple (marca la respuesta correcta)</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre redireccionamiento
+                        (<code>&gt;</code>, <code>&gt;&gt;</code>, <code>&lt;</code>), tuberías (<code>|</code>) y los
+                        filtros básicos <code>cat</code>, <code>less</code>, <code>head</code>, <code>tail</code>,
+                        <code>grep</code>, <code>sort</code>, <code>wc</code>, <code>uniq</code> y <code>cut</code>.
+                        Selecciona la respuesta correcta para cada pregunta.
+                    </p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn"
+                        class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar
+                        evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== RECURSOS ===================== -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para profundizar en el redireccionamiento, las tuberías
+                    y los filtros básicos, te recomendamos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Cómo utilizar los comandos diff, file, wc, head y tail.</h3>
+                            <p class="text-slate-600 text-sm mt-1">Video tutorial con ejemplos prácticos para comparar,
+                                identificar, contar y visualizar archivos desde la terminal de Linux con diff, file, wc,
+                                head y tail.</p>
+                            <a href="https://www.youtube.com/watch?v=gSboS0lhjFE" target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/diff.png" alt="Cómo utilizar los comandos diff, file, wc, head y tail"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Uso de los pipe o tuberías.</h3>
+                            <p class="text-slate-600 text-sm mt-1">Video tutorial sobre el operador | para encadenar
+                                comandos en la terminal: cómo conectar la salida de un comando con la entrada de otro
+                                usando tuberías.</p>
+                            <a href="https://www.youtube.com/watch?v=YmcS_ns_z3Y" target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Tuberias.png" alt="Uso de los pipe o tuberías"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== BIBLIOGRAFÍA ===================== -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Architecnología. (s. f.). <i>Pipes (tuberías) en Linux: Qué son y cómo utilizarlas</i>.
+                            <a href="https://architecnologia.es/pipes-especial-tuberias-linux"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">architecnologia.es</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            GeeksforGeeks. (s. f.). <i>Basic shell commands in Linux</i>.
+                            <a href="https://www.geeksforgeeks.org/linux-unix/basic-shell-commands-in-linux/"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">geeksforgeeks.org</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Linux Adictos. (s. f.). <i>Tuberías: Lo que necesitas saber para empezar a usarlas en GNU/Linux</i>.
+                            <a href="https://www.linuxadictos.com/tuberias-lo-que-necesitas-saber-para-empezar-a-usarlas-en-gnu-linux.html"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">linuxadictos.com</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Linux Total. (s. f.). <i>Redireccionamiento en Linux</i>.
+                            <a href="https://www.linuxtotal.com.mx/index.php?cont=redireccionamiento-en-linux"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">linuxtotal.com.mx</a>
+                        </span>
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div><!-- /bibliografia -->
+        </main>
+    </div>
+
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/speech.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/accordion.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+
+</html>
