@@ -1,0 +1,1413 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head><style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active,
+        .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .video-embed {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: #000;
+        }
+        .video-embed iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+
+    <link rel="stylesheet" href="tailwind.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Correlacion y regresion lineal simple</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            color: #334155;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+        button, select, input { font-family: inherit; font-size: inherit; }
+        button { border: none; cursor: pointer; }
+        
+        body { -webkit-user-select: none; user-select: none; }
+        .text-slate-700, .leading-relaxed, p, label, textarea, input { -webkit-user-select: text; user-select: text; }
+        
+        /* ===== LAYOUT ===== */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .min-h-screen { min-height: 100vh; }
+        .w-full { width: 100%; }
+        .w-64 { width: 16rem; }
+        .w-24 { width: 6rem; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        .h-screen { height: 100vh; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .hidden { display: none; }
+        .block { display: block; }
+        .relative { position: relative; }
+        .sticky { position: sticky; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        
+        /* ===== SPACING ===== */
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-5 { margin-top: 1.25rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .mr-1 { margin-right: 0.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .mr-3 { margin-right: 0.75rem; }
+        .ml-2 { margin-left: 0.5rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        
+        /* ===== TYPOGRAPHY ===== */
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .text-7xl { font-size: 4.5rem; line-height: 1; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .italic { font-style: italic; }
+        .leading-relaxed { line-height: 1.625; }
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .cursor-pointer { cursor: pointer; }
+        .list-disc { list-style-type: disc; }
+        .list-decimal { list-style-type: decimal; }
+        .list-inside { list-style-position: inside; }
+        
+        /* ===== COLORS - Backgrounds ===== */
+        .bg-slate-50 { background-color: #f8fafc; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-white { background-color: #ffffff; }
+        .bg-green-100 { background-color: #dcfce7; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-green-700 { background-color: #15803d; }
+        .bg-green-800 { background-color: #166534; }
+        .bg-yellow-100 { background-color: #fef9c3; }
+        .bg-yellow-500 { background-color: #eab308; }
+        .bg-yellow-600 { background-color: #ca8a04; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-gray-500 { background-color: #6b7280; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .bg-gray-700 { background-color: #374151; }
+        
+        /* ===== COLORS - Text ===== */
+        .text-white { color: #ffffff; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-700 { color: #334155; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .text-green-600 { color: #16a34a; }
+        .text-green-700 { color: #15803d; }
+        .text-green-800 { color: #166534; }
+        .text-green-100 { color: #dcfce7; }
+        .text-yellow-600 { color: #ca8a04; }
+        .text-yellow-700 { color: #a16207; }
+        .text-yellow-800 { color: #854d0e; }
+        .text-red-800 { color: #991b1b; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-blue-700 { color: #1d4ed8; }
+        
+        /* ===== BORDERS ===== */
+        .border { border-width: 1px; border-style: solid; border-color: #e5e7eb; }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-l-4 { border-left-width: 4px; border-left-style: solid; }
+        .border-green-200 { border-color: #bbf7d0; }
+        .border-green-500 { border-color: #22c55e; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-yellow-500 { border-color: #eab308; }
+        .border-red-500 { border-color: #ef4444; }
+        .border-blue-500 { border-color: #3b82f6; }
+        
+        /* ===== BORDER RADIUS ===== */
+        .rounded { border-radius: 0.25rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        
+        /* ===== SHADOWS ===== */
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        
+        /* ===== TRANSITIONS ===== */
+        .transition-colors { transition-property: background-color, border-color, color; transition-duration: 150ms; transition-timing-function: ease-in-out; }
+        .transition-shadow { transition-property: box-shadow; transition-duration: 300ms; }
+        .duration-300 { transition-duration: 300ms; }
+        
+        /* ===== HOVER STATES ===== */
+        .hover\:bg-green-700:hover { background-color: #15803d; }
+        .hover\:bg-yellow-600:hover { background-color: #ca8a04; }
+        .hover\:bg-red-600:hover { background-color: #dc2626; }
+        .hover\:bg-gray-700:hover { background-color: #374151; }
+        .hover\:bg-white:hover { background-color: #ffffff; }
+        .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .hover\:shadow-green-400:hover { box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.3); }
+        button:hover { opacity: 0.9; }
+        
+        /* ===== RESPONSIVE - sm (640px+) ===== */
+        @media (min-width: 640px) {
+            .sm\:p-6 { padding: 1.5rem; }
+            .sm\:flex-row { flex-direction: row; }
+            .sm\:items-center { align-items: center; }
+            .sm\:mt-0 { margin-top: 0; }
+            .sm\:ml-6 { margin-left: 1.5rem; }
+        }
+        
+        /* ===== FIXED SIDEBAR ===== */
+        .ova-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* ===== RESPONSIVE - md (768px+) ===== */
+        @media (min-width: 768px) {
+            .md\:flex { display: flex; }
+            .md\:flex-row { flex-direction: row; }
+            .md\:flex-col { flex-direction: column; }
+            .md\:hidden { display: none; }
+            .md\:w-64 { width: 16rem; }
+            .md\:w-auto { width: auto; }
+            .md\:p-10 { padding: 2.5rem; }
+            .ova-main {
+                margin-left: 16rem; /* w-64 = 16rem */
+            }
+        }
+        
+        /* ===== MOBILE HEADER FIXED ===== */
+        .ova-mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 767px) {
+            .ova-main {
+                padding-top: 13rem;
+            }
+            .ova-mobile-header {
+                margin-bottom: 0 !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .text-slate-700 ul,
+            .text-slate-700 ol {
+                margin-left: 1rem;
+                padding-right: 0.5rem;
+            }
+            main {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .ova-columns-row {
+                flex-direction: column !important;
+            }
+            .ova-columns-row .ova-column {
+                flex: 1 1 100% !important;
+            }
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+        }
+        
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        
+        /* ===== CONTENT PANES ===== */
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .content-pane.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== IMAGE MODAL ===== */
+        .image-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .expand-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(34, 197, 94, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+        
+        .image-container:hover .expand-btn {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .image-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border: 4px solid white;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            padding: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* ===== SPEECH CONTROLS ===== */
+        .speech-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .speech-controls button {
+            min-width: 90px;
+            max-width: fit-content;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 480px) {
+            .speech-controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 8px;
+            }
+            .speech-controls button {
+                width: 100%;
+            }
+        }
+        
+        /* ===== RICH TEXT CONTENT ===== */
+        .text-slate-700 {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .text-slate-700 ul,
+        .text-slate-700 ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .text-slate-700 ul { list-style-type: disc; }
+        .text-slate-700 ol { list-style-type: decimal; }
+        .text-slate-700 li { margin-bottom: 0.5rem; }
+        .text-slate-700 strong { font-weight: 600; }
+        .text-slate-700 em { font-style: italic; }
+        
+        .text-slate-700 a {
+            color: #16a34a;
+            text-decoration: underline;
+        }
+        .text-slate-700 a:hover { color: #15803d; }
+        
+        .text-slate-700 h1,
+        .text-slate-700 h2,
+        .text-slate-700 h3 {
+            font-weight: 700;
+            color: #166534;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .text-slate-700 h1 { font-size: 2rem; }
+        .text-slate-700 h2 { font-size: 1.5rem; }
+        .text-slate-700 h3 { font-size: 1.25rem; }
+        .text-slate-700 p { margin-bottom: 0.75rem; }
+        
+        /* ===== MOBILE HEADER ===== */
+        .md\:hidden.mb-6 {
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* ===== CODE BLOCK ===== */
+        .code-block-wrapper {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2d2d2d;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .code-block-lang {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        
+        .code-copy-btn {
+            background: #404040;
+            color: #d4d4d4;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .code-copy-btn:hover {
+            background: #525252;
+            opacity: 1 !important;
+        }
+        
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem 1.25rem;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.7;
+            tab-size: 4;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .code-block code {
+            font-family: inherit;
+            white-space: pre;
+        }
+        
+        /* ===== SYNTAX HIGHLIGHTING (Prism tokens) ===== */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a9955; }
+        .token.punctuation { color: #d4d4d4; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #b5cea8; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #ce9178; }
+        .token.operator, .token.entity, .token.url { color: #d4d4d4; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #569cd6; }
+        .token.function, .token.class-name { color: #dcdcaa; }
+        .token.regex, .token.important, .token.variable { color: #d16969; }
+        
+        /* ===== TABLE ===== */
+        .overflow-x-auto { overflow-x: auto; }
+        
+        .ova-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ova-table th {
+            background-color: #166534;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        
+        .ova-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .ova-table tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .ova-table tbody tr:hover {
+            background-color: #f0fdf4;
+        }
+        
+        .ova-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* ===== NAV ITEMS ===== */
+        .nav-item:hover { background-color: #15803d; }
+        .nav-item.active { background-color: #166534; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col ova-sidebar">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1 overflow-y-auto">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 w-full md:w-auto p-4 sm:p-6 md:p-10 bg-gray-50 ova-main">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center ova-mobile-header">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Aplicación de correlación y regresión lineal simple en el análisis de datos web</h2>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                    En el analisis de datos suele ser necesario estudiar como se relacionan dos variables. Por ejemplo, en una tienda virtual puede interesar saber si al aumentar el numero de visitas tambien aumentan los formularios completados.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                    Tambien puede ser util analizar si el tiempo de permanencia en una pagina se relaciona con la cantidad de clics o si el numero de campañas publicitarias guarda alguna relacion con las conversiones.
+                </p>
+                <div class="mb-6 bg-white p-4 rounded-lg shadow-md">
+                    <div class="video-embed">
+                        <iframe src="https://www.youtube.com/embed/rcU5Q9PS0CY" title="Video introductorio sobre correlacion y regresion lineal simple" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                    La correlacion muestra la direccion y la fuerza de la asociacion lineal entre dos variables, mientras que la regresion permite construir una ecuacion para estimar o predecir un valor a partir de otro.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed">
+                    En esta guia se trabajaran ejemplos vinculados con datos web, graficos de dispersion, interpretacion del coeficiente de correlacion y uso basico de la recta de regresion como apoyo para la toma de decisiones.
+                </p>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">&#129504;</span>
+                        <span>Comprender que es la correlacion e identificar si la relacion entre dos variables es positiva, negativa o nula en situaciones sencillas del analisis web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">&#128202;</span>
+                        <span>Interpretar el coeficiente de correlacion y reconocer cuando una relacion lineal es fuerte, moderada o debil a partir de tablas, graficos y datos del entorno digital.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">&#128161;</span>
+                        <span>Aplicar la regresion lineal simple para estimar valores y apoyar decisiones basicas sobre visitas, clics, formularios o conversiones mediante herramientas digitales.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane">
+<div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>1. ¿Que es la correlacion?</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La correlacion es una medida que describe como cambian juntas dos variables. Si una aumenta y la otra tambien, se habla de relacion positiva. Si una aumenta y la otra disminuye, se trata de una relacion negativa.</p>
+                                <p class="mb-4">Cuando no hay una tendencia lineal clara entre las variables, la relacion puede considerarse nula o muy debil.</p>
+                                <div class="mt-4 p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                    <p class="font-semibold text-green-800 mb-2">Idea clave</p>
+                                    <p>La correlacion describe como se mueven juntas dos variables; la regresion, ademas, permite estimar una variable a partir de la otra.</p>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <div class="p-4 bg-green-700 text-white rounded-lg shadow-sm">
+                                        <h4 class="font-bold mb-2">Positiva</h4>
+                                        <p>Si una variable aumenta y la otra tambien tiende a aumentar.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-700 text-white rounded-lg shadow-sm">
+                                        <h4 class="font-bold mb-2">Negativa</h4>
+                                        <p>Si una variable aumenta y la otra tiende a disminuir.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-700 text-white rounded-lg shadow-sm">
+                                        <h4 class="font-bold mb-2">Nula o debil</h4>
+                                        <p>Cuando no se aprecia una tendencia lineal clara.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>2. Tipos de correlacion</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La correlacion positiva indica que, en general, al aumentar una variable tambien aumenta la otra. La correlacion negativa muestra que al crecer una variable, la otra tiende a disminuir.</p>
+                                <p class="mb-4">Estas relaciones se observan mejor en un diagrama de dispersion. Cada punto representa un par de datos y la forma en que se agrupan ayuda a reconocer si existe o no una tendencia.</p>
+                                <div class="mt-4 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                    <div class="w-full bg-white rounded flex items-center justify-center overflow-hidden">
+                                        <img src="img/image1.png" alt="Tipos basicos de correlacion" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-green-300 rounded-lg overflow-hidden shadow-sm">
+                                        <thead class="bg-green-800 text-white">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Horas de campaña (X)</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Visitas a la landing page (Y)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-slate-700">
+                                            <tr class="border-t"><td class="px-4 py-3">1</td><td class="px-4 py-3">120</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">2</td><td class="px-4 py-3">145</td></tr>
+                                            <tr class="border-t"><td class="px-4 py-3">3</td><td class="px-4 py-3">170</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">4</td><td class="px-4 py-3">210</td></tr>
+                                            <tr class="border-t"><td class="px-4 py-3">5</td><td class="px-4 py-3">230</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">6</td><td class="px-4 py-3">260</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>3. Coeficiente de correlacion (r)</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">El coeficiente de correlacion de Pearson, representado con la letra r, resume numericamente la fuerza y la direccion de la relacion lineal entre dos variables. Su valor siempre esta entre -1 y 1.</p>
+                                <p class="mb-4">Cuando r esta cerca de 1, la relacion lineal es positiva y fuerte. Cuando r esta cerca de -1, la relacion lineal es negativa y fuerte. Cuando r esta cerca de 0, la relacion es debil o inexistente.</p>
+                                <div class="overflow-x-auto mt-4 mb-6">
+                                    <table class="min-w-full bg-white border border-green-300 rounded-lg overflow-hidden shadow-sm">
+                                        <thead class="bg-green-800 text-white">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Valor aproximado de r</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Interpretacion</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-slate-700">
+                                            <tr class="border-t"><td class="px-4 py-3">Cerca de +1</td><td class="px-4 py-3">Relacion positiva fuerte</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">Entre +0,3 y +0,7</td><td class="px-4 py-3">Relacion positiva moderada</td></tr>
+                                            <tr class="border-t"><td class="px-4 py-3">Cerca de 0</td><td class="px-4 py-3">Relacion lineal debil o nula</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">Cerca de -1</td><td class="px-4 py-3">Relacion negativa fuerte</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p><strong>Ejemplo:</strong> si r = 0,92 entre visitas y formularios enviados, la relacion es positiva y fuerte. Si r = -0,81 entre tiempo de carga y satisfaccion, la relacion es negativa y fuerte.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>4. Correlacion no implica causalidad</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Aunque dos variables esten relacionadas, eso no prueba por si solo que una sea la causa de la otra. Puede haber otros factores involucrados, como campañas, cambios de diseño o temporadas.</p>
+                                <p class="mb-4">La correlacion es muy util para descubrir patrones, pero la interpretacion correcta exige mirar el contexto y otras posibles variables que puedan estar influyendo.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-green-800 mb-2">Asociacion</h4>
+                                        <p>Dos variables pueden moverse juntas sin que una cause a la otra.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-green-800 mb-2">Contexto</h4>
+                                        <p>Siempre conviene revisar campañas, cambios, temporadas o factores externos.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-green-800 mb-2">Decision analitica</h4>
+                                        <p>El analisis responsable combina correlacion, contexto y evidencia complementaria.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>5. Regresion lineal simple</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La regresion lineal simple utiliza una variable independiente X para estimar el comportamiento de una variable dependiente Y. Su representacion mas conocida es la ecuacion de la recta.</p>
+                                <div class="mt-4 p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                    <p class="font-semibold text-green-800 mb-2">Ecuacion basica</p>
+                                    <p><span class="font-mono">ŷ = a + bx</span></p>
+                                    <p class="mt-2"><span class="font-mono">ŷ:</span> valor estimado de Y, <span class="font-mono">a:</span> intercepto, <span class="font-mono">b:</span> pendiente.</p>
+                                </div>
+                                <p class="mb-4">La pendiente b indica cuanto cambia Y cuando X aumenta una unidad. El intercepto a es el valor estimado de Y cuando X es igual a cero.</p>
+                                <div class="overflow-x-auto mt-4 mb-6">
+                                    <table class="min-w-full bg-white border border-green-300 rounded-lg overflow-hidden shadow-sm">
+                                        <thead class="bg-green-800 text-white">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Visitas a la pagina (X)</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Formularios completados (Y)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-slate-700">
+                                            <tr class="border-t"><td class="px-4 py-3">50</td><td class="px-4 py-3">9</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">100</td><td class="px-4 py-3">16</td></tr>
+                                            <tr class="border-t"><td class="px-4 py-3">150</td><td class="px-4 py-3">20</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">200</td><td class="px-4 py-3">24</td></tr>
+                                            <tr class="border-t"><td class="px-4 py-3">250</td><td class="px-4 py-3">31</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-4 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                    <div class="w-full bg-white rounded flex items-center justify-center overflow-hidden">
+                                        <img src="img/image2.png" alt="Diagrama de dispersion con recta de regresion" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                                <div class="mt-4 bg-white border border-green-300 rounded-lg shadow-sm p-4">
+                                    <h4 class="font-bold text-green-800 mb-2">Simulador de prediccion con regresion</h4>
+                                    <p class="text-slate-700 mb-4">Explora como cambia el valor estimado de formularios a partir de una ecuacion lineal simple.</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-simulator="regresion">
+                                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                            <label class="block text-sm font-semibold text-green-800 mb-2" for="intercepto-input">Intercepto a</label>
+                                            <input id="intercepto-input" type="number" step="0.1" value="4.4" class="w-full p-3 border rounded-md bg-white" data-field="intercepto">
+                                            <label class="block text-sm font-semibold text-green-800 mt-4 mb-2" for="pendiente-input">Pendiente b</label>
+                                            <input id="pendiente-input" type="number" step="0.001" value="0.104" class="w-full p-3 border rounded-md bg-white" data-field="pendiente">
+                                            <label class="block text-sm font-semibold text-green-800 mt-4 mb-2" for="visitas-input">Visitas x</label>
+                                            <input id="visitas-input" type="number" step="1" value="180" class="w-full p-3 border rounded-md bg-white" data-field="visitas">
+                                            <div class="flex flex-wrap gap-3 mt-4">
+                                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-run="regresion">Estimar valor</button>
+                                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset-sim="regresion">Reiniciar</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                            <p class="font-semibold text-green-800 mb-2">Guia rapida</p>
+                                            <p class="mb-2"><strong>a</strong> representa el intercepto de la recta.</p>
+                                            <p class="mb-2"><strong>b</strong> indica cuanto cambia Y cuando X aumenta una unidad.</p>
+                                            <p><strong>ŷ</strong> es un valor estimado, no una garantia exacta.</p>
+                                        </div>
+                                    </div>
+                                    <div class="hidden p-4 rounded-lg text-sm mt-4" data-result="regresion"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-6">
+                            <span>6. Uso de herramientas digitales e importancia del tema</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-6" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">En entornos educativos y profesionales, la correlacion y la regresion suelen calcularse con herramientas digitales. Excel y Google Sheets permiten insertar graficos de dispersion, agregar lineas de tendencia y mostrar ecuaciones. Jamovi facilita el calculo del coeficiente de correlacion y genera salidas estadisticas mas completas.</p>
+                                <div class="overflow-x-auto mt-4 mb-6">
+                                    <table class="min-w-full bg-white border border-green-300 rounded-lg overflow-hidden shadow-sm">
+                                        <thead class="bg-green-800 text-white">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Herramienta</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">¿Que permite hacer?</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Aplicacion sencilla</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-slate-700">
+                                            <tr class="border-t"><td class="px-4 py-3">Excel</td><td class="px-4 py-3">Crear tablas, diagramas de dispersion y linea de tendencia</td><td class="px-4 py-3">Relacionar visitas con clics o conversiones</td></tr>
+                                            <tr class="border-t bg-slate-50"><td class="px-4 py-3">Google Sheets</td><td class="px-4 py-3">Analizar datos compartidos y graficarlos en linea</td><td class="px-4 py-3">Seguir metricas basicas de formularios o campañas</td></tr>
+                                            <tr class="border-t"><td class="px-4 py-3">Jamovi</td><td class="px-4 py-3">Calcular correlacion y regresion con salidas automaticas</td><td class="px-4 py-3">Interpretar r, pendiente y ajuste del modelo</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-4">El analisis de correlacion y regresion ayuda a comprender patrones de comportamiento de los usuarios y a respaldar decisiones con evidencia. Permite explorar si ciertas variables del sitio se mueven juntas y construir estimaciones sencillas sobre registros, clics, visitas o permanencia.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades de aprendizaje</h2>
+                <div class="space-y-6">
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">1. Simulador del tipo de relacion</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Analiza cada caso y define si la relacion esperada entre las variables es positiva, negativa o nula.</p>
+                        <div class="space-y-4" data-activity="correlacion-relacion">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si aumenta el tiempo de carga de una pagina y disminuye la satisfaccion del usuario, la relacion es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="tiempo_satisfaccion">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="positiva">Positiva</option>
+                                    <option value="negativa">Negativa</option>
+                                    <option value="nula">Nula</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si al enviar mas campañas de correo tambien aumentan las visitas al sitio, la relacion es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="campanas_visitas">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="positiva">Positiva</option>
+                                    <option value="negativa">Negativa</option>
+                                    <option value="nula">Nula</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si se compara el color favorito de los usuarios con la cantidad de clics en un boton, la relacion esperada es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="color_clics">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="positiva">Positiva</option>
+                                    <option value="negativa">Negativa</option>
+                                    <option value="nula">Nula</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-check="correlacion-relacion">Evaluar actividad</button>
+                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset="correlacion-relacion">Reiniciar</button>
+                            </div>
+                            <div class="hidden p-4 rounded-lg text-sm" data-result="correlacion-relacion"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">2. Simulador de interpretacion de r</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Interpreta el signo y la magnitud del coeficiente de correlacion para cada valor.</p>
+                        <div class="space-y-4" data-activity="correlacion-r">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si r = 0,88, la interpretacion correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="r_088">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="positiva_fuerte">Relacion positiva fuerte</option>
+                                    <option value="negativa_fuerte">Relacion negativa fuerte</option>
+                                    <option value="debil_nula">Relacion debil o nula</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si r = -0,76, la interpretacion correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="r_m076">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="positiva_fuerte">Relacion positiva fuerte</option>
+                                    <option value="negativa_fuerte">Relacion negativa fuerte</option>
+                                    <option value="debil_nula">Relacion debil o nula</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si r = 0,09, la interpretacion correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="r_009">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="positiva_fuerte">Relacion positiva fuerte</option>
+                                    <option value="negativa_moderada">Relacion negativa moderada</option>
+                                    <option value="debil_nula">Relacion debil o nula</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-check="correlacion-r">Evaluar actividad</button>
+                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset="correlacion-r">Reiniciar</button>
+                            </div>
+                            <div class="hidden p-4 rounded-lg text-sm" data-result="correlacion-r"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">3. Simulador de prediccion con regresion</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Usa la ecuacion de regresion <span class="font-mono">ŷ = 4 + 0,10x</span>, donde <span class="font-mono">x</span> es el numero de visitas y <span class="font-mono">ŷ</span> el numero estimado de formularios completados.</p>
+                        <div class="space-y-4" data-activity="regresion-prediccion">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                    <label class="block text-sm font-semibold text-green-800 mb-2" for="pred-120">Prediccion para 120 visitas</label>
+                                    <input id="pred-120" type="number" step="1" class="w-full p-3 border rounded-md bg-white" data-field="pred_120" placeholder="Escribe el valor estimado">
+                                </div>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                    <label class="block text-sm font-semibold text-green-800 mb-2" for="pred-180">Prediccion para 180 visitas</label>
+                                    <input id="pred-180" type="number" step="1" class="w-full p-3 border rounded-md bg-white" data-field="pred_180" placeholder="Escribe el valor estimado">
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">La pendiente 0,10 en este contexto significa que:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="pendiente">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="por_visita">Por cada visita extra, se esperan 0,10 formularios mas</option>
+                                    <option value="fijo">Siempre habra exactamente 10 formularios</option>
+                                    <option value="seguro">Cada visita asegura un formulario completo</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-check="regresion-prediccion">Evaluar actividad</button>
+                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset="regresion-prediccion">Reiniciar</button>
+                            </div>
+                            <div class="hidden p-4 rounded-lg text-sm" data-result="regresion-prediccion"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                    <p class="text-slate-700 mb-4">Quiz tema 3. Aplicacion de correlacion y regresion lineal simple en el analisis de datos web mediante herramientas digitales.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluacion</button>
+                    <div id="quiz-result" class="mt-4"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <ul class="space-y-4">
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Video explicativo</h3>
+                            <p class="text-slate-600 mb-2">Recurso audiovisual para reforzar la correlacion y la regresion lineal simple en el analisis web.</p>
+                            <a href="https://www.youtube.com/watch?v=rcU5Q9PS0CY" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-video.png" alt="QR del video del tema 3" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Infografia del tema 3</h3>
+                            <p class="text-slate-600 mb-2">Sintesis visual de los conceptos principales sobre correlacion y regresion.</p>
+                            <a href="https://drive.google.com/file/d/1RaYhtIm2qi3-9vNMxz2URGWOAUf0N8Uv/view?usp=sharing" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-infografia.png" alt="QR de la infografia del tema 3" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Anderson, D. R., Sweeney, D. J., Williams, T. A., Camm, J. D., y Cochran, J. J. (2019). <i>Estadistica para negocios y economia</i> (13.a ed.). Cengage Learning.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Cadena Lozano, J. B. (2024). <i>Estadistica descriptiva y probabilidad para los negocios con aplicaciones en Excel y Jamovi</i> (1.a ed.). Editorial CESA.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Lind, D. A., Marchal, W. G., y Wathen, S. A. (2018). <i>Estadistica aplicada a los negocios y la economia</i> (17.a ed.). McGraw-Hill Interamericana.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Triola, M. F. (2018). <i>Estadistica</i> (12.a ed.). Pearson.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Walpole, R. E., Myers, R. H., Myers, S. L., y Ye, K. (2012). <i>Probabilidad y estadistica para ingenieria y ciencias</i> (9.a ed.). Pearson.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Ministerio de Educacion Nacional de Colombia. (2016). <i>Derechos basicos de aprendizaje DBA V.2: Matematicas</i>.<br><a href="https://www.colombiaaprende.edu.co/sites/default/files/files_public/2022-06/DBA_Matematicas-min.pdf" class="text-green-700 underline break-all" target="_blank">https://www.colombiaaprende.edu.co/sites/default/files/files_public/2022-06/DBA_Matematicas-min.pdf</a></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+<script>
+        function showActivityResult(activityId, message, isSuccess) {
+            const box = document.querySelector(`[data-result="${activityId}"]`);
+            box.innerHTML = message;
+            box.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'border', 'border-red-300', 'bg-green-100', 'text-green-800', 'border-green-300', 'bg-yellow-100', 'text-yellow-800', 'border-yellow-300');
+            if (isSuccess) {
+                box.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300');
+            } else {
+                box.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-300');
+            }
+        }
+
+        function resetActivityResult(activityId) {
+            const box = document.querySelector(`[data-result="${activityId}"]`);
+            box.className = 'hidden p-4 rounded-lg text-sm';
+            box.innerHTML = '';
+        }
+
+        document.querySelector('[data-check="correlacion-relacion"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="correlacion-relacion"]');
+            const a = activity.querySelector('[data-field="tiempo_satisfaccion"]').value;
+            const b = activity.querySelector('[data-field="campanas_visitas"]').value;
+            const c = activity.querySelector('[data-field="color_clics"]').value;
+            if (!a || !b || !c) {
+                showActivityResult('correlacion-relacion', 'Completa los tres casos antes de evaluar.', false);
+                return;
+            }
+            let score = 0;
+            if (a === 'negativa') score++;
+            if (b === 'positiva') score++;
+            if (c === 'nula') score++;
+            const ok = score === 3;
+            showActivityResult('correlacion-relacion', `<strong>Resultado:</strong> ${score} de 3 respuestas correctas.<br>${ok ? 'Clasificaste correctamente los tipos de relacion.' : 'Revisa si las variables cambian en el mismo sentido, en sentido contrario o si no hay relacion lineal clara.'}`, ok);
+        });
+
+        document.querySelector('[data-reset="correlacion-relacion"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="correlacion-relacion"]');
+            activity.querySelectorAll('select').forEach(select => { select.value = ''; });
+            resetActivityResult('correlacion-relacion');
+        });
+
+        document.querySelector('[data-check="correlacion-r"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="correlacion-r"]');
+            const r1 = activity.querySelector('[data-field="r_088"]').value;
+            const r2 = activity.querySelector('[data-field="r_m076"]').value;
+            const r3 = activity.querySelector('[data-field="r_009"]').value;
+            if (!r1 || !r2 || !r3) {
+                showActivityResult('correlacion-r', 'Completa los tres casos antes de evaluar.', false);
+                return;
+            }
+            let score = 0;
+            if (r1 === 'positiva_fuerte') score++;
+            if (r2 === 'negativa_fuerte') score++;
+            if (r3 === 'debil_nula') score++;
+            const ok = score === 3;
+            showActivityResult('correlacion-r', `<strong>Resultado:</strong> ${score} de 3 respuestas correctas.<br>${ok ? 'Interpretaste correctamente el signo y la magnitud de r.' : 'Recuerda: valores cercanos a +1 o -1 indican relaciones fuertes; valores cercanos a 0 indican relacion debil o nula.'}`, ok);
+        });
+
+        document.querySelector('[data-reset="correlacion-r"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="correlacion-r"]');
+            activity.querySelectorAll('select').forEach(select => { select.value = ''; });
+            resetActivityResult('correlacion-r');
+        });
+
+        document.querySelector('[data-check="regresion-prediccion"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="regresion-prediccion"]');
+            const pred120 = parseFloat(activity.querySelector('[data-field="pred_120"]').value);
+            const pred180 = parseFloat(activity.querySelector('[data-field="pred_180"]').value);
+            const pendiente = activity.querySelector('[data-field="pendiente"]').value;
+            if ([pred120, pred180].some(Number.isNaN) || !pendiente) {
+                showActivityResult('regresion-prediccion', 'Completa todos los campos del simulador antes de evaluar.', false);
+                return;
+            }
+            let score = 0;
+            if (Math.abs(pred120 - 16) < 0.05) score++;
+            if (Math.abs(pred180 - 22) < 0.05) score++;
+            if (pendiente === 'por_visita') score++;
+            const ok = score === 3;
+            showActivityResult('regresion-prediccion', `<strong>Resultado:</strong> ${score} de 3 respuestas correctas.<br>${ok ? 'Calculaste bien las predicciones e interpretaste correctamente la pendiente.' : 'Sustituye x en la ecuacion ŷ = 4 + 0,10x y recuerda que la pendiente muestra el cambio esperado de Y por cada unidad adicional de X.'}`, ok);
+        });
+
+        document.querySelector('[data-reset="regresion-prediccion"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="regresion-prediccion"]');
+            activity.querySelector('[data-field="pred_120"]').value = '';
+            activity.querySelector('[data-field="pred_180"]').value = '';
+            activity.querySelector('[data-field="pendiente"]').value = '';
+            resetActivityResult('regresion-prediccion');
+        });
+
+        document.querySelector('[data-run="regresion"]').addEventListener('click', () => {
+            const simulator = document.querySelector('[data-simulator="regresion"]');
+            const intercepto = parseFloat(simulator.querySelector('[data-field="intercepto"]').value);
+            const pendiente = parseFloat(simulator.querySelector('[data-field="pendiente"]').value);
+            const visitas = parseFloat(simulator.querySelector('[data-field="visitas"]').value);
+            if ([intercepto, pendiente, visitas].some(Number.isNaN)) {
+                showActivityResult('regresion', 'Ingresa valores numericos validos para a, b y x.', false);
+                return;
+            }
+            const y = intercepto + (pendiente * visitas);
+            showActivityResult('regresion', `<strong>Prediccion:</strong> con la ecuacion <strong>ŷ = ${intercepto.toFixed(1)} + ${pendiente.toFixed(3)}x</strong> y <strong>x = ${visitas.toFixed(0)}</strong>, el valor estimado es <strong>ŷ = ${y.toFixed(1)}</strong>.`, true);
+        });
+
+        document.querySelector('[data-reset-sim="regresion"]').addEventListener('click', () => {
+            const simulator = document.querySelector('[data-simulator="regresion"]');
+            simulator.querySelector('[data-field="intercepto"]').value = '4.4';
+            simulator.querySelector('[data-field="pendiente"]').value = '0.104';
+            simulator.querySelector('[data-field="visitas"]').value = '180';
+            resetActivityResult('regresion');
+        });
+    </script>
+<script>
+        const quizData = [
+            {
+                question: "La correlacion se utiliza para:",
+                options: [
+                    "Medir la relacion entre dos variables",
+                    "Ordenar datos alfabeticamente",
+                    "Calcular unicamente porcentajes",
+                    "Eliminar valores atipicos"
+                ],
+                correct: 0
+            },
+            {
+                question: "Un valor de r cercano a +1 indica:",
+                options: [
+                    "Relacion negativa fuerte",
+                    "Relacion positiva fuerte",
+                    "Ausencia total de relacion",
+                    "Error en los datos"
+                ],
+                correct: 1
+            },
+            {
+                question: "La expresion 'correlacion no implica causalidad' significa que:",
+                options: [
+                    "Toda relacion lineal prueba una causa",
+                    "Dos variables pueden estar asociadas sin que una sea la causa de la otra",
+                    "La regresion siempre reemplaza el analisis",
+                    "r nunca debe calcularse"
+                ],
+                correct: 1
+            },
+            {
+                question: "En la ecuacion de regresion ŷ = a + bx, la letra b representa:",
+                options: [
+                    "El numero total de datos",
+                    "La pendiente de la recta",
+                    "El error de la muestra",
+                    "El coeficiente de variacion"
+                ],
+                correct: 1
+            },
+            {
+                question: "Una utilidad practica de la regresion lineal simple en un sitio web es:",
+                options: [
+                    "Predecir una metrica a partir de otra",
+                    "Cambiar el codigo HTML automaticamente",
+                    "Sustituir las bases de datos",
+                    "Ordenar usuarios por nombre"
+                ],
+                correct: 0
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`.quiz-option[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option, 10) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+<footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center"><p class="text-slate-600 font-medium">Creado por:</p><p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p><p class="text-slate-500 text-sm">Universidad de Córdoba</p></footer>
+</body>
+</html>

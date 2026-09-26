@@ -1,0 +1,1384 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head><style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active,
+        .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .video-embed {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: #000;
+        }
+        .video-embed iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+
+    <link rel="stylesheet" href="tailwind.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Pruebas de hipotesis estadisticas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            color: #334155;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+        button, select, input { font-family: inherit; font-size: inherit; }
+        button { border: none; cursor: pointer; }
+        
+        body { -webkit-user-select: none; user-select: none; }
+        .text-slate-700, .leading-relaxed, p, label, textarea, input { -webkit-user-select: text; user-select: text; }
+        
+        /* ===== LAYOUT ===== */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .min-h-screen { min-height: 100vh; }
+        .w-full { width: 100%; }
+        .w-64 { width: 16rem; }
+        .w-24 { width: 6rem; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        .h-screen { height: 100vh; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .hidden { display: none; }
+        .block { display: block; }
+        .relative { position: relative; }
+        .sticky { position: sticky; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        
+        /* ===== SPACING ===== */
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-5 { margin-top: 1.25rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .mr-1 { margin-right: 0.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .mr-3 { margin-right: 0.75rem; }
+        .ml-2 { margin-left: 0.5rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        
+        /* ===== TYPOGRAPHY ===== */
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .text-7xl { font-size: 4.5rem; line-height: 1; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .italic { font-style: italic; }
+        .leading-relaxed { line-height: 1.625; }
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .cursor-pointer { cursor: pointer; }
+        .list-disc { list-style-type: disc; }
+        .list-decimal { list-style-type: decimal; }
+        .list-inside { list-style-position: inside; }
+        
+        /* ===== COLORS - Backgrounds ===== */
+        .bg-slate-50 { background-color: #f8fafc; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-white { background-color: #ffffff; }
+        .bg-green-100 { background-color: #dcfce7; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-green-700 { background-color: #15803d; }
+        .bg-green-800 { background-color: #166534; }
+        .bg-yellow-100 { background-color: #fef9c3; }
+        .bg-yellow-500 { background-color: #eab308; }
+        .bg-yellow-600 { background-color: #ca8a04; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-gray-500 { background-color: #6b7280; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .bg-gray-700 { background-color: #374151; }
+        
+        /* ===== COLORS - Text ===== */
+        .text-white { color: #ffffff; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-700 { color: #334155; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .text-green-600 { color: #16a34a; }
+        .text-green-700 { color: #15803d; }
+        .text-green-800 { color: #166534; }
+        .text-green-100 { color: #dcfce7; }
+        .text-yellow-600 { color: #ca8a04; }
+        .text-yellow-700 { color: #a16207; }
+        .text-yellow-800 { color: #854d0e; }
+        .text-red-800 { color: #991b1b; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-blue-700 { color: #1d4ed8; }
+        
+        /* ===== BORDERS ===== */
+        .border { border-width: 1px; border-style: solid; border-color: #e5e7eb; }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-l-4 { border-left-width: 4px; border-left-style: solid; }
+        .border-green-200 { border-color: #bbf7d0; }
+        .border-green-500 { border-color: #22c55e; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-yellow-500 { border-color: #eab308; }
+        .border-red-500 { border-color: #ef4444; }
+        .border-blue-500 { border-color: #3b82f6; }
+        
+        /* ===== BORDER RADIUS ===== */
+        .rounded { border-radius: 0.25rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        
+        /* ===== SHADOWS ===== */
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        
+        /* ===== TRANSITIONS ===== */
+        .transition-colors { transition-property: background-color, border-color, color; transition-duration: 150ms; transition-timing-function: ease-in-out; }
+        .transition-shadow { transition-property: box-shadow; transition-duration: 300ms; }
+        .duration-300 { transition-duration: 300ms; }
+        
+        /* ===== HOVER STATES ===== */
+        .hover\:bg-green-700:hover { background-color: #15803d; }
+        .hover\:bg-yellow-600:hover { background-color: #ca8a04; }
+        .hover\:bg-red-600:hover { background-color: #dc2626; }
+        .hover\:bg-gray-700:hover { background-color: #374151; }
+        .hover\:bg-white:hover { background-color: #ffffff; }
+        .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .hover\:shadow-green-400:hover { box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.3); }
+        button:hover { opacity: 0.9; }
+        
+        /* ===== RESPONSIVE - sm (640px+) ===== */
+        @media (min-width: 640px) {
+            .sm\:p-6 { padding: 1.5rem; }
+            .sm\:flex-row { flex-direction: row; }
+            .sm\:items-center { align-items: center; }
+            .sm\:mt-0 { margin-top: 0; }
+            .sm\:ml-6 { margin-left: 1.5rem; }
+        }
+        
+        /* ===== FIXED SIDEBAR ===== */
+        .ova-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* ===== RESPONSIVE - md (768px+) ===== */
+        @media (min-width: 768px) {
+            .md\:flex { display: flex; }
+            .md\:flex-row { flex-direction: row; }
+            .md\:flex-col { flex-direction: column; }
+            .md\:hidden { display: none; }
+            .md\:w-64 { width: 16rem; }
+            .md\:w-auto { width: auto; }
+            .md\:p-10 { padding: 2.5rem; }
+            .ova-main {
+                margin-left: 16rem; /* w-64 = 16rem */
+            }
+        }
+        
+        /* ===== MOBILE HEADER FIXED ===== */
+        .ova-mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 767px) {
+            .ova-main {
+                padding-top: 13rem;
+            }
+            .ova-mobile-header {
+                margin-bottom: 0 !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .text-slate-700 ul,
+            .text-slate-700 ol {
+                margin-left: 1rem;
+                padding-right: 0.5rem;
+            }
+            main {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .ova-columns-row {
+                flex-direction: column !important;
+            }
+            .ova-columns-row .ova-column {
+                flex: 1 1 100% !important;
+            }
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+        }
+        
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        
+        /* ===== CONTENT PANES ===== */
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .content-pane.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== IMAGE MODAL ===== */
+        .image-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .expand-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(34, 197, 94, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+        
+        .image-container:hover .expand-btn {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .image-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border: 4px solid white;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            padding: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* ===== SPEECH CONTROLS ===== */
+        .speech-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .speech-controls button {
+            min-width: 90px;
+            max-width: fit-content;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 480px) {
+            .speech-controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 8px;
+            }
+            .speech-controls button {
+                width: 100%;
+            }
+        }
+        
+        /* ===== RICH TEXT CONTENT ===== */
+        .text-slate-700 {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .text-slate-700 ul,
+        .text-slate-700 ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .text-slate-700 ul { list-style-type: disc; }
+        .text-slate-700 ol { list-style-type: decimal; }
+        .text-slate-700 li { margin-bottom: 0.5rem; }
+        .text-slate-700 strong { font-weight: 600; }
+        .text-slate-700 em { font-style: italic; }
+        
+        .text-slate-700 a {
+            color: #16a34a;
+            text-decoration: underline;
+        }
+        .text-slate-700 a:hover { color: #15803d; }
+        
+        .text-slate-700 h1,
+        .text-slate-700 h2,
+        .text-slate-700 h3 {
+            font-weight: 700;
+            color: #166534;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .text-slate-700 h1 { font-size: 2rem; }
+        .text-slate-700 h2 { font-size: 1.5rem; }
+        .text-slate-700 h3 { font-size: 1.25rem; }
+        .text-slate-700 p { margin-bottom: 0.75rem; }
+        
+        /* ===== MOBILE HEADER ===== */
+        .md\:hidden.mb-6 {
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* ===== CODE BLOCK ===== */
+        .code-block-wrapper {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2d2d2d;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .code-block-lang {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        
+        .code-copy-btn {
+            background: #404040;
+            color: #d4d4d4;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .code-copy-btn:hover {
+            background: #525252;
+            opacity: 1 !important;
+        }
+        
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem 1.25rem;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.7;
+            tab-size: 4;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .code-block code {
+            font-family: inherit;
+            white-space: pre;
+        }
+        
+        /* ===== SYNTAX HIGHLIGHTING (Prism tokens) ===== */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a9955; }
+        .token.punctuation { color: #d4d4d4; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #b5cea8; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #ce9178; }
+        .token.operator, .token.entity, .token.url { color: #d4d4d4; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #569cd6; }
+        .token.function, .token.class-name { color: #dcdcaa; }
+        .token.regex, .token.important, .token.variable { color: #d16969; }
+        
+        /* ===== TABLE ===== */
+        .overflow-x-auto { overflow-x: auto; }
+        
+        .ova-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ova-table th {
+            background-color: #166534;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        
+        .ova-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .ova-table tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .ova-table tbody tr:hover {
+            background-color: #f0fdf4;
+        }
+        
+        .ova-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* ===== NAV ITEMS ===== */
+        .nav-item:hover { background-color: #15803d; }
+        .nav-item.active { background-color: #166534; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col ova-sidebar">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1 overflow-y-auto">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 w-full md:w-auto p-4 sm:p-6 md:p-10 bg-gray-50 ova-main">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center ova-mobile-header">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Pruebas de hipótesis estadísticas: formulación, planteamiento y toma de decisiones</h2>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                    En el analisis de datos no basta con observar que un promedio o un porcentaje cambio. Tambien es necesario preguntarse si ese cambio es suficientemente fuerte como para pensar que no ocurrio solo por azar.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                    Esto es especialmente importante en programacion web, donde se comparan tiempos de carga, tasas de conversion, clics o resultados de distintas versiones de una pagina.
+                </p>
+                <div class="mb-6 bg-white p-4 rounded-lg shadow-md">
+                    <div class="video-embed">
+                        <iframe src="https://www.youtube.com/embed/4jloXllLZBI" title="Video introductorio sobre pruebas de hipotesis" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                    Las pruebas de hipotesis permiten evaluar una afirmacion usando informacion de una muestra. Con ellas se plantea una idea inicial, se analiza la evidencia recogida y luego se toma una decision razonada.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed">
+                    En esta guia se estudiaran la hipotesis nula, la hipotesis alternativa, el nivel de significancia, el p-valor y la toma de decisiones con ejemplos aplicados al contexto digital.
+                </p>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">&#129504;</span>
+                        <span>Comprender que es una prueba de hipotesis y diferenciar la hipotesis nula de la hipotesis alternativa en situaciones sencillas del contexto academico y tecnologico.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">&#128209;</span>
+                        <span>Formular pruebas de hipotesis basicas para medias o proporciones, identificando el nivel de significancia, la evidencia muestral y la regla de decision.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">&#128202;</span>
+                        <span>Tomar decisiones estadisticas iniciales a partir de p-valores o regiones criticas en ejemplos relacionados con analitica web y pruebas A/B.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane">
+<div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>1. ¿Que es una prueba de hipotesis?</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Una prueba de hipotesis es un procedimiento de la inferencia estadistica que permite evaluar una afirmacion sobre una poblacion a partir de una muestra. En otras palabras, ayuda a decidir si los datos observados apoyan o no una idea inicial.</p>
+                                <p class="mb-4">En un contexto web, por ejemplo, se puede querer comprobar si el tiempo promedio de carga de una pagina supera 3 segundos, si una campaña logra al menos 60 % de registros completados o si una version nueva convierte mejor que una version anterior.</p>
+                                <div class="mt-4 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                    <div class="w-full bg-white rounded flex items-center justify-center overflow-hidden">
+                                        <img src="img/img1.png" alt="Flujo de una prueba de hipotesis" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-green-800 mb-2">H0</h4>
+                                        <p>Representa que no hay cambio, diferencia o efecto.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                        <h4 class="font-bold text-green-800 mb-2">H1</h4>
+                                        <p>Plantea que si existe un cambio, una diferencia o un efecto.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>2. Hipotesis nula e hipotesis alternativa</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La hipotesis nula, representada por H0, es la afirmacion que se pone a prueba. Generalmente expresa estabilidad, igualdad o ausencia de diferencia. La hipotesis alternativa, representada por H1, plantea lo contrario.</p>
+                                <p class="mb-4">Por ejemplo, si una empresa afirma que el tiempo promedio de respuesta de su servidor es de 3 segundos, esa afirmacion puede escribirse como H0: μ = 3. Si se sospecha que el tiempo real es mayor, la hipotesis alternativa seria H1: μ &gt; 3.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                        <img src="img/hnula-y-alternativa.png" alt="Hipotesis nula e hipotesis alternativa" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                        <img src="img/curva-una-cola.png" alt="Prueba de una cola" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p><strong>Idea clave:</strong> la forma de H1 indica si la prueba es de una cola o de dos colas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>3. Nivel de significancia</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">El nivel de significancia, simbolizado con α, es el riesgo maximo que se acepta al rechazar la hipotesis nula cuando en realidad era verdadera. Un valor muy usado es α = 0,05.</p>
+                                <p class="mb-4">Mientras mas pequeño sea α, mas exigente sera la evidencia necesaria para rechazar H0.</p>
+                                <div class="mt-4 p-4 bg-slate-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="font-semibold text-green-800">Ejemplo</p>
+                                    <p class="mt-2">Si una tienda virtual quiere verificar si su pagina carga en mas de 3 segundos, puede formular H0: μ = 3 y H1: μ &gt; 3 para una prueba de una cola.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>4. ¿Que es el p-valor?</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">El p-valor es una medida que resume que tan compatible es la muestra con la hipotesis nula. Un p-valor pequeño indica que los datos observados serian poco probables si H0 fuera cierta.</p>
+                                <p class="mb-4">Se compara el p-valor con α. Si p es menor o igual que α, se rechaza H0. Si p es mayor que α, no se rechaza H0.</p>
+                                <div class="overflow-x-auto mt-4 mb-6">
+                                    <table class="min-w-full bg-white border border-green-300 rounded-lg overflow-hidden shadow-sm">
+                                        <thead class="bg-green-800 text-white">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Elemento</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Valor observado</th>
+                                                <th class="px-4 py-3 text-left text-sm font-semibold">Interpretacion</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-slate-700">
+                                            <tr class="border-t">
+                                                <td class="px-4 py-3">Nivel de significancia</td>
+                                                <td class="px-4 py-3">0,05</td>
+                                                <td class="px-4 py-3">Riesgo maximo aceptado para rechazar H0</td>
+                                            </tr>
+                                            <tr class="border-t bg-slate-50">
+                                                <td class="px-4 py-3">p-valor</td>
+                                                <td class="px-4 py-3">0,02</td>
+                                                <td class="px-4 py-3">La evidencia contra H0 es fuerte</td>
+                                            </tr>
+                                            <tr class="border-t">
+                                                <td class="px-4 py-3">Decision</td>
+                                                <td class="px-4 py-3">0,02 ≤ 0,05</td>
+                                                <td class="px-4 py-3">Se rechaza H0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-4 p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                    <p class="font-semibold text-green-800 mb-2">Regla de decision</p>
+                                    <p><span class="font-mono">Si p ≤ α, se rechaza H0. Si p &gt; α, no se rechaza H0.</span></p>
+                                </div>
+                                <div class="mt-4 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                    <div class="w-full bg-white rounded flex items-center justify-center overflow-hidden">
+                                        <img src="img/meta-vs-muestra.png" alt="Meta frente a muestra observada" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                                <div class="mt-4 bg-white border border-green-300 rounded-lg shadow-sm p-4">
+                                    <h4 class="font-bold text-green-800 mb-2">Simulador de decision con p-valor</h4>
+                                    <p class="text-slate-700 mb-4">Explora la regla de decision basica comparando p con α.</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-simulator="pvalor">
+                                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                            <label class="block text-sm font-semibold text-green-800 mb-2" for="alpha-input">Nivel de significancia α</label>
+                                            <input id="alpha-input" type="number" step="0.01" value="0.05" class="w-full p-3 border rounded-md bg-white" data-field="alpha">
+                                            <label class="block text-sm font-semibold text-green-800 mt-4 mb-2" for="pvalue-input">p-valor</label>
+                                            <input id="pvalue-input" type="number" step="0.01" value="0.03" class="w-full p-3 border rounded-md bg-white" data-field="pvalue">
+                                            <div class="flex flex-wrap gap-3 mt-4">
+                                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-run="pvalor">Tomar decision</button>
+                                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset-sim="pvalor">Reiniciar</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                            <p class="font-semibold text-green-800 mb-2">Guia rapida</p>
+                                            <p class="mb-2"><strong>Si p ≤ α:</strong> se rechaza H0.</p>
+                                            <p class="mb-2"><strong>Si p &gt; α:</strong> no se rechaza H0.</p>
+                                            <p>"No se rechaza" no significa que H0 sea verdadera, sino que no hubo evidencia suficiente para descartarla.</p>
+                                        </div>
+                                    </div>
+                                    <div class="hidden p-4 rounded-lg text-sm mt-4" data-result="pvalor"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>5. Pruebas para una o dos muestras</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Las pruebas de hipotesis pueden aplicarse a una sola muestra o a dos muestras, dependiendo de la pregunta que se desea responder. En una muestra se compara un promedio o una proporcion observada contra un valor de referencia; en dos muestras se comparan dos grupos entre si.</p>
+                                <p class="mb-4">En dos muestras, el proposito es contrastar si las diferencias observadas pueden explicarse por el azar o si son suficientemente grandes como para considerarlas estadisticamente significativas.</p>
+                                <div class="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p><strong>Ejemplo:</strong> en una prueba A/B, la version A alcanza 48 % de conversion y la version B 56 %. Si la prueba arroja p = 0,04 con α = 0,05, se rechaza H0 y se concluye que existe evidencia de diferencia entre las versiones.</p>
+                                </div>
+                                <div class="mt-4 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                    <div class="w-full bg-white rounded flex items-center justify-center overflow-hidden">
+                                        <img src="img/comparacion-ab.png" alt="Comparacion de dos versiones en una prueba A/B" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-6">
+                            <span>6. Representacion grafica e importancia del tema</span>
+                            <span class="ml-2">&#10133;</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-6" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Las representaciones graficas ayudan a comprender mejor el proceso de una prueba de hipotesis, especialmente cuando se quiere visualizar la region critica y la ubicacion del estadistico de prueba.</p>
+                                <p class="mb-4">Comprender este tema es importante porque permite analizar datos con criterios formales y no solo con intuicion. En programacion web, pruebas A/B, metricas de conversion y rendimiento de aplicaciones, las pruebas de hipotesis ayudan a tomar decisiones respaldadas por evidencia.</p>
+                                <div class="mt-4 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center">
+                                    <div class="w-full bg-white rounded flex items-center justify-center overflow-hidden">
+                                        <img src="img/curva-dos-colas.png" alt="Regiones criticas en una prueba de dos colas" class="max-w-full max-h-full object-contain" loading="lazy">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Actividades de aprendizaje</h2>
+                <div class="space-y-6">
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">1. Simulador de formulacion de hipotesis</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Evalua cada situacion seleccionando la formulacion o interpretacion correcta.</p>
+                        <div class="space-y-4" data-activity="hipotesis-formulacion">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si se desea comprobar si el tiempo promedio real es mayor a 2,5 segundos, la H0 adecuada es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="h0_media">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="igual">H0: μ = 2,5 segundos</option>
+                                    <option value="mayor">H0: μ &gt; 2,5 segundos</option>
+                                    <option value="distinta">H0: μ ≠ 2,5 segundos</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si se quiere verificar si la tasa de finalizacion es menor al 70 %, el tipo de prueba mas adecuado es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="tipo_prueba">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="una_cola">Prueba de una cola</option>
+                                    <option value="dos_colas">Prueba de dos colas</option>
+                                    <option value="sin_prueba">No se necesita prueba</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Si se sospecha que la version B convierte mejor que la version A, la hipotesis alternativa correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="h1_ab">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="igual">H1: pA = pB</option>
+                                    <option value="mayor">H1: pB &gt; pA</option>
+                                    <option value="menor">H1: pB &lt; pA</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-check="hipotesis-formulacion">Evaluar actividad</button>
+                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset="hipotesis-formulacion">Reiniciar</button>
+                            </div>
+                            <div class="hidden p-4 rounded-lg text-sm" data-result="hipotesis-formulacion"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">2. Simulador de decision con p-valor</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Usa la regla de decision y determina que conclusion corresponde en cada caso.</p>
+                        <div class="space-y-4" data-activity="hipotesis-pvalor">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Con α = 0,05 y p = 0,02, la decision correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="decision_1">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="rechaza">Se rechaza H0</option>
+                                    <option value="no_rechaza">No se rechaza H0</option>
+                                    <option value="no_decide">No se puede decidir</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Con α = 0,01 y p = 0,04, la decision correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="decision_2">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="rechaza">Se rechaza H0</option>
+                                    <option value="no_rechaza">No se rechaza H0</option>
+                                    <option value="igualdad">Se rechaza solo si p = α</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Cuando una prueba concluye "no se rechaza H0", esto significa que:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="interpretacion">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="verdadera">H0 quedo demostrada como verdadera</option>
+                                    <option value="evidencia">No hay evidencia suficiente para rechazar H0</option>
+                                    <option value="inutil">La prueba no sirve para nada</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-check="hipotesis-pvalor">Evaluar actividad</button>
+                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset="hipotesis-pvalor">Reiniciar</button>
+                            </div>
+                            <div class="hidden p-4 rounded-lg text-sm" data-result="hipotesis-pvalor"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">3. Simulador de comparacion A/B</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">En una prueba A/B, la version A logra 48 % de conversion y la version B 56 %. La prueba arroja p = 0,04 con α = 0,05.</p>
+                        <div class="space-y-4" data-activity="hipotesis-ab">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">La hipotesis nula coherente con este analisis es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="h0_ab">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="sin_diferencia">H0: no hay diferencia entre A y B</option>
+                                    <option value="b_mejor">H0: la version B convierte mas</option>
+                                    <option value="a_mejor">H0: la version A convierte mejor</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Con α = 0,05 y p = 0,04, la conclusion estadistica correcta es:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="decision_ab">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="rechaza">Se rechaza H0</option>
+                                    <option value="no_rechaza">No se rechaza H0</option>
+                                    <option value="indeciso">No hay forma de decidir</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <p class="font-medium text-slate-800 mb-3">Desde el punto de vista practico, el resultado sugiere que:</p>
+                                <select class="w-full p-3 border rounded-md bg-white" data-field="recomendacion">
+                                    <option value="">Selecciona una opcion</option>
+                                    <option value="mantener_a">Debe mantenerse A porque no hay diferencia</option>
+                                    <option value="implementar_b">Puede considerarse implementar B por su mejor conversion</option>
+                                    <option value="no_usable">No se puede usar este analisis en una decision real</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors" data-check="hipotesis-ab">Evaluar actividad</button>
+                                <button type="button" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors" data-reset="hipotesis-ab">Reiniciar</button>
+                            </div>
+                            <div class="hidden p-4 rounded-lg text-sm" data-result="hipotesis-ab"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                    <p class="text-slate-700 mb-4">Quiz tema 2. Pruebas de hipotesis estadisticas: formulacion, planteamiento y toma de decisiones.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluacion</button>
+                    <div id="quiz-result" class="mt-4"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <ul class="space-y-4">
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Video explicativo</h3>
+                            <p class="text-slate-600 mb-2">Recurso audiovisual para reforzar la formulacion y toma de decisiones en pruebas de hipotesis.</p>
+                            <a href="https://www.youtube.com/watch?v=4jloXllLZBI" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-video.png" alt="QR del video del tema 2" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Infografia del tema 2</h3>
+                            <p class="text-slate-600 mb-2">Sintesis visual de los conceptos principales de pruebas de hipotesis.</p>
+                            <a href="https://drive.google.com/file/d/1Pmesq2q6u6A77eWk5O9aHXGGK7QRJxf5/view?usp=sharing" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-infografia.png" alt="QR de la infografia del tema 2" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+<h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Anderson, D. R., Sweeney, D. J., Williams, T. A., Camm, J. D., y Cochran, J. J. (2019). <i>Estadistica para negocios y economia</i> (13.a ed.). Cengage Learning.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Cadena Lozano, J. B. (2024). <i>Estadistica descriptiva y probabilidad para los negocios con aplicaciones en Excel y Jamovi</i> (1.a ed.). Editorial CESA.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Lind, D. A., Marchal, W. G., y Wathen, S. A. (2018). <i>Estadistica aplicada a los negocios y la economia</i> (17.a ed.). McGraw-Hill Interamericana.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Triola, M. F. (2018). <i>Estadistica</i> (12.a ed.). Pearson.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Walpole, R. E., Myers, R. H., Myers, S. L., y Ye, K. (2012). <i>Probabilidad y estadistica para ingenieria y ciencias</i> (9.a ed.). Pearson.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Ministerio de Educacion Nacional de Colombia. (2016). <i>Derechos basicos de aprendizaje DBA V.2: Matematicas</i>.<br><a href="https://www.colombiaaprende.edu.co/sites/default/files/files_public/2022-06/DBA_Matematicas-min.pdf" class="text-green-700 underline break-all" target="_blank">https://www.colombiaaprende.edu.co/sites/default/files/files_public/2022-06/DBA_Matematicas-min.pdf</a></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+<script>
+        function showActivityResult(activityId, message, isSuccess) {
+            const box = document.querySelector(`[data-result="${activityId}"]`);
+            box.innerHTML = message;
+            box.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'border', 'border-red-300', 'bg-green-100', 'text-green-800', 'border-green-300', 'bg-yellow-100', 'text-yellow-800', 'border-yellow-300');
+            if (isSuccess) {
+                box.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300');
+            } else {
+                box.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-300');
+            }
+        }
+
+        function resetActivityResult(activityId) {
+            const box = document.querySelector(`[data-result="${activityId}"]`);
+            box.className = 'hidden p-4 rounded-lg text-sm';
+            box.innerHTML = '';
+        }
+
+        document.querySelector('[data-check="hipotesis-formulacion"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="hipotesis-formulacion"]');
+            const h0 = activity.querySelector('[data-field="h0_media"]').value;
+            const tipo = activity.querySelector('[data-field="tipo_prueba"]').value;
+            const h1 = activity.querySelector('[data-field="h1_ab"]').value;
+            if (!h0 || !tipo || !h1) {
+                showActivityResult('hipotesis-formulacion', 'Completa los tres casos antes de evaluar.', false);
+                return;
+            }
+            let score = 0;
+            if (h0 === 'igual') score++;
+            if (tipo === 'una_cola') score++;
+            if (h1 === 'mayor') score++;
+            const ok = score === 3;
+            showActivityResult('hipotesis-formulacion', `<strong>Resultado:</strong> ${score} de 3 respuestas correctas.<br>${ok ? 'Formulaste correctamente H0, el tipo de prueba y la hipotesis alternativa.' : 'Recuerda que H0 suele expresarse con igualdad, la prueba direccional usa una cola y la alternativa debe reflejar la mejora esperada.'}`, ok);
+        });
+
+        document.querySelector('[data-reset="hipotesis-formulacion"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="hipotesis-formulacion"]');
+            activity.querySelectorAll('select').forEach(select => { select.value = ''; });
+            resetActivityResult('hipotesis-formulacion');
+        });
+
+        document.querySelector('[data-check="hipotesis-pvalor"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="hipotesis-pvalor"]');
+            const decision1 = activity.querySelector('[data-field="decision_1"]').value;
+            const decision2 = activity.querySelector('[data-field="decision_2"]').value;
+            const interpretacion = activity.querySelector('[data-field="interpretacion"]').value;
+            if (!decision1 || !decision2 || !interpretacion) {
+                showActivityResult('hipotesis-pvalor', 'Completa todos los campos del simulador antes de evaluar.', false);
+                return;
+            }
+            let score = 0;
+            if (decision1 === 'rechaza') score++;
+            if (decision2 === 'no_rechaza') score++;
+            if (interpretacion === 'evidencia') score++;
+            const ok = score === 3;
+            showActivityResult('hipotesis-pvalor', `<strong>Resultado:</strong> ${score} de 3 respuestas correctas.<br>${ok ? 'Interpretaste correctamente la comparacion entre p y α.' : 'Revisa la regla de decision: si p ≤ α se rechaza H0; si p &gt; α no se rechaza H0.'}`, ok);
+        });
+
+        document.querySelector('[data-reset="hipotesis-pvalor"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="hipotesis-pvalor"]');
+            activity.querySelectorAll('select').forEach(select => { select.value = ''; });
+            resetActivityResult('hipotesis-pvalor');
+        });
+
+        document.querySelector('[data-check="hipotesis-ab"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="hipotesis-ab"]');
+            const h0 = activity.querySelector('[data-field="h0_ab"]').value;
+            const decision = activity.querySelector('[data-field="decision_ab"]').value;
+            const recomendacion = activity.querySelector('[data-field="recomendacion"]').value;
+            if (!h0 || !decision || !recomendacion) {
+                showActivityResult('hipotesis-ab', 'Completa todos los campos del caso A/B antes de evaluar.', false);
+                return;
+            }
+            let score = 0;
+            if (h0 === 'sin_diferencia') score++;
+            if (decision === 'rechaza') score++;
+            if (recomendacion === 'implementar_b') score++;
+            const ok = score === 3;
+            showActivityResult('hipotesis-ab', `<strong>Resultado:</strong> ${score} de 3 respuestas correctas.<br>${ok ? 'Relacionaste correctamente H0, el p-valor y la decision practica del caso.' : 'Revisa primero la hipotesis nula y luego compara el p-valor con α para decidir si conviene implementar la version B.'}`, ok);
+        });
+
+        document.querySelector('[data-reset="hipotesis-ab"]').addEventListener('click', () => {
+            const activity = document.querySelector('[data-activity="hipotesis-ab"]');
+            activity.querySelectorAll('select').forEach(select => { select.value = ''; });
+            resetActivityResult('hipotesis-ab');
+        });
+
+        document.querySelector('[data-run="pvalor"]').addEventListener('click', () => {
+            const simulator = document.querySelector('[data-simulator="pvalor"]');
+            const alpha = parseFloat(simulator.querySelector('[data-field="alpha"]').value);
+            const pvalue = parseFloat(simulator.querySelector('[data-field="pvalue"]').value);
+            if ([alpha, pvalue].some(Number.isNaN) || alpha <= 0 || alpha >= 1 || pvalue < 0 || pvalue > 1) {
+                showActivityResult('pvalor', 'Ingresa valores validos entre 0 y 1 para α y el p-valor.', false);
+                return;
+            }
+            if (pvalue <= alpha) {
+                showActivityResult('pvalor', `<strong>Decision:</strong> como <strong>p = ${pvalue.toFixed(2)}</strong> es menor o igual que <strong>α = ${alpha.toFixed(2)}</strong>, se rechaza H0. La evidencia observada es suficiente para apoyar la hipotesis alternativa.`, true);
+            } else {
+                const box = document.querySelector('[data-result="pvalor"]');
+                box.innerHTML = `<strong>Decision:</strong> como <strong>p = ${pvalue.toFixed(2)}</strong> es mayor que <strong>α = ${alpha.toFixed(2)}</strong>, no se rechaza H0. No hay evidencia suficiente para descartarla con este nivel de significancia.`;
+                box.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'border', 'border-red-300', 'bg-green-100', 'text-green-800', 'border-green-300');
+                box.classList.add('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+            }
+        });
+
+        document.querySelector('[data-reset-sim="pvalor"]').addEventListener('click', () => {
+            const simulator = document.querySelector('[data-simulator="pvalor"]');
+            simulator.querySelector('[data-field="alpha"]').value = '0.05';
+            simulator.querySelector('[data-field="pvalue"]').value = '0.03';
+            resetActivityResult('pvalor');
+        });
+    </script>
+<script>
+        const quizData = [
+            {
+                question: "La hipotesis nula H0 suele representar:",
+                options: [
+                    "Que siempre existe una mejora",
+                    "Que no hay cambio o diferencia significativa",
+                    "Que la muestra es perfecta",
+                    "Que el p-valor ya fue calculado"
+                ],
+                correct: 1
+            },
+            {
+                question: "Si p-valor ≤ α, entonces:",
+                options: [
+                    "Se rechaza H0",
+                    "No se rechaza H0",
+                    "La prueba no sirve",
+                    "Se repite la muestra automaticamente"
+                ],
+                correct: 0
+            },
+            {
+                question: "α = 0,05 indica que:",
+                options: [
+                    "El 5 % de la muestra esta mal",
+                    "Se acepta un riesgo del 5 % de rechazar H0 siendo verdadera",
+                    "H1 tiene 5 % de probabilidad de ser falsa",
+                    "Siempre se debe rechazar H0"
+                ],
+                correct: 1
+            },
+            {
+                question: "El p-valor sirve para:",
+                options: [
+                    "Medir la evidencia contra H0",
+                    "Calcular el tamaño de toda la poblacion",
+                    "Sustituir α",
+                    "Confirmar que H0 es verdadera"
+                ],
+                correct: 0
+            },
+            {
+                question: "Una prueba de dos muestras puede usarse para:",
+                options: [
+                    "Comparar dos versiones de una pagina web",
+                    "Ordenar datos alfabeticamente",
+                    "Eliminar la variabilidad de los datos",
+                    "Reemplazar una muestra por una opinion"
+                ],
+                correct: 0
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65 + i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`.quiz-option[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option, 10) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+<footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center"><p class="text-slate-600 font-medium">Creado por:</p><p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p><p class="text-slate-500 text-sm">Universidad de Córdoba</p></footer>
+</body>
+</html>

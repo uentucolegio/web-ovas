@@ -1,0 +1,952 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head><style>
+
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--green-50:#f0fdf4;--green-100:#dcfce7;--green-200:#bbf7d0;--green-500:#22c55e;--green-600:#16a34a;--green-700:#15803d;--green-800:#166534;--slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--yellow-100:#fef9c3;--yellow-500:#eab308;--yellow-700:#a16207;--red-100:#fee2e2;--red-500:#ef4444;--red-700:#b91c1c;--shadow-sm:0 1px 2px rgba(15,23,42,.06);--shadow-md:0 10px 25px rgba(15,23,42,.08);--shadow-lg:0 18px 40px rgba(15,23,42,.12);--radius-lg:18px;--radius-md:14px}
+        html,body{max-width:100%;overflow-x:auto;background:var(--slate-50)}
+        body{font-family:"Poppins","Segoe UI",Tahoma,sans-serif;color:var(--slate-700);line-height:1.6}
+        img{display:block;max-width:100%;height:auto} button,select,input{font:inherit} button{border:0;cursor:pointer} a{color:inherit;text-decoration:none}
+        .layout{display:flex;min-height:100vh}.sidebar{position:fixed;top:0;left:0;width:16rem;height:100vh;background:#fff;box-shadow:0 10px 15px rgba(0,0,0,.1);display:flex;flex-direction:column;z-index:40}.sidebar-logo{padding:1rem;display:flex;justify-content:center}.sidebar-logo-frame{width:150px;height:150px;padding:.5rem;border-radius:999px;background:#fff;border:2px solid var(--green-500);box-shadow:0 10px 15px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:box-shadow .3s ease}.sidebar-logo-frame:hover{box-shadow:0 10px 15px rgba(34,197,94,.35)}.sidebar-nav{margin-top:1.5rem;padding-bottom:1.5rem;flex:1;overflow-y:auto}.sidebar-link{width:100%;display:flex;align-items:center;gap:.75rem;padding:.9rem 1.5rem;color:var(--slate-700);font-weight:500;transition:.3s;border-left:4px solid transparent}.sidebar-link:hover,.sidebar-link.active{background:var(--green-50);color:var(--green-800);border-left-color:var(--green-500)}.sidebar-icon{width:1.75rem;text-align:center;font-size:1.1rem}.main{flex:1;margin-left:16rem;padding:2.5rem}.mobile-header{display:none}.content-pane{display:none;max-width:72rem;margin:0 auto;animation:fadeIn .5s ease-in-out}.content-pane.active{display:block}.content-stack{display:grid;gap:1.15rem}@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .hero-card{background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:1.5rem}.eyebrow,.hero-meta,.hero-chip{display:none}.hero-card h1,.content-pane h2{color:var(--green-800)}.hero-card h1,.hero-card .section-heading,.section-heading{font-size:clamp(1.75rem,2.2vw,2rem);line-height:1.2;margin:0 0 1rem;font-weight:700}.hero-card p{font-size:1.05rem}.sidebar-logo-frame img,.mobile-logo img{max-width:80%;max-height:80%;object-fit:contain}
+        .text-block,.activity-card,.quiz-card,.resource-card,.figure-card,.bibliography-item,.example-card,.accordion{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(15,23,42,.08);border:1px solid #dbe7ee}
+        .text-block{padding:0;margin-bottom:1.25rem;background:transparent;border:0;box-shadow:none}.text-block p+p,.mini-card p+p,.example-card p+p{margin-top:.95rem}
+        .video-card{margin:1.15rem 0;background:#fff;border-radius:.75rem;padding:1rem;box-shadow:0 1px 3px rgba(15,23,42,.08);border:1px solid #dbe7ee}
+        .video-embed{position:relative;width:100%;padding-top:56.25%;border-radius:.8rem;overflow:hidden;background:#000}
+        .video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+        .activity-card,.quiz-card,.resource-card,.bibliography-item{border-left:0}
+        .objective-list{list-style:none;display:grid;gap:1rem;padding:0;margin:0}.objective-item{display:grid;grid-template-columns:2rem minmax(0,1fr);align-items:center;column-gap:1rem;padding:1rem 1.1rem;background:#fff;border:1px solid #dbe7ee;border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.08)}.objective-check{display:block;width:2rem;min-width:2rem;color:inherit;font-size:1.35rem;line-height:1.2;text-align:center;background:none;border:0;box-shadow:none;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol",sans-serif}.objective-item p{margin:0;min-width:0}
+        .speech-controls{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1rem;background:#dcfce7;border-radius:10px;margin-bottom:1.35rem;border:1px solid #86efac}.speech-main{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;min-width:0}.speech-btn{padding:.55rem 1rem;border-radius:999px;color:#fff;font-weight:700;min-width:88px}.speech-btn:disabled{opacity:.55;cursor:not-allowed}.speech-btn.play{background:#16a34a}.speech-btn.pause{background:#eab308}.speech-btn.stop{background:#ef4444}.speech-speed{display:flex;align-items:center;gap:.65rem;color:var(--green-800);font-size:.95rem;font-weight:600;min-width:0}.speech-speed input{accent-color:#22c55e}.speech-voice{color:var(--green-800);font-size:.95rem;text-align:right;min-width:0;overflow-wrap:anywhere}
+        .accordion-list{display:grid;gap:1rem}.accordion{overflow:visible;background:transparent;border:0;box-shadow:none}.accordion-toggle{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;background:#dcfce7;color:var(--green-800);text-align:left;font-weight:700;font-size:1.12rem;border:1px solid #86efac;border-radius:10px 10px 0 0}.accordion-toggle span:first-child{flex:1}.accordion-toggle span:last-child{display:block;color:#16a34a;font-size:1.6rem;font-weight:700;line-height:1;flex-shrink:0}.accordion-panel{display:none;padding:1rem 1.1rem 1.1rem;background:#fff;border:1px solid #86efac;border-top:0;border-radius:0 0 10px 10px;margin-bottom:1.5rem}.accordion.open .accordion-panel{display:block}
+        .two-col,.flip-grid,.figure-grid{display:grid;gap:1rem}.two-col,.figure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.figure-grid > :only-child{grid-column:1/-1}.flip-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:stretch}.mini-card{padding:1rem;border-radius:10px;background:#fff;border:1px solid #dbe7ee;box-shadow:0 1px 2px rgba(15,23,42,.06)}.mini-card h3,.mini-card h4,.example-card h4,.module-title,.figure-card h4{color:var(--green-800)}.formula-card{padding:1rem 1.15rem;border-radius:10px;background:#f0fdf4;border:1px solid #86efac;border-left:4px solid #4ade80;color:var(--green-800);font-weight:600;margin:1rem 0;overflow-x:auto}.formula-inline{font-family:"Courier New",Courier,monospace;white-space:nowrap;font-size:1rem}.flip-card{perspective:1000px;min-height:225px;max-width:100%}.flip-card button{width:100%;height:100%;background:transparent}.flip-inner{position:relative;width:100%;min-height:225px;transition:transform .55s ease;transform-style:preserve-3d}.flip-card.flipped .flip-inner{transform:rotateY(180deg)}.flip-face{position:absolute;inset:0;padding:1.1rem 1.2rem;border-radius:12px;backface-visibility:hidden;box-shadow:none;border:0;display:flex;flex-direction:column;justify-content:space-between}.flip-front{background:#16a34a;color:#fff}.flip-back{background:#fff;color:var(--slate-700);border:1px solid #86efac;transform:rotateY(180deg)}.flip-label{color:rgba(255,255,255,.72);font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem}.flip-back .flip-label{color:#9ca3af}.flip-front h3{color:#fff;font-size:1.05rem;line-height:1.25}.flip-back h3{color:var(--green-800);font-size:1.05rem;line-height:1.25}.flip-front p{color:rgba(255,255,255,.92)}.flip-back p{color:var(--slate-700)}.flip-back strong,.flip-back .formula-inline{color:var(--green-800)}.example-card{margin-top:1rem;padding:1rem 1.1rem;border-radius:10px;background:#f0fdf4;box-shadow:none;border:1px solid #bbf7d0;border-left:4px solid #4ade80}
+        .figure-card{padding:1rem;border-radius:10px;border:1px solid #86efac;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.08)}.figure-image{width:100%;border-radius:10px;overflow:hidden;border:1px solid #bbf7d0;background:#fff;min-height:220px;display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;color:var(--slate-600)}.figure-card h4{margin:.9rem 0 .35rem}
+        .table-shell{margin-top:1rem;background:#fff;border-radius:.75rem;padding:1rem;box-shadow:0 1px 3px rgba(15,23,42,.08);border:1px solid #dbe7ee;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .ova-table{width:100%;border-collapse:collapse;background:#fff;border-radius:.5rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:560px}
+        .ova-table th{background-color:#166534;color:#fff;font-weight:600;padding:.75rem 1rem;text-align:left;font-size:.875rem}
+        .ova-table td{padding:.75rem 1rem;border-bottom:1px solid #e5e7eb;font-size:.875rem;color:#374151}
+        .ova-table tbody tr:nth-child(even){background-color:#f9fafb}
+        .ova-table tbody tr:hover{background-color:#f0fdf4}
+        .ova-table tbody tr:last-child td{border-bottom:none}
+        .decision-pills{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.9rem}.decision-pill{padding:.45rem .75rem;border-radius:999px;background:#fff;color:var(--slate-700);font-size:.9rem;border:1px solid #dfe8ee}.table-note{margin-top:.55rem;color:var(--slate-500);font-size:.86rem}
+        #contenido .accordion{border:0;background:transparent}
+        #contenido .accordion .mini-card,#contenido .example-card,#contenido .figure-card,#contenido .formula-card{border-left:0}
+        #contenido .accordion .mini-card{background:#fff}
+        .image-placeholder-label{font-weight:600;color:var(--green-800);margin-bottom:.35rem}
+        .activity-card,.quiz-card,.resource-card{margin-bottom:1.25rem;border-radius:10px}.activity-card{padding:1.5rem;border:1px solid #dbe7ee;border-left:4px solid var(--green-500);background:#fff;box-shadow:var(--shadow-sm)}.quiz-card{padding:1.5rem;border:1px solid #dbe7ee;background:#fff;box-shadow:var(--shadow-md)}.resource-card{padding:1rem;background:#fff;box-shadow:var(--shadow-md);border-left:4px solid var(--green-500);transition:box-shadow .2s}.module-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem}.module-title{font-size:1.2rem;font-weight:700;color:var(--green-700)}.score-chip{padding:.32rem .7rem;border-radius:999px;background:var(--green-50);color:var(--green-700);font-size:.84rem;font-weight:600;white-space:nowrap;border:1px solid var(--green-200)}.activity-question,.quiz-question{padding:1rem 1.05rem;background:var(--slate-50);border-radius:10px;border:1px solid var(--slate-200);overflow-wrap:anywhere}.activity-question+.activity-question,.quiz-question+.quiz-question{margin-top:.9rem}.activity-options{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.85rem}.activity-option{padding:.65rem .9rem;border-radius:999px;background:#fff;border:1px solid var(--green-200);color:var(--green-800);font-weight:500;transition:.2s;text-align:left;white-space:normal;line-height:1.45;justify-content:flex-start}.activity-option:hover,.resource-link:hover,.reset-btn:hover,.quiz-btn:hover{transform:translateY(-1px)}.activity-option:hover{background:var(--green-50)}.activity-option.correct{background:var(--green-100);border-color:var(--green-500)}.activity-option.incorrect{background:var(--red-100);border-color:var(--red-500);color:var(--red-700)}.feedback{margin-top:.8rem;padding:.8rem .95rem;border-radius:10px;font-size:.95rem;display:none}.feedback.show{display:block}.feedback.correct{background:var(--green-100);color:var(--green-800)}.feedback.incorrect{background:var(--red-100);color:var(--red-700)}
+        .reset-btn,.quiz-btn,.resource-link{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-weight:600}.reset-btn,.quiz-btn{padding:.7rem 1rem;border-radius:999px;background:var(--green-600);color:#fff}.reset-btn.secondary{background:var(--slate-500)}.resource-link{background:none;color:var(--slate-700);width:fit-content;text-decoration:underline;padding:0}.resource-link:hover{color:var(--green-700)}.quiz-options{display:grid;gap:.8rem;margin-top:.8rem}.quiz-option{display:flex;align-items:flex-start;gap:.75rem;padding:.95rem 1rem;border-radius:18px;background:#f8fafc;border:1px solid #dbe7ee}.quiz-option input{margin-top:.25rem}.quiz-summary{padding:1rem 1.15rem;border-radius:var(--radius-md);border-left:4px solid var(--green-500)}.quiz-summary.success{background:var(--green-100);color:var(--green-800)}.quiz-summary.warning{background:var(--yellow-100);color:var(--yellow-700);border-left-color:var(--yellow-500)}.quiz-summary.error{background:var(--red-100);color:var(--red-700);border-left-color:var(--red-500)}.resource-text{flex:1;min-width:0}.resource-text p{margin:.35rem 0 .7rem;color:var(--slate-600)}.resource-title{font-weight:700;color:var(--green-700)}
+        #recursos .resource-card:hover,#bibliografia .bibliography-item:hover{box-shadow:var(--shadow-lg)}
+        .bibliography-list{display:grid;gap:1.9rem;padding:0;margin:0;list-style:none;align-items:stretch}.bibliography-item,.bibliography-credit,.bibliography-credit-label,.bibliography-credit-name,.bibliography-credit-org{font-family:"Poppins","Segoe UI",Tahoma,sans-serif}.bibliography-item{display:block;width:100%;padding:1.55rem 1.9rem;border-radius:10px;border-left:4px solid var(--green-500);background:#fff;box-shadow:var(--shadow-md);font-size:1rem;line-height:1.7;text-align:left;overflow-wrap:anywhere;transition:box-shadow .2s}.bibliography-copy{display:block;color:var(--slate-700)}.bibliography-item a{color:var(--green-700);text-decoration:underline;word-break:break-all}.bibliography-credit{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;width:auto;margin:2rem 1.15rem 0;padding:1.6rem 1rem 0;border-top:2px solid var(--slate-200);text-align:center}.bibliography-credit-label{display:block;font-weight:600;color:var(--slate-700);font-size:.92rem}.bibliography-credit-name{display:block;max-width:900px;margin-top:.2rem;color:var(--green-800);font-size:clamp(1.1rem,2vw,1.45rem);font-weight:700;line-height:1.2;text-wrap:balance}.bibliography-credit-org{display:block;margin-top:.1rem;color:#64748b;font-size:clamp(.9rem,1.6vw,1rem)}.page-footer{margin-top:2rem;padding-bottom:1rem}.placeholder-card{padding:1rem 1.1rem;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--slate-50),#fff);border:1px dashed var(--slate-200);color:var(--slate-600)}.actions-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}.resource-split{display:flex;align-items:center;justify-content:space-between;gap:1.5rem}.resource-qr{width:2cm;height:2cm;border:1px solid #86efac;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--green-50);flex-shrink:0;overflow:hidden}.resource-qr img{width:100%;height:100%;object-fit:contain;display:block}
+        .simulator-card{margin-top:1rem;padding:1.2rem;border-radius:var(--radius-lg);background:#fff;border:1px solid #dfe8ee}
+        .simulator-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:1rem;margin-top:1rem}
+        .simulator-panel{padding:1rem 1.1rem;border-radius:18px;background:#f8fafc;border:1px solid #dbe7ee}
+        .simulator-panel h4{color:var(--green-800);margin-bottom:.65rem}
+        .simulator-panel p+p{margin-top:.6rem}
+        .simulator-controls{display:grid;gap:.85rem}
+        .simulator-controls label{display:grid;gap:.35rem;font-weight:600;color:var(--green-800)}
+        .simulator-controls select,.simulator-controls input{padding:.8rem .9rem;border-radius:14px;border:1px solid var(--slate-200);background:#fff;color:var(--slate-700)}
+        .simulator-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.2rem}
+        .simulator-output{margin-top:.9rem;padding:1rem 1.05rem;border-radius:16px;border-left:4px solid var(--slate-500);background:#fff}
+        .simulator-output.success{border-left-color:var(--green-500);background:var(--green-100);color:var(--green-800)}
+        .simulator-output.warning{border-left-color:var(--yellow-500);background:var(--yellow-100);color:var(--yellow-700)}
+        .simulator-output.error{border-left-color:var(--red-500);background:var(--red-100);color:var(--red-700)}
+        .simulator-output code{font-family:"Courier New",Courier,monospace}
+        .chart-card{padding:1.1rem;border-radius:18px;background:#fff;border:1px solid #dfe8ee}
+        .chart-visual{display:grid;gap:.85rem}
+        .chart-row{display:grid;grid-template-columns:120px 1fr;gap:.8rem;align-items:center}
+        .chart-label{font-weight:600;color:var(--green-800)}
+        .chart-track{position:relative;height:28px;border-radius:999px;background:linear-gradient(90deg,#e8f7ed,#f8fbfd);border:1px solid #d8ebe0}
+        .chart-point{position:absolute;top:5px;height:16px;border-radius:999px;background:#1d9442}
+        .chart-point::before,.chart-point::after{content:"";position:absolute;top:-4px;width:2px;height:24px;background:#166534}
+        .chart-point::before{left:0}
+        .chart-point::after{right:0}
+        .chart-caption{margin-top:.75rem;font-size:.9rem;color:var(--slate-600)}
+        .image-modal{position:fixed;inset:0;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;padding:1.25rem;z-index:1000}.image-modal.active{display:flex}.image-modal-inner{position:relative;max-width:min(1100px,94vw);max-height:90vh}.image-modal img{max-width:100%;max-height:90vh;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);background:#fff}.image-modal button{position:absolute;top:-.85rem;right:-.85rem;width:2.7rem;height:2.7rem;border-radius:999px;background:#fff;color:var(--slate-800);box-shadow:var(--shadow-md);font-size:1.15rem}
+        @media (max-width:1200px){.flip-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+        @media (max-width:1024px){.two-col,.figure-grid,.simulator-grid{grid-template-columns:1fr}.main{padding:2rem 1.5rem 2.5rem}}
+        @media (max-width:900px){.speech-controls{align-items:stretch;padding:.95rem 1rem}.speech-main{flex-direction:column;align-items:flex-start;width:100%}.speech-btn{width:100%}.speech-speed{width:100%;justify-content:space-between}.speech-speed input{flex:1;margin-left:.5rem;min-width:0}.speech-voice{text-align:left;width:100%}}
+        @media (max-width:767px){.sidebar{display:none}.main{margin-left:0;padding:13rem 1rem 1.3rem}.mobile-header{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;flex-direction:column;align-items:center;gap:.7rem;padding:1rem;background:var(--slate-50);box-shadow:0 2px 4px rgba(0,0,0,.1)}.mobile-logo{width:100px;height:100px;padding:.5rem;border-radius:999px;background:#fff;box-shadow:0 10px 15px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:.5rem}.mobile-nav{width:100%;margin-top:.5rem;padding:.5rem;border-radius:.375rem;border:1px solid var(--slate-200);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06)}.text-block,.activity-card,.quiz-card,.resource-card,.bibliography-item{padding:1.1rem}.objective-item{grid-template-columns:1.7rem minmax(0,1fr);column-gap:.75rem;padding:1rem}.objective-check{width:1.7rem;min-width:1.7rem;font-size:1.15rem}.speech-controls{align-items:stretch;padding:.95rem 1rem}.speech-main{flex-direction:column;align-items:flex-start;width:100%}.speech-btn{width:100%}.speech-speed{width:100%;justify-content:space-between}.speech-speed input{flex:1;margin-left:.5rem;min-width:0}.speech-voice{text-align:left}.hero-meta,.activity-options,.actions-row,.resource-split,.module-header{flex-direction:column;align-items:stretch}.activity-option,.reset-btn,.quiz-btn{width:100%}.score-chip{width:fit-content;max-width:100%;white-space:normal}.resource-link{width:auto}.accordion-toggle{padding:1rem 1rem .25rem;font-size:1.05rem}.accordion-panel{padding:0 1rem 1rem}.flip-grid,.two-col,.figure-grid{grid-template-columns:1fr}.flip-card,.flip-inner{min-height:190px}.table-shell{margin-top:.8rem;border-radius:16px;padding:.85rem}.ova-table{min-width:480px}.table-note{font-size:.8rem}.quiz-option{padding:.85rem}.resource-qr{width:100%;height:90px}}
+        @media (max-width:480px){.main{padding:13rem .7rem 1rem}.hero-card h1,.hero-card .section-heading,.section-heading{font-size:1.5rem}.text-block,.activity-card,.quiz-card,.resource-card,.bibliography-item{padding:1rem}.objective-item{grid-template-columns:1.5rem minmax(0,1fr);column-gap:.65rem;padding:.95rem}.objective-check{width:1.5rem;min-width:1.5rem;font-size:1.05rem}.bibliography-credit{margin:1.5rem .85rem 0;padding:1.3rem .8rem 0}.bibliography-credit-label{font-size:.88rem}.bibliography-credit-name{font-size:1.02rem}.bibliography-credit-org{font-size:.88rem}table{min-width:420px}th,td{padding:.75rem .8rem}}
+    
+    </style>
+
+    <link rel="stylesheet" href="tailwind.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Conceptos y Reglas de Probabilidad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            color: #334155;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+        button, select, input { font-family: inherit; font-size: inherit; }
+        button { border: none; cursor: pointer; }
+        
+        body { -webkit-user-select: none; user-select: none; }
+        .text-slate-700, .leading-relaxed, p, label, textarea, input { -webkit-user-select: text; user-select: text; }
+        
+        /* ===== LAYOUT ===== */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .min-h-screen { min-height: 100vh; }
+        .w-full { width: 100%; }
+        .w-64 { width: 16rem; }
+        .w-24 { width: 6rem; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        .h-screen { height: 100vh; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .hidden { display: none; }
+        .block { display: block; }
+        .relative { position: relative; }
+        .sticky { position: sticky; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        
+        /* ===== SPACING ===== */
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-5 { margin-top: 1.25rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .mr-1 { margin-right: 0.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .mr-3 { margin-right: 0.75rem; }
+        .ml-2 { margin-left: 0.5rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        
+        /* ===== TYPOGRAPHY ===== */
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .text-7xl { font-size: 4.5rem; line-height: 1; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .italic { font-style: italic; }
+        .leading-relaxed { line-height: 1.625; }
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .cursor-pointer { cursor: pointer; }
+        .list-disc { list-style-type: disc; }
+        .list-decimal { list-style-type: decimal; }
+        .list-inside { list-style-position: inside; }
+        
+        /* ===== COLORS - Backgrounds ===== */
+        .bg-slate-50 { background-color: #f8fafc; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-white { background-color: #ffffff; }
+        .bg-green-100 { background-color: #dcfce7; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-green-700 { background-color: #15803d; }
+        .bg-green-800 { background-color: #166534; }
+        .bg-yellow-100 { background-color: #fef9c3; }
+        .bg-yellow-500 { background-color: #eab308; }
+        .bg-yellow-600 { background-color: #ca8a04; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-gray-500 { background-color: #6b7280; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .bg-gray-700 { background-color: #374151; }
+        
+        /* ===== COLORS - Text ===== */
+        .text-white { color: #ffffff; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-700 { color: #334155; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .text-green-600 { color: #16a34a; }
+        .text-green-700 { color: #15803d; }
+        .text-green-800 { color: #166534; }
+        .text-green-100 { color: #dcfce7; }
+        .text-yellow-600 { color: #ca8a04; }
+        .text-yellow-700 { color: #a16207; }
+        .text-yellow-800 { color: #854d0e; }
+        .text-red-800 { color: #991b1b; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-blue-700 { color: #1d4ed8; }
+        
+        /* ===== BORDERS ===== */
+        .border { border-width: 1px; border-style: solid; border-color: #e5e7eb; }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-l-4 { border-left-width: 4px; border-left-style: solid; }
+        .border-green-200 { border-color: #bbf7d0; }
+        .border-green-500 { border-color: #22c55e; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-yellow-500 { border-color: #eab308; }
+        .border-red-500 { border-color: #ef4444; }
+        .border-blue-500 { border-color: #3b82f6; }
+        
+        /* ===== BORDER RADIUS ===== */
+        .rounded { border-radius: 0.25rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        
+        /* ===== SHADOWS ===== */
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        
+        /* ===== TRANSITIONS ===== */
+        .transition-colors { transition-property: background-color, border-color, color; transition-duration: 150ms; transition-timing-function: ease-in-out; }
+        .transition-shadow { transition-property: box-shadow; transition-duration: 300ms; }
+        .duration-300 { transition-duration: 300ms; }
+        
+        /* ===== HOVER STATES ===== */
+        .hover\:bg-green-700:hover { background-color: #15803d; }
+        .hover\:bg-yellow-600:hover { background-color: #ca8a04; }
+        .hover\:bg-red-600:hover { background-color: #dc2626; }
+        .hover\:bg-gray-700:hover { background-color: #374151; }
+        .hover\:bg-white:hover { background-color: #ffffff; }
+        .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .hover\:shadow-green-400:hover { box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.3); }
+        button:hover { opacity: 0.9; }
+        
+        /* ===== RESPONSIVE - sm (640px+) ===== */
+        @media (min-width: 640px) {
+            .sm\:p-6 { padding: 1.5rem; }
+            .sm\:flex-row { flex-direction: row; }
+            .sm\:items-center { align-items: center; }
+            .sm\:mt-0 { margin-top: 0; }
+            .sm\:ml-6 { margin-left: 1.5rem; }
+        }
+        
+        /* ===== FIXED SIDEBAR ===== */
+        .ova-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* ===== RESPONSIVE - md (768px+) ===== */
+        @media (min-width: 768px) {
+            .md\:flex { display: flex; }
+            .md\:flex-row { flex-direction: row; }
+            .md\:flex-col { flex-direction: column; }
+            .md\:hidden { display: none; }
+            .md\:w-64 { width: 16rem; }
+            .md\:w-auto { width: auto; }
+            .md\:p-10 { padding: 2.5rem; }
+            .ova-main {
+                margin-left: 16rem; /* w-64 = 16rem */
+            }
+        }
+        
+        /* ===== MOBILE HEADER FIXED ===== */
+        .ova-mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 767px) {
+            .ova-main {
+                padding-top: 13rem;
+            }
+            .ova-mobile-header {
+                margin-bottom: 0 !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .text-slate-700 ul,
+            .text-slate-700 ol {
+                margin-left: 1rem;
+                padding-right: 0.5rem;
+            }
+            main {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .ova-columns-row {
+                flex-direction: column !important;
+            }
+            .ova-columns-row .ova-column {
+                flex: 1 1 100% !important;
+            }
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+        }
+        
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        
+        /* ===== CONTENT PANES ===== */
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .content-pane.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== IMAGE MODAL ===== */
+        .image-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .expand-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(34, 197, 94, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+        
+        .image-container:hover .expand-btn {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .image-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border: 4px solid white;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            padding: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* ===== SPEECH CONTROLS ===== */
+        .speech-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .speech-controls button {
+            min-width: 90px;
+            max-width: fit-content;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 480px) {
+            .speech-controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 8px;
+            }
+            .speech-controls button {
+                width: 100%;
+            }
+        }
+        
+        /* ===== RICH TEXT CONTENT ===== */
+        .text-slate-700 {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .text-slate-700 ul,
+        .text-slate-700 ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .text-slate-700 ul { list-style-type: disc; }
+        .text-slate-700 ol { list-style-type: decimal; }
+        .text-slate-700 li { margin-bottom: 0.5rem; }
+        .text-slate-700 strong { font-weight: 600; }
+        .text-slate-700 em { font-style: italic; }
+        
+        .text-slate-700 a {
+            color: #16a34a;
+            text-decoration: underline;
+        }
+        .text-slate-700 a:hover { color: #15803d; }
+        
+        .text-slate-700 h1,
+        .text-slate-700 h2,
+        .text-slate-700 h3 {
+            font-weight: 700;
+            color: #166534;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .text-slate-700 h1 { font-size: 2rem; }
+        .text-slate-700 h2 { font-size: 1.5rem; }
+        .text-slate-700 h3 { font-size: 1.25rem; }
+        .text-slate-700 p { margin-bottom: 0.75rem; }
+        
+        /* ===== MOBILE HEADER ===== */
+        .md\:hidden.mb-6 {
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* ===== CODE BLOCK ===== */
+        .code-block-wrapper {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2d2d2d;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .code-block-lang {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        
+        .code-copy-btn {
+            background: #404040;
+            color: #d4d4d4;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .code-copy-btn:hover {
+            background: #525252;
+            opacity: 1 !important;
+        }
+        
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem 1.25rem;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.7;
+            tab-size: 4;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .code-block code {
+            font-family: inherit;
+            white-space: pre;
+        }
+        
+        /* ===== SYNTAX HIGHLIGHTING (Prism tokens) ===== */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a9955; }
+        .token.punctuation { color: #d4d4d4; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #b5cea8; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #ce9178; }
+        .token.operator, .token.entity, .token.url { color: #d4d4d4; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #569cd6; }
+        .token.function, .token.class-name { color: #dcdcaa; }
+        .token.regex, .token.important, .token.variable { color: #d16969; }
+        
+        /* ===== TABLE ===== */
+        .overflow-x-auto { overflow-x: auto; }
+        
+        .ova-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ova-table th {
+            background-color: #166534;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        
+        .ova-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .ova-table tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .ova-table tbody tr:hover {
+            background-color: #f0fdf4;
+        }
+        
+        .ova-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* ===== NAV ITEMS ===== */
+        .nav-item:hover { background-color: #15803d; }
+        .nav-item.active { background-color: #166534; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col ova-sidebar">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1 overflow-y-auto">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 w-full md:w-auto p-4 sm:p-6 md:p-10 bg-gray-50 ova-main">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center ova-mobile-header">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2 overflow-hidden">
+                    <img src="img/logo.webp" alt="Logo" style="max-width: 80%; max-height: 80%; object-fit: contain;">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+<div class="hero-card" data-speech-content>
+                    <h1>Conceptos y reglas de probabilidad: eventos, espacio muestral, probabilidad condicional e independencia</h1>
+                    <p>La probabilidad permite describir, comparar e interpretar fenómenos aleatorios que aparecen en la vida diaria y también en escenarios tecnológicos.</p>
+                </div>
+<div class="text-block" data-speech-content>
+                    <p>En la vida diaria y en el mundo digital aparecen situaciones en las que no siempre es posible saber con certeza qué ocurrirá. Por ejemplo, no se puede asegurar cuál número saldrá al lanzar un dado, qué enlace abrirá primero un usuario en una página web o cuántas personas harán clic en un botón de registro. En estos casos hablamos de fenómenos aleatorios.</p>
+                    <div class="video-card">
+                        <div class="video-embed">
+                            <iframe src="https://www.youtube.com/embed/MpdhXhLFv4Q?si=5Qkz-v1K4T1kFv7b" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    <p>La probabilidad es una herramienta matemática que permite medir qué tan posible es que ocurra un evento. Gracias a ella es posible analizar situaciones de incertidumbre, comparar resultados y tomar decisiones más informadas. En el campo de la programación web, por ejemplo, la probabilidad ayuda a interpretar comportamientos de usuarios, evaluar riesgos y comprender patrones de acceso o respuesta.</p>
+                    <p>En esta guía se abordan los conceptos esenciales de probabilidad de manera clara y práctica. Se trabajan los términos evento, espacio muestral, probabilidad condicional e independencia, apoyándose en ejemplos sencillos, gráficos y actividades que facilitan la comprensión del tema.</p>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+<div class="hero-card" data-speech-content><h2 class="section-heading">Objetivos de Aprendizaje</h2></div>
+<ul class="objective-list" data-speech-content>
+                    <li class="objective-item"><div class="objective-check">🧠</div><p>Comprender el significado de la probabilidad y reconocer sus elementos básicos, tales como experimento aleatorio, resultado, evento y espacio muestral.</p></li>
+                    <li class="objective-item"><div class="objective-check">✏️</div><p>Aplicar la regla básica de probabilidad y la probabilidad condicional en situaciones sencillas del contexto cotidiano y del entorno tecnológico.</p></li>
+                    <li class="objective-item"><div class="objective-check">🔍</div><p>Diferenciar cuándo dos eventos son dependientes o independientes, interpretando correctamente sus relaciones mediante ejemplos, tablas y gráficos.</p></li>
+                </ul>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane">
+<div class="accordion-list" data-speech-content>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>¿Qué es la probabilidad?</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>La probabilidad expresa la posibilidad de que ocurra un evento. Su valor se encuentra entre 0 y 1, o entre 0 % y 100 %. Un valor cercano a 0 indica que el evento es poco probable; un valor cercano a 1 indica que es muy probable.</p>
+                                <p>Por ejemplo, si se lanza una moneda equilibrada, la probabilidad de obtener cara es 1/2, es decir, 0,5 o 50 %. Esto significa que cara y sello tienen la misma posibilidad de aparecer.</p>
+                            </div>
+                            <div class="figure-grid"><article class="figure-card"><div class="figure-image"><img src="img/tema1-img1.png" alt="Imagen de la guía sobre qué es la probabilidad y regla básica" class="zoomable-image"></div></article></div>
+                            <div class="formula-card"><div class="formula-inline">Regla básica: P(A) = número de resultados favorables / número total de resultados posibles</div></div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>Experimento aleatorio, resultado y evento</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>Un experimento aleatorio es una acción cuyo resultado no se puede conocer con seguridad antes de realizarla. Algunos ejemplos son lanzar un dado, sacar una ficha de una bolsa sin mirar o registrar desde qué dispositivo entra un visitante a una página web.</p>
+                                <p>El resultado es lo que ocurre en una realización del experimento. Si se lanza un dado y cae el número 4, ese es un resultado.</p>
+                                <p>Un evento es un conjunto de uno o varios resultados que cumplen una condición. Por ejemplo, en el lanzamiento de un dado, el evento “obtener un número par” está formado por los resultados 2, 4 y 6.</p>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>Espacio muestral</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>El espacio muestral es el conjunto de todos los resultados posibles de un experimento aleatorio. Se suele representar con la letra S.</p>
+                                <p>Si el experimento es lanzar un dado, el espacio muestral es: S = {1, 2, 3, 4, 5, 6}. Si el experimento es lanzar una moneda, el espacio muestral es: S = {cara, sello}.</p>
+                                <p>Conocer el espacio muestral es importante porque permite identificar qué resultados son posibles y facilita el cálculo de probabilidades.</p>
+                            </div>
+                            <article class="example-card">
+                                <h4>Ejemplo 1. Espacio muestral en un experimento compuesto</h4>
+                                <p>Si se lanza una moneda y luego un dado, el espacio muestral está formado por 12 resultados posibles: (cara,1), (cara,2), ..., (sello,6).</p>
+                            </article>
+                            <div class="figure-grid"><article class="figure-card"><div class="figure-image"><img src="img/tema1-img2.png" alt="Imagen de la guía sobre espacio muestral" class="zoomable-image"></div></article></div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>Cálculo de probabilidad de un evento</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>Para calcular una probabilidad simple se comparan los resultados favorables con el total de resultados posibles, siempre que todos tengan la misma oportunidad de ocurrir.</p>
+                                <p>En el lanzamiento de un dado, el evento A = “obtener un número mayor que 4” tiene como resultados favorables {5, 6}. Como hay 2 resultados favorables y 6 resultados posibles, entonces P(A)=2/6=1/3≈0,33.</p>
+                            </div>
+                            <div class="table-shell"><table class="ova-table"><thead><tr><th>Evento</th><th>Resultados favorables</th><th>Probabilidad</th></tr></thead><tbody><tr><td>Obtener un número par</td><td>{2, 4, 6}</td><td>3/6 = 1/2 = 0,50</td></tr><tr><td>Obtener un número menor que 3</td><td>{1, 2}</td><td>2/6 = 1/3 ≈ 0,33</td></tr><tr><td>Obtener el número 5</td><td>{5}</td><td>1/6 ≈ 0,17</td></tr></tbody></table></div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>Probabilidad condicional</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>La probabilidad condicional se utiliza cuando se desea conocer la probabilidad de que ocurra un evento A sabiendo que ya ocurrió otro evento B. En este caso, el espacio de análisis cambia, porque ahora solo se consideran los casos en los que B ya sucedió.</p>
+                                <p>Se representa como P(A|B), que se lee “probabilidad de A dado B”, y se calcula con la expresión: P(A|B)=P(A∩B)/P(B), siempre que P(B) sea diferente de 0.</p>
+                            </div>
+                            <div class="formula-card"><div class="formula-inline">Fórmula: P(A|B)=P(A ∩ B)/P(B)</div></div>
+                            <article class="example-card">
+                                <h4>Ejemplo 2. Probabilidad condicional en un contexto tecnológico</h4>
+                                <p>En un grupo de 20 estudiantes, 8 usan Chrome para navegar, 10 usan celular para conectarse a internet y 4 usan Chrome desde el celular.</p>
+                            </article>
+                            <div class="figure-grid"><article class="figure-card"><div class="figure-image"><img src="img/tema1-img3.png" alt="Imagen de la guía sobre probabilidad condicional" class="zoomable-image"></div></article></div>
+                            <div class="mini-card">
+                                <p>Si se elige un estudiante al azar y se sabe que usa Chrome, ¿cuál es la probabilidad de que también use celular? En este caso:</p>
+                                <p>P(celular | Chrome) = 4/8 = 1/2 = 0,50.</p>
+                                <p>Esto significa que, entre quienes usan Chrome, la mitad navega desde el celular.</p>
+                            </div>
+                            <div class="table-shell"><table class="ova-table"><thead><tr><th>Grupo</th><th>Cantidad</th><th>Interpretación</th></tr></thead><tbody><tr><td>Usan Chrome</td><td>8</td><td>Evento B</td></tr><tr><td>Usan celular</td><td>10</td><td>Evento A</td></tr><tr><td>Usan Chrome y celular</td><td>4</td><td>A ∩ B</td></tr></tbody></table></div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>Independencia de eventos</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>Dos eventos son independientes cuando la ocurrencia de uno no cambia la probabilidad del otro. Es decir, saber que ocurrió un evento no aporta información nueva sobre el otro.</p>
+                                <p>Por ejemplo, si se lanza una moneda y un dado al mismo tiempo, el resultado de la moneda no afecta el resultado del dado. Por eso se consideran eventos independientes.</p>
+                                <p>Una forma de verificar la independencia es revisar si se cumple que P(A∩B)=P(A)·P(B). Si se cumple, los eventos pueden considerarse independientes.</p>
+                            </div>
+                            <article class="example-card">
+                                <h4>Ejemplo 3. Independencia en un experimento simple</h4>
+                            </article>
+                            <div class="figure-grid"><article class="figure-card"><div class="figure-image"><img src="img/tema1-img4.jpeg" alt="Imagen de la guía sobre independencia de eventos" class="zoomable-image"></div></article></div>
+                            <div class="mini-card">
+                                <p>Supóngase que A es el evento “obtener cara en la moneda” y B es el evento “obtener un número par en el dado”.</p>
+                                <p>Se tiene que P(A)=1/2 y P(B)=3/6=1/2. Además, P(A∩B)=3/12=1/4, porque los resultados favorables son (cara,2), (cara,4) y (cara,6).</p>
+                                <p>Como P(A)·P(B)=1/2·1/2=1/4 y coincide con P(A∩B), se concluye que los eventos A y B son independientes.</p>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>Representación gráfica de probabilidades en un contexto web</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>En programación web también es posible interpretar probabilidades a partir de datos observados. Por ejemplo, si de cada 100 visitas a una página, 50 provienen de celular, 35 de computador y 15 de tablet, estas frecuencias permiten estimar la probabilidad de acceso por dispositivo.</p>
+                                <p>El siguiente gráfico facilita comparar visualmente cuál dispositivo tiene mayor probabilidad de uso:</p>
+                            </div>
+                            <div class="figure-grid"><article class="figure-card"><div class="figure-image"><img src="img/tema1-img5.png" alt="Gráfico 2 de probabilidad estimada del dispositivo de acceso" class="zoomable-image"></div></article></div>
+                            <div class="mini-card">
+                                <p>Gráfico 2. Comparación de probabilidades estimadas de acceso por tipo de dispositivo.</p>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>¿Por qué este tema es importante en programación web?</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card">
+                                <p>La probabilidad no solo se usa en juegos de azar o experimentos escolares. En el desarrollo web resulta útil para analizar comportamientos de usuarios, estimar qué opción podría elegirse con mayor frecuencia, comprender tasas de error, evaluar respuestas del sistema y tomar decisiones basadas en datos.</p>
+                                <p>Entender estos conceptos fortalece el razonamiento lógico y permite leer con mayor claridad los resultados de tablas, gráficos y reportes digitales.</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="content-pane">
+<div class="hero-card" data-speech-content><h2 class="section-heading">Cuestionarios o actividades complementarias</h2></div>
+                <div class="activity-card" style="border-left-color:#eab308">
+                    <div class="module-header"><div><div class="module-title">🏆 Misión de puntos</div><p>Cada respuesta correcta suma <strong>10 puntos</strong>. Completa las actividades, acumula tu puntaje y desbloquea la insignia de <strong>Experto en probabilidad</strong> 🎯</p></div><div class="score-chip">⭐ Puntos: <span id="puntos-total">0</span></div></div>
+                </div>
+<div class="activity-card activity-module" data-module>
+                    <div class="module-header"><div><div class="module-title">Actividad 1. Reconociendo eventos y espacio muestral</div><p>Observa los experimentos de la guía y selecciona en cada caso la opción que identifica correctamente el experimento aleatorio, el espacio muestral y un evento posible.</p></div><div class="score-chip">Aciertos: <span data-score>0</span>/3</div></div>
+                    <div class="activity-question" data-question><p>Caso a) Lanzar un dado.</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: el experimento es lanzar un dado, el espacio muestral es {1, 2, 3, 4, 5, 6} y un evento posible puede ser obtener un número par.">Experimento: lanzar un dado. Espacio muestral: {1, 2, 3, 4, 5, 6}. Evento posible: obtener un número par.</button><button class="activity-option" type="button" data-feedback="Esa opción mezcla un espacio muestral incompleto con un resultado que no corresponde al dado.">Experimento: lanzar un dado. Espacio muestral: {2, 4, 6}. Evento posible: obtener cara.</button><button class="activity-option" type="button" data-feedback="Cara y sello pertenecen al experimento de lanzar una moneda, no a un dado.">Experimento: lanzar un dado. Espacio muestral: {cara, sello}. Evento posible: obtener 4.</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>Caso b) Sacar una ficha de una bolsa con fichas rojas, azules y verdes.</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Aquí se confundió el evento con el experimento.">Experimento: obtener una ficha roja. Espacio muestral: {roja}. Evento posible: sacar una ficha.</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: el experimento es sacar una ficha, el espacio muestral es {roja, azul, verde} y un evento posible puede ser obtener una ficha roja.">Experimento: sacar una ficha. Espacio muestral: {roja, azul, verde}. Evento posible: obtener una ficha roja.</button><button class="activity-option" type="button" data-feedback="Chrome, Firefox y Edge son navegadores, no colores de fichas.">Experimento: sacar una ficha. Espacio muestral: {Chrome, Firefox, Edge}. Evento posible: obtener una ficha verde.</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>Caso c) Registrar el primer dispositivo desde el cual entra un usuario a un sitio web.</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Chrome y Firefox son navegadores, no dispositivos de acceso.">Experimento: registrar el primer dispositivo. Espacio muestral: {Chrome, Firefox, Edge}. Evento posible: entrar desde celular.</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: el experimento es registrar el primer dispositivo, el espacio muestral es {celular, computador, tablet} y un evento posible puede ser entrar desde celular.">Experimento: registrar el primer dispositivo. Espacio muestral: {celular, computador, tablet}. Evento posible: entrar desde celular.</button><button class="activity-option" type="button" data-feedback="Un solo resultado no representa el espacio muestral completo.">Experimento: registrar el primer dispositivo. Espacio muestral: {celular}. Evento posible: entrar desde computador.</button></div><div class="feedback"></div></div>
+                    <div class="actions-row"><button type="button" class="reset-btn secondary" data-reset-module>Reiniciar actividad</button></div>
+                </div>
+                <div class="activity-card activity-module" data-module>
+                    <div class="module-header"><div><div class="module-title">Actividad 2. Cálculo de probabilidades simples</div><p>Una caja contiene 10 tarjetas numeradas del 1 al 10. Responde cada pregunta usando fracción, decimal o porcentaje según corresponda.</p></div><div class="score-chip">Aciertos: <span data-score>0</span>/4</div></div>
+                    <div class="activity-question" data-question><p>¿Cuál es la probabilidad de sacar una tarjeta con número par?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Hay cinco números pares, no cuatro.">4/10 = 0,40</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: los números pares son 2, 4, 6, 8 y 10, por tanto 5/10 = 1/2 = 0,50.">5/10 = 0,50</button><button class="activity-option" type="button" data-feedback="Ese valor sería mayor que la probabilidad real.">6/10 = 0,60</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Cuál es la probabilidad de sacar un número mayor que 7?</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: los números mayores que 7 son 8, 9 y 10; por tanto 3/10 = 0,30.">3/10 = 0,30</button><button class="activity-option" type="button" data-feedback="Solo hay tres tarjetas favorables, no dos.">2/10 = 0,20</button><button class="activity-option" type="button" data-feedback="4/10 contaría un resultado adicional que no corresponde.">4/10 = 0,40</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Cuál es la probabilidad de sacar exactamente el número 3?</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: solo una tarjeta cumple la condición, así que la probabilidad es 1/10 = 0,10.">1/10 = 0,10</button><button class="activity-option" type="button" data-feedback="Hay un solo resultado favorable, no dos.">2/10 = 0,20</button><button class="activity-option" type="button" data-feedback="1/5 no es equivalente a la probabilidad de un solo resultado entre diez posibles.">1/5 = 0,20</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>Si la probabilidad es 3/10, ¿cuál es su expresión correcta en porcentaje?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="0,03 corresponde a 3 %, no a 30 %.">3 %</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: 3/10 equivale a 0,30 y a 30 %.">30 %</button><button class="activity-option" type="button" data-feedback="0,3 equivale a 30 %, no a 300 %.">300 %</button></div><div class="feedback"></div></div>
+                    <div class="actions-row"><button type="button" class="reset-btn secondary" data-reset-module>Reiniciar actividad</button></div>
+                </div>
+                <div class="activity-card activity-module" data-module>
+                    <div class="module-header"><div><div class="module-title">Actividad 3. Probabilidad condicional e independencia</div><p>En un grupo de 20 estudiantes se sabe que 8 usan Chrome, 10 navegan desde celular y 4 usan Chrome desde el celular.</p></div><div class="score-chip">Aciertos: <span data-score>0</span>/4</div></div>
+                    <div class="table-shell"><table class="ova-table"><thead><tr><th>Dato</th><th>Valor</th></tr></thead><tbody><tr><td>Total de estudiantes</td><td>20</td></tr><tr><td>Usan Chrome</td><td>8</td></tr><tr><td>Usan celular</td><td>10</td></tr><tr><td>Usan Chrome desde celular</td><td>4</td></tr></tbody></table></div><div class="table-note">En móvil, puedes deslizar esta tabla horizontalmente.</div>
+                    <div class="activity-question" data-question><p>¿Cuál es la probabilidad de que un estudiante use Chrome?</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: 8 de 20 estudiantes usan Chrome, así que P(Chrome) = 8/20 = 0,40.">8/20 = 0,40</button><button class="activity-option" type="button" data-feedback="10/20 corresponde a quienes usan celular.">10/20 = 0,50</button><button class="activity-option" type="button" data-feedback="4/20 representa la intersección, no el evento Chrome completo.">4/20 = 0,20</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Cuál es la probabilidad de que un estudiante use celular?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="8/20 corresponde al uso de Chrome.">8/20 = 0,40</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: 10 de 20 estudiantes navegan desde celular, así que P(celular) = 10/20 = 0,50.">10/20 = 0,50</button><button class="activity-option" type="button" data-feedback="4/20 representa solo quienes usan Chrome desde celular.">4/20 = 0,20</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Cuál es la probabilidad de usar celular sabiendo que usa Chrome?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="4/20 usa el total del grupo, pero la condición reduce el universo a quienes usan Chrome.">4/20 = 0,20</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: P(celular | Chrome) = 4/8 = 1/2 = 0,50.">4/8 = 0,50</button><button class="activity-option" type="button" data-feedback="10/8 no representa una probabilidad válida para esta situación.">10/8 = 1,25</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Son independientes los eventos “usar Chrome” y “acceder desde celular”?</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: P(Chrome) × P(celular) = 0,40 × 0,50 = 0,20, que coincide con P(Chrome ∩ celular).">Sí, porque 0,20 = 0,40 × 0,50</button><button class="activity-option" type="button" data-feedback="La probabilidad condicional obtenida no demuestra dependencia por sí sola.">No, porque P(celular | Chrome) = 0,50</button><button class="activity-option" type="button" data-feedback="La suma no es el criterio para evaluar independencia.">No, porque 8 + 10 = 18</button></div><div class="feedback"></div></div>
+                    <div class="actions-row"><button type="button" class="reset-btn secondary" data-reset-module>Reiniciar actividad</button></div>
+                </div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+<div class="quiz-card" id="quiz-evaluacion" data-correct='[1,0,1,1,2]' data-feedback-correct='["Correcto: el espacio muestral reúne todos los resultados posibles.","Correcto: en un dado los números pares son 2, 4 y 6, por eso la probabilidad es 3/6 = 1/2.","Correcto: un evento es un conjunto de resultados del experimento.","Correcto: la probabilidad condicional analiza un evento sabiendo que otro ya ocurrió.","Correcto: en eventos independientes, uno no altera la probabilidad del otro."]' data-feedback-incorrect='["Recuerda que el espacio muestral contiene el total de resultados posibles.","Revisa cuántos números pares hay entre 1 y 6.","Un evento no es el experimento mismo, sino un conjunto de resultados asociados a él.","La clave está en la expresión \"sabiendo que otro ocurrió\".","La independencia se relaciona con que un evento no modifica la probabilidad del otro."]'>
+                    <div class="module-header"><div><h2 class="section-heading" style="margin-bottom:.55rem">Evaluación</h2><p>Responde el quiz de verificación y comprueba tu comprensión de los conceptos y reglas de probabilidad estudiados en este tema.</p></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>1.</strong> El espacio muestral es:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q1" value="0"> El resultado más probable de un experimento</label><label class="quiz-option"><input type="radio" name="q1" value="1"> El conjunto de todos los resultados posibles</label><label class="quiz-option"><input type="radio" name="q1" value="2"> La regla para sumar probabilidades</label><label class="quiz-option"><input type="radio" name="q1" value="3"> Un único resultado observado</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>2.</strong> Si se lanza un dado, ¿cuál es la probabilidad de obtener un número par?</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q2" value="0"> 1/2</label><label class="quiz-option"><input type="radio" name="q2" value="1"> 1/3</label><label class="quiz-option"><input type="radio" name="q2" value="2"> 2/3</label><label class="quiz-option"><input type="radio" name="q2" value="3"> 1/6</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>3.</strong> En probabilidad, un evento es:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q3" value="0"> El experimento que se realiza</label><label class="quiz-option"><input type="radio" name="q3" value="1"> Un conjunto de resultados del experimento</label><label class="quiz-option"><input type="radio" name="q3" value="2"> La cantidad total de datos</label><label class="quiz-option"><input type="radio" name="q3" value="3"> Una tabla de frecuencias</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>4.</strong> La probabilidad condicional permite calcular:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q4" value="0"> La suma de todos los resultados posibles</label><label class="quiz-option"><input type="radio" name="q4" value="1"> La probabilidad de un evento sabiendo que otro ya ocurrió</label><label class="quiz-option"><input type="radio" name="q4" value="2"> El promedio de una muestra</label><label class="quiz-option"><input type="radio" name="q4" value="3"> El número de observaciones de una tabla</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>5.</strong> Dos eventos son independientes cuando:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q5" value="0"> Siempre ocurren al mismo tiempo</label><label class="quiz-option"><input type="radio" name="q5" value="1"> Tienen exactamente el mismo espacio muestral</label><label class="quiz-option"><input type="radio" name="q5" value="2"> Uno no afecta la probabilidad del otro</label><label class="quiz-option"><input type="radio" name="q5" value="3"> Su unión siempre vale 1</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="actions-row"><button type="button" class="quiz-btn" id="check-quiz">Comprobar evaluación</button><button type="button" class="reset-btn secondary" id="reset-quiz">Reiniciar quiz</button></div>
+                    <div class="quiz-result" id="quiz-result"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+<div class="hero-card" data-speech-content><h2 class="section-heading">Recursos para profundizar</h2><p>Para ampliar tu comprensión sobre este tema, puedes consultar los siguientes recursos de apoyo.</p></div>
+                <ul class="objective-list" data-speech-content>
+                    <li><div class="resource-card" data-speech-content><div class="resource-split"><div class="resource-text"><div class="resource-title">Video explicativo</div><p>Material audiovisual de refuerzo sobre conceptos básicos de probabilidad, eventos y reglas fundamentales.</p><a class="resource-link" href="https://www.youtube.com/watch?v=MpdhXhLFv4Q" target="_blank" rel="noopener">Ir al recurso</a></div><div class="resource-qr"><img src="img/qr-video.png" alt="QR del video explicativo del tema 1"></div></div></div></li>
+                    <li><div class="resource-card" data-speech-content><div class="resource-split"><div class="resource-text"><div class="resource-title">Juego interactivo</div><p>Actividad digital para practicar el reconocimiento de experimentos, espacio muestral y eventos en situaciones sencillas.</p><a class="resource-link" href="https://es.educaplay.com/recursos-educativos/28367217-probabilidad_conceptos_basicos.html" target="_blank" rel="noopener">Ir al recurso</a></div><div class="resource-qr"><img src="img/qr-juego-interactivo.png" alt="QR del juego interactivo del tema 1"></div></div></div></li>
+                    </ul>
+</div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+<div class="hero-card" data-speech-content><h2 class="section-heading">Bibliografía</h2></div>
+                <div class="bibliography-list" data-speech-content>
+                    <article class="bibliography-item"><span class="bibliography-copy">Anderson, D. R., Sweeney, D. J., Williams, T. A., Camm, J. D., y Cochran, J. J. (2019). <i>Estadística para negocios y economía</i> (13.ª ed.). Cengage Learning.<br><a href="https://books.google.com/books/about/Estad%C3%ADstica_Para_Negocios_Y_Econom%C3%ADa_1.html?id=N_o2zAEACAAJ" target="_blank" rel="noopener">https://books.google.com/books/about/Estad%C3%ADstica_Para_Negocios_Y_Econom%C3%ADa_1.html?id=N_o2zAEACAAJ</a></span></article>
+                    <article class="bibliography-item"><span class="bibliography-copy">Lind, D. A., Marchal, W. G., y Wathen, S. A. (2018). <i>Estadística aplicada a los negocios y la economía</i> (17.ª ed.). McGraw-Hill Interamericana.<br><a href="https://books.google.com/books/about/Estad%C3%ADstica_aplicada_a_los_negocios_y_l.html?id=hGwqyQEACAAJ" target="_blank" rel="noopener">https://books.google.com/books/about/Estad%C3%ADstica_aplicada_a_los_negocios_y_l.html?id=hGwqyQEACAAJ</a></span></article>
+                    <article class="bibliography-item"><span class="bibliography-copy">Triola, M. F. (2018). <i>Estadística</i> (12.ª ed.). Pearson.<br><a href="https://www.pearsoneducacion.net/Colombia/Inicio/estadistica12ed-pearson-ed-ebook" target="_blank" rel="noopener">https://www.pearsoneducacion.net/Colombia/Inicio/estadistica12ed-pearson-ed-ebook</a></span></article>
+                    <article class="bibliography-item"><span class="bibliography-copy">Walpole, R. E., Myers, R. H., Myers, S. L., y Ye, K. (2012). <i>Probabilidad y estadística para ingeniería y ciencias</i> (9.ª ed.). Pearson.<br><a href="https://www.pearsonenespanol.com/mexico/educacion-superior/walpole_index/probabilidad-y-estadistica-para-ingenieria-y-ciencias-9e-contenido" target="_blank" rel="noopener">https://www.pearsonenespanol.com/mexico/educacion-superior/walpole_index/probabilidad-y-estadistica-para-ingenieria-y-ciencias-9e-contenido</a></span></article>
+                    <article class="bibliography-item"><span class="bibliography-copy">Ministerio de Educación Nacional de Colombia. (2016). <i>Derechos básicos de aprendizaje DBA V.2: Matemáticas</i>. MEN.<br><a href="https://www.colombiaaprende.edu.co/sites/default/files/files_public/2022-06/DBA_Matematicas-min.pdf" target="_blank" rel="noopener">https://www.colombiaaprende.edu.co/sites/default/files/files_public/2022-06/DBA_Matematicas-min.pdf</a></span></article>
+                </div>
+</div>
+        </main>
+    </div>
+
+<script>
+        (function(){
+            const sidebarLinks=document.querySelectorAll('.sidebar-link');
+            const panes=document.querySelectorAll('.content-pane');
+            const mobileNav=document.getElementById('mobile-nav');
+            const quickLinks=document.querySelectorAll('[data-target-link]');
+            const accordions=document.querySelectorAll('.accordion');
+            const flipCards=document.querySelectorAll('.flip-card');
+            const moduleResetButtons=document.querySelectorAll('[data-reset-module]');
+            const imageModal=document.getElementById('image-modal');
+            const imageModalTarget=document.getElementById('image-modal-target');
+            const closeImageModalBtn=document.getElementById('close-image-modal');
+            const zoomableImages=document.querySelectorAll('.zoomable-image');
+            function setActivePane(targetId){panes.forEach((pane)=>pane.classList.toggle('active',pane.id===targetId));sidebarLinks.forEach((link)=>link.classList.toggle('active',link.dataset.target===targetId));if(mobileNav){mobileNav.value=targetId}window.scrollTo({top:0,behavior:'smooth'})}
+            sidebarLinks.forEach((link)=>link.addEventListener('click',(event)=>{event.preventDefault();setActivePane(link.dataset.target)}));
+            if(mobileNav){mobileNav.addEventListener('change',(event)=>setActivePane(event.target.value))}
+            quickLinks.forEach((link)=>link.addEventListener('click',()=>setActivePane(link.dataset.targetLink)));
+            function syncAccordionIcon(accordion){const icon=accordion.querySelector('.accordion-toggle span:last-child');if(icon){icon.textContent=accordion.classList.contains('open')?'−':'+'}}
+            accordions.forEach((accordion)=>{syncAccordionIcon(accordion);const toggle=accordion.querySelector('.accordion-toggle');toggle.addEventListener('click',()=>{accordion.classList.toggle('open');syncAccordionIcon(accordion)})});
+            flipCards.forEach((card)=>{const trigger=card.querySelector('.flip-trigger');trigger.addEventListener('click',()=>card.classList.toggle('flipped'))});
+            function updateModuleScore(module){const questions=module.querySelectorAll('[data-question]');let correct=0;questions.forEach((question)=>{if(question.dataset.answered==='true'&&question.dataset.correct==='true'){correct+=1}});const slot=module.querySelector('[data-score]');if(slot){slot.textContent=String(correct)}}
+            document.querySelectorAll('.activity-option').forEach((button)=>{
+                button.addEventListener('click',()=>{
+                    const question=button.closest('[data-question]');
+                    const module=button.closest('[data-module]');
+                    const feedback=question.querySelector('.feedback');
+                    if(question.dataset.answered==='true'){return}
+                    const isCorrect=button.dataset.correct==='true';
+                    question.dataset.answered='true';
+                    question.dataset.correct=String(isCorrect);
+                    question.querySelectorAll('.activity-option').forEach((option)=>{option.disabled=true;if(option===button){option.classList.add(isCorrect?'correct':'incorrect')}else if(option.dataset.correct==='true'){option.classList.add('correct')}});
+                    feedback.textContent=button.dataset.feedback||'';
+                    feedback.className='feedback show '+(isCorrect?'correct':'incorrect');
+                    updateModuleScore(module);
+                if(isCorrect){const t=document.getElementById('puntos-total');if(t){t.textContent=String(Number(t.textContent)+10)}}
+                });
+            });
+            moduleResetButtons.forEach((button)=>button.addEventListener('click',()=>{const module=button.closest('[data-module]');module.querySelectorAll('[data-question]').forEach((question)=>{delete question.dataset.answered;delete question.dataset.correct;const feedback=question.querySelector('.feedback');feedback.className='feedback';feedback.textContent='';question.querySelectorAll('.activity-option').forEach((option)=>{option.disabled=false;option.classList.remove('correct','incorrect')})});updateModuleScore(module)}));
+            const quiz=document.getElementById('quiz-evaluacion');
+            const quizResult=document.getElementById('quiz-result');
+            const checkQuizButton=document.getElementById('check-quiz');
+            const resetQuizButton=document.getElementById('reset-quiz');
+            function renderQuizResult(correctCount,total){const percentage=Math.round(correctCount/total*100);let cssClass='success',title='¡Excelente!';if(percentage<80&&percentage>=60){cssClass='warning';title='Buen trabajo'}else if(percentage<60){cssClass='error';title='Sigue practicando'}quizResult.innerHTML=`<div class="quiz-summary ${cssClass}"><strong>${title}</strong><p>Respuestas correctas: ${correctCount} de ${total} (${percentage} %).</p></div>`}
+            if(checkQuizButton){checkQuizButton.addEventListener('click',()=>{const correctAnswers=JSON.parse(quiz.dataset.correct);const feedbackCorrect=JSON.parse(quiz.dataset.feedbackCorrect);const feedbackIncorrect=JSON.parse(quiz.dataset.feedbackIncorrect);const questions=quiz.querySelectorAll('[data-quiz-question]');let correctCount=0;questions.forEach((question,index)=>{const selected=question.querySelector("input[type='radio']:checked");const feedback=question.querySelector('[data-feedback-slot]');if(!selected){feedback.textContent='Selecciona una respuesta antes de comprobar.';feedback.className='feedback show incorrect';return}const isCorrect=Number(selected.value)===correctAnswers[index];if(isCorrect){correctCount+=1}feedback.textContent=isCorrect?feedbackCorrect[index]:feedbackIncorrect[index];feedback.className='feedback show '+(isCorrect?'correct':'incorrect')});renderQuizResult(correctCount,questions.length)})}
+            if(resetQuizButton){resetQuizButton.addEventListener('click',()=>{quiz.querySelectorAll("input[type='radio']").forEach((input)=>input.checked=false);quiz.querySelectorAll('[data-feedback-slot]').forEach((feedback)=>{feedback.textContent='';feedback.className='feedback'});quizResult.innerHTML=''})}
+            function openImageModal(src,alt){imageModalTarget.src=src;imageModalTarget.alt=alt||'Imagen ampliada';imageModal.classList.add('active');imageModal.setAttribute('aria-hidden','false')}
+            function closeImageModal(){imageModal.classList.remove('active');imageModal.setAttribute('aria-hidden','true');imageModalTarget.src='';imageModalTarget.alt=''}
+            zoomableImages.forEach((image)=>image.addEventListener('click',()=>openImageModal(image.getAttribute('src'),image.getAttribute('alt'))));
+            closeImageModalBtn.addEventListener('click',closeImageModal);
+            imageModal.addEventListener('click',(event)=>{if(event.target===imageModal){closeImageModal()}});
+            document.addEventListener('keydown',(event)=>{if(event.key==='Escape'){closeImageModal()}});
+                pause.addEventListener('click',()=>{if(!synth||!synth.speaking){return}synth.pause();play.disabled=false;play.textContent='Continuar';pause.disabled=true});
+                stop.addEventListener('click',()=>stopSpeech());
+                speed.addEventListener('change',()=>{if(currentSpeechSection===sectionId&&currentUtterance){stopSpeech()}});
+            });
+        })();
+    </script>
+
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+<footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center"><p class="text-slate-600 font-medium">Creado por:</p><p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p><p class="text-slate-500 text-sm">Universidad de Córdoba</p></footer>
+</body>
+</html>
