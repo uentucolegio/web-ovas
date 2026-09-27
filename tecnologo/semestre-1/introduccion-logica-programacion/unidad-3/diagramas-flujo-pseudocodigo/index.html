@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OVA: Representación Algorítmica: Diagramas de Flujo y Pseudocódigo</title>
+  <link rel="stylesheet" href="tailwind.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .sidebar-link { transition: all .3s ease; border-left: 4px solid transparent; }
+    .sidebar-link.active, .sidebar-link:hover { background:#e6f4ea; color:#166534; border-left-color:#22c55e; }
+    .content-pane { display:none; animation:fadeIn .5s ease-in-out; }
+    .content-pane.active { display:block; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(20px)} to {opacity:1; transform:translateY(0)} }
+    .quiz-option:hover { background:#f0fdf4; }
+    .quiz-option.selected { background:#dcfce7; border-color:#22c55e; }
+    .image-container { position:relative; overflow:hidden; max-width:50%; margin:0 auto; }
+    .image-container img { width:100%; height:auto; }
+    .zoom-btn { position:absolute; top:10px; right:10px; background:rgba(34,197,94,.95); color:#fff; border:none; border-radius:8px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; opacity:0; transition:opacity .3s, transform .3s; z-index:10; box-shadow:0 4px 8px rgba(0,0,0,.2); }
+    @media (max-width: 768px) { .image-container { max-width:80%; } .zoom-btn { opacity:.9; width:44px; height:44px; font-size:22px; } }
+    .image-container:hover .zoom-btn { opacity:1; transform:scale(1.05); }
+    .zoom-btn:hover { background:rgba(34,197,94,1); transform:scale(1.15)!important; }
+    .image-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:1000; justify-content:center; align-items:center; opacity:0; transition:opacity .3s; }
+    .image-modal.active { display:flex; opacity:1; }
+    .modal-content { max-width:95%; max-height:95%; position:relative; }
+    .modal-content img { max-width:100%; max-height:95vh; border:4px solid #fff; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.7); }
+    .close-modal { position:absolute; top:-15px; right:-15px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; box-shadow:0 4px 8px rgba(0,0,0,.3); }
+    .close-modal:hover { background:#dc2626; transform:scale(1.1); }
+    .highlight { background:linear-gradient(180deg, transparent 60%, #fef08a 60%); font-weight:600; padding:0 2px; }
+ 
+  /* ====== Tooltips (estilos globales) ====oop== */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  font-weight: bold;
+  color: #006633; /* Verde oscuro */
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 280px;
+  background-color: #006633; /* Verde oscuro */
+  color: #ffffff;            /* Texto blanco */
+  text-align: left;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: normal;
+  position: absolute;
+  z-index: 30;      /* sube la capa por si hay otros elementos encima */
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none; /* evita interferir con el hover */
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+/* Bocina redonda (toggle TTS) */
+.tts-fab{
+  width:64px; height:64px; border-radius:9999px;
+  background:#10b981; color:#fff; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; line-height:1;
+  box-shadow:0 8px 18px rgba(16,185,129,.35);
+  transition:transform .15s ease, background .2s ease;
+}
+.tts-fab:hover{ transform:translateY(-1px); }
+.tts-fab.muted{ background:#9ca3af; }   /* gris cuando está desactivada */
+
+/* ====== Estilos adicionales para el cuestionario ====== */
+.quiz-option { transition: all 0.3s ease; }
+.quiz-option.bg-green-100 { background-color: #d1fae5 !important; }
+.quiz-option.border-green-500 { border-color: #10b981 !important; }
+.quiz-option.bg-red-100 { background-color: #fee2e2 !important; }
+.quiz-option.border-red-500 { border-color: #ef4444 !important; }
+
+  </style>
+</head>
+<body class="bg-slate-50">
+
+  <div class="flex h-screen">
+  <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col md:sticky md:top-0 md:h-screen md:overflow-y-auto border-r">
+
+    <div class="p-4">
+      <div style="width:150px;height:150px" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500">
+        <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+      </div>
+    </div>
+<nav class="mt-6 flex-1" role="navigation" aria-label="Secciones del OVA">
+  <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="introduccion" aria-label="Introducción">
+    <span class="mr-3 text-xl">🚀</span> Introducción
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="objetivos" aria-label="Objetivos">
+    <span class="mr-3 text-xl">🎯</span> Objetivos
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="contenido" aria-label="Contenido">
+    <span class="mr-3 text-xl">📚</span> Contenido
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="actividades" aria-label="Actividades">
+    <span class="mr-3 text-xl">✍️</span> Actividades
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="evaluacion" aria-label="Evaluación">
+    <span class="mr-3 text-xl">✔️</span> Evaluación
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="recursos" aria-label="Recursos">
+    <span class="mr-3 text-xl">📖</span> Recursos
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="bibliografia" aria-label="Bibliografía">
+    <span class="mr-3 text-xl">📚</span> Bibliografía
+  </a>
+</nav>
+
+   <!-- Bocina fija dentro del aside, arriba del borde inferior y a la derecha -->
+<div class="aside-tts border-t border-emerald-100">
+  <button id="menu-tts-toggle"
+          type="button"
+          aria-pressed="false"
+          class="tts-fab muted"
+          title="Voz desactivada"
+          aria-label="Voz desactivada">
+    🔇
+  </button>
+</div>
+
+
+
+    
+  </aside>
+<main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50 max-h-screen overflow-y-auto">
+
+    <div class="md:hidden mb-6 flex flex-col items-center">
+      <div style="width:100px;height:100px" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg mb-2">
+        <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+      </div>
+      <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+        <option value="introduccion">🚀 Introducción</option>
+        <option value="objetivos">🎯 Objetivos</option>
+        <option value="contenido">📚 Contenido</option>
+        <option value="actividades">✍️ Actividades</option>
+        <option value="evaluacion">✔️ Evaluación</option>
+        <option value="recursos">📖 Recursos</option>
+        <option value="bibliografia">📚 Bibliografía</option>
+      </select>
+    </div>
+
+   <!-- Intro -->
+        <section id="introduccion" class="content-pane active">
+<!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="introduccion">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+          
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-emerald-800 flex items-center">
+            📐 Representación Algorítmica: Diagramas de Flujo y Pseudocódigo
+          </h1>
+
+            <div class="mt-6 space-y-6">
+              <div class="bg-white rounded-xl p-6 shadow-md border-l-4 border-emerald-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  La representación de algoritmos constituye uno de los <strong class="text-emerald-700">pilares fundamentales</strong> del proceso de programación. Antes de escribir código en un lenguaje específico, el programador debe ser capaz de expresar sus ideas de forma <span class="highlight">estructurada y comprensible</span>, utilizando herramientas como <strong class="text-emerald-700">diagramas de flujo</strong> y <strong class="text-emerald-700">pseudocódigos</strong>. Estos estándares actúan como un <span class="highlight">lenguaje común</span> entre los desarrolladores, permitiendo <strong class="text-emerald-700">planificar, analizar y comunicar</strong> soluciones lógicas sin depender de una sintaxis particular.
+                </p>
+              </div>
+
+              <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 shadow-md border-2 border-emerald-200">
+                <div class="flex items-start space-x-4">
+                  <div class="text-4xl flex-shrink-0">🎯</div>
+                  <div>
+                    <h3 class="font-bold text-emerald-900 text-xl mb-3">¿Por qué es importante la representación estandarizada?</h3>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      La representación estandarizada de algoritmos permite que <strong class="text-emerald-700">cualquier programador</strong> pueda entender, analizar y mejorar una solución lógica, independientemente de su experiencia o del lenguaje de programación que utilice. Esto facilita la <span class="highlight">comunicación efectiva</span>, reduce <span class="highlight">errores lógicos</span> y mejora la <span class="highlight">calidad del software</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-white rounded-lg p-5 shadow-md border-2 border-blue-200 hover:border-blue-400 transition-all">
+                  <div class="text-3xl mb-3 text-center">📊</div>
+                  <h4 class="font-bold text-blue-900 text-center mb-2">Diagramas de Flujo</h4>
+                  <p class="text-sm text-slate-700 text-center">Representación gráfica con símbolos estandarizados (ISO 5807)</p>
+                </div>
+                <div class="bg-white rounded-lg p-5 shadow-md border-2 border-purple-200 hover:border-purple-400 transition-all">
+                  <div class="text-3xl mb-3 text-center">📝</div>
+                  <h4 class="font-bold text-purple-900 text-center mb-2">Pseudocódigo</h4>
+                  <p class="text-sm text-slate-700 text-center">Descripción textual con estructura de programación</p>
+                </div>
+                <div class="bg-white rounded-lg p-5 shadow-md border-2 border-cyan-200 hover:border-cyan-400 transition-all">
+                  <div class="text-3xl mb-3 text-center">🔗</div>
+                  <h4 class="font-bold text-cyan-900 text-center mb-2">Herramientas</h4>
+                  <p class="text-sm text-slate-700 text-center">PSeInt, Flowgorithm, Visio y otras</p>
+                </div>
+              </div>
+            </div>
+          
+          <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+            <div class="flex items-start">
+              <span class="text-2xl mr-3">💡</span>
+              <p class="text-amber-900">
+                Navega por el menú para explorar el <strong>objetivo</strong>, el <strong>contenido</strong>, las <strong>actividades</strong>, la <strong>evaluación</strong> y los <strong>recursos</strong>.
+              </p>
+            </div>
+          </div>
+        </section>
+
+   <!-- Objetivo -->
+        <section id="objetivos" class="content-pane">
+<!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="objetivos">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+          
+          <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Objetivo</h2>
+          <ul class="space-y-4">
+            <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+              <span class="text-emerald-700 mr-3 text-2xl">🎯</span>
+              <span class="leading-relaxed text-lg text-slate-700">Comprender los <strong class="text-emerald-700">principios, símbolos y convenciones</strong> que rigen los estándares de representación algorítmica, aplicándolos en la elaboración de <strong class="text-emerald-700">diagramas de flujo y pseudocódigos claros</strong>.</span>
+            </li>
+          </ul>
+        </section>
+    
+    <!-- Contenido -->
+    <section id="contenido" class="content-pane">
+      <div class="space-y-6">
+        <!-- TTS para acordeón de CONTENIDO -->
+        <div class="flex justify-end">
+          <div class="space-y-1">
+            <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+                 data-mode="accordion" data-container="#contenido">
+              <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+                <span class="mr-1">▶️</span> Leer
+              </button>
+              <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏸️</span> Pausar
+              </button>
+              <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏹️</span> Detener
+              </button>
+              <div class="flex items-center ml-2">
+                <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+                <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+              </div>
+            </div>
+            <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+              <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+              <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+            </div>
+          </div>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6">Contenido</h2>
+
+        <!-- Acordeón 1: Concepto de Representación Algorítmica -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-emerald-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-emerald-50 transition-colors font-bold text-xl text-emerald-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-emerald-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">1</span>
+              Concepto de Representación Algorítmica
+            </span>
+            <span class="text-emerald-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-emerald-100">
+            <!-- Contenido del acordeón 1: Concepto de Representación Algorítmica -->
+            <div class="space-y-6">
+              <!-- Texto explicativo principal -->
+              <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border-l-4 border-emerald-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  📋 Representar un algoritmo significa expresar de forma <strong class="text-emerald-700">estructurada, precisa y comprensible</strong> la secuencia de pasos lógicos que permiten resolver un problema. Es, en esencia, la <span class="highlight">traducción del pensamiento lógico</span> del programador a un modelo formal que pueda ser entendido tanto por personas como por computadoras.
+                </p>
+              </div>
+
+              <!-- Propósito de la representación -->
+              <div class="bg-white rounded-lg p-5 border-2 border-emerald-200">
+                <div class="flex items-start space-x-3">
+                  <span class="text-3xl flex-shrink-0">🎯</span>
+                  <div>
+                    <h4 class="font-bold text-emerald-900 text-lg mb-2">Propósito de la representación algorítmica</h4>
+                    <p class="text-slate-700">
+                      La representación algorítmica tiene como finalidad <strong class="text-emerald-700">comunicar la lógica de un proceso sin depender de un lenguaje de programación específico</strong>. De esta manera, se convierte en una <span class="highlight">etapa intermedia entre el análisis del problema y la codificación</span> en un lenguaje concreto. Según Joyanes Aguilar (2021), el proceso de representar un algoritmo "es un ejercicio de abstracción, en el cual se modelan las acciones necesarias para transformar datos de entrada en resultados de salida, siguiendo una secuencia ordenada de operaciones".
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Figura 1: Ejemplo representación algorítmica -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-emerald-200 hover:border-emerald-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Imagen_1.png" 
+                     alt="Ejemplo de representación algorítmica" 
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 font-medium border-t border-emerald-200">
+                  📊 <strong>Figura 1.</strong> Ejemplo representación algorítmica
+                </figcaption>
+              </figure>
+
+              <!-- Propósitos fundamentales -->
+              <div class="bg-gradient-to-r from-teal-50 to-emerald-50 rounded-lg p-6 border-l-4 border-teal-500">
+                <h4 class="font-bold text-emerald-900 text-xl mb-4">Propósitos fundamentales</h4>
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="text-slate-700"><strong class="text-emerald-700">✓ Clarificar la lógica</strong> antes de programar</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="text-slate-700"><strong class="text-emerald-700">✓ Comunicar ideas</strong> entre miembros del equipo</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="text-slate-700"><strong class="text-emerald-700">✓ Facilitar documentación</strong> técnica del sistema</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="text-slate-700"><strong class="text-emerald-700">✓ Promover pensamiento</strong> computacional</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formas de representación -->
+              <div class="bg-white rounded-lg p-6 border-2 border-emerald-300 shadow-md">
+                <h4 class="font-bold text-emerald-900 text-xl mb-4">Formas de representación</h4>
+                <p class="text-lg leading-relaxed text-slate-700 mb-4">
+                  Existen principalmente dos formas de representación complementarias:
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="bg-emerald-50 rounded-lg p-4 border-2 border-emerald-200">
+                    <h5 class="font-bold text-emerald-800 mb-2 flex items-center">
+                      <span class="mr-2">📈</span> Representación Gráfica
+                    </h5>
+                    <p class="text-slate-700">Mediante <strong>diagramas de flujo</strong>, que utilizan símbolos estandarizados para representar visualmente el flujo del algoritmo.</p>
+                  </div>
+                  <div class="bg-emerald-50 rounded-lg p-4 border-2 border-emerald-200">
+                    <h5 class="font-bold text-emerald-800 mb-2 flex items-center">
+                      <span class="mr-2">📝</span> Representación Textual
+                    </h5>
+                    <p class="text-slate-700">Mediante <strong>pseudocódigo</strong>, que describe los pasos usando palabras del lenguaje natural combinadas con estructuras de programación.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conclusión -->
+              <div class="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg p-6 border-2 border-emerald-300">
+                <div class="flex items-start space-x-3">
+                  <span class="text-4xl flex-shrink-0">✅</span>
+                  <div>
+                    <h4 class="font-bold text-emerald-900 text-xl mb-3">En síntesis</h4>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      Representar un algoritmo no solo consiste en escribir pasos, sino en <strong class="text-emerald-700">organizar y comunicar la lógica de resolución de problemas</strong> de manera estandarizada, garantizando que cualquier persona con conocimientos básicos de programación pueda <span class="highlight">entender, evaluar y replicar</span> el proceso descrito.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 2: Estándares para Diagramas de Flujo -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-blue-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-blue-50 transition-colors font-bold text-xl text-blue-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">2</span>
+              Estándares para Diagramas de Flujo
+            </span>
+            <span class="text-blue-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-blue-100">
+            <!-- Contenido del acordeón 2: Estándares para Diagramas de Flujo -->
+            <div class="space-y-6">
+              <!-- Texto explicativo principal -->
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border-l-4 border-blue-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  📊 Los diagramas de flujo se construyen siguiendo un conjunto de <strong class="text-blue-700">símbolos estandarizados</strong> definidos por la <span class="highlight">ISO 5807:1985</span> y la <span class="highlight">ANSI X3.5-1970</span>, ampliamente adoptados en ingeniería del software.
+                </p>
+              </div>
+
+              <!-- Tabla de símbolos -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md overflow-x-auto">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">Símbolos estandarizados</h4>
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="bg-blue-100 border-b-2 border-blue-300">
+                      <th class="px-4 py-2 text-left font-bold text-blue-900">Símbolo</th>
+                      <th class="px-4 py-2 text-left font-bold text-blue-900">Nombre</th>
+                      <th class="px-4 py-2 text-left font-bold text-blue-900">Uso principal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-blue-200 hover:bg-blue-50">
+                      <td class="px-4 py-3 text-center text-2xl">⭘</td>
+                      <td class="px-4 py-3 font-semibold text-blue-800">Terminal (Inicio/Fin)</td>
+                      <td class="px-4 py-3 text-slate-700">Marca el inicio o fin del algoritmo</td>
+                    </tr>
+                    <tr class="border-b border-blue-200 hover:bg-blue-50">
+                      <td class="px-4 py-3 text-center text-2xl">⬛</td>
+                      <td class="px-4 py-3 font-semibold text-blue-800">Proceso</td>
+                      <td class="px-4 py-3 text-slate-700">Representa una operación o cálculo</td>
+                    </tr>
+                    <tr class="border-b border-blue-200 hover:bg-blue-50">
+                      <td class="px-4 py-3 text-center text-2xl">⧫</td>
+                      <td class="px-4 py-3 font-semibold text-blue-800">Decisión</td>
+                      <td class="px-4 py-3 text-slate-700">Indica una condición que puede ser verdadera o falsa</td>
+                    </tr>
+                    <tr class="border-b border-blue-200 hover:bg-blue-50">
+                      <td class="px-4 py-3 text-center text-2xl">⧈</td>
+                      <td class="px-4 py-3 font-semibold text-blue-800">Entrada/Salida</td>
+                      <td class="px-4 py-3 text-slate-700">Denota lectura o escritura de datos</td>
+                    </tr>
+                    <tr class="border-b border-blue-200 hover:bg-blue-50">
+                      <td class="px-4 py-3 text-center text-2xl">⭞</td>
+                      <td class="px-4 py-3 font-semibold text-blue-800">Conector</td>
+                      <td class="px-4 py-3 text-slate-700">Indica continuidad del flujo entre páginas</td>
+                    </tr>
+                    <tr class="hover:bg-blue-50">
+                      <td class="px-4 py-3 text-center text-2xl">⬒</td>
+                      <td class="px-4 py-3 font-semibold text-blue-800">Línea de flujo</td>
+                      <td class="px-4 py-3 text-slate-700">Indica la dirección de ejecución</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Buenas prácticas -->
+              <div class="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-6 border-l-4 border-indigo-500">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">Buenas prácticas en diagramas de flujo</h4>
+                <ul class="space-y-2">
+                  <li class="flex items-start">
+                    <span class="text-blue-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Usar una <strong>sola entrada y salida</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-blue-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Mantener el flujo de <strong>arriba hacia abajo</strong> y de <strong>izquierda a derecha</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-blue-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Evitar <strong>cruces de líneas</strong> innecesarias</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-blue-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Rotular las condiciones de decisión con <strong>"Sí"</strong> y <strong>"No"</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-blue-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Usar <strong>nombres de variables descriptivos</strong></span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Ejemplo práctico -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">Ejemplo: Determinar si un número es par o impar</h4>
+                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500 mb-4">
+                  <p class="text-slate-700 mb-2"><strong class="text-blue-700">Algoritmo:</strong></p>
+                  <ul class="list-disc pl-6 space-y-1 text-slate-700">
+                    <li>Inicio</li>
+                    <li>Leer número</li>
+                    <li>Si (número mod 2 == 0) → Mostrar "Par"</li>
+                    <li>Sino → Mostrar "Impar"</li>
+                    <li>Fin</li>
+                  </ul>
+                </div>
+                <p class="text-slate-700">
+                  Este diagrama ejemplifica el uso de <strong class="text-blue-700">estructuras de decisión (condicional)</strong> dentro de un flujo lógico simple.
+                </p>
+              </div>
+
+              <!-- Figura 2: Características del diagrama de flujos -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-blue-200 hover:border-blue-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Imagen_2.png"
+                     alt="Características del diagrama de flujos"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-blue-50 px-4 py-3 text-center text-sm text-blue-800 font-medium border-t border-blue-200">
+                  📊 <strong>Figura 2.</strong> Características del diagrama de flujos
+                </figcaption>
+              </figure>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 3: Estándares para el Pseudocódigo -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-purple-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-purple-50 transition-colors font-bold text-xl text-purple-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">3</span>
+              Estándares para el Pseudocódigo
+            </span>
+            <span class="text-purple-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-purple-100">
+            <!-- Contenido del acordeón 3: Estándares para el Pseudocódigo -->
+            <div class="space-y-6">
+              <!-- Definición del pseudocódigo -->
+              <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 border-l-4 border-purple-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  📝 El pseudocódigo se define como una <strong class="text-purple-700">descripción estructurada de los pasos de un algoritmo</strong> usando palabras del lenguaje natural combinadas con estructuras propias de la programación (condiciones, ciclos, etc.).
+                </p>
+              </div>
+
+              <!-- Estándares empleados -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">Estándares más empleados en educación informática</h4>
+                <div class="space-y-3">
+                  <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                    <p class="text-slate-700"><strong class="text-purple-700">• Trejos Buriticá (2023)</strong> – Lógica de Programación</p>
+                  </div>
+                  <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                    <p class="text-slate-700"><strong class="text-purple-700">• García Santillán (2014)</strong> – Fundamentos de programación usando PSeInt</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estructura básica -->
+              <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6 border-l-4 border-indigo-500">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">Estructura básica del pseudocódigo en PSeInt</h4>
+                <p class="text-slate-700 mb-3">
+                  La estructura jerárquica de un pseudocódigo en PSeInt incluye:
+                </p>
+                <div class="bg-white rounded-lg p-4 border-2 border-purple-200">
+                  <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-purple-200 hover:border-purple-400 transition-all duration-300">
+                    <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                    <img src="img/Imagen_3.png"
+                         alt="Jerarquía de un Pseudocódigo"
+                         class="w-full h-auto object-contain bg-white"
+                         loading="lazy">
+                    <figcaption class="bg-purple-50 px-4 py-3 text-center text-sm text-purple-800 font-medium border-t border-purple-200">
+                      📊 <strong>Figura 4.</strong> Jerarquía de un Pseudocódigo
+                    </figcaption>
+                  </figure>
+                </div>
+              </div>
+
+              <!-- Reglas de estilo -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">Reglas de estilo</h4>
+                <ul class="space-y-2">
+                  <li class="flex items-start">
+                    <span class="text-purple-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Cada <strong>instrucción en una línea</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-purple-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700"><strong>Sangría para bloques anidados</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-purple-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Palabras clave (Si, Mientras, Para, FinProceso, etc.) en <strong>mayúscula inicial</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-purple-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Comentarios precedidos por <strong>"//"</strong></span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-purple-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700">Nombres de variables en <strong>minúscula y significativos</strong></span>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 4: Ejemplo práctico en PSeInt -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-orange-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-orange-50 transition-colors font-bold text-xl text-orange-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-orange-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">4</span>
+              Ejemplo práctico en PSeInt
+            </span>
+            <span class="text-orange-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-orange-100">
+            <!-- Contenido del acordeón 4: Ejemplo práctico en PSeInt -->
+            <div class="space-y-6">
+              <!-- Problema -->
+              <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-6 border-l-4 border-orange-500">
+                <h4 class="font-bold text-orange-900 text-xl mb-3">Problema: Determinar si una persona es mayor de edad</h4>
+                <p class="text-lg leading-relaxed text-slate-700">
+                  Este ejemplo práctico muestra cómo implementar una <strong class="text-orange-700">estructura condicional</strong> en PSeInt para verificar si una persona es mayor de edad.
+                </p>
+              </div>
+
+              <!-- Pseudocódigo -->
+              <div class="bg-white rounded-lg p-6 border-2 border-orange-300 shadow-md">
+                <h4 class="font-bold text-orange-900 text-xl mb-4">Pseudocódigo</h4>
+                <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-orange-200 hover:border-orange-400 transition-all duration-300">
+                  <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                  <img src="img/Imagen_4.png"
+                       alt="Ejemplo pseudocódigo"
+                       class="w-full h-auto object-contain bg-white"
+                       loading="lazy">
+                  <figcaption class="bg-orange-50 px-4 py-3 text-center text-sm text-orange-800 font-medium border-t border-orange-200">
+                    📝 <strong>Figura 5.</strong> Ejemplo pseudocódigo
+                  </figcaption>
+                </figure>
+              </div>
+
+              <!-- Interpretación -->
+              <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border-l-4 border-amber-500">
+                <h4 class="font-bold text-orange-900 text-xl mb-3">Interpretación</h4>
+                <p class="text-lg leading-relaxed text-slate-700">
+                  El algoritmo solicita un valor, evalúa una condición y muestra un resultado según el estándar de estructura condicional.
+                </p>
+              </div>
+
+              <!-- Diagrama de flujo equivalente -->
+              <div class="bg-white rounded-lg p-6 border-2 border-orange-300 shadow-md">
+                <h4 class="font-bold text-orange-900 text-xl mb-4">Diagrama de flujo equivalente</h4>
+                <div class="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-500 mb-4">
+                  <p class="text-slate-700 font-mono text-center">
+                    Inicio → Leer edad → ¿edad ≥ 18? → Sí: Mostrar "Mayor de edad" / No: Mostrar "Menor de edad" → Fin
+                  </p>
+                </div>
+              </div>
+
+              <!-- Figura 6: Ejemplo diagrama de flujos -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-orange-200 hover:border-orange-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Imagen_5.png"
+                     alt="Ejemplo diagrama de flujos"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-orange-50 px-4 py-3 text-center text-sm text-orange-800 font-medium border-t border-orange-200">
+                  📊 <strong>Figura 6.</strong> Ejemplo diagrama de flujos
+                </figcaption>
+              </figure>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 5: Importancia de la Representación Estandarizada -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-cyan-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-cyan-50 transition-colors font-bold text-xl text-cyan-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-cyan-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">5</span>
+              Importancia de la Representación Estandarizada
+            </span>
+            <span class="text-cyan-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-cyan-100">
+            <!-- Contenido del acordeón 5: Importancia de la Representación Estandarizada -->
+            <div class="space-y-6">
+              <!-- Introducción -->
+              <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg p-6 border-l-4 border-cyan-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  🎯 El uso de <strong class="text-cyan-700">estándares de representación</strong> permite que los algoritmos sean <span class="highlight">claros, uniformes y comprensibles</span> para cualquier persona con conocimientos básicos de programación, independientemente de su experiencia o del lenguaje que utilice.
+                </p>
+              </div>
+
+              <!-- Beneficios principales -->
+              <div class="bg-white rounded-lg p-6 border-2 border-cyan-300 shadow-md">
+                <h4 class="font-bold text-cyan-900 text-xl mb-4">Beneficios del uso de estándares</h4>
+                <div class="space-y-3">
+                  <div class="bg-cyan-50 rounded-lg p-4 border-l-4 border-cyan-500">
+                    <p class="text-slate-700"><strong class="text-cyan-700">✓ Claridad y uniformidad</strong> entre distintos programadores</p>
+                  </div>
+                  <div class="bg-cyan-50 rounded-lg p-4 border-l-4 border-cyan-500">
+                    <p class="text-slate-700"><strong class="text-cyan-700">✓ Detección temprana</strong> de errores lógicos</p>
+                  </div>
+                  <div class="bg-cyan-50 rounded-lg p-4 border-l-4 border-cyan-500">
+                    <p class="text-slate-700"><strong class="text-cyan-700">✓ Mayor facilidad</strong> para documentar y mantener el software</p>
+                  </div>
+                  <div class="bg-cyan-50 rounded-lg p-4 border-l-4 border-cyan-500">
+                    <p class="text-slate-700"><strong class="text-cyan-700">✓ Comunicación efectiva</strong> entre equipos de desarrollo</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contexto profesional -->
+              <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-6 border-l-4 border-teal-500">
+                <h4 class="font-bold text-cyan-900 text-xl mb-3">En entornos profesionales</h4>
+                <p class="text-lg leading-relaxed text-slate-700">
+                  La representación adecuada de algoritmos forma parte del <strong class="text-cyan-700">proceso de diseño y documentación técnica</strong>, y es esencial para la <span class="highlight">gestión de calidad del software</span> (ISO/IEC 12207). En proyectos grandes, esta práctica garantiza que:
+                </p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700 mt-3">
+                  <li>Los nuevos miembros del equipo puedan <strong>entender rápidamente</strong> la lógica del sistema</li>
+                  <li>Se reduzcan los <strong>tiempos de mantenimiento</strong> y depuración</li>
+                  <li>Se facilite la <strong>reutilización de código</strong> en otros proyectos</li>
+                  <li>Se mejore la <strong>calidad general</strong> del software desarrollado</li>
+                </ul>
+              </div>
+
+              <!-- Conclusión -->
+              <div class="bg-gradient-to-r from-cyan-100 to-teal-100 rounded-lg p-6 border-2 border-cyan-300">
+                <div class="flex items-start space-x-3">
+                  <span class="text-4xl flex-shrink-0">✅</span>
+                  <div>
+                    <h4 class="font-bold text-cyan-900 text-xl mb-3">Resumen</h4>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      La representación estandarizada de algoritmos no es solo una práctica recomendada, sino una <strong class="text-cyan-700">necesidad fundamental</strong> en el desarrollo profesional de software. Al seguir estándares como los de ISO 5807 para diagramas de flujo y las convenciones de pseudocódigo, se garantiza que cualquier persona pueda <span class="highlight">comprender, evaluar y mejorar</span> el código, lo que resulta en sistemas más robustos, mantenibles y de mejor calidad.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Actividades -->
+    <section id="actividades" class="content-pane">
+      <!-- TTS sección: Introducción -->
+        <div class="flex justify-end">
+          <div class="space-y-1">
+            <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+                 data-target="introduccion">
+              <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+                <span class="mr-1">▶️</span> Leer
+              </button>
+              <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏸️</span> Pausar
+              </button>
+              <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏹️</span> Detener
+              </button>
+              <div class="flex items-center ml-2">
+                <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+                <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+              </div>
+            </div>
+            <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+              <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+              <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+            </div>
+          </div>
+        </div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Actividades</h2>
+
+      <!-- Ejercicio: Diagrama de Flujo - Par o Impar -->
+  <article class="bg-white border-l-4 border-emerald-500 rounded-lg shadow-lg p-6 mb-6">
+    <h3 class="text-xl font-bold text-emerald-700 mb-4">📊 Ejercicio: Diagrama de Flujo – Determinar si un Número es Par o Impar</h3>
+    
+    <div class="mb-6">
+      <h4 class="font-semibold text-slate-800 mb-3 text-lg">Enunciado</h4>
+      <p class="mb-4 text-slate-700 leading-relaxed">
+        Realiza un diagrama de flujo que permita:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-700 mb-4 ml-2">
+        <li>Solicitar al usuario un número entero.</li>
+        <li>Evaluar si el número es par o impar.</li>
+        <li>Mostrar en pantalla un mensaje indicando el resultado.</li>
+      </ul>
+    </div>
+
+    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 p-5 rounded-lg border-2 border-emerald-200 mb-6">
+      <h4 class="font-semibold text-emerald-900 mb-3 text-lg">Requisitos del ejercicio</h4>
+      <ul class="list-disc list-inside space-y-2 text-slate-700 ml-2">
+        <li>Debes utilizar los <strong>símbolos correctos</strong> según la norma (inicio/fin, proceso, entrada/salida y decisión).</li>
+        <li>La decisión debe representar la pregunta: <code class="bg-white px-2 py-1 rounded text-emerald-700 font-mono text-sm">"¿El número módulo 2 es igual a 0?"</code></li>
+        <li>Asegúrate de que el flujo sea <strong>claro, ordenado</strong> y con un <strong>único punto de entrada y salida</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="bg-blue-50 p-5 rounded-lg border-2 border-blue-200 mb-6">
+      <h4 class="font-semibold text-blue-900 mb-3 text-lg">Ejemplo del comportamiento esperado</h4>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded border-l-4 border-green-500">
+          <p class="text-sm font-semibold text-slate-700 mb-2">Si el usuario ingresa <strong>8</strong>:</p>
+          <p class="text-slate-700 font-mono bg-green-50 p-2 rounded">El número es par.</p>
+        </div>
+        <div class="bg-white p-4 rounded border-l-4 border-orange-500">
+          <p class="text-sm font-semibold text-slate-700 mb-2">Si el usuario ingresa <strong>5</strong>:</p>
+          <p class="text-slate-700 font-mono bg-orange-50 p-2 rounded">El número es impar.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-50 p-6 rounded-lg border-2 border-slate-300 shadow-md">
+      <h4 class="font-semibold text-slate-800 mb-4 text-lg">Solución: Diagrama de Flujo</h4>
+      <div class="bg-white p-6 rounded-lg border border-slate-200 overflow-x-auto shadow-sm">
+        <pre class="text-slate-700 font-mono text-sm leading-relaxed whitespace-pre" style="opacity: 0.85;">            ┌───────────────┐
+            │   Inicio       │
+            └───────┬───────┘
+                    │
+                    ▼
+        ┌────────────────────────┐
+        │ Leer número (N)        │   ← Paralelogramo (Entrada)
+        └─────────┬──────────────┘
+                  │
+                  ▼
+       ┌──────────────────────────┐
+       │ ¿N mod 2 = 0 ?           │   ← Rombo (Decisión)
+       └───────┬───────┬─────────┘
+               │Sí      │No
+               │        │
+               ▼        ▼
+   ┌────────────────┐   ┌───────────────────┐
+   │ Mostrar:        │   │ Mostrar:          │   ← Paralelogramo (Salida)
+   │ "Es par"        │   │ "Es impar"        │
+   └───────┬────────┘   └─────────┬─────────┘
+           │                      │
+           └──────────────┬───────┘
+                          ▼
+                 ┌────────────────┐
+                 │     Fin         │
+                 └────────────────┘</pre>
+      </div>
+      <p class="text-xs text-slate-600 mt-3 italic">Diagrama de flujo con símbolos estandarizados según ISO 5807:1985</p>
+    </div>
+
+    <div class="mt-6 p-5 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-l-4 border-yellow-500">
+      <h4 class="font-semibold text-yellow-900 mb-3">💡 Notas importantes</h4>
+      <ul class="list-disc list-inside space-y-2 text-slate-700 ml-2">
+        <li>El <strong>operador módulo (%)</strong> devuelve el residuo de una división.</li>
+        <li>Si <code class="bg-white px-2 py-1 rounded text-yellow-700 font-mono text-sm">N % 2 = 0</code>, el número es <strong>par</strong>.</li>
+        <li>Si <code class="bg-white px-2 py-1 rounded text-yellow-700 font-mono text-sm">N % 2 ≠ 0</code>, el número es <strong>impar</strong>.</li>
+        <li>Este diagrama utiliza una <strong>estructura condicional simple (Si-Entonces-Sino)</strong>.</li>
+      </ul>
+    </div>
+  </article>
+
+
+</section>  <!-- ← cierre de la sección ACTIVIDADES -->
+
+
+    <!-- Evaluación (quiz) -->
+    <section id="evaluacion" class="content-pane">
+      <!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="evaluacion">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Cuestionario de Repaso</h2>
+      <p class="text-slate-600 mb-6">Temática: Representación Algorítmica, Diagramas de Flujo y Pseudocódigo</p>
+      
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div id="quiz-container" class="space-y-6">
+          <!-- Pregunta 1 -->
+          <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-5 border-l-4 border-emerald-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-emerald-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+              <div class="flex-1">
+                <p class="font-bold text-emerald-900 text-lg">(Comprensión) ¿Qué finalidad tiene un diagrama de flujo en el diseño de algoritmos?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Representar visualmente el flujo lógico de un proceso.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Traducir directamente el algoritmo a código.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Almacenar variables de entrada y salida.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Ejecutar instrucciones automáticamente.</span>
+              </label>
+            </div>
+            <p class="text-xs text-emerald-700 mt-3 ml-11 font-semibold">Respuesta correcta: A</p>
+          </div>
+
+          <!-- Pregunta 2 -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-5 border-l-4 border-blue-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+              <div class="flex-1">
+                <p class="font-bold text-blue-900 text-lg">(Conceptual) ¿Qué norma define los símbolos de los diagramas de flujo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. ISO 9001</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. ANSI X3.5–1970 e ISO 5807:1985</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. IEEE 802.11</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. W3C HTML5</span>
+              </label>
+            </div>
+            <p class="text-xs text-blue-700 mt-3 ml-11 font-semibold">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 3 -->
+          <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-5 border-l-4 border-purple-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+              <div class="flex-1">
+                <p class="font-bold text-purple-900 text-lg">(Aplicación) ¿Qué símbolo se usa para representar una decisión en un diagrama de flujo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Óvalo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Rombo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Rectángulo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Paralelogramo</span>
+              </label>
+            </div>
+            <p class="text-xs text-purple-700 mt-3 ml-11 font-semibold">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 4 -->
+          <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-5 border-l-4 border-orange-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">4</span>
+              <div class="flex-1">
+                <p class="font-bold text-orange-900 text-lg">(Comprensión) En pseudocódigo, la palabra clave "FinSi" indica:</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. El fin del algoritmo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. El fin de un bloque condicional</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. El inicio de un ciclo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. La declaración de una variable</span>
+              </label>
+            </div>
+            <p class="text-xs text-orange-700 mt-3 ml-11 font-semibold">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 5 -->
+          <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-5 border-l-4 border-red-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">5</span>
+              <div class="flex-1">
+                <p class="font-bold text-red-900 text-lg">(Análisis) Si un algoritmo no tiene un único punto de inicio, ¿qué problema genera?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Redundancia de código</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Inconsistencia en el flujo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Mejora en la eficiencia</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Ninguno</span>
+              </label>
+            </div>
+            <p class="text-xs text-red-700 mt-3 ml-11 font-semibold">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 6 -->
+          <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg p-5 border-l-4 border-cyan-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-cyan-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">6</span>
+              <div class="flex-1">
+                <p class="font-bold text-cyan-900 text-lg">(Aplicación) ¿Cuál de las siguientes instrucciones está correctamente escrita en PSeInt?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. si edad > 18 entonces</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. SI edad > 18</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Si edad > 18 Entonces</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Si edad mayor que 18</span>
+              </label>
+            </div>
+            <p class="text-xs text-cyan-700 mt-3 ml-11 font-semibold">Respuesta correcta: C</p>
+          </div>
+
+          <!-- Pregunta 7 -->
+          <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-5 border-l-4 border-green-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">7</span>
+              <div class="flex-1">
+                <p class="font-bold text-green-900 text-lg">(Razonamiento) ¿Por qué es importante la indentación en pseudocódigo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Mejora la velocidad del programa</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Permite que el compilador entienda el código</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Facilita la lectura y comprensión de estructuras anidadas</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. No tiene relevancia práctica</span>
+              </label>
+            </div>
+            <p class="text-xs text-green-700 mt-3 ml-11 font-semibold">Respuesta correcta: C</p>
+          </div>
+
+          <!-- Pregunta 8 -->
+          <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-5 border-l-4 border-indigo-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">8</span>
+              <div class="flex-1">
+                <p class="font-bold text-indigo-900 text-lg">(Aplicación práctica) En PSeInt, ¿qué instrucción se usa para leer un dato ingresado por el usuario?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Ingresar</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Escribir</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Leer</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Mostrar</span>
+              </label>
+            </div>
+            <p class="text-xs text-indigo-700 mt-3 ml-11 font-semibold">Respuesta correcta: C</p>
+          </div>
+
+          <!-- Pregunta 9 -->
+          <div class="bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg p-5 border-l-4 border-rose-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-rose-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">9</span>
+              <div class="flex-1">
+                <p class="font-bold text-rose-900 text-lg">(Análisis de errores) ¿Qué ocurre si un pseudocódigo omite el "FinProceso"?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. El programa se ejecuta igual.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Se genera un error lógico o de estructura.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Se ejecuta infinitamente.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. El algoritmo ignora las últimas instrucciones.</span>
+              </label>
+            </div>
+            <p class="text-xs text-rose-700 mt-3 ml-11 font-semibold">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 10 -->
+          <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg p-5 border-l-4 border-slate-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">10</span>
+              <div class="flex-1">
+                <p class="font-bold text-slate-900 text-lg">(Comprensión contextual) ¿Por qué es importante aplicar estándares en la enseñanza de programación?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Porque garantizan uniformidad y claridad en la lógica algorítmica.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Porque sustituyen la práctica con lenguajes reales.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Porque reducen la necesidad de documentación.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Porque eliminan la depuración.</span>
+              </label>
+            </div>
+            <p class="text-xs text-slate-700 mt-3 ml-11 font-semibold">Respuesta correcta: A</p>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="mt-8 flex gap-3 flex-wrap">
+          <button id="quiz-submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded transition-colors shadow-md">
+            ✓ Enviar Respuestas
+          </button>
+          <button id="quiz-reset" class="bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded transition-colors shadow-md">
+            ↻ Reiniciar
+          </button>
+        </div>
+
+        <!-- Resultado -->
+        <div id="quiz-result" class="mt-6 p-4 rounded-lg hidden">
+          <div id="result-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recursos (3 tarjetas como la imagen) -->
+    <section id="recursos" class="content-pane">
+      <!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="recursos">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6">Recursos</h2>
+      <ul class="grid lg:grid-cols-3 gap-5">
+        <!-- Card 1 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">Lógica de programación</h3>
+              <span class="badge">Libro</span>
+            </div>
+            <p class="text-sm text-slate-700"><strong>Trejos Buriticá, O. I.</strong> (2023). <em>Lógica de programación</em>. Ediciones de la U.</p>
+            <a href="https://www.edicionesdelau.com/" target="_blank" class="inline-block mt-3 text-emerald-700 underline">Ver recurso</a>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <img src="img/qr-code 1.png" alt="QR Lógica de programación" class="w-20 h-20 object-contain">
+          </div>
+        </li>
+        <!-- Card 2 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">Solucionario en pseudocódigo</h3>
+              <span class="badge">Libro</span>
+            </div>
+            <p class="text-sm text-slate-700"><strong>Trejos Buriticá, O. I.</strong> (2021). <em>Lógica de programación: solucionario en pseudocódigo. Ejercicios resueltos</em>. Ediciones de la U.</p>
+            <a href="https://www.edicionesdelau.com/" target="_blank" class="inline-block mt-3 text-emerald-700 underline">Ver recurso</a>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <img src="img/qr-code 2.png" alt="QR Solucionario en pseudocódigo" class="w-20 h-20 object-contain">
+          </div>
+        </li>
+        <!-- Card 3 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-lg text-green-800 mb-2 pr-2">Programación basada en PSeInt</h3>
+                <span class="badge">Libro</span>
+            </div>
+                  <p class="text-slate-600 mb-4">Celi V., P. (2023).<i>Fundamentos de programación basados en PSeInt.</i> (1.ª ed.) [PDF]. ITQ.</p>
+                  <a href="https://itq.edu.ec/wp-content/uploads/2023/04/2023-04-19_fundamentos_de_programacion_basados_en_pseint.pdf" target="_blank" class="text-green-700 hover:text-green-900 underline block mb-4">Ver recurso</a>          </div>
+          <div class="mt-4 flex justify-end">
+                   <img src="img/qr-code 3.png" alt="QR Code" class="w-16 h-16">
+          </div>
+        </li>
+        <!-- Card 4 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">Fundamentos de programación</h3>
+              <span class="badge">Libro</span>
+            </div>
+            <p class="text-sm text-slate-700"><strong>García Santillán, I.</strong> (Ed.). (2014). <em>Fundamentos de programación usando PSeInt</em>. Unidad de Producción y Difusión Científica y Académica.</p>
+            <a href="#" class="inline-block mt-3 text-emerald-700 underline">Ver recurso</a>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <img src="img/qr-code 4.png" alt="QR Fundamentos de programación" class="w-20 h-20 object-contain">
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Bibliografía -->
+    <section id="bibliografia" class="content-pane">
+      <!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="bibliografia">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Bibliografía</h2>
+      <ul class="space-y-3">
+        <li class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          García Santillán, I. (Ed.). (2014). <em>Fundamentos de programación usando PSeInt</em>. Unidad de Producción y Difusión Científica y Académica.
+        </li>
+        <li class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          Trejos Buriticá, O. I. (2021). <em>Lógica de programación: solucionario en pseudocódigo. Ejercicios resueltos</em>. Ediciones de la U.
+        </li>
+        <li class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          Trejos Buriticá, O. I. (2023). <em>Lógica de programación</em>. Ediciones de la U.
+        </li>
+      </ul>
+      <footer class="mt-10 pt-6 border-t text-center text-slate-600">
+        <p class="font-medium">Unicórdoba, calidad, innovación e inclusión para la transformación del territorio.</p>
+        <a class="text-emerald-700 underline" href="https://www.unicordoba.edu.co" target="_blank">www.unicordoba.edu.co</a>
+      </footer>
+    </section>
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+  </main>
+</div>
+
+<!-- Image modal -->
+<div id="imgModal" class="image-modal">
+  <img id="imgModalSrc" src="" alt="Vista ampliada" class="max-w-[92vw] max-h-[92vh] border-4 border-white rounded shadow-2xl"/>
+</div>
+
+<script>
+/* === Navegación + voz SOLO al hacer clic === */
+(() => {
+  const panes = document.querySelectorAll('.content-pane');
+  const links = document.querySelectorAll('.sidebar-link');
+  const mobileNav = document.getElementById('mobile-nav');
+
+  function go(id){
+    panes.forEach(p=>p.classList.remove('active'));
+    document.getElementById(id)?.classList.add('active');
+    links.forEach(a=>{
+      const active = a.dataset.target===id;
+      a.classList.toggle('active', active);
+      a.setAttribute('aria-current', active ? 'page' : 'false');
+    });
+    if(mobileNav) mobileNav.value=id;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ===== TTS (toggle con bocina) =====
+  const synth = window.speechSynthesis;
+  let voices = [];
+  function loadVoices(){ voices = synth.getVoices(); }
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+
+  let menuTtsEnabled = JSON.parse(localStorage.getItem('menuTtsEnabled') || 'false');
+  const ttsBtn = document.getElementById('menu-tts-toggle');
+
+  function updateTtsBtn(){
+    if(!ttsBtn) return;
+    ttsBtn.classList.toggle('muted', !menuTtsEnabled);
+    ttsBtn.setAttribute('aria-pressed', menuTtsEnabled ? 'true' : 'false');
+    ttsBtn.setAttribute('aria-label', menuTtsEnabled ? 'Voz activada' : 'Voz desactivada');
+    ttsBtn.title = menuTtsEnabled ? 'Voz activada' : 'Voz desactivada';
+    ttsBtn.textContent = menuTtsEnabled ? '🔊' : '🔇';
+  }
+  updateTtsBtn();
+
+  ttsBtn?.addEventListener('click', () => {
+    menuTtsEnabled = !menuTtsEnabled;
+    localStorage.setItem('menuTtsEnabled', JSON.stringify(menuTtsEnabled));
+    if(!menuTtsEnabled) synth.cancel();
+    updateTtsBtn();
+  });
+
+  function speakMenu(text){
+    if(!menuTtsEnabled || !text) return;
+    try{
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = voices.find(v => /es/i.test(v.lang)) || null;
+      if (v) u.voice = v, u.lang = v.lang; else u.lang = 'es-ES';
+      u.rate = 1.0;
+      synth.speak(u);
+    }catch(e){}
+  }
+
+  // ===== Un SOLO listener: navega + lee (si está activado) =====
+  links.forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = a.dataset.target;
+      if (id) go(id);
+
+      // Toma aria-label para no leer el emoji
+      const label = a.getAttribute('aria-label') || a.textContent.replace(/\s+/g,' ').trim();
+      speakMenu(label);
+    });
+  });
+
+  // Mobile select
+  mobileNav?.addEventListener('change', e => {
+    go(e.target.value);
+    // También lee en móvil si está activado
+    const opt = e.target.selectedOptions[0];
+    const label = (opt?.textContent || '').replace(/\s+/g,' ').trim();
+    speakMenu(label);
+  });
+})();
+</script>
+
+
+
+  
+<script>
+// Activities check (very lightweight rubric)
+
+// ====== Verificador de Actividades (S1: cine, S2: efectivo) ======
+document.getElementById('check-acts')?.addEventListener('click', () => {
+  let correct = 0, total = 0;
+
+  // Helper: evalúa si el texto contiene TODAS las palabras clave (al menos una variante por grupo)
+  const hasAll = (txt, keywords) => {
+    txt = txt.toLowerCase();
+    return keywords.every(group =>
+      group.some(k => txt.includes(k))
+    );
+  };
+
+  // -------- Situación 1 (Cine) --------
+  // Entradas
+  total++;
+  if (hasAll(document.querySelector('.a1.entrada')?.value || '', [
+      ['edad'], ['precio', 'preciobase'] ])) correct++;
+
+  // Restricciones
+  total++;
+  if (hasAll(document.querySelector('.a1.restricciones')?.value || '', [
+      ['edad','>=','mayor','igual','0'], ['precio','preciobase','>','mayor','0'] ])) correct++;
+
+  // Condición
+  total++;
+  if (hasAll(document.querySelector('.a1.condicion')?.value || '', [
+      ['edad','<','menor','12'] ])) correct++;
+
+  // Proceso
+  total++;
+  if (hasAll(document.querySelector('.a1.proceso')?.value || '', [
+      ['si','if'], ['edad','<','menor','12'], ['precio','preciobase','*','0.8','20%'] ])) correct++;
+
+  // Salidas
+  total++;
+  if (hasAll(document.querySelector('.a1.salidas')?.value || '', [
+      ['total','pagar','valor'] ])) correct++;
+
+
+
+  // -------- Situación 2 (Tienda) --------
+  // Entradas
+  total++;
+  if (hasAll(document.querySelector('.a2.entrada')?.value || '', [
+      ['subtotal'], ['medio','pago','mediopago'] ])) correct++;
+
+  // Restricciones
+  total++;
+  if (hasAll(document.querySelector('.a2.restricciones')?.value || '', [
+      ['subtotal','>','mayor','0'] ])) correct++;
+
+  // Condición
+  total++;
+  if (hasAll(document.querySelector('.a2.condicion')?.value || '', [
+      ['medio','pago','mediopago'], ['efectivo','"efectivo"','=='] ])) correct++;
+
+  // Proceso
+  total++;
+  if (hasAll(document.querySelector('.a2.proceso')?.value || '', [
+      ['si','if'], ['efectivo'], ['subtotal','*','0.9','10%'] ])) correct++;
+
+  // Salidas
+  total++;
+  if (hasAll(document.querySelector('.a2.salidas')?.value || '', [
+      ['total','pagar'], ['descuento'] ])) correct++;
+
+  // Resultado
+  const res = document.getElementById('acts-result');
+  res.textContent = `Respuestas correctas: ${correct} de ${total}.`;
+  res.className = 'mt-3 font-semibold ' + (correct/total >= 0.7 ? 'text-emerald-700' : 'text-red-700');
+  window.scrollTo({ top: res.offsetTop - 80, behavior: 'smooth' });
+});
+
+// Validación de la actividad de pseudocódigo
+document.getElementById('validar-actividad')?.addEventListener('click', function() {
+  const codigo = document.getElementById('codigo-actividad').value.toLowerCase().trim();
+  const resultado = document.getElementById('resultado-actividad');
+  
+  // Palabras clave que debe contener la solución correcta
+  const palabrasClave = [
+    'proceso',
+    'promedio_grupo',
+    'definir',
+    'nota',
+    'suma',
+    'promedio',
+    'contador',
+    'mientras',
+    'leer',
+    'escribir',
+    'finmientras',
+    'finproceso'
+  ];
+  
+  let palabrasEncontradas = 0;
+  palabrasClave.forEach(palabra => {
+    if (codigo.includes(palabra)) palabrasEncontradas++;
+  });
+  
+  const porcentaje = Math.round((palabrasEncontradas / palabrasClave.length) * 100);
+  
+  if (porcentaje >= 90) {
+    resultado.textContent = '✅ ¡Excelente! Tu solución es correcta.';
+    resultado.className = 'mt-3 text-lg font-semibold text-green-700';
+  } else if (porcentaje >= 70) {
+    resultado.textContent = '⚠️ Tu solución está incompleta. Revisa las palabras clave del algoritmo.';
+    resultado.className = 'mt-3 text-lg font-semibold text-yellow-700';
+  } else {
+    resultado.textContent = '❌ Tu solución necesita mejoras. Asegúrate de incluir todas las estructuras necesarias.';
+    resultado.className = 'mt-3 text-lg font-semibold text-red-700';
+  }
+});
+
+// Quiz sobre bucles, contadores, acumuladores y centinelas
+document.addEventListener('DOMContentLoaded', function() {
+const quizData = [
+  {q:'<strong>1. Ciclo con contador.</strong> Observa el siguiente fragmento de código e indica la salida esperada:',code:'Proceso ContadorBasico\n   Definir i Como Entero;\n   i = 1;\n   Mientras i <= 3 Hacer\n      Escribir "Iteración ", i;\n      i = i + 1;\n   FinMientras\nFinProceso',opts:['A. Iteración 1, Iteración 2, Iteración 3','B. Iteración 0, Iteración 1, Iteración 2','C. Iteración 1, Iteración 2, Iteración 3, Iteración 4','D. Iteración 2, Iteración 3, Iteración 4'],a:0},
+  {q:'<strong>2. Acumulador.</strong> Analiza el siguiente código. ¿Qué valor se mostrará al final del programa?',code:'Proceso SumaNumeros\n   Definir i, suma Como Entero;\n   suma = 0;\n   Para i = 1 Hasta 4 Con Paso 1 Hacer\n      suma = suma + i;\n   FinPara\n   Escribir "Resultado final: ", suma;\nFinProceso',opts:['A. 6','B. 10','C. 4','D. 15'],a:1},
+  {q:'<strong>3. Ciclo con centinela.</strong> Observa el siguiente código. Si el usuario ingresa: <strong>5, 3, 2, -1</strong>, ¿cuál será el resultado final?',code:'Proceso SumaCentinela\n   Definir num, total Como Entero;\n   total = 0;\n   Escribir "Ingrese un número (-1 para terminar): ";\n   Leer num;\n   Mientras num <> -1 Hacer\n      total = total + num;\n      Leer num;\n   FinMientras\n   Escribir "Total: ", total;\nFinProceso',opts:['A. 8','B. 9','C. 10','D. 11'],a:2},
+  {q:'<strong>4. Ciclo con rango y paso.</strong> Analiza el siguiente fragmento. ¿Qué valores se imprimirán?',code:'Proceso RangoYpaso\n   Definir i Como Entero\n   Para i = 2 Hasta 10 Con Paso 3 Hacer\n      Escribir i\n   FinPara\nFinProceso',opts:['A. 2, 3, 4, 5, 6, 7, 8, 9, 10','B. 2, 5, 8','C. 2, 5, 8, 11','D. 3, 6, 9'],a:1},
+  {q:'<strong>5. Ciclo anidado.</strong> Observa el siguiente código. ¿Cuántas líneas imprimirá este programa?',code:'Proceso TablasMultiplicar\n   Definir i, j Como Entero\n   Para i = 1 Hasta 2 Con Paso 1 Hacer\n      Para j = 1 Hasta 3 Con Paso 1 Hacer\n         Escribir i, " x ", j, " = ", i*j\n      FinPara\n   FinPara\nFinProceso',opts:['A. 3','B. 5','C. 6','D. 9'],a:2}
+];
+const quiz=document.getElementById('quiz');
+if(quiz){
+  quizData.forEach((it,i)=>{
+    const w=document.createElement('div');w.className='mb-5 p-4 bg-white rounded-lg shadow-sm border border-slate-200';
+    w.innerHTML=`<p class='font-semibold mb-3 text-lg'>${it.q}</p>`;
+    if(it.code){
+      const ta=document.createElement('textarea');
+      ta.rows=8;
+      ta.className='w-full p-3 mb-3 border-2 border-slate-300 rounded-lg bg-slate-50 font-mono text-sm text-slate-800';
+      ta.value=it.code;
+      ta.readOnly=true;
+      w.appendChild(ta);
+    }
+    it.opts.forEach(op=>{
+      const d=document.createElement('div');
+      d.className='quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer mb-2 hover:bg-slate-50 transition-colors';
+      d.textContent=op;
+      d.onclick=()=>{w.querySelectorAll('.quiz-option').forEach(x=>x.classList.remove('selected','bg-emerald-50'));d.classList.add('selected','bg-emerald-50');};
+      w.appendChild(d);
+    });
+    quiz.appendChild(w);
+  });
+  document.getElementById('quiz-submit').onclick=()=>{
+    let score=0;
+    [...quiz.children].forEach((b,i)=>{
+      const sel=b.querySelector('.quiz-option.selected');
+      const correct=quizData[i].opts[quizData[i].a];
+      b.querySelectorAll('.quiz-option').forEach(o=>{
+        if(o.textContent===correct){o.classList.remove('bg-emerald-50');o.classList.add('bg-green-100','border-green-500');}
+        else if(o.classList.contains('selected')){o.classList.remove('bg-emerald-50');o.classList.add('bg-red-100','border-red-500');}
+        o.style.pointerEvents='none';
+      });
+      if(sel&&sel.textContent===correct)score++;
+    });
+    const out=document.getElementById('quiz-result');
+    out.innerHTML=`<strong>Puntaje:</strong> ${score}/${quizData.length} (${Math.round(score/quizData.length*100)}%)`;
+    out.className='mt-3 text-lg font-bold '+(score/quizData.length>=0.7?'text-emerald-700':'text-red-700');
+  };
+}
+});
+
+// ===== Cuestionario de Repaso Interactivo =====
+document.addEventListener('DOMContentLoaded', function() {
+  const correctAnswers = {
+    q1: 'A', q2: 'B', q3: 'B', q4: 'B', q5: 'B',
+    q6: 'C', q7: 'C', q8: 'C', q9: 'B', q10: 'A'
+  };
+
+  const submitBtn = document.getElementById('quiz-submit');
+  const resetBtn = document.getElementById('quiz-reset');
+  const resultDiv = document.getElementById('quiz-result');
+  const resultContent = document.getElementById('result-content');
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', function() {
+      let correct = 0;
+      let total = 10;
+      const answers = {};
+
+      // Recopilar respuestas
+      for (let i = 1; i <= 10; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+          answers[`q${i}`] = selected.value;
+          if (selected.value === correctAnswers[`q${i}`]) {
+            correct++;
+          }
+        }
+      }
+
+      // Calcular porcentaje
+      const percentage = Math.round((correct / total) * 100);
+
+      // Mostrar resultado
+      let resultHTML = `
+        <div class="text-center">
+          <h3 class="text-2xl font-bold mb-3">Resultado Final</h3>
+          <div class="text-4xl font-bold mb-2 ${percentage >= 70 ? 'text-emerald-600' : 'text-red-600'}">
+            ${correct}/${total}
+          </div>
+          <p class="text-xl font-semibold mb-4 ${percentage >= 70 ? 'text-emerald-700' : 'text-red-700'}">
+            ${percentage}%
+          </p>
+      `;
+
+      if (percentage >= 90) {
+        resultHTML += `<p class="text-lg text-emerald-700 font-semibold">🎉 ¡Excelente! Dominas perfectamente los conceptos.</p>`;
+      } else if (percentage >= 80) {
+        resultHTML += `<p class="text-lg text-emerald-700 font-semibold">✅ ¡Muy bien! Tienes un buen dominio de los temas.</p>`;
+      } else if (percentage >= 70) {
+        resultHTML += `<p class="text-lg text-blue-700 font-semibold">👍 Bien. Considera revisar los temas con menor puntuación.</p>`;
+      } else if (percentage >= 50) {
+        resultHTML += `<p class="text-lg text-yellow-700 font-semibold">⚠️ Necesitas estudiar más. Revisa los conceptos clave.</p>`;
+      } else {
+        resultHTML += `<p class="text-lg text-red-700 font-semibold">❌ Necesitas reforzar tus conocimientos. Repasa el material.</p>`;
+      }
+
+      resultHTML += `</div>`;
+
+      resultContent.innerHTML = resultHTML;
+      resultDiv.classList.remove('hidden');
+      resultDiv.classList.add('bg-gradient-to-r', 'from-slate-50', 'to-gray-50', 'border-2', 'border-slate-300');
+
+      // Desplazar al resultado
+      setTimeout(() => {
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      // Limpiar todas las respuestas
+      document.querySelectorAll('.quiz-answer').forEach(input => {
+        input.checked = false;
+      });
+
+      // Ocultar resultado
+      resultDiv.classList.add('hidden');
+      resultContent.innerHTML = '';
+
+      // Desplazar al inicio del cuestionario
+      document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+});
+
+// ===== Función para abrir modal de zoom =====
+function openImageModal(src) {
+  const modal = document.getElementById('imgModal');
+  const modalImg = document.getElementById('imgModalSrc');
+  if (modal && modalImg) {
+    modalImg.src = src;
+    modal.classList.add('active');
+  }
+}
+
+// ===== Zoom de imágenes al hacer clic =====
+const modal=document.getElementById('imgModal');
+const modalImg=document.getElementById('imgModalSrc');
+document.querySelectorAll('figure img').forEach(img=>{
+  img.classList.add('cursor-zoom-in');
+  img.addEventListener('click',()=>{ modal.classList.add('active'); modalImg.src=img.src; });
+});
+modal?.addEventListener('click',()=>modal.classList.remove('active'));
+</script>
+
+<script>
+// ==== TTS genérico (para .speech-controls con data-target) ====
+document.addEventListener('DOMContentLoaded', function () {
+  const synth = window.speechSynthesis;
+  let voices = [], preferred = null;
+
+  function loadVoices(){
+    voices = synth.getVoices();
+    preferred = voices.find(v => v.name.includes('Paulina'))
+             || voices.find(v => (v.lang||'').toLowerCase().startsWith('es'))
+             || voices[0] || null;
+  }
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+
+  document.querySelectorAll('.speech-controls[data-target]').forEach(controls => {
+    const targetId = controls.dataset.target;
+    const section  = document.getElementById(targetId);
+    if (!section) return;
+
+    const playBtn  = controls.querySelector('.play-btn');
+    const pauseBtn = controls.querySelector('.pause-btn');
+    const stopBtn  = controls.querySelector('.stop-btn');
+    const rateCtrl = controls.querySelector('.speech-rate');
+
+    let currentUtterance = null, isPaused = false;
+
+    function getTextFromSection(sec){
+      const nodes = sec.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,figcaption,pre');
+      if (!nodes.length) return (sec.textContent||'').trim();
+      let text = '';
+      nodes.forEach(el=>{
+        const t=(el.textContent||'').trim();
+        if (!t) return;
+        text += (/^H[1-6]$/.test(el.tagName) ? t + '. . . ' : t + ' ');
+      });
+      return text.trim();
+    }
+    function setButtons(playing){
+      playBtn.disabled  = playing && !isPaused;
+      pauseBtn.disabled = !playing;
+      stopBtn.disabled  = !playing;
+    }
+    function stop(){
+      if (synth.speaking || synth.pending) synth.cancel();
+      currentUtterance=null; isPaused=false; setButtons(false);
+    }
+    function play(){
+      if (currentUtterance && isPaused && synth.speaking){
+        synth.resume(); isPaused=false; setButtons(true); return;
+      }
+      stop();
+      const text=getTextFromSection(section);
+      if (!text) return;
+      const utt=new SpeechSynthesisUtterance(text);
+      utt.lang  =(preferred && preferred.lang) || 'es-ES';
+      utt.voice = preferred || null;
+      utt.rate  = parseFloat(rateCtrl?.value || '1');
+      utt.onend   = ()=>{ currentUtterance=null; setButtons(false); };
+      utt.onerror = ()=>{ currentUtterance=null; setButtons(false); };
+      currentUtterance=utt; synth.speak(utt); isPaused=false; setButtons(true);
+    }
+    function pause(){
+      if (currentUtterance && !isPaused && synth.speaking){
+        synth.pause(); isPaused=true; playBtn.disabled=false;
+      }
+    }
+
+    playBtn?.addEventListener('click',  play);
+    pauseBtn?.addEventListener('click', pause);
+    stopBtn?.addEventListener('click',  stop);
+    rateCtrl?.addEventListener('change', ()=>{ if (currentUtterance && !isPaused && synth.speaking){ stop(); setTimeout(play,80);} });
+
+    // Atajos: solo cuando la sección está visible
+    document.addEventListener('keydown', (e)=>{
+      const activePane = document.querySelector('.content-pane.active');
+      if (!activePane || activePane.id !== targetId) return;
+      if (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+      if (e.code==='Space'){ e.preventDefault(); (currentUtterance && !isPaused && synth.speaking) ? pause() : play(); }
+      if (e.code==='Tab' && !e.shiftKey){ stop(); }
+    });
+  });
+});
+</script>
+
+  <script>
+// ==== TTS para acordeón (lee solo el <details> abierto en #contenido) ====
+document.addEventListener('DOMContentLoaded', () => {
+  const synth = window.speechSynthesis;
+  let voices=[], preferred=null;
+  function loadVoices(){
+    voices = synth.getVoices();
+    preferred = voices.find(v=>v.name.includes('Paulina'))
+             || voices.find(v=>(v.lang||'').toLowerCase().startsWith('es'))
+             || voices[0] || null;
+  }
+  loadVoices();
+  if (synth.onvoiceschanged!==undefined) synth.onvoiceschanged=loadVoices;
+
+  const ctrl = document.querySelector('.speech-controls[data-mode="accordion"][data-container="#contenido"]');
+  if (!ctrl) return;
+  const container = document.querySelector('#contenido');
+
+  const playBtn  = ctrl.querySelector('.play-btn');
+  const pauseBtn = ctrl.querySelector('.pause-btn');
+  const stopBtn  = ctrl.querySelector('.stop-btn');
+  const rateCtrl = ctrl.querySelector('.speech-rate');
+
+  let currentUtterance=null, isPaused=false;
+
+  function getActiveDetails(){ return container.querySelector('details[open]') || container.querySelector('details'); }
+  function getDetailsText(det){
+    if (!det) return '';
+    const parts=[];
+    const sum=det.querySelector(':scope > summary');
+    if (sum){ const t=(sum.textContent||'').trim(); if (t) parts.push(t + '. . . '); }
+    const bodyNodes = det.querySelectorAll(':scope > :not(summary)');
+    if (bodyNodes.length){
+      bodyNodes.forEach(n=>{
+        n.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,figcaption,pre').forEach(el=>{
+          const t=(el.textContent||'').trim(); if (t) parts.push(t + ' ');
+        });
+        if (!n.querySelector('h1,h2,h3,h4,h5,h6,p,li,figcaption,pre')){
+          const t=(n.textContent||'').trim(); if (t) parts.push(t + ' ');
+        }
+      });
+    }else{
+      const t=(det.textContent||'').trim(); if (t) parts.push(t);
+    }
+    return parts.join('').trim();
+  }
+  function setButtons(playing){
+    playBtn.disabled  = playing && !isPaused;
+    pauseBtn.disabled = !playing;
+    stopBtn.disabled  = !playing;
+  }
+  function stop(){
+    if (synth.speaking || synth.pending) synth.cancel();
+    currentUtterance=null; isPaused=false; setButtons(false);
+  }
+  function play(){
+    if (currentUtterance && isPaused && synth.speaking){ synth.resume(); isPaused=false; setButtons(true); return; }
+    stop();
+    const det=getActiveDetails(); const text=getDetailsText(det);
+    if (!text) return;
+    const utt=new SpeechSynthesisUtterance(text);
+    utt.lang  =(preferred && preferred.lang) || 'es-ES';
+    utt.voice = preferred || null;
+    utt.rate  = parseFloat(rateCtrl?.value || '1');
+    utt.onend   = ()=>{ currentUtterance=null; setButtons(false); };
+    utt.onerror = ()=>{ currentUtterance=null; setButtons(false); };
+    currentUtterance=utt; synth.speak(utt); isPaused=false; setButtons(true);
+  }
+  function pause(){
+    if (currentUtterance && !isPaused && synth.speaking){ synth.pause(); isPaused=true; playBtn.disabled=false; }
+  }
+
+  playBtn.addEventListener('click',  play);
+  pauseBtn.addEventListener('click', pause);
+  stopBtn.addEventListener('click',  stop);
+  rateCtrl?.addEventListener('change', ()=>{ if (currentUtterance && !isPaused && synth.speaking){ stop(); setTimeout(play,80);} });
+
+  // Si se abre otro acordeón, corta la lectura
+  container.querySelectorAll('details').forEach(d=>{
+    d.addEventListener('toggle', ()=>{ if (d.open) stop(); });
+  });
+
+  // Atajos cuando "contenido" esté visible
+  document.addEventListener('keydown', (e)=>{
+    const activePane=document.querySelector('.content-pane.active');
+    if (!activePane || activePane.id!=='contenido') return;
+    if (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+    if (e.code==='Space'){ e.preventDefault(); (currentUtterance && !isPaused && synth.speaking) ? pause() : play(); }
+    if (e.code==='Tab' && !e.shiftKey){ stop(); }
+    if (e.code==='Escape'){ stop(); }
+  });
+});
+</script>
+  
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
