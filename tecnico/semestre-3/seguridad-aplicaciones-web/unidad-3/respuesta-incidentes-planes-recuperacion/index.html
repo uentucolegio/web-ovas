@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: 🚑 Respuesta a incidentes y planes de recuperación</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .zoom-image-wrap {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .zoom-image-wrap img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .zoom-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 2;
+            background: rgba(22, 101, 52, 0.92);
+            color: #fff;
+            border: 0;
+            border-radius: 9999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .zoom-btn:hover { background: rgba(21, 128, 61, 0.98); transform: translateY(-1px); }
+        .zoom-btn:focus { outline: 2px solid #86efac; outline-offset: 2px; }
+        .zoom-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+        }
+        .zoom-modal.active { display: flex; }
+        .zoom-modal-content {
+            position: relative;
+            width: min(96vw, 1100px);
+            max-height: 92vh;
+            overflow: auto;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        }
+        .zoom-modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            border: 0;
+            border-radius: 9999px;
+            background: #14532d;
+            color: white;
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .zoom-modal-close:hover { background: #166534; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🚑 Respuesta a incidentes y planes de recuperación</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                                <p class="mb-4">A pesar de contar con servidores configurados de forma segura, comunicaciones cifradas, buenas prácticas en la nube y sistemas de monitoreo activos, ningún entorno está completamente exento de sufrir un incidente de seguridad. Lo que diferencia a una organización preparada de una que no lo está no es la ausencia de incidentes, sino la capacidad de responder a ellos de forma rápida, ordenada y efectiva.</p>
+                                <p class="mb-4">La <strong>respuesta a incidentes</strong> es un proceso estructurado que busca minimizar el impacto de un ataque o falla, preservar evidencia para su análisis y restablecer la operación normal en el menor tiempo posible. Este proceso se complementa con un <strong>plan de recuperación ante desastres</strong>, que define cómo restaurar los sistemas críticos tras un evento grave. En esta OVA se estudian ambos conceptos como cierre de la unidad de seguridad en infraestructura web y entornos en la nube.</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">🚑</span> No se trata de si ocurrirá un incidente, sino de qué tan preparado está el equipo para responder cuando ocurra. <span class="text-xl">📋</span>
+                    </p>
+                </div>
+
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Describir las fases del ciclo de respuesta a incidentes de seguridad.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Diferenciar las estrategias de contención a corto y largo plazo ante un incidente.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Reconocer los roles típicos de un equipo de respuesta a incidentes (CSIRT).</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Aplicar los conceptos de RTO y RPO en el diseño de un plan de recuperación ante desastres.</span>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🧭 1. El ciclo de respuesta a incidentes</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Un modelo ampliamente utilizado organiza la respuesta a incidentes en seis fases: <strong>preparación</strong> (contar con herramientas, procedimientos y personal capacitado antes de que ocurra un incidente); <strong>detección y análisis</strong> (identificar y confirmar que se trata de un incidente real); <strong>contención</strong> (limitar el alcance del daño); <strong>erradicación</strong> (eliminar la causa raíz); <strong>recuperación</strong> (restablecer los sistemas afectados); y <strong>lecciones aprendidas</strong> (documentar el incidente para mejorar la preparación futura).</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig1.png" data-zoom-alt="Ciclo de respuesta a incidentes de seguridad">🔍 Ampliar</button>
+                                        <img src="img/fig1.png" alt="Ciclo de respuesta a incidentes de seguridad" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Ciclo de respuesta a incidentes de seguridad.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔁</span> La fase de <strong>lecciones aprendidas</strong> es la que permite que un equipo mejore con cada incidente, aunque este ya haya sido resuelto por completo.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🧯 2. Estrategias de contención</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">La contención busca detener la propagación del incidente sin perder evidencia valiosa para la investigación posterior. La <strong>contención a corto plazo</strong> implica acciones inmediatas, como aislar el sistema afectado de la red o bloquear una cuenta comprometida, mientras que la <strong>contención a largo plazo</strong> incluye medidas más duraderas, como aplicar parches temporales o rotar credenciales expuestas, mientras se prepara la erradicación definitiva de la amenaza.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig2.png" data-zoom-alt="Estrategias de contención a corto y largo plazo">🔍 Ampliar</button>
+                                        <img src="img/fig2.png" alt="Estrategias de contención a corto y largo plazo" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Estrategias de contención a corto y largo plazo.</figcaption>
+                                </figure>
+
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Contención a corto plazo</h3>
+                                        <p class="text-sm">Acciones inmediatas: aislar el sistema afectado de la red, bloquear una cuenta comprometida.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Contención a largo plazo</h3>
+                                        <p class="text-sm">Medidas más duraderas: aplicar parches temporales, rotar credenciales expuestas.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>👥 3. Roles del equipo de respuesta a incidentes</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">En organizaciones con procesos maduros de seguridad, la respuesta a incidentes es gestionada por un equipo especializado, conocido como <strong>CSIRT</strong> (Computer Security Incident Response Team). Este equipo suele incluir un líder que coordina la respuesta, analistas técnicos que investigan y contienen la amenaza, un responsable de comunicaciones que informa a las partes interesadas, y, en muchos casos, un responsable legal que evalúa las obligaciones normativas, como la notificación de una filtración de datos personales.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig3.png" data-zoom-alt="Roles típicos de un equipo de respuesta a incidentes (CSIRT)">🔍 Ampliar</button>
+                                        <img src="img/fig3.png" alt="Roles típicos de un equipo de respuesta a incidentes (CSIRT)" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Roles típicos de un equipo de respuesta a incidentes (CSIRT).</figcaption>
+                                </figure>
+
+                                <div class="grid gap-4 md:grid-cols-3">
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Líder / Coordinador</h3>
+                                        <p class="text-sm">Dirige la respuesta y toma las decisiones críticas durante el incidente.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Analista técnico</h3>
+                                        <p class="text-sm">Investiga, contiene y erradica la amenaza a nivel técnico.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Responsable de comunicaciones / legal</h3>
+                                        <p class="text-sm">Informa a las partes interesadas y evalúa obligaciones normativas.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>⏱️ 4. RTO y RPO en la recuperación ante desastres</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Dos métricas fundamentales guían el diseño de un plan de recuperación: el <strong>RPO</strong> (Recovery Point Objective), que indica la cantidad máxima de datos que la organización puede permitirse perder, medida en tiempo desde el último respaldo válido; y el <strong>RTO</strong> (Recovery Time Objective), que indica el tiempo máximo aceptable para restaurar el servicio tras un incidente. Definir estos valores para cada sistema permite dimensionar correctamente la frecuencia de los respaldos y la infraestructura de contingencia necesaria.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig4.png" data-zoom-alt="Relación entre RPO y RTO en la línea de tiempo de un incidente">🔍 Ampliar</button>
+                                        <img src="img/fig4.png" alt="Relación entre RPO y RTO en la línea de tiempo de un incidente" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Relación entre RPO y RTO en la línea de tiempo de un incidente.</figcaption>
+                                </figure>
+                                <p class="mt-6 mb-3 font-semibold text-slate-800">Ejemplo de script simplificado de verificación de un respaldo (bash):</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-bash">#!/bin/bash
+# Verifica que el último respaldo no supere el RPO definido (24 horas)
+ULTIMO=$(stat -c %Y /backups/ultimo_respaldo.tar.gz)
+AHORA=$(date +%s)
+DIFERENCIA=$(( (AHORA - ULTIMO) / 3600 ))
+
+if [ $DIFERENCIA -gt 24 ]; then
+    echo "ALERTA: el último respaldo supera el RPO definido (24h)"
+fi</code></pre>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>✅ 5. Checklist del plan de recuperación</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Un plan de recuperación ante desastres bien diseñado combina respaldos periódicos, infraestructura de contingencia y procedimientos documentados que permiten restaurar la operación dentro de los objetivos de RTO y RPO definidos.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig5.png" data-zoom-alt="Checklist de un plan de recuperación ante desastres">🔍 Ampliar</button>
+                                        <img src="img/fig5.png" alt="Checklist de un plan de recuperación ante desastres" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Checklist de un plan de recuperación ante desastres.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🗂️</span> Un plan de recuperación que nunca se ha probado en la práctica es, en el mejor de los casos, una suposición: las pruebas periódicas de restauración son tan importantes como los respaldos mismos.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 1: Simulación de un incidente (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            A partir del siguiente escenario: "se detectan múltiples intentos fallidos de inicio de sesión seguidos de un acceso exitoso a la cuenta de administrador desde una IP desconocida", redacte un plan de acción siguiendo las seis fases del ciclo de respuesta a incidentes estudiadas en esta OVA.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> documento con el plan de acción estructurado en las seis fases del ciclo de respuesta a incidentes.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">🔎 Enfoque:</span> aplicación ordenada del ciclo de respuesta a incidentes sobre un escenario concreto.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Diseño de un plan de recuperación (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En grupos de máximo tres integrantes, seleccionen una aplicación web académica (real o propuesta) y definan su RTO y RPO justificando los valores elegidos. Propongan una estrategia de respaldo (frecuencia, ubicación, verificación) que permita cumplir con esos objetivos.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> documento con los valores de RTO y RPO justificados y la estrategia de respaldo propuesta.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">👥 Modalidad:</span> trabajo colaborativo en equipos de máximo tres estudiantes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Cuestionario de autoevaluación para verificar la comprensión del ciclo de respuesta a incidentes, las estrategias de contención, los roles del CSIRT y las métricas RTO y RPO.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📎 Anexos</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Material complementario asociado a los conceptos desarrollados en esta unidad.</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — ANEXOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">📘 NIST SP 800-61 Rev. 2</h3>
+                            <p class="text-slate-600 mb-2">Guía del NIST para el manejo de incidentes de seguridad informática.</p>
+                            <a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-1.png" alt="QR 📘 NIST SP 800-61 Rev. 2" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🎓 SANS Institute - Incident Handler's Handbook</h3>
+                            <p class="text-slate-600 mb-2">Manual de referencia del SANS Institute para equipos de respuesta a incidentes.</p>
+                            <a href="https://www.sans.org/white-papers/33901/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-2.png" alt="QR 🎓 SANS Institute - Incident Handler's Handbook" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🛡️ OWASP - Incident Response</h3>
+                            <p class="text-slate-600 mb-2">Recurso de OWASP sobre buenas prácticas de respuesta a incidentes en aplicaciones web.</p>
+                            <a href="https://owasp.org/www-community/Incident_Response" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-3.png" alt="QR 🛡️ OWASP - Incident Response" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — ANEXOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            National Institute of Standards and Technology. (2012). <i>NIST SP 800-61 Rev. 2: Computer Security Incident Handling Guide</i>. https://csrc.nist.gov/pubs/sp/800/61/r2/final
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            SANS Institute. (2023). <i>Incident Handler's Handbook</i>. https://www.sans.org/white-papers/33901/
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2023). <i>Incident Response</i>. https://owasp.org/www-community/Incident_Response
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            INCIBE. (2023). <i>Guía de gestión de crisis de ciberseguridad</i>. Instituto Nacional de Ciberseguridad de España. https://www.incibe.es/
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Recio García, J. A. (2021). <i>Gestión de incidentes de seguridad informática</i>. RA-MA Editorial.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="zoom-modal" class="zoom-modal" aria-hidden="true">
+        <div class="zoom-modal-content">
+            <button type="button" class="zoom-modal-close" id="zoom-modal-close" aria-label="Cerrar imagen ampliada">×</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el orden correcto de las fases del ciclo de respuesta a incidentes?",
+                options: ["Contención, preparación, detección, erradicación, recuperación, lecciones aprendidas", "Preparación, detección y análisis, contención, erradicación, recuperación, lecciones aprendidas", "Erradicación, recuperación, preparación, detección, contención, lecciones aprendidas", "Detección, lecciones aprendidas, preparación, contención, erradicación, recuperación"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál de las siguientes acciones corresponde a una estrategia de contención a corto plazo?",
+                options: ["Aplicar un parche definitivo al sistema semanas después del incidente", "Aislar de inmediato el sistema afectado de la red o bloquear la cuenta comprometida", "Redactar el informe final de lecciones aprendidas", "Contratar personal adicional para el equipo de seguridad"],
+                correct: 1
+            },
+            {
+                question: "¿Qué mide el RPO (Recovery Point Objective) en un plan de recuperación ante desastres?",
+                options: ["El tiempo máximo aceptable para restaurar el servicio", "La cantidad máxima de datos que la organización puede permitirse perder, medida en tiempo desde el último respaldo válido", "El número de servidores necesarios para operar", "El costo total de la infraestructura de contingencia"],
+                correct: 1
+            },
+            {
+                question: "¿Por qué la fase de \"lecciones aprendidas\" es importante, aunque el incidente ya haya sido resuelto?",
+                options: ["Porque permite documentar el incidente y mejorar la preparación frente a futuros eventos similares", "Porque es un requisito legal en todos los países", "Porque reemplaza la necesidad de contención", "Porque solo sirve para fines de auditoría contable"],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+
+        // Zoom de imágenes del contenido
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomModalImage = document.getElementById('zoom-modal-image');
+        const zoomModalClose = document.getElementById('zoom-modal-close');
+
+        function closeZoomModal() {
+            zoomModal.classList.remove('active');
+            zoomModal.setAttribute('aria-hidden', 'true');
+            zoomModalImage.src = '';
+            zoomModalImage.alt = '';
+        }
+
+        document.querySelectorAll('.zoom-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                zoomModalImage.src = button.dataset.zoomImage;
+                zoomModalImage.alt = button.dataset.zoomAlt || 'Imagen ampliada';
+                zoomModal.classList.add('active');
+                zoomModal.setAttribute('aria-hidden', 'false');
+            });
+        });
+
+        zoomModalClose.addEventListener('click', closeZoomModal);
+        zoomModal.addEventListener('click', event => {
+            if (event.target === zoomModal) closeZoomModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && zoomModal.classList.contains('active')) closeZoomModal();
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

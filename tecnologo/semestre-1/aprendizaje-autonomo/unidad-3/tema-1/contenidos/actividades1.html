@@ -1,0 +1,729 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OVA: Introducción a las
+        Fuentes de Información</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #064e3b;
+      /* green-900 */
+      --secondary: #16a34a;
+      /* green-600 */
+      --accent: #10b981;
+      /* green-500 */
+      --warning: #f39c12;
+      --danger: #c0392b;
+      --text: #1f2937;
+      --soft: #dcfce7;
+      /* green-100 */
+      --border: #d1d5db;
+      --ok: #d1fae5;
+      --bad: #fee2e2;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #064e3b, #16a34a 55%, #4ade80);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    header p {
+      max-width: 900px;
+      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 25px auto;
+      padding: 0 16px 40px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+      border: 1px solid #e5e7eb;
+    }
+
+    h2 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+
+    .intro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 15px;
+    }
+
+    .mini {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--secondary);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .video-box {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-top: 16px;
+      border: 3px solid var(--soft);
+    }
+
+    .video-box iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .question-box {
+      margin-top: 16px;
+      padding: 15px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+    }
+
+    .btn {
+      background: var(--secondary);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+      transition: .2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      opacity: .95
+    }
+
+    .btn.secondary {
+      background: var(--accent)
+    }
+
+    .btn.warning {
+      background: var(--warning)
+    }
+
+    .btn.danger {
+      background: var(--danger)
+    }
+
+    .feedback {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .ok {
+      background: var(--ok);
+      color: #065f46
+    }
+
+    .bad {
+      background: var(--bad);
+      color: #991b1b
+    }
+
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 38px);
+      gap: 4px;
+      justify-content: center;
+      margin: 18px 0;
+    }
+
+    .cell {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: .15s;
+    }
+
+    .cell:hover {
+      background: #dcfce7;
+    }
+
+    .cell.selected {
+      background: #86efac;
+    }
+
+    .cell.found {
+      background: #34d399;
+      color: #083344
+    }
+
+    .cell.error {
+      background: #fca5a5
+    }
+
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .word-tag {
+      background: var(--soft);
+      border: 1px solid #86efac;
+      color: #166534;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: bold;
+    }
+
+    .word-tag.found {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+      text-decoration: line-through;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media(max-width:900px) {
+      .columns {
+        grid-template-columns: 1fr
+      }
+
+      .word-grid {
+        grid-template-columns: repeat(12, 28px)
+      }
+
+      .cell {
+        width: 28px;
+        height: 28px;
+        font-size: .85rem
+      }
+    }
+
+    .items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .drag-item {
+      background: #f8fafc;
+      border: 2px dashed #94a3b8;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: grab;
+      min-width: 230px;
+      font-weight: bold;
+    }
+
+    .dropzones {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .zone {
+      min-height: 180px;
+      background: #f9fafb;
+      border: 2px dashed #94a3b8;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .zone h3 {
+      margin-top: 0;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .zone.over {
+      background: #eff6ff;
+      border-color: #2563eb;
+    }
+
+    .zone .placed {
+      background: #e0f2fe;
+      border: 1px solid #7dd3fc;
+      border-radius: 10px;
+      padding: 8px;
+      margin: 8px 0;
+      font-size: .95rem;
+    }
+
+    .score {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--primary);
+      padding: 12px;
+      background: #f0fdf4;
+      border-radius: 10px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #475569;
+      font-size: .95rem;
+      margin-top: 20px;
+    }
+
+    .legend {
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .small {
+      font-size: .95rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Actividad de aprendizaje</h1>
+    <p>
+      Aprende a identificar, clasificar y evaluar fuentes de información útiles para la actualización tecnológica
+      mediante video, sopa de letras y una actividad práctica de arrastrar y soltar.
+    </p>
+  </header>
+
+  <main>
+
+    <section class="card">
+      <h2>1. Contexto de aprendizaje</h2>
+      <p>
+        Las fuentes de información permiten adquirir, ampliar y actualizar conocimientos. En el campo tecnológico,
+        son esenciales para conocer herramientas, lenguajes, metodologías, estándares, investigaciones y soluciones
+        a problemas reales.
+      </p>
+
+      <div class="intro-grid">
+        <div class="mini">
+          <strong>Fuentes primarias</strong>
+          <p>Presentan información original: artículos científicos, estándares, repositorios y documentación oficial.
+          </p>
+        </div>
+        <div class="mini">
+          <strong>Fuentes secundarias</strong>
+          <p>Interpretan o explican fuentes primarias: libros, manuales, blogs especializados y comparativas.</p>
+        </div>
+        <div class="mini">
+          <strong>Fuentes terciarias</strong>
+          <p>Organizan y resumen información: bases de datos, enciclopedias técnicas y portales educativos.</p>
+        </div>
+        <div class="mini">
+          <strong>Fuentes emergentes</strong>
+          <p>Incluyen comunidades, foros, videos, podcasts y redes profesionales con información dinámica y actual.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Video de aprendizaje</h2>
+      <p>
+        Observa el siguiente video y luego responde la pregunta de comprensión.
+      </p>
+
+      <div class="video-box">
+        <iframe src="https://www.youtube.com/embed/pUFdoYsAkoc" title="Video de alfabetización informacional" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="">
+        </iframe>
+      </div>
+
+      <div class="question-box">
+        <p><strong>Pregunta de comprensión:</strong> ¿Por qué es importante evaluar la calidad de una fuente antes de
+          usarla?</p>
+        <label><input type="radio" name="videoQ" value="a"> A. Porque toda la información de internet tiene la misma
+          validez.</label><br>
+        <label><input type="radio" name="videoQ" value="b"> B. Porque permite decidir si la información es confiable,
+          actual y pertinente.</label><br>
+        <label><input type="radio" name="videoQ" value="c"> C. Porque solo deben utilizarse videos y no documentos
+          escritos.</label><br>
+        <button class="btn" onclick="checkVideoQuestion()">Verificar respuesta</button>
+        <div id="videoFeedback"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. Sopa de letras interactiva</h2>
+      <p>
+        Busca estas palabras clave relacionadas con el tema. Haz clic sobre las letras de una palabra y luego pulsa
+        <strong>“Validar selección”</strong>.
+      </p>
+
+      <div class="legend small">
+        <strong>Instrucción:</strong> Las palabras están ubicadas en horizontal o vertical. Si te equivocas, puedes
+        limpiar la selección.
+      </div>
+
+      <div class="word-list" id="wordList"></div>
+      <div class="word-grid" id="wordGrid"></div>
+
+      <button class="btn secondary" onclick="validateSelection()">Validar selección</button>
+      <button class="btn warning" onclick="clearSelection()">Limpiar selección</button>
+
+      <div id="wordFeedback"></div>
+    </section>
+
+    <section class="card">
+      <h2>4. Actividad de arrastrar y soltar</h2>
+      <p>
+        Arrastra cada ejemplo hacia la categoría correcta de fuente de información.
+      </p>
+
+      <div class="items" id="dragItems">
+        <div class="drag-item" draggable="true" data-type="primaria">Documentación oficial de Python</div>
+        <div class="drag-item" draggable="true" data-type="primaria">Repositorio original de un proyecto en GitHub</div>
+        <div class="drag-item" draggable="true" data-type="secundaria">Libro académico sobre ingeniería de software
+        </div>
+        <div class="drag-item" draggable="true" data-type="secundaria">Blog técnico especializado con análisis
+          comparativo</div>
+        <div class="drag-item" draggable="true" data-type="terciaria">Base de datos IEEE Xplore</div>
+        <div class="drag-item" draggable="true" data-type="terciaria">Portal educativo que reúne cursos y tutoriales
+        </div>
+        <div class="drag-item" draggable="true" data-type="emergente">Foro Stack Overflow</div>
+        <div class="drag-item" draggable="true" data-type="emergente">Canal de YouTube con tutoriales técnicos</div>
+      </div>
+
+      <div class="dropzones">
+        <div class="zone" data-zone="primaria">
+          <h3>Fuentes primarias</h3>
+        </div>
+        <div class="zone" data-zone="secundaria">
+          <h3>Fuentes secundarias</h3>
+        </div>
+        <div class="zone" data-zone="terciaria">
+          <h3>Fuentes terciarias</h3>
+        </div>
+        <div class="zone" data-zone="emergente">
+          <h3>Fuentes emergentes</h3>
+        </div>
+      </div>
+
+      <button class="btn" onclick="checkDragDrop()">Revisar actividad</button>
+      <button class="btn danger" onclick="resetDragDrop()">Reiniciar</button>
+
+      <div id="dragFeedback"></div>
+    </section>
+
+    <section class="card">
+      <h2>5. Cierre y autoevaluación</h2>
+      <p>Completa esta reflexión final:</p>
+      <ol>
+        <li>¿Qué tipo de fuente usarías para aprender una tecnología nueva desde su base?</li>
+        <li>¿Cuál criterio consideras más importante al evaluar una fuente: autoridad, actualidad, relevancia u
+          objetividad?</li>
+        <li>¿Qué fuente usarías para resolver rápidamente un error de programación real?</li>
+      </ol>
+
+      <textarea style="width:100%;min-height:140px;padding:12px;border-radius:10px;border:1px solid #cbd5e1;" placeholder="Escribe aquí tus respuestas..."></textarea>
+
+      <div class="score" id="finalScore">
+        Puntaje actual: 0 / 3 actividades completadas
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* -------------------------
+       VIDEO
+    -------------------------- */
+    let completedVideo = false;
+    let completedWord = false;
+    let completedDrag = false;
+
+    function updateFinalScore() {
+      let total = 0;
+      if (completedVideo) total++;
+      if (completedWord) total++;
+      if (completedDrag) total++;
+      document.getElementById("finalScore").textContent = `Puntaje actual: ${total} / 3 actividades completadas`;
+    }
+
+    function checkVideoQuestion() {
+      const answer = document.querySelector('input[name="videoQ"]:checked');
+      const feedback = document.getElementById("videoFeedback");
+
+      if (!answer) {
+        feedback.innerHTML = `<div class="feedback bad">Debes seleccionar una opción.</div>`;
+        return;
+      }
+
+      if (answer.value === "b") {
+        feedback.innerHTML = `<div class="feedback ok">¡Correcto! Evaluar una fuente permite determinar si es confiable, actual y pertinente.</div>`;
+        completedVideo = true;
+      } else {
+        feedback.innerHTML = `<div class="feedback bad">Respuesta incorrecta. La evaluación de una fuente permite establecer su confiabilidad, vigencia y utilidad para una necesidad concreta.</div>`;
+      }
+      updateFinalScore();
+    }
+
+    /* -------------------------
+       SOPA DE LETRAS
+    -------------------------- */
+    const gridData = [
+      ['A', 'U', 'T', 'O', 'R', 'I', 'D', 'A', 'D', 'X', 'P', 'Q'],
+      ['B', 'M', 'N', 'L', 'S', 'K', 'P', 'O', 'R', 'T', 'A', 'L'],
+      ['R', 'E', 'L', 'E', 'V', 'A', 'N', 'C', 'I', 'A', 'H', 'T'],
+      ['I', 'F', 'G', 'H', 'J', 'D', 'O', 'C', 'S', 'Z', 'Q', 'Y'],
+      ['E', 'M', 'E', 'R', 'G', 'E', 'N', 'T', 'E', 'S', 'L', 'U'],
+      ['T', 'P', 'R', 'I', 'M', 'A', 'R', 'I', 'A', 'S', 'E', 'I'],
+      ['E', 'W', 'E', 'K', 'O', 'B', 'J', 'E', 'T', 'I', 'V', 'O'],
+      ['R', 'Q', 'T', 'E', 'R', 'C', 'I', 'A', 'R', 'I', 'A', 'S'],
+      ['I', 'S', 'A', 'C', 'T', 'U', 'A', 'L', 'I', 'D', 'A', 'D'],
+      ['O', 'F', 'M', 'G', 'I', 'T', 'H', 'U', 'B', 'R', 'V', 'N'],
+      ['S', 'E', 'C', 'U', 'N', 'D', 'A', 'R', 'I', 'A', 'S', 'T'],
+      ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'L', 'K']
+    ];
+
+    const words = [
+      "AUTORIDAD",
+      "RELEVANCIA",
+      "ACTUALIDAD",
+      "OBJETIVO",
+      "PRIMARIAS",
+      "SECUNDARIAS",
+      "TERCIARIAS",
+      "EMERGENTES",
+      "GITHUB",
+      "PORTAL"
+    ];
+
+    const foundWords = new Set();
+    let selectedCells = [];
+
+    const wordGrid = document.getElementById("wordGrid");
+    const wordList = document.getElementById("wordList");
+
+    function renderWordList() {
+      wordList.innerHTML = "";
+      words.forEach(word => {
+        const tag = document.createElement("div");
+        tag.className = "word-tag" + (foundWords.has(word) ? " found" : "");
+        tag.id = "tag-" + word;
+        tag.textContent = word;
+        wordList.appendChild(tag);
+      });
+    }
+
+    function renderGrid() {
+      wordGrid.innerHTML = "";
+      for (let r = 0; r < gridData.length; r++) {
+        for (let c = 0; c < gridData[r].length; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.textContent = gridData[r][c];
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener("click", () => toggleCell(cell));
+          wordGrid.appendChild(cell);
+        }
+      }
+    }
+
+    function toggleCell(cell) {
+      if (cell.classList.contains("found")) return;
+      const index = selectedCells.indexOf(cell);
+      if (index >= 0) {
+        selectedCells.splice(index, 1);
+        cell.classList.remove("selected");
+      } else {
+        selectedCells.push(cell);
+        cell.classList.add("selected");
+      }
+    }
+
+    function clearSelection() {
+      selectedCells.forEach(cell => cell.classList.remove("selected", "error"));
+      selectedCells = [];
+      document.getElementById("wordFeedback").innerHTML = "";
+    }
+
+    function validateSelection() {
+      const feedback = document.getElementById("wordFeedback");
+      if (selectedCells.length === 0) {
+        feedback.innerHTML = `<div class="feedback bad">Selecciona letras antes de validar.</div>`;
+        return;
+      }
+
+      const sorted = [...selectedCells].sort((a, b) => {
+        const ra = parseInt(a.dataset.row), rb = parseInt(b.dataset.row);
+        const ca = parseInt(a.dataset.col), cb = parseInt(b.dataset.col);
+
+        if (ra === rb) return ca - cb;
+        if (ca === cb) return ra - rb;
+        return 0;
+      });
+
+      const forwardWord = sorted.map(cell => cell.textContent).join("");
+      const backwardWord = [...forwardWord].reverse().join("");
+
+      const matchedWord = words.find(w => w === forwardWord || w === backwardWord);
+
+      if (matchedWord && !foundWords.has(matchedWord)) {
+        foundWords.add(matchedWord);
+        sorted.forEach(cell => {
+          cell.classList.remove("selected", "error");
+          cell.classList.add("found");
+        });
+        selectedCells = [];
+        document.getElementById("tag-" + matchedWord)?.classList.add("found");
+        feedback.innerHTML = `<div class="feedback ok">¡Muy bien! Encontraste la palabra <strong>${matchedWord}</strong>.</div>`;
+      } else if (foundWords.has(forwardWord) || foundWords.has(backwardWord)) {
+        feedback.innerHTML = `<div class="feedback bad">Esa palabra ya fue encontrada.</div>`;
+        clearSelection();
+      } else {
+        selectedCells.forEach(cell => cell.classList.add("error"));
+        feedback.innerHTML = `<div class="feedback bad">La selección no coincide con una palabra válida de la lista.</div>`;
+        setTimeout(() => {
+          selectedCells.forEach(cell => cell.classList.remove("error"));
+        }, 700);
+      }
+
+      if (foundWords.size === words.length) {
+        completedWord = true;
+        feedback.innerHTML += `<div class="feedback ok">¡Excelente! Completaste toda la sopa de letras.</div>`;
+      }
+
+      renderWordList();
+      updateFinalScore();
+    }
+
+    renderGrid();
+    renderWordList();
+
+    /* -------------------------
+       DRAG AND DROP
+    -------------------------- */
+    let draggedElement = null;
+
+    const dragItems = document.querySelectorAll(".drag-item");
+    const zones = document.querySelectorAll(".zone");
+
+    dragItems.forEach(item => {
+      item.addEventListener("dragstart", e => {
+        draggedElement = item;
+        setTimeout(() => item.style.opacity = "0.4", 0);
+      });
+
+      item.addEventListener("dragend", () => {
+        item.style.opacity = "1";
+      });
+    });
+
+    zones.forEach(zone => {
+      zone.addEventListener("dragover", e => {
+        e.preventDefault();
+        zone.classList.add("over");
+      });
+
+      zone.addEventListener("dragleave", () => {
+        zone.classList.remove("over");
+      });
+
+      zone.addEventListener("drop", e => {
+        e.preventDefault();
+        zone.classList.remove("over");
+        if (draggedElement) {
+          zone.appendChild(draggedElement);
+          draggedElement.classList.add("placed");
+        }
+      });
+    });
+
+    function checkDragDrop() {
+      const feedback = document.getElementById("dragFeedback");
+      let correct = 0;
+      let total = 0;
+
+      zones.forEach(zone => {
+        const expected = zone.dataset.zone;
+        const items = zone.querySelectorAll(".drag-item");
+        items.forEach(item => {
+          total++;
+          if (item.dataset.type === expected) correct++;
+        });
+      });
+
+      if (total < 8) {
+        feedback.innerHTML = `<div class="feedback bad">Aún faltan elementos por clasificar. Debes ubicar los 8 ejemplos.</div>`;
+        return;
+      }
+
+      if (correct === 8) {
+        feedback.innerHTML = `<div class="feedback ok">¡Excelente! Clasificaste correctamente todas las fuentes de información.</div>`;
+        completedDrag = true;
+      } else {
+        feedback.innerHTML = `<div class="feedback bad">Obtuviste ${correct} de 8 correctas. Revisa especialmente qué ejemplos corresponden a información original, explicativa, de recopilación o comunitaria.</div>`;
+      }
+      updateFinalScore();
+    }
+
+    function resetDragDrop() {
+      const container = document.getElementById("dragItems");
+      const allItems = document.querySelectorAll(".drag-item");
+      allItems.forEach(item => {
+        container.appendChild(item);
+        item.classList.remove("placed");
+      });
+      document.getElementById("dragFeedback").innerHTML = "";
+      completedDrag = false;
+      updateFinalScore();
+    }
+  </script>
+
+
+</body></html>

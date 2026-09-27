@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Manejo de Errores y Respuestas HTTP</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .zoom-container { position: relative; display: block; }
+        .zoom-btn {
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(255,255,255,0.9); border: 1px solid #cbd5e1;
+            border-radius: 9999px; width: 2.25rem; height: 2.25rem;
+            cursor: pointer; font-size: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .zoom-btn:hover { background: #f0fdf4; }
+        #zoom-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            align-items: center; justify-content: center; padding: 2rem;
+            cursor: zoom-out;
+        }
+        #zoom-overlay.active { display: flex; }
+        #zoom-overlay img { max-width: 100%; max-height: 100%; border-radius: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🚦 Manejo de Errores y Respuestas HTTP</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    El manejo de errores es, paradójicamente, uno de los aspectos de seguridad más subestimados en el desarrollo de aplicaciones web, a pesar de que los mensajes de error mal gestionados constituyen una de las fuentes más comunes de fuga de información técnica que facilita ataques posteriores más sofisticados. Un mensaje de error que revela la estructura de una consulta SQL, la ruta de archivos del servidor o la versión exacta del framework utilizado proporciona a un atacante información valiosa que reduce significativamente el esfuerzo necesario para identificar y explotar vulnerabilidades adicionales.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Esta categoría de vulnerabilidad, formalmente identificada en estándares de seguridad como parte de la exposición de información sensible, ha sido documentada en auditorías de seguridad realizadas a entidades públicas y privadas colombianas, donde es común encontrar aplicaciones en producción que muestran trazas completas de errores (stack traces) directamente al usuario final, revelando inadvertidamente detalles de la arquitectura interna del sistema que deberían permanecer confidenciales.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Para el técnico en programación web que se forma en la Universidad de Córdoba, este tema cierra de manera coherente el recorrido de la Unidad 2: después de aprender a validar datos, prevenir inyección y controlar el acceso, comprender cómo responder de forma segura ante situaciones de error completa el ciclo de competencias necesarias para entregar una aplicación backend robusta, profesional y lista para un entorno de producción real.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA sabrás manejar errores sin exponer información sensible, usar correctamente los códigos HTTP, y aplicar logging seguro en tus APIs. <span class="text-xl">🔒</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Implementar un manejo de errores que evite la exposición de información técnica sensible a usuarios finales, protegiendo la aplicación frente a intentos de reconocimiento por parte de un atacante.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Aplicar correctamente las categorías de códigos de estado HTTP en el diseño de APIs REST, comunicando con precisión el resultado de cada operación al cliente.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Estructurar respuestas de error estandarizadas en formato JSON, facilitando su interpretación y manejo tanto a desarrolladores como a sistemas consumidores de la API.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Establecer prácticas de logging seguro que registren la información necesaria para diagnóstico sin comprometer datos sensibles, cerrando así el conjunto de competencias de seguridad backend desarrolladas a lo largo de la Unidad 2.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🆔</span>
+                        <span>Justificar la importancia de incluir un identificador único de petición (request ID) en las respuestas de error, considerando su valor para el proceso de soporte técnico a usuarios finales.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🕵️ Exposición de Información en Mensajes de Error</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">La diferencia entre un mensaje de error que ayuda al atacante y uno que protege la aplicación radica en el nivel de detalle técnico expuesto al usuario final, independientemente de si dicho usuario es legítimo o malicioso.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig1.png" alt="Respuesta de error insegura vs segura" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Comparación entre una respuesta de error insegura que expone detalles técnicos internos y una respuesta segura con mensaje genérico. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">📋 La práctica recomendada consiste en capturar todas las excepciones y errores en el servidor, registrar el detalle técnico completo únicamente en un sistema de logs interno no accesible públicamente, y devolver al cliente exclusivamente un mensaje genérico junto con un <strong>identificador único de la petición</strong> (request ID) que permita al equipo de soporte correlacionar el reporte del usuario con el registro detallado del error en el log del servidor.</p>
+
+                                <p class="text-slate-700 mb-3">El siguiente ejemplo implementa un middleware de manejo de errores centralizado para una API REST en Node.js/Express, que captura cualquier error no controlado, registra el detalle técnico en el log del servidor y devuelve al cliente una respuesta JSON estandarizada sin exponer información sensible:</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">// Middleware de manejo centralizado de errores
+// (se registra al final, después de todas las rutas: app.use(manejadorErrores))
+function manejadorErrores(err, req, res, next) {
+    // Registrar el detalle completo SOLO en el log interno
+    const requestId = "req_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+    console.error(`[${requestId}] ${err.message} en ${err.stack}`);
+
+    // Responder al cliente con información mínima y segura
+    res.status(500).json({
+        success: false,
+        error: {
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Ocurrió un error inesperado. Intente nuevamente.",
+            request_id: requestId,
+        },
+    });
+}
+
+// Ejemplo de error de validación controlado (no excepción genérica)
+function responderError(res, codigo, mensaje, campo = null) {
+    res.status(codigo).json({
+        success: false,
+        error: { message: mensaje, field: campo },
+    });
+}
+
+module.exports = { manejadorErrores, responderError };</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Middleware centralizado de manejo de errores (Express) con registro seguro en logs y respuesta JSON estandarizada al cliente.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🚦 Categorías de Códigos de Estado HTTP</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">El protocolo HTTP organiza sus códigos de estado en cinco categorías claramente diferenciadas según su primer dígito, y el uso correcto y consistente de estas categorías es fundamental para que tanto humanos como sistemas automatizados puedan interpretar correctamente el resultado de una petición.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig2.png" alt="Cinco categorías de códigos HTTP" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Las cinco categorías de códigos de estado HTTP: informacional, éxito, redirección, error del cliente y error del servidor. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚖️</span> Una distinción especialmente relevante para el desarrollo de APIs seguras es la diferencia entre los códigos de la categoría <strong>4xx</strong>, que indican un error atribuible al cliente (datos inválidos, falta de autenticación, recurso inexistente), y los códigos de la categoría <strong>5xx</strong>, que indican un error interno del servidor que el cliente no puede corregir por sí mismo y que generalmente no debe revelar detalles internos de implementación. <span class="text-xl">🔍</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>📦 Estructura Estandarizada de Respuestas de Error en APIs</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Las APIs REST modernas adoptan un formato consistente y predecible para comunicar errores, lo que facilita enormemente el trabajo de los desarrolladores que consumen la API, ya sea un equipo de frontend interno o desarrolladores externos integrando un servicio de terceros.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig3.png" alt="Estructura JSON estandarizada de error" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 3. Estructura estandarizada de una respuesta de error JSON en una API REST, incluyendo código de error, mensaje, campo afectado e identificador de petición. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🧩</span> Una estructura de error bien diseñada incluye un <strong>código de error</strong> legible por máquina (útil para que el código del cliente tome decisiones automatizadas), un <strong>mensaje</strong> descriptivo apto para mostrar al usuario final, información sobre qué <strong>campo</strong> específico generó el error cuando aplica, una <strong>marca de tiempo</strong>, y un <strong>identificador único de petición</strong> que vincula la respuesta visible para el usuario con el registro detallado disponible en los logs internos del servidor. <span class="text-xl">✅</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>📝 Logging Seguro: Qué Registrar y Qué Nunca Registrar</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Los sistemas de registro de eventos (logs) son una herramienta indispensable para el diagnóstico de errores y la auditoría de seguridad, pero su implementación incorrecta puede convertir al propio sistema de logging en una fuente de exposición de datos sensibles, especialmente si los archivos de log no cuentan con controles de acceso adecuados.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig4.png" alt="Qué registrar y qué nunca registrar en logs" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Información que debe registrarse en los logs de seguridad versus información que nunca debe almacenarse en texto plano en ningún sistema de logging. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚠️</span> Como principio general, los logs deben contener suficiente información contextual para reconstruir qué ocurrió durante un incidente (quién, cuándo, qué endpoint, qué resultado), pero <strong>nunca</strong> deben almacenar contraseñas, tokens de autenticación completos, números de documentos de pago u otra información cuya exposición representaría un riesgo de seguridad significativo si esos logs llegaran a ser comprometidos. <span class="text-xl">🔐</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🌳 Árbol de Decisión para la Selección del Código HTTP Correcto</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Determinar qué código de estado HTTP utilizar en cada situación puede simplificarse aplicando un árbol de decisión sencillo que guía al desarrollador a través de las preguntas clave que determinan la respuesta apropiada para cada escenario.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig5.png" alt="Árbol de decisión para código HTTP" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Árbol de decisión para seleccionar el código de estado HTTP apropiado según el resultado de la petición. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🎯</span> Aplicar este árbol de decisión de forma consistente en toda la API garantiza que los consumidores de la API, ya sean aplicaciones frontend propias o integraciones de terceros, puedan confiar en el significado estándar de cada código de respuesta sin necesidad de inspeccionar el cuerpo del mensaje para determinar si la operación fue exitosa o no. <span class="text-xl">✅</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Implementación de Manejo de Errores Seguro en una API (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Desarrolla una API REST en Node.js/Express que implemente un middleware de manejo de errores centralizado, capturando todos los errores posibles, registrando el detalle técnico completo en un archivo de log local, y devolviendo al cliente respuestas de error estandarizadas en formato JSON según la estructura de la Figura 3, utilizando los códigos de estado HTTP apropiados para cada tipo de error (400, 401, 403, 404, 500).
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> API funcional con el middleware de errores, archivo de log generado con al menos 5 casos de error distintos, y evidencia de que las respuestas al cliente no exponen información técnica sensible.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Informe de Análisis de Logs e Incidentes (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3 estudiantes, de acuerdo con el siguiente archivo de logs, resuelvan el proceso contemplado al final.
+                        </p>
+                        <p class="text-sm text-slate-600 italic mb-2">Archivo de logs a analizar:</p>
+                        <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono">2026-07-20 08:12:03  192.168.1.45   GET  /productos?id=15                              200
+2026-07-20 08:14:11  203.0.113.77   POST /login usuario=admin                     fallo 401
+2026-07-20 08:14:13  203.0.113.77   POST /login usuario=admin                     fallo 401
+2026-07-20 08:14:15  203.0.113.77   POST /login usuario=admin                     fallo 401
+2026-07-20 08:14:17  203.0.113.77   POST /login usuario=admin                     fallo 401
+2026-07-20 08:14:19  203.0.113.77   POST /login usuario=admin                     fallo 401
+2026-07-20 08:20:44  192.168.1.50   GET  /productos?categoria=electronica          200
+2026-07-20 08:31:02  198.51.100.23  GET  /productos?id=1' OR '1'='1                500
+2026-07-20 08:31:05  198.51.100.23  GET  /productos?id=1;DROP TABLE usuarios;--    500
+2026-07-20 08:45:12  192.168.1.60   GET  /perfil                                   200
+2026-07-20 09:02:37  203.0.113.77   POST /login usuario=admin                     fallo 401</pre>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Analicen el archivo anterior, identifiquen los eventos sospechosos presentes (incluyendo el patrón de intentos de login fallidos y las peticiones con payloads de inyección SQL) y elaboren un informe técnico que, para cada hallazgo, describa la evidencia encontrada, el riesgo asociado y las acciones recomendadas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🤔 Actividad 3: Cuestionario de Autoevaluación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Antes de responder, repasa los conceptos de manejo seguro de errores, la semántica de los códigos de estado HTTP y los criterios de logging seguro vistos en la guía, y redacta tus respuestas con tus propias palabras, apoyándote en ejemplos cuando sea posible:
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 mb-4 text-slate-700">
+                            <li>Explica por qué un mensaje de error detallado con la traza completa del stack (stack trace) no debería mostrarse nunca a un usuario final en un entorno de producción.</li>
+                            <li>Una API devuelve el código de estado 200 (OK) incluso cuando ocurre un error de validación en los datos enviados, incluyendo el detalle del error únicamente en el cuerpo de la respuesta. Aplica el código de estado HTTP correcto para este caso y explica por qué la práctica descrita es incorrecta.</li>
+                            <li>Analiza qué información de una petición de login fallida sería útil registrar en los logs de seguridad, y qué información de esa misma petición jamás debería almacenarse.</li>
+                            <li><em>(Nivel avanzado)</em> Evalúa la importancia de incluir un identificador único de petición (request ID) en las respuestas de error de una API, considerando el proceso de soporte técnico a usuarios finales.</li>
+                        </ul>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Documento escrito con las 4 respuestas argumentadas, desde la explicación de riesgos concretos hasta la evaluación crítica del valor del request ID.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📜 RFC 9110 — HTTP Semantics</h3>
+                            <p class="text-slate-600 mb-2">Especificación oficial de la IETF que define la semántica de los códigos de estado HTTP y el protocolo en general.</p>
+                            <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-rfc9110.png" alt="QR RFC 9110 HTTP Semantics" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🛡️ Error Handling Cheat Sheet — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial de OWASP sobre cómo implementar un manejo de errores seguro que no revele información sensible.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-owasp-error-handling.png" alt="QR OWASP Error Handling Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📝 Logging Cheat Sheet — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial de OWASP sobre qué información registrar en los logs de seguridad y qué información nunca debe almacenarse.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-owasp-logging.png" alt="QR OWASP Logging Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Fielding, R., Nottingham, M., &amp; Reschke, J. (Eds.). (2022). <i>RFC 9110: HTTP Semantics</i>. Internet Engineering Task Force.<br>
+                            <a href="https://www.rfc-editor.org/rfc/rfc9110" class="text-green-700 underline break-all" target="_blank">https://www.rfc-editor.org/rfc/rfc9110</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (s.f.). <i>Error Handling Cheat Sheet</i>.<br>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html" class="text-green-700 underline break-all" target="_blank">https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (s.f.). <i>Logging Cheat Sheet</i>.<br>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html" class="text-green-700 underline break-all" target="_blank">https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html</a>
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Overlay de zoom para imágenes — usado por el JS de zoom -->
+    <div id="zoom-overlay">
+        <img id="zoom-overlay-img" src="" alt="Imagen ampliada">
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Por qué un mensaje de error con la traza completa del stack (stack trace) no debería mostrarse nunca a un usuario final en producción?",
+                options: [
+                    "Porque hace que la página cargue más lento",
+                    "Porque revela información técnica interna (rutas, versiones, estructura) que reduce el esfuerzo del atacante para explotar vulnerabilidades",
+                    "Porque ocupa demasiado espacio en pantalla",
+                    "Porque los navegadores antiguos no lo soportan"
+                ],
+                correct: 1
+            },
+            {
+                question: "Una API devuelve código 200 (OK) incluso cuando hay un error de validación, incluyendo el detalle solo en el cuerpo de la respuesta. ¿Cuál es el problema y el código correcto?",
+                options: [
+                    "No hay ningún problema, es una práctica válida",
+                    "Es incorrecto: debería usar un código 4xx (como 400 Bad Request) para que el cliente identifique el error sin inspeccionar el cuerpo",
+                    "Debería usar código 500, ya que todo error es responsabilidad del servidor",
+                    "Debería usar código 301 para redirigir al usuario"
+                ],
+                correct: 1
+            },
+            {
+                question: "De una petición de login fallida, ¿qué información es segura registrar en los logs y cuál nunca debe almacenarse?",
+                options: [
+                    "Se puede registrar la contraseña completa para auditoría",
+                    "Es seguro registrar IP, usuario y resultado (fallo); nunca debe registrarse la contraseña en texto plano",
+                    "No se debe registrar ningún dato de intentos fallidos",
+                    "Solo se debe registrar la hora, ningún otro dato"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el valor principal de incluir un request ID en las respuestas de error de una API?",
+                options: [
+                    "Permite al equipo de soporte correlacionar el reporte del usuario con el registro detallado en los logs del servidor, sin exponer información técnica",
+                    "Sirve para cifrar automáticamente la respuesta",
+                    "Reemplaza la necesidad de usar códigos de estado HTTP",
+                    "Es un requisito exclusivo de las APIs GraphQL"
+                ],
+                correct: 0
+            },
+            {
+                question: "¿Qué diferencia fundamental existe entre los códigos de estado 4xx y 5xx?",
+                options: [
+                    "No hay ninguna diferencia real, son intercambiables",
+                    "4xx indica un error atribuible al cliente; 5xx indica un error interno del servidor que el cliente no puede corregir por sí mismo",
+                    "4xx es para APIs REST y 5xx es exclusivo de aplicaciones web tradicionales",
+                    "4xx solo se usa en desarrollo, nunca en producción"
+                ],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Zoom de imágenes: click en el botón 🔍 abre la imagen en un overlay ampliado
+        const zoomOverlay = document.getElementById('zoom-overlay');
+        const zoomOverlayImg = document.getElementById('zoom-overlay-img');
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const img = this.previousElementSibling;
+                zoomOverlayImg.src = img.src;
+                zoomOverlayImg.alt = img.alt;
+                zoomOverlay.classList.add('active');
+            });
+        });
+        zoomOverlay.addEventListener('click', () => zoomOverlay.classList.remove('active'));
+    </script>
+
+    <!-- Resaltado de sintaxis para los bloques de código Node.js/JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: 🚀 Autenticación, autorización y gestión de sesiones</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        /* Estilos para botón de zoom sobre imágenes */
+        .zoom-container { position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 48rem; }
+        .zoom-container img { display: block; margin-left: auto; margin-right: auto; }
+        .zoom-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+        }
+        .zoom-btn:hover { background: rgba(0,0,0,0.75); }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🚀 Autenticación, autorización y gestión de sesiones</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La autenticación y la autorización constituyen el primer perímetro de defensa de cualquier aplicación web: antes de poder proteger los datos, es necesario establecer con certeza quién es el usuario que interactúa con el sistema y qué acciones tiene permitido realizar. Según informes recientes, una gran parte de las filtraciones de datos involucran credenciales comprometidas o mecanismos de autenticación débiles.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En esta OVA revisaremos las diferencias conceptuales entre autenticación y autorización, los flujos modernos de autenticación (incluyendo JWT), buenas prácticas de gestión de sesiones y mecanismos de autenticación multifactor. El objetivo es que puedas aplicar estas prácticas en proyectos reales y reducir la superficie de ataque relacionada con identidades y sesiones.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Objetivo práctico: al finalizar, podrás diseñar e implementar un sistema de autenticación y gestión de sesiones con controles básicos de seguridad. <span class="text-xl">🔐</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔍</span>
+                        <span>Diferenciar con precisión los conceptos de autenticación y autorización.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛡️</span>
+                        <span>Comprender los principales mecanismos de autenticación modernos, incluyendo JWT y MFA.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Aplicar buenas prácticas de gestión segura de sesiones en aplicaciones web.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <!-- contenido inicial eliminado (duplicado). Contenido real continúa abajo. -->
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- Subtema 1: Autenticación vs Autorización -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>Autenticación versus Autorización</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Aunque frecuentemente se mencionan juntos, autenticación y autorización son procesos conceptualmente distintos que ocurren en momentos diferentes del flujo de una aplicación. Confundirlos es una fuente común de errores de diseño.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig2.png" alt="Diferencias entre autenticación y autorización" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Diferencias conceptuales entre autenticación (verificar identidad) y autorización (verificar permisos). Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🔑 La <strong>autenticación</strong> responde a la pregunta <em>"¿quién eres?"</em> y ocurre típicamente una sola vez, al inicio de la sesión del usuario, mediante la verificación de credenciales como usuario y contraseña, un token biométrico o un segundo factor de verificación.</p>
+                                <p class="mb-4">🚦 La <strong>autorización</strong>, en cambio, responde a la pregunta <em>"¿qué puedes hacer?"</em> y se evalúa de forma constante durante toda la sesión, cada vez que el usuario intenta acceder a un recurso o ejecutar una acción específica dentro del sistema.</p>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">💡</span> Tip práctico: si tu API responde <code class="bg-green-100 px-1 rounded">401</code> es un problema de autenticación (no sabemos quién eres); si responde <code class="bg-green-100 px-1 rounded">403</code> es de autorización (sabemos quién eres, pero no tienes permiso). <span class="text-xl">🔐</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 2: JWT -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>Flujo de autenticación con JSON Web Tokens (JWT)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">JWT se ha convertido en el estándar predominante para la autenticación en arquitecturas API y SPAs. Recuerda que el payload no está cifrado, solo codificado en Base64, por lo que no debe contener información sensible.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig3.png" alt="Flujo autenticación JWT" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Flujo completo de autenticación mediante JSON Web Token (JWT), desde el login hasta el acceso a recursos protegidos. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🧩 Un token JWT está compuesto por tres partes separadas por puntos: el <strong>encabezado (header)</strong>, que especifica el algoritmo de firma; la <strong>carga útil (payload)</strong>, que contiene los datos del usuario (claims) como su identificador y rol; y la <strong>firma (signature)</strong>, que garantiza que el token no ha sido alterado desde su emisión.</p>
+                                <p class="mb-4">⏳ Los tokens JWT deben tener un tiempo de expiración razonablemente corto. En aplicaciones que requieren mayor seguridad es recomendable implementar un mecanismo de <strong>refresh tokens</strong> que permita renovar el acceso sin que el usuario deba autenticarse nuevamente cada pocos minutos, equilibrando así la seguridad con una buena experiencia de usuario.</p>
+                                <div class="mt-4 mb-6 overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-slate-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-slate-100 text-left">
+                                                <th class="px-4 py-3 border-b">🧱 Concepto</th>
+                                                <th class="px-4 py-3 border-b">❓ Pregunta que responde</th>
+                                                <th class="px-4 py-3 border-b">📌 Ejemplo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Header (encabezado)</td>
+                                                <td class="px-4 py-3 border-b">¿Qué algoritmo de firma se usó?</td>
+                                                <td class="px-4 py-3 border-b font-mono text-sm">HS256, RS256</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Payload (carga útil)</td>
+                                                <td class="px-4 py-3 border-b">¿Quién es el usuario y qué rol tiene?</td>
+                                                <td class="px-4 py-3 border-b font-mono text-sm">{"id": 123, "rol": "admin"}</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Signature (firma)</td>
+                                                <td class="px-4 py-3 border-b">¿El token fue alterado desde su emisión?</td>
+                                                <td class="px-4 py-3 border-b">Verificación con clave secreta/privada</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Expiración (exp)</td>
+                                                <td class="px-4 py-3 border-b">¿Cuándo deja de ser válido el token?</td>
+                                                <td class="px-4 py-3 border-b font-mono text-sm">exp: 900 (15 min)</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Refresh token</td>
+                                                <td class="px-4 py-3 border-b">¿Cómo renovar el acceso sin reautenticarse?</td>
+                                                <td class="px-4 py-3 border-b">Token de larga duración para solicitar un nuevo JWT</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="mt-1 text-xs text-slate-500">Tabla 1. Estructura de un token JWT.</div>
+                                </div>
+                                <div class="mb-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚠️</span> Recuerda: el payload de un JWT <strong>no está cifrado</strong>, solo codificado en Base64, por lo que nunca debe incluirse información sensible (contraseñas, números de tarjeta, etc.) dentro de él. <span class="text-xl">🚫🔓</span></p>
+                                </div>
+                                <p class="text-sm text-slate-600 italic">Código de ejemplo: fragmento ilustrativo (Node.js) incluido únicamente para mostrar cómo se genera y verifica un JWT en el servidor. No es código de producción; su objetivo es explicar los pasos básicos: crear el payload, firmarlo y verificar la firma.</p>
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">// Ejemplo: generar/verificar JWT (Node.js, jsonwebtoken)
+const jwt = require('jsonwebtoken');
+
+const claveSecreta = process.env.JWT_SECRET;  // nunca hardcodear la clave
+
+function generarToken(idUsuario, rol, clave) {
+    const payload = { sub: idUsuario, rol: rol, iat: Math.floor(Date.now() / 1000) };
+    return jwt.sign(payload, clave, { algorithm: 'HS256', expiresIn: '1h' });
+}
+
+function verificarToken(token, clave) {
+    try { return jwt.verify(token, clave, { algorithms: ['HS256'] }); }
+    catch (error) { return null; }
+}
+</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Generación y verificación básica de JWT en Node.js.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- Subtema 3: Gestión de sesiones -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>Gestión segura de sesiones</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La gestión de sesión adecuada incluye identificadores no predecibles, expiración razonable, regeneración tras login y atributos de cookie como HttpOnly y Secure.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig4.png" alt="Gestión de sesiones segura vs insegura" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 3. Comparativa entre prácticas inseguras y prácticas seguras en la gestión de sesiones web. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🎲 Un identificador de sesión <strong>predecible</strong> permite a un atacante adivinar o calcular sesiones de otros usuarios.</p>
+                                <p class="mb-4">⏱️ La <strong>ausencia de tiempo de expiración</strong> mantiene sesiones activas indefinidamente, incrementando la ventana de oportunidad para un secuestro de sesión (session hijacking).</p>
+                                <p class="mb-4">🍪 La falta de los atributos <code class="bg-slate-100 px-1 rounded">HttpOnly</code> y <code class="bg-slate-100 px-1 rounded">Secure</code> en las cookies de sesión expone el identificador a ataques de <em>scripting entre sitios (XSS)</em> y a interceptación en redes no cifradas, respectivamente.</p>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">✅</span> Buenas prácticas mínimas: generar IDs de sesión aleatorios y largos, expirar sesiones inactivas, <strong>regenerar el ID tras el login</strong> y marcar siempre las cookies como <code class="bg-green-100 px-1 rounded">HttpOnly</code> + <code class="bg-green-100 px-1 rounded">Secure</code>. <span class="text-xl">🛡️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 4: MFA -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>Autenticación multifactor (MFA)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">La MFA combina factores independientes: algo que sabes, algo que tienes y algo que eres. Evita combinar dos factores de la misma categoría si buscas seguridad real.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig5.png" alt="Categorías de factores MFA" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Las tres categorías de factores de autenticación: algo que sabes, algo que tienes y algo que eres. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">🚫 Es fundamental notar que combinar dos factores de la <strong>misma categoría</strong> —por ejemplo, una contraseña y una pregunta secreta, ambas pertenecientes a "algo que sabes"— <strong>no constituye verdadera autenticación multifactor</strong>, ya que un atacante que obtiene un factor de esa categoría probablemente puede obtener el otro mediante técnicas similares como phishing o ingeniería social.</p>
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">📲</span> Ejemplo real: contraseña (algo que sabes) + código OTP enviado a tu celular o app autenticadora (algo que tienes) sí es MFA genuina, porque combina dos categorías independientes. <span class="text-xl">✅</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtema 5: Algoritmos de hash -->
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>Comparativa de algoritmos de hash para contraseñas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div class="content-section">
+                                <p class="mb-4">Algoritmos como MD5/SHA-1 son inseguros para contraseñas; en su lugar usa bcrypt, Argon2 u otros diseñados para hashing de contraseñas con costo computacional ajustable.</p>
+                                <div class="zoom-container mx-auto max-w-3xl">
+                                    <img src="img/fig6.png" alt="Comparativa algoritmos hash" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Comparativa de algoritmos de hash para almacenamiento de contraseñas, de los obsoletos a los recomendados actualmente. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+                                <p class="mt-4 mb-4">⚡ Algoritmos como <strong>MD5</strong> y <strong>SHA-1</strong> fueron diseñados originalmente para verificar la integridad de archivos a alta velocidad, característica que los hace inadecuados para contraseñas, ya que esa misma velocidad permite a un atacante probar miles de millones de combinaciones por segundo.</p>
+                                <p class="mb-4">🐢 Algoritmos como <strong>bcrypt</strong> y <strong>Argon2</strong>, en cambio, fueron diseñados deliberadamente para ser <em>computacionalmente costosos</em>, dificultando los ataques de fuerza bruta incluso con hardware especializado.</p>
+                                <div class="mb-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔒</span> Regla de oro: nunca almacenes contraseñas en texto plano ni con hashes "rápidos" (MD5/SHA-1/SHA-256 solo). Usa siempre bcrypt o Argon2 con un factor de costo adecuado. <span class="text-xl">🧂</span></p>
+                                </div>
+                                <!-- Tabla derivada del documento original: comparativa resumida -->
+                                <div class="mt-6 overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-slate-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-slate-100 text-left">
+                                                <th class="px-4 py-3 border-b">Algoritmo</th>
+                                                <th class="px-4 py-3 border-b">Seguridad (comentario)</th>
+                                                <th class="px-4 py-3 border-b">Recomendación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">Argon2</td>
+                                                <td class="px-4 py-3 border-b">Diseñado para hashing de contraseñas, resistencia a GPU</td>
+                                                <td class="px-4 py-3 border-b">Recomendado (mejor opción 2025)</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">bcrypt</td>
+                                                <td class="px-4 py-3 border-b">Maduro, configurable con factor de coste</td>
+                                                <td class="px-4 py-3 border-b">Recomendado</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">SHA-256 (solo)</td>
+                                                <td class="px-4 py-3 border-b">Rápido, no apto solo para contraseñas</td>
+                                                <td class="px-4 py-3 border-b">No usar solo, combinar con KDF</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b">SHA-1 / MD5</td>
+                                                <td class="px-4 py-3 border-b">Obsoletos; vulnerables a colisiones</td>
+                                                <td class="px-4 py-3 border-b">NO usar</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACORDEONES] -->
+                </div>
+            </div>
+
+            <div id="actividades" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Implementación de un sistema de login con sesiones seguras</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Desarrolla un servidor de login en Node.js (Express) que implemente contraseñas almacenadas con hash bcrypt, regeneración del identificador de sesión tras login exitoso, cookies con flags HttpOnly y Secure, y expiración automática de sesión tras 20 minutos de inactividad.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Código fuente con evidencia de configuración de sesión y un breve informe explicando las decisiones de seguridad.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Diseño de un sistema de roles</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3, diseñen el esquema de autorización para una plataforma de gestión académica con al menos cuatro roles (estudiante, docente, coordinador, administrador). Especifiquen acciones y reglas de acceso.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Matriz de permisos y justificación técnica de la elección de permisos por rol.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📖 Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1: JWT (BBVA) -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🔐 Introducción a JSON Web Tokens (JWT)</h3>
+                            <p class="text-slate-600 mb-2">Artículo práctico sobre qué es un JWT y cómo usarlo de forma segura.</p>
+                            <a href="https://www.bbva.com/es/innovacion/json-web-tokens-jwt-claves-para-usarlos-de-manera-segura/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="zoom-container bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-jwt.png" alt="QR JWT" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: Gestión de sesiones (OWASP) -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🧵 Gestión de sesiones — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía de buenas prácticas para gestión de sesiones y cookies.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="zoom-container bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-sessions.png" alt="QR Gestión de sesiones" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: Autenticación multifactor (INCIBE) -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📲 Autenticación multifactor — INCIBE</h3>
+                            <p class="text-slate-600 mb-2">Guía divulgativa sobre el uso y beneficios de MFA.</p>
+                            <a href="https://www.incibe.es/ciudadania/blog/el-factor-de-autenticacion-doble-y-multiple" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="zoom-container bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-mfa.png" alt="QR MFA" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2021). <i>OWASP Top 10:2021</i>. https://owasp.org/Top10/2021/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            BBVA Labs. (2020). JSON Web tokens (JWT): claves para usarlos de manera segura. https://www.bbva.com/es/innovacion/json-web-tokens-jwt-claves-para-usarlos-de-manera-segura/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            INCIBE. (2019). El factor de autenticación doble y múltiple. Oficina de Seguridad del Internauta (OSI), INCIBE. https://www.incibe.es/ciudadania/blog/el-factor-de-autenticacion-doble-y-multiple
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Zakuskina, N. (2025). Cómo proteger tus cookies y tu ID de sesión. Blog de Kaspersky. https://www.kaspersky.es/blog/types-of-cookie-files-and-how-to-protect-them/31382/
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Zoom modal para imágenes -->
+    <div id="zoom-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 p-4">
+        <div class="relative max-w-4xl w-full">
+            <button id="zoom-modal-close" class="absolute top-2 right-2 text-white bg-black bg-opacity-40 rounded-full p-2">✕</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded shadow-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+        // Zoom modal para imágenes
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomModalImage = document.getElementById('zoom-modal-image');
+        const zoomModalClose = document.getElementById('zoom-modal-close');
+
+        function openZoom(src, alt) {
+            zoomModalImage.src = src;
+            zoomModalImage.alt = alt || '';
+            zoomModal.classList.remove('hidden');
+            zoomModal.classList.add('flex');
+        }
+
+        function closeZoom() {
+            zoomModal.classList.remove('flex');
+            zoomModal.classList.add('hidden');
+            zoomModalImage.src = '';
+            zoomModalImage.alt = '';
+        }
+
+        document.querySelectorAll('.zoomable').forEach(img => {
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', () => openZoom(img.src, img.alt));
+        });
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const img = btn.previousElementSibling;
+                if (img && img.tagName === 'IMG') openZoom(img.src, img.alt);
+            });
+        });
+        zoomModalClose.addEventListener('click', closeZoom);
+        zoomModal.addEventListener('click', (e) => { if (e.target === zoomModal) closeZoom(); });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué proceso responde a la pregunta '¿quién eres'?",
+                options: ["Autenticación", "Autorización", "Cifrado", "Hashing"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál es una afirmación verdadera sobre JSON Web Tokens (JWT)?",
+                options: ["El payload está cifrado por defecto", "El payload está codificado en Base64 y no debe contener información sensible", "Un JWT no puede expirar", "Los JWT siempre usan cifrado asimétrico"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál de estas es una buena práctica para la gestión segura de sesiones?",
+                options: ["Usar identificadores de sesión predecibles", "No establecer flags en las cookies", "Regenerar el id de sesión tras login y usar flags HttpOnly/Secure", "Mantener sesiones indefinidas sin expiración"],
+                correct: 2
+            },
+            {
+                question: "¿Qué describe mejor la autenticación multifactor (MFA)?",
+                options: ["Dos preguntas secretas del mismo tipo", "Contraseña y PIN idénticos", "Combinar factores independientes (algo que sabes, algo que tienes, algo que eres)", "Usar solo biometría siempre"] ,
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+</body>
+</html>

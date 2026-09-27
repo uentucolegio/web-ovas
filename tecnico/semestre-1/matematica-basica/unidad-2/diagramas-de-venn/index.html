@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Diagramas de Venn</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .sidebar-link {
+            border-left: 4px solid transparent;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .sidebar-link.active {
+            border-left-color: #22c55e;
+            background-color: #dcfce7;
+            color: #15803d;
+            font-weight: 600;
+        }
+
+        .content-pane[hidden] {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(0.5rem);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        [data-animate="fade"] {
+            animation: fadeIn 0.45s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            [data-animate="fade"] {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                animation-name: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-700">
+    <div class="flex min-h-screen">
+        <aside class="hidden w-72 flex-shrink-0 flex-col bg-white shadow-lg md:flex" aria-label="Secciones del curso">
+            <div class="p-6">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="flex-1 pb-6 pt-2" id="desktop-nav">
+                <button type="button" class="sidebar-link active flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="introduccion" aria-controls="introduccion" aria-current="true">
+                    <span class="text-xl" aria-hidden="true">🚀</span> Introducción
+                </button>
+                <button type="button" class="sidebar-link flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="objetivos" aria-controls="objetivos">
+                    <span class="text-xl" aria-hidden="true">🎯</span> Objetivos
+                </button>
+                <button type="button" class="sidebar-link flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="contenido" aria-controls="contenido">
+                    <span class="text-xl" aria-hidden="true">📚</span> Contenido
+                </button>
+                <button type="button" class="sidebar-link flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="actividades" aria-controls="actividades">
+                    <span class="text-xl" aria-hidden="true">✍️</span> Actividades
+                </button>
+                <button type="button" class="sidebar-link flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="evaluacion" aria-controls="evaluacion">
+                    <span class="text-xl" aria-hidden="true">✔️</span> Evaluación
+                </button>
+                <button type="button" class="sidebar-link flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="recursos" aria-controls="recursos">
+                    <span class="text-xl" aria-hidden="true">📖</span> Recursos
+                </button>
+                <button type="button" class="sidebar-link flex w-full items-center gap-3 px-7 py-3 text-left text-base text-slate-700" data-pane="bibliografia" aria-controls="bibliografia">
+                    <span class="text-xl" aria-hidden="true">📚</span> Bibliografía
+                </button>
+            </nav>
+        </aside>
+
+        <main class="flex-1 bg-slate-50 p-5 sm:p-8 md:p-12">
+            <header class="mb-8 flex flex-col items-center md:hidden">
+                <figure class="mb-3 flex h-28 w-28 items-center justify-center rounded-full bg-white shadow-lg transition-shadow duration-300 hover:shadow-brand-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="h-5/6 w-5/6 object-contain" loading="lazy">
+                </figure>
+                <label for="mobile-nav" class="sr-only">Seleccionar sección</label>
+                <select id="mobile-nav" class="w-full rounded-md border border-slate-200 bg-white p-2 text-base shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </header>
+
+            <section id="introduccion" class="content-pane space-y-5" aria-labelledby="heading-introduccion" data-animate="fade">
+                <h1 id="heading-introduccion" class="text-3xl font-bold text-brand-800 sm:text-4xl">Diagramas de Venn</h1>
+                <p class="leading-relaxed">
+                    <span class="text-2xl" aria-hidden="true">🤔</span>
+                    <strong>¿Qué es un Diagrama de Venn?</strong>
+                    Es una <span class="font-semibold text-brand-800">representación gráfica</span> que permite visualizar las relaciones entre diferentes conjuntos. A través de círculos que se superponen podemos identificar de forma intuitiva qué elementos comparten y cuáles son exclusivos.
+                </p>
+                <p class="leading-relaxed">
+                    En programación, los Diagramas de Venn son útiles para comprender la lógica de consultas a bases de datos, segmentar audiencias o depurar información compleja. Son una puerta de entrada visual a conceptos que de otro modo serían abstractos.
+                </p>
+                <div class="rounded-r-xl border-l-4 border-brand-500 bg-brand-50 p-5 sm:p-6">
+                    <p class="text-brand-800">
+                        Aprender a interpretar Diagramas de Venn fortalece tu intuición para resolver problemas de lógica, filtrar información y modelar conjuntos que utilizas en el día a día al programar <span class="text-xl" aria-hidden="true">✨</span>.
+                    </p>
+                </div>
+            </section>
+
+            <section id="objetivos" class="content-pane mt-4 space-y-6" aria-labelledby="heading-objetivos" data-animate="fade" hidden>
+                <h2 id="heading-objetivos" class="text-3xl font-bold text-brand-800 sm:text-4xl">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3 rounded-xl bg-white p-5 shadow-sm">
+                        <span class="text-2xl text-brand-700" aria-hidden="true">🧠</span>
+                        <span>Aplicar la lógica proposicional y la teoría de conjuntos para <span class="font-semibold">modelar y analizar problemas</span> en sistemas computacionales.</span>
+                    </li>
+                    <li class="flex items-start gap-3 rounded-xl bg-white p-5 shadow-sm">
+                        <span class="text-2xl text-brand-700" aria-hidden="true">🎨</span>
+                        <span>Representar gráficamente las operaciones de <span class="font-semibold">unión, intersección, diferencia y complemento</span> utilizando Diagramas de Venn.</span>
+                    </li>
+                    <li class="flex items-start gap-3 rounded-xl bg-white p-5 shadow-sm">
+                        <span class="text-2xl text-brand-700" aria-hidden="true">✍️</span>
+                        <span>Resolver problemas prácticos interpretando y construyendo Diagramas de Venn para extraer información relevante.</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section id="contenido" class="content-pane mt-4 space-y-6" aria-labelledby="heading-contenido" data-animate="fade" hidden>
+                <h2 id="heading-contenido" class="text-3xl font-bold text-brand-800 sm:text-4xl">Representación gráfica de operaciones</h2>
+                <p class="leading-relaxed">
+                    Los Diagramas de Venn muestran cómo se relacionan dos o más conjuntos mediante áreas sombreadas.
+                    Cada círculo representa un conjunto y las zonas en común evidencian los elementos compartidos.
+                    Gracias a esta visualización es más sencillo razonar sobre uniones, intersecciones o diferencias
+                    sin perder de vista el contexto general.
+                </p>
+                <p class="leading-relaxed">
+                    Para interpretar cualquier diagrama, identifica primero qué representa cada círculo. Luego sigue
+                    los pasos de la operación que quieres analizar: resalta las zonas correspondientes, verifica los
+                    elementos que pertenecen a cada área y comprueba que la cantidad de elementos coincide con los
+                    valores conocidos. Algo tan simple como sombrear o des-sombrear partes específicas del diagrama
+                    ayuda a razonar con mayor precisión.
+                </p>
+
+                <article class="space-y-6">
+                    <div class="rounded-xl border border-brand-200 bg-white p-6 shadow-sm">
+                        <div class="flex flex-col gap-6 lg:flex-row">
+                            <div class="flex-1 space-y-4">
+                                <h3 class="text-2xl font-bold text-brand-800">Explora paso a paso</h3>
+                                <p>
+                                    Selecciona una operación para observar qué zonas del diagrama se activan y qué
+                                    significa cada resultado. Utiliza los botones para recorrer las operaciones más
+                                    comunes entre dos conjuntos.
+                                </p>
+                                <div class="flex flex-wrap gap-3" role="tablist" aria-label="Operaciones entre A y B">
+                                    <button type="button" class="rounded-full border border-brand-400 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-step-button="union" role="tab" aria-selected="true">
+                                        Unión (A ⋃ B)
+                                    </button>
+                                    <button type="button" class="rounded-full border border-brand-400 bg-white px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-step-button="interseccion" role="tab" aria-selected="false">
+                                        Intersección (A ∩ B)
+                                    </button>
+                                    <button type="button" class="rounded-full border border-brand-400 bg-white px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-step-button="diferencia-a" role="tab" aria-selected="false">
+                                        Diferencia (A − B)
+                                    </button>
+                                    <button type="button" class="rounded-full border border-brand-400 bg-white px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-step-button="diferencia-b" role="tab" aria-selected="false">
+                                        Diferencia (B − A)
+                                    </button>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                    <h4 id="operation-step-title" class="text-xl font-semibold text-brand-700">Unión (A ⋃ B)</h4>
+                                    <p id="operation-step-description" class="mt-2 leading-relaxed">
+                                        La unión resalta todos los elementos que pertenecen al conjunto A, al conjunto B o a ambos. Ningún elemento queda fuera cuando realizas A ⋃ B.
+                                    </p>
+                                </div>
+                            </div>
+                            <figure class="flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white p-6 shadow-inner">
+                                <div class="relative flex h-64 w-full max-w-sm items-center justify-center">
+                                    <svg data-step-diagram="union" viewBox="0 0 220 150" class="h-full w-full transition-opacity duration-200">
+                                        <title>Unión de los conjuntos A y B</title>
+                                        <circle cx="90" cy="75" r="55" stroke="black" stroke-width="2" fill="rgba(34,197,94,0.5)"></circle>
+                                        <circle cx="130" cy="75" r="55" stroke="black" stroke-width="2" fill="rgba(59,130,246,0.5)"></circle>
+                                    </svg>
+                                    <svg data-step-diagram="interseccion" viewBox="0 0 220 150" class="h-full w-full transition-opacity duration-200" hidden>
+                                        <title>Intersección de los conjuntos A y B</title>
+                                        <defs>
+                                            <clipPath id="interactive-clip-intersection">
+                                                <circle cx="90" cy="75" r="55"></circle>
+                                            </clipPath>
+                                        </defs>
+                                        <circle cx="90" cy="75" r="55" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                        <circle cx="130" cy="75" r="55" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                        <circle cx="130" cy="75" r="55" fill="rgba(107,33,168,0.6)" clip-path="url(#interactive-clip-intersection)"></circle>
+                                    </svg>
+                                    <svg data-step-diagram="diferencia-a" viewBox="0 0 220 150" class="h-full w-full transition-opacity duration-200" hidden>
+                                        <title>Diferencia del conjunto A respecto a B</title>
+                                        <defs>
+                                            <mask id="interactive-mask-diff-a">
+                                                <rect width="100%" height="100%" fill="white"></rect>
+                                                <circle cx="130" cy="75" r="55" fill="black"></circle>
+                                            </mask>
+                                        </defs>
+                                        <circle cx="90" cy="75" r="55" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                        <circle cx="130" cy="75" r="55" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                        <circle cx="90" cy="75" r="55" fill="rgba(234,88,12,0.55)" mask="url(#interactive-mask-diff-a)"></circle>
+                                    </svg>
+                                    <svg data-step-diagram="diferencia-b" viewBox="0 0 220 150" class="h-full w-full transition-opacity duration-200" hidden>
+                                        <title>Diferencia del conjunto B respecto a A</title>
+                                        <defs>
+                                            <mask id="interactive-mask-diff-b">
+                                                <rect width="100%" height="100%" fill="white"></rect>
+                                                <circle cx="90" cy="75" r="55" fill="black"></circle>
+                                            </mask>
+                                        </defs>
+                                        <circle cx="90" cy="75" r="55" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                        <circle cx="130" cy="75" r="55" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                        <circle cx="130" cy="75" r="55" fill="rgba(14,165,233,0.55)" mask="url(#interactive-mask-diff-b)"></circle>
+                                    </svg>
+                                </div>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
+                        <p class="font-semibold text-blue-800">Ejemplo base:</p>
+                        <p>Para los diagramas utilizaremos los conjuntos:</p>
+                        <ul class="mt-2 space-y-1 rounded-lg bg-white p-3 font-mono text-sm text-blue-900 shadow-sm">
+                            <li>A = {1, 2, 3, 4}</li>
+                            <li>B = {3, 4, 5, 6}</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-xl border border-brand-200 bg-white">
+                        <div class="divide-y divide-brand-100">
+                            <div>
+                                <button type="button" class="flex w-full items-center justify-between rounded-none px-5 py-4 text-left text-lg font-semibold text-brand-800 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-accordion-target="panel-operaciones-union" aria-expanded="false" aria-controls="panel-operaciones-union">
+                                    Unión (A ⋃ B)
+                                    <span class="accordion-icon text-xl" aria-hidden="true">➕</span>
+                                </button>
+                                <div id="panel-operaciones-union" class="accordion-panel space-y-4 border-t border-brand-200 p-5" data-animate="fade" hidden>
+                                    <p>La unión agrupa todos los elementos que pertenecen al conjunto A, al conjunto B o a ambos.</p>
+                                    <div class="flex flex-col gap-4 rounded-xl border-l-4 border-brand-400 bg-brand-50 p-4 shadow-sm lg:flex-row">
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-brand-800">Resultado:</p>
+                                            <code class="mt-1 block rounded bg-brand-200 p-2 font-semibold text-brand-900">A ⋃ B = {1, 2, 3, 4, 5, 6}</code>
+                                        </div>
+                                        <figure class="flex h-36 w-48 flex-shrink-0 items-center justify-center self-center rounded-lg bg-white shadow">
+                                            <svg viewBox="0 0 200 120" class="h-28 w-44">
+                                                <circle cx="80" cy="60" r="50" stroke="black" stroke-width="2" fill="rgba(34,197,94,0.45)"></circle>
+                                                <circle cx="120" cy="60" r="50" stroke="black" stroke-width="2" fill="rgba(59,130,246,0.45)"></circle>
+                                            </svg>
+                                            <figcaption class="sr-only">Los dos círculos completos representan la unión de A y B.</figcaption>
+                                        </figure>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="flex w-full items-center justify-between rounded-none px-5 py-4 text-left text-lg font-semibold text-brand-800 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-accordion-target="panel-operaciones-interseccion" aria-expanded="false" aria-controls="panel-operaciones-interseccion">
+                                    Intersección (A ∩ B)
+                                    <span class="accordion-icon text-xl" aria-hidden="true">➕</span>
+                                </button>
+                                <div id="panel-operaciones-interseccion" class="accordion-panel space-y-4 border-t border-brand-200 p-5" data-animate="fade" hidden>
+                                    <p>La intersección identifica los elementos que comparten ambos conjuntos. Es la zona donde los círculos se superponen.</p>
+                                    <div class="flex flex-col gap-4 rounded-xl border-l-4 border-brand-400 bg-brand-50 p-4 shadow-sm lg:flex-row">
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-brand-800">Resultado:</p>
+                                            <code class="mt-1 block rounded bg-brand-200 p-2 font-semibold text-brand-900">A ∩ B = {3, 4}</code>
+                                        </div>
+                                        <figure class="flex h-36 w-48 flex-shrink-0 items-center justify-center self-center rounded-lg bg-white shadow">
+                                            <svg viewBox="0 0 200 120" class="h-28 w-44">
+                                                <defs>
+                                                    <clipPath id="clip-intersect-static">
+                                                        <circle cx="80" cy="60" r="50"></circle>
+                                                    </clipPath>
+                                                </defs>
+                                                <circle cx="80" cy="60" r="50" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                                <circle cx="120" cy="60" r="50" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                                <circle cx="120" cy="60" r="50" fill="rgba(107,33,168,0.55)" clip-path="url(#clip-intersect-static)"></circle>
+                                            </svg>
+                                            <figcaption class="sr-only">La zona compartida muestra la intersección de ambos conjuntos.</figcaption>
+                                        </figure>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="flex w-full items-center justify-between rounded-none px-5 py-4 text-left text-lg font-semibold text-brand-800 transition hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" data-accordion-target="panel-operaciones-diferencia" aria-expanded="false" aria-controls="panel-operaciones-diferencia">
+                                    Diferencia (A − B)
+                                    <span class="accordion-icon text-xl" aria-hidden="true">➕</span>
+                                </button>
+                                <div id="panel-operaciones-diferencia" class="accordion-panel space-y-4 border-t border-brand-200 p-5" data-animate="fade" hidden>
+                                    <p>La diferencia A − B señala los elementos exclusivos de A, es decir, los que no pertenecen al conjunto B.</p>
+                                    <div class="flex flex-col gap-4 rounded-xl border-l-4 border-brand-400 bg-brand-50 p-4 shadow-sm lg:flex-row">
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-brand-800">Resultado:</p>
+                                            <code class="mt-1 block rounded bg-brand-200 p-2 font-semibold text-brand-900">A − B = {1, 2}</code>
+                                        </div>
+                                        <figure class="flex h-36 w-48 flex-shrink-0 items-center justify-center self-center rounded-lg bg-white shadow">
+                                            <svg viewBox="0 0 200 120" class="h-28 w-44">
+                                                <defs>
+                                                    <mask id="mask-diff-static">
+                                                        <rect width="100%" height="100%" fill="white"></rect>
+                                                        <circle cx="120" cy="60" r="50" fill="black"></circle>
+                                                    </mask>
+                                                </defs>
+                                                <circle cx="80" cy="60" r="50" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                                <circle cx="120" cy="60" r="50" stroke="black" stroke-width="2" fill="transparent"></circle>
+                                                <circle cx="80" cy="60" r="50" fill="rgba(239,68,68,0.45)" mask="url(#mask-diff-static)"></circle>
+                                            </svg>
+                                            <figcaption class="sr-only">Sólo el círculo izquierdo representa la diferencia de A respecto a B.</figcaption>
+                                        </figure>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="actividades" class="content-pane mt-4 space-y-8" aria-labelledby="heading-actividades" data-animate="fade" hidden>
+                <h2 id="heading-actividades" class="text-3xl font-bold text-brand-800 sm:text-4xl">Actividades prácticas</h2>
+                <article class="space-y-6">
+                    <div class="rounded-xl border-l-4 border-brand-500 bg-white p-6 shadow-sm">
+                        <h3 class="text-xl font-semibold text-brand-700">Ejercicio 1. Clasificación de tecnologías</h3>
+                        <p class="font-semibold">Conjuntos de referencia:</p>
+                        <div class="mt-3 grid gap-4 md:grid-cols-2">
+                            <div class="rounded-lg border border-slate-200 bg-brand-50 p-4">
+                                <p class="font-semibold text-brand-800">A = Tecnologías de interfaz</p>
+                                <ul class="mt-2 list-disc pl-5">
+                                    <li>HTML</li>
+                                    <li>CSS</li>
+                                    <li>JavaScript</li>
+                                    <li>React</li>
+                                </ul>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-blue-50 p-4">
+                                <p class="font-semibold text-blue-800">B = Tecnologías de backend</p>
+                                <ul class="mt-2 list-disc pl-5">
+                                    <li>JavaScript</li>
+                                    <li>TypeScript</li>
+                                    <li>Node.js</li>
+                                    <li>Express</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="mt-4 font-semibold">Tu tarea:</p>
+                        <p>Completa cada sección con los elementos que correspondan según la operación entre conjuntos trabajada en la guía.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label class="font-semibold text-brand-700" for="actividad-1-union">Unión (A ⋃ B)</label>
+                                <textarea id="actividad-1-union" class="mt-1 w-full rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300" rows="2" placeholder="Lista aquí todas las tecnologías que pertenecen a A, a B o a ambos conjuntos."></textarea>
+                            </div>
+                            <div>
+                                <label class="font-semibold text-brand-700" for="actividad-1-interseccion">Intersección (A ∩ B)</label>
+                                <textarea id="actividad-1-interseccion" class="mt-1 w-full rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300" rows="2" placeholder="Lista aquí las tecnologías que comparten ambos conjuntos."></textarea>
+                            </div>
+                            <div>
+                                <label class="font-semibold text-brand-700" for="actividad-1-diferencia-a">Diferencia (A − B)</label>
+                                <textarea id="actividad-1-diferencia-a" class="mt-1 w-full rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300" rows="2" placeholder="Lista aquí las tecnologías exclusivas del conjunto A."></textarea>
+                            </div>
+                            <div>
+                                <label class="font-semibold text-brand-700" for="actividad-1-diferencia-b">Diferencia (B − A)</label>
+                                <textarea id="actividad-1-diferencia-b" class="mt-1 w-full rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300" rows="2" placeholder="Lista aquí las tecnologías exclusivas del conjunto B."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border-l-4 border-brand-500 bg-white p-6 shadow-sm">
+                        <h3 class="text-xl font-semibold text-brand-700">Ejercicio 2. Gustos de comida</h3>
+                        <p><span class="font-semibold">Situación:</span> Un grupo fue consultado sobre si prefiere pizza (P) o hamburguesas (H). 18 prefieren pizza, 12 hamburguesas y 7 ambas opciones.</p>
+                        <p class="font-semibold">Tu tarea:</p>
+                        <p>Representa la información en un Diagrama de Venn y responde: ¿cuántos estudiantes prefieren solo la pizza?</p>
+                        <label class="mt-3 block" for="actividad-2">Registra tu respuesta:</label>
+                        <textarea id="actividad-2" class="mt-1 w-full rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300" rows="3" placeholder="Explica tu razonamiento aquí..."></textarea>
+                    </div>
+
+                    <div class="rounded-xl border-l-4 border-brand-500 bg-white p-6 shadow-sm">
+                        <h3 class="text-xl font-semibold text-brand-700">Ejercicio 3. Deportes en la escuela</h3>
+                        <p><span class="font-semibold">Situación:</span> 20 estudiantes practican natación, 15 practican fútbol y 5 realizan ambos deportes. En total hay 30 estudiantes.</p>
+                        <p class="font-semibold">Tu tarea:</p>
+                        <p>Calcula cuántos estudiantes practican solo un deporte y cuántos no practican ninguno.</p>
+                        <label class="mt-3 block" for="actividad-3">Registra tus cálculos:</label>
+                        <textarea id="actividad-3" class="mt-1 w-full rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-300" rows="3" placeholder="Describe tus cálculos paso a paso..."></textarea>
+                    </div>
+                </article>
+            </section>
+
+            <section id="evaluacion" class="content-pane mt-4 space-y-6" aria-labelledby="heading-evaluacion" data-animate="fade" hidden>
+                <h2 id="heading-evaluacion" class="text-3xl font-bold text-brand-800 sm:text-4xl">Evaluación</h2>
+                <form id="quiz-form" class="space-y-6 rounded-xl bg-white p-6 shadow-md" novalidate>
+                    <p class="text-slate-600">Comprueba tus aprendizajes seleccionando la alternativa correcta.</p>
+
+                    <fieldset class="space-y-3">
+                        <legend class="font-semibold text-slate-800">1. En un Diagrama de Venn, el área donde dos círculos se superponen representa la...</legend>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q1" value="a" class="h-4 w-4">
+                            <span>Unión</span>
+                        </label>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q1" value="b" class="h-4 w-4">
+                            <span>Intersección</span>
+                        </label>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q1" value="c" class="h-4 w-4">
+                            <span>Diferencia</span>
+                        </label>
+                    </fieldset>
+
+                    <fieldset class="space-y-3">
+                        <legend class="font-semibold text-slate-800">2. Si 15 estudiantes usan React y 20 usan Vue, y 8 usan ambos, ¿cuántos usan solo React?</legend>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q2" value="a" class="h-4 w-4">
+                            <span>12</span>
+                        </label>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q2" value="b" class="h-4 w-4">
+                            <span>20</span>
+                        </label>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q2" value="c" class="h-4 w-4">
+                            <span>7</span>
+                        </label>
+                    </fieldset>
+
+                    <fieldset class="space-y-3">
+                        <legend class="font-semibold text-slate-800">3. La representación gráfica de A ⋃ B en un Diagrama de Venn es:</legend>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q3" value="a" class="h-4 w-4">
+                            <span>Solo el área donde se cruzan los círculos</span>
+                        </label>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q3" value="b" class="h-4 w-4">
+                            <span>Solo el círculo A</span>
+                        </label>
+                        <label class="quiz-option flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 p-3 transition hover:bg-brand-100">
+                            <input type="radio" name="q3" value="c" class="h-4 w-4">
+                            <span>Ambos círculos sombreados por completo</span>
+                        </label>
+                    </fieldset>
+
+                    <button type="button" id="submit-quiz-btn" class="rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Verificar respuestas</button>
+                    <div id="quiz-result" class="text-lg font-semibold" role="status" aria-live="polite"></div>
+                </form>
+            </section>
+
+            <section id="recursos" class="content-pane mt-4 space-y-6" aria-labelledby="heading-recursos" data-animate="fade" hidden>
+                <h2 id="heading-recursos" class="text-3xl font-bold text-brand-800 sm:text-4xl">Recursos para profundizar</h2>
+                <div class="space-y-5">
+                    <article class="rounded-xl border-l-4 border-brand-500 bg-white p-5 shadow-sm transition hover:shadow-md">
+                        <p><strong>Recurso en línea:</strong> Graficador de relaciones de conjuntos.</p>
+                        <a href="https://www.geogebra.org/m/UPTcEmRU" target="_blank" rel="noopener" class="text-brand-700 underline break-all">https://www.geogebra.org/m/UPTcEmRU</a>
+                    </article>
+                    <article class="rounded-xl border-l-4 border-brand-500 bg-white p-5 shadow-sm transition hover:shadow-md">
+                        <p><strong>Juego interactivo:</strong> Diagrama de Venn.</p>
+                        <a href="https://es.educaplay.com/recursos-educativos/1156287-diagrama_de_venn.html" target="_blank" rel="noopener" class="text-brand-700 underline break-all">https://es.educaplay.com/recursos-educativos/1156287-diagrama_de_venn.html</a>
+                    </article>
+                </div>
+            </section>
+
+            <section id="bibliografia" class="content-pane mt-4 space-y-6" aria-labelledby="heading-bibliografia" data-animate="fade" hidden>
+                <h2 id="heading-bibliografia" class="text-3xl font-bold text-brand-800 sm:text-4xl">Bibliografía</h2>
+                <div class="space-y-5">
+                    <article class="rounded-xl border-l-4 border-brand-500 bg-white p-5 shadow-sm transition hover:shadow-md">
+                        <p>Soto, R. (2011). <i>Lógica y conjuntos</i>. Trillas.</p>
+                    </article>
+                    <article class="rounded-xl border-l-4 border-brand-500 bg-white p-5 shadow-sm transition hover:shadow-md">
+                        <p>Venn, J. (1880). <i>On the Diagrammatic and Mechanical Representation of Propositions and Reasonings.</i></p>
+                    </article>
+                </div>
+                <footer class="mt-10 border-t-2 border-slate-200 pt-6 text-center">
+                    <p class="font-medium text-slate-600">Creado por:</p>
+                    <p class="text-lg font-bold text-brand-800">Centro de Innovación en TIC para el Apoyo de la Docencia (CINTIA)</p>
+                    <p class="text-sm text-slate-500">Universidad de Córdoba</p>
+                </footer>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const paneButtons = document.querySelectorAll('[data-pane]');
+            const panes = document.querySelectorAll('.content-pane');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const accordionButtons = document.querySelectorAll('[data-accordion-target]');
+            const quizButton = document.getElementById('submit-quiz-btn');
+            const quizResult = document.getElementById('quiz-result');
+            const stepButtons = document.querySelectorAll('[data-step-button]');
+            const stepDiagrams = document.querySelectorAll('[data-step-diagram]');
+            const stepTitle = document.getElementById('operation-step-title');
+            const stepDescription = document.getElementById('operation-step-description');
+
+            const correctAnswers = {
+                q1: 'b',
+                q2: 'c',
+                q3: 'c'
+            };
+            const stepCopy = {
+                union: {
+                    title: 'Unión (A ⋃ B)',
+                    description: 'La unión reúne todos los elementos presentes en cualquiera de los conjuntos. Si un elemento está en A, en B o en ambos, se incluye en A ⋃ B.'
+                },
+                interseccion: {
+                    title: 'Intersección (A ∩ B)',
+                    description: 'La intersección identifica únicamente los elementos compartidos por A y B. Representa la zona de solapamiento entre ambos conjuntos.'
+                },
+                'diferencia-a': {
+                    title: 'Diferencia (A − B)',
+                    description: 'La diferencia A − B guarda los elementos exclusivos del conjunto A, es decir, aquellos que no aparecen en B.'
+                },
+                'diferencia-b': {
+                    title: 'Diferencia (B − A)',
+                    description: 'La diferencia B − A conserva los elementos que pertenecen a B pero no se encuentran en A.'
+                }
+            };
+
+            const activatePane = (paneId) => {
+                panes.forEach((pane) => {
+                    const shouldActivate = pane.id === `${paneId}`;
+                    pane.toggleAttribute('hidden', !shouldActivate);
+                });
+
+                paneButtons.forEach((button) => {
+                    const isActive = button.dataset.pane === paneId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-current', isActive ? 'true' : 'false');
+                });
+
+                if (mobileNav && mobileNav.value !== paneId) {
+                    mobileNav.value = paneId;
+                }
+            };
+
+            paneButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    activatePane(button.dataset.pane);
+                });
+            });
+
+            if (mobileNav) {
+                mobileNav.addEventListener('change', (event) => {
+                    activatePane(event.target.value);
+                });
+            }
+
+            const closeAllAccordions = () => {
+                accordionButtons.forEach((button) => {
+                    const panel = document.getElementById(button.dataset.accordionTarget);
+                    if (panel) {
+                        panel.setAttribute('hidden', '');
+                        button.setAttribute('aria-expanded', 'false');
+                        const icon = button.querySelector('.accordion-icon');
+                        if (icon) {
+                            icon.textContent = '➕';
+                        }
+                    }
+                });
+            };
+
+            accordionButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const panel = document.getElementById(button.dataset.accordionTarget);
+                    if (!panel) {
+                        return;
+                    }
+                    const willOpen = panel.hasAttribute('hidden');
+                    closeAllAccordions();
+                    if (willOpen) {
+                        panel.removeAttribute('hidden');
+                        button.setAttribute('aria-expanded', 'true');
+                        const icon = button.querySelector('.accordion-icon');
+                        if (icon) {
+                            icon.textContent = '➖';
+                        }
+                    }
+                });
+            });
+
+            if (accordionButtons.length > 0) {
+                const firstButton = accordionButtons[0];
+                const firstPanel = document.getElementById(firstButton.dataset.accordionTarget);
+                if (firstPanel) {
+                    firstPanel.removeAttribute('hidden');
+                    firstButton.setAttribute('aria-expanded', 'true');
+                    const icon = firstButton.querySelector('.accordion-icon');
+                    if (icon) {
+                        icon.textContent = '➖';
+                    }
+                }
+            }
+
+            const optionBaseClasses = ['border-transparent', 'bg-slate-50'];
+            const removeFeedbackClasses = (option) => {
+                option.classList.remove('bg-brand-100', 'bg-rose-100', 'border-brand-300', 'border-rose-300', 'ring-2', 'ring-brand-300', 'ring-rose-300');
+                option.classList.add(...optionBaseClasses);
+            };
+
+            const highlightOption = (option, isCorrect) => {
+                option.classList.remove(...optionBaseClasses);
+                option.classList.add('ring-2', isCorrect ? 'ring-brand-300' : 'ring-rose-300');
+                option.classList.add(isCorrect ? 'bg-brand-100' : 'bg-rose-100');
+                option.classList.add(isCorrect ? 'border-brand-300' : 'border-rose-300');
+            };
+
+            const resetQuizFeedback = () => {
+                document.querySelectorAll('.quiz-option').forEach(removeFeedbackClasses);
+            };
+
+            const gradeQuiz = () => {
+                resetQuizFeedback();
+                let score = 0;
+                let answered = 0;
+                const totalQuestions = Object.keys(correctAnswers).length;
+
+                Object.entries(correctAnswers).forEach(([question, correctValue]) => {
+                    const selected = document.querySelector(`input[name="${question}"]:checked`);
+                    if (selected) {
+                        answered += 1;
+                        const optionLabel = selected.closest('.quiz-option');
+                        const isCorrect = selected.value === correctValue;
+                        if (isCorrect) {
+                            score += 1;
+                        }
+                        if (optionLabel) {
+                            highlightOption(optionLabel, isCorrect);
+                        }
+                    }
+                });
+
+                if (answered < totalQuestions) {
+                    quizResult.textContent = 'Responde todas las preguntas para obtener tu calificación.';
+                    quizResult.classList.remove('text-brand-600', 'text-rose-600');
+                    quizResult.classList.add('text-slate-600');
+                    return;
+                }
+
+                quizResult.textContent = `Tu puntaje es ${score} de ${totalQuestions}.`;
+                quizResult.classList.remove('text-slate-600', 'text-rose-600', 'text-brand-600');
+                quizResult.classList.add(score === totalQuestions ? 'text-brand-600' : 'text-rose-600');
+            };
+
+            if (quizButton) {
+                quizButton.addEventListener('click', gradeQuiz);
+            }
+
+            const activateStep = (stepKey) => {
+                if (!stepCopy[stepKey]) {
+                    return;
+                }
+                stepButtons.forEach((button) => {
+                    const isActive = button.dataset.stepButton === stepKey;
+                    button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    button.classList.toggle('bg-brand-50', isActive);
+                    button.classList.toggle('bg-white', !isActive);
+                    button.classList.toggle('shadow', isActive);
+                });
+                stepDiagrams.forEach((diagram) => {
+                    const shouldShow = diagram.dataset.stepDiagram === stepKey;
+                    diagram.toggleAttribute('hidden', !shouldShow);
+                });
+                if (stepTitle) {
+                    stepTitle.textContent = stepCopy[stepKey].title;
+                }
+                if (stepDescription) {
+                    stepDescription.textContent = stepCopy[stepKey].description;
+                }
+            };
+
+            if (stepButtons.length > 0) {
+                stepButtons.forEach((button) => {
+                    button.addEventListener('click', () => {
+                        activateStep(button.dataset.stepButton);
+                    });
+                });
+                activateStep('union');
+            }
+
+            activatePane('introduccion');
+        });
+    </script>
+
+<!-- Plugin de accesibilidad -->
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

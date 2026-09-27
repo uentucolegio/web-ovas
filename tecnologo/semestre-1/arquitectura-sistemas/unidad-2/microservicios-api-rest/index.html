@@ -1,0 +1,1778 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="tailwind.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Microservicios y API REST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f8fafc;
+            --panel: #ffffff;
+            --soft: #f0fdf4;
+            --line: #d1fae5;
+            --text: #334155;
+            --muted: #64748b;
+            --brand: #16a34a;
+            --brand-dark: #166534;
+            --warning: #f59e0b;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            background: #f8fafc;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+        body { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 290px;
+            background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+            border-right: 1px solid #dcfce7;
+            padding: 24px 18px;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .brand-badge {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 18px;
+            padding: 10px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #22c55e;
+            box-shadow: 0 20px 40px rgba(22, 163, 74, 0.18);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-badge img {
+            max-width: 82%;
+            max-height: 82%;
+            object-fit: contain;
+            display: block;
+        }
+        .brand-copy { display: none; }
+        .brand-copy h1 { font-size: 1.15rem; color: var(--brand-dark); margin-bottom: 8px; }
+        .brand-copy p { font-size: 0.9rem; color: var(--muted); }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+            padding: 16px 18px;
+            border-radius: 0;
+            margin-bottom: 2px;
+            transition: 0.2s ease;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: #e7f5ed;
+            color: var(--brand-dark);
+            transform: none;
+        }
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: inherit;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .main { flex: 1; padding: 28px 32px; background: #f8fafc; }
+        .mobile-top {
+            display: none;
+            background: white;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        .mobile-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 12px;
+            padding: 8px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .mobile-logo img {
+            max-width: 82%;
+            max-height: 82%;
+            object-fit: contain;
+        }
+        .mobile-top select {
+            width: 100%;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: white;
+        }
+        .pane { display: none; max-width: 1400px; margin: 0 auto; }
+        .pane.active { display: block; }
+        .hero { display: none; }
+        .eyebrow { display: none; }
+        h2 { color: var(--brand-dark); font-size: 2rem; margin-bottom: 18px; font-weight: 700; }
+        h3 { color: var(--brand-dark); font-size: 1.3rem; margin-bottom: 12px; font-weight: 700; }
+        p, li { color: var(--text); line-height: 1.75; font-size: 1rem; }
+        .lead { font-size: 1rem; color: var(--text); max-width: none; }
+        .grid { display: grid; gap: 18px; }
+        .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .card {
+            background: var(--panel);
+            border: 1px solid #dcfce7;
+            border-radius: 16px;
+            padding: 26px 28px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+            margin-bottom: 18px;
+        }
+        .card.soft { background: #ffffff; }
+        .panel-card {
+            border-left: 5px solid #22c55e;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .section-intro {
+            margin-bottom: 22px;
+        }
+        .content-accordion {
+            margin-bottom: 18px;
+            background: #ffffff;
+            border: 1px solid #dcfce7;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+        }
+        .content-accordion[open] {
+            border-color: #86efac;
+        }
+        .content-accordion summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 20px 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--brand-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: #ffffff;
+        }
+        .content-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+        .content-accordion summary::after {
+            content: '+';
+            font-size: 1.6rem;
+            line-height: 1;
+            color: #16a34a;
+            flex-shrink: 0;
+        }
+        .content-accordion[open] summary::after {
+            content: '−';
+        }
+        .sub-accordion {
+            margin-top: 18px;
+            border-radius: 14px;
+            box-shadow: none;
+            background: #f8fff9;
+        }
+        .sub-accordion summary {
+            padding: 16px 18px;
+            font-size: 1.02rem;
+            background: #f8fff9;
+        }
+        .sub-accordion .accordion-body {
+            padding: 0 18px 18px;
+        }
+        .accordion-body {
+            padding: 0 24px 24px;
+        }
+        .accordion-body > *:first-child {
+            margin-top: 0;
+        }
+        .accordion-body > p,
+        .accordion-body > table,
+        .accordion-body > .image-placeholder,
+        .accordion-body > .code-box,
+        .accordion-body > .flip-grid {
+            margin-top: 16px;
+        }
+        .check-line {
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        .check-mark {
+            color: #16a34a;
+            font-size: 2rem;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        .objective-list {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+        }
+        .objective-item {
+            display: grid;
+            grid-template-columns: 2rem minmax(0, 1fr);
+            align-items: center;
+            column-gap: 1rem;
+            padding: 1.15rem 1.3rem;
+            background: #fff;
+            border: 1px solid #edf2f7;
+            border-left: 6px solid var(--brand);
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
+        .objective-check {
+            display: block;
+            width: 2rem;
+            min-width: 2rem;
+            font-size: 1.35rem;
+            line-height: 1.2;
+            text-align: center;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
+        }
+        .objective-item p {
+            margin: 0;
+            min-width: 0;
+        }
+        .qr-box {
+            width: 96px;
+            height: 96px;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            background: #ffffff;
+            flex-shrink: 0;
+        }
+        .resource-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+        .resource-card a {
+            color: #1e3a8a;
+        }
+        .pill-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        .pill {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: var(--brand-dark);
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+        .info-box {
+            border-left: 5px solid var(--brand);
+            background: var(--soft);
+            padding: 18px 18px 18px 20px;
+            border-radius: 16px;
+            margin: 16px 0;
+        }
+        .section-space { margin-bottom: 24px; }
+        .timeline { display: grid; gap: 14px; margin-top: 16px; }
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        .timeline-dot {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #bbf7d0, #22c55e);
+            color: var(--brand-dark);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            box-shadow: 0 12px 24px rgba(34, 197, 94, 0.18);
+        }
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+        .tab-btn, .choice-btn, .action-btn, .mini-btn {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s ease;
+        }
+        .tab-btn {
+            padding: 11px 14px;
+            border-radius: 12px;
+            background: #ecfdf5;
+            color: var(--brand-dark);
+            border: 1px solid #bbf7d0;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #166534, #16a34a);
+            color: white;
+            border-color: transparent;
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .flip-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+        .flip-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .flip-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .flip-card { perspective: 1200px; min-height: 180px; cursor: pointer; }
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            min-height: 180px;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+        }
+        .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+        .flip-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 20px;
+            backface-visibility: hidden;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .flip-front { background: linear-gradient(160deg, #166534 0%, #16a34a 100%); color: white; }
+        .flip-back { background: white; border: 1px solid #bbf7d0; transform: rotateY(180deg); }
+        .flip-tag { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }
+        .flip-title { font-size: 1.05rem; font-weight: 700; line-height: 1.4; }
+        .endpoint-builder {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 18px;
+            align-items: start;
+        }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .choice-btn {
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: var(--text);
+            font-weight: 600;
+        }
+        .choice-btn.selected { background: #166534; color: white; border-color: #166534; }
+        .code-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 20px;
+            padding: 22px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.96rem;
+            line-height: 1.8;
+            min-height: 240px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .code-box .good { color: #86efac; }
+        .code-box .muted { color: #94a3b8; }
+        .code-box .warn { color: #fcd34d; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #dcfce7;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { background: #166534; color: white; font-size: 0.94rem; }
+        tr:nth-child(even) td { background: #f8fff9; }
+        .match-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .match-item, .match-target {
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid #d1fae5;
+            background: white;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .match-item:hover, .match-target:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .match-item.selected, .match-target.selected { border-color: #16a34a; background: #f0fdf4; }
+        .match-item.done, .match-target.done { border-color: #22c55e; background: #dcfce7; cursor: default; }
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .feedback.show { display: block; }
+        .feedback.success { background: #dcfce7; color: #166534; }
+        .feedback.error { background: #fee2e2; color: #991b1b; }
+        .feedback.info { background: #eff6ff; color: #1d4ed8; }
+        .lab-steps { counter-reset: step; display: grid; gap: 14px; margin-top: 14px; }
+        .lab-step {
+            background: white;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 16px 18px 16px 68px;
+            position: relative;
+        }
+        .lab-step::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 18px;
+            top: 16px;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+        .action-btn {
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #166534, #16a34a);
+            color: white;
+            font-weight: 700;
+        }
+        .action-btn.secondary { background: #334155; }
+        .mini-btn {
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: var(--brand-dark);
+            border: 1px solid #bbf7d0;
+            font-weight: 600;
+        }
+        .quiz-question {
+            background: white;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .quiz-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+        .quiz-result {
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 18px;
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .resource-list li, .biblio-list li { margin-left: 18px; margin-bottom: 12px; }
+        .footer-note { margin-top: 18px; color: var(--muted); font-size: 0.92rem; }
+        .bibliography-list {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+            align-items: stretch;
+        }
+        .bibliography-item,
+        .bibliography-credit,
+        .bibliography-credit-label,
+        .bibliography-credit-name,
+        .bibliography-credit-org {
+            font-family: 'Poppins', sans-serif;
+        }
+        .bibliography-item {
+            display: block;
+            width: 100%;
+            padding: 1.35rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            text-align: left;
+            overflow-wrap: anywhere;
+            background: #fff;
+            border: 1px solid #edf2f7;
+            border-left: 6px solid var(--brand);
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
+        .bibliography-item a {
+            color: var(--brand-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .bibliography-item a:hover {
+            text-decoration: underline;
+        }
+        .bibliography-credit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.15rem;
+            width: 100%;
+            margin-top: 2rem;
+            padding-top: 1.6rem;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        .bibliography-credit-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.92rem;
+        }
+        .bibliography-credit-name {
+            display: block;
+            max-width: 900px;
+            margin-top: 0.2rem;
+            color: var(--brand-dark);
+            font-size: clamp(1.1rem, 2vw, 1.45rem);
+            font-weight: 700;
+            line-height: 1.2;
+            text-wrap: balance;
+        }
+        .bibliography-credit-org {
+            display: block;
+            margin-top: 0.1rem;
+            color: var(--muted);
+            font-size: clamp(0.9rem, 1.6vw, 1rem);
+        }
+        .image-placeholder {
+            min-height: 240px;
+            border: 2px dashed #86efac;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #f8fff9 0%, #eefbf2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            color: var(--muted);
+            font-weight: 600;
+            margin: 18px 0;
+        }
+        .content-image {
+            margin: 18px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #dcfce7;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+        .content-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .video-embed {
+            margin: 18px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            background: #000;
+        }
+        .video-embed iframe {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            border: 0;
+        }
+        .speech-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 0 0 18px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        }
+        .speech-btn {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            padding: 10px 14px;
+            border-radius: 999px;
+            color: white;
+            transition: 0.2s ease;
+        }
+        .speech-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .speech-btn.play { background: #16a34a; }
+        .speech-btn.pause { background: #f59e0b; }
+        .speech-btn.stop { background: #ef4444; }
+        .speech-rate-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #166534;
+            font-weight: 600;
+        }
+        .speech-rate-wrap input {
+            accent-color: #ef4444;
+        }
+        .speech-note {
+            color: #166534;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+        .speech-note.unsupported {
+            color: #991b1b;
+            margin-left: 0;
+        }
+        .work-area {
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid #d1fae5;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+        }
+        .work-area label {
+            display: block;
+            font-weight: 600;
+            color: var(--brand-dark);
+            margin-bottom: 8px;
+        }
+        .work-area textarea, .work-area input {
+            width: 100%;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: white;
+            margin-bottom: 14px;
+        }
+        .work-area textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+        .simulator-shell {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+        .simulator-console {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+        }
+        .simulator-console h4 {
+            color: #86efac;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        .simulator-line {
+            margin-bottom: 10px;
+            line-height: 1.7;
+            font-family: Consolas, Monaco, monospace;
+            white-space: pre-wrap;
+        }
+        .simulator-line strong { color: #f8fafc; }
+        .simulator-builder {
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+            border: 1px solid #d1fae5;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .simulator-step {
+            margin-bottom: 18px;
+        }
+        .simulator-step h4 {
+            color: var(--brand-dark);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .simulator-choice {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .simulator-choice button {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: var(--text);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .simulator-choice button.selected {
+            background: #166534;
+            color: white;
+            border-color: #166534;
+        }
+        @media (max-width: 1080px) {
+            .grid.two, .grid.three, .flip-grid, .endpoint-builder, .match-layout, .simulator-shell { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 860px) {
+            body { display: block; }
+            .sidebar { display: none; }
+            .mobile-top { display: block; }
+            .main { padding: 18px; }
+            .hero, .card { padding: 20px; }
+            h2 { font-size: 1.65rem; }
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+            }
+            th, td {
+                min-width: 150px;
+            }
+            .speech-controls {
+                align-items: flex-start;
+            }
+            .speech-note {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+<style id="normalizacion-institucional-cintia">
+html,body{
+    width:100%;min-height:100%;overflow-x:hidden;max-width:100vw;
+    background:#f8fafc!important
+}
+body{
+    margin:0!important;padding:0!important;color:#334155!important;
+    font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif!important;
+    line-height:1.5!important;-webkit-font-smoothing:antialiased
+}
+.layout{display:flex!important;min-height:100vh!important;width:100%!important}
+.sidebar{
+    position:fixed!important;top:0!important;left:0!important;
+    width:16rem!important;height:100vh!important;overflow-y:auto!important;
+    z-index:40!important;padding:0!important;background:#fff!important;
+    border-right:0!important;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.10),0 4px 6px -4px rgba(0,0,0,.10)!important
+}
+.sidebar-logo{padding:1rem!important;display:flex!important;justify-content:center!important}
+.sidebar-logo-frame,.brand-badge{
+    width:150px!important;height:150px!important;padding:.5rem!important;margin:0 auto!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    background:#fff!important;border-radius:9999px!important;border:2px solid #22c55e!important;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.10),0 4px 6px -4px rgba(0,0,0,.10)!important;
+    overflow:hidden!important
+}
+.sidebar-logo-frame img,.brand-badge img{
+    max-width:80%!important;max-height:80%!important;object-fit:contain!important
+}
+.sidebar-nav{margin-top:1.5rem!important;padding-bottom:0!important}
+.sidebar-link,.nav-link{
+    display:flex!important;align-items:center!important;gap:.75rem!important;
+    padding:.75rem 1.5rem!important;margin:0!important;border-left:4px solid transparent!important;
+    border-radius:0!important;color:#334155!important;font-size:1rem!important;
+    font-weight:500!important;text-decoration:none!important;transition:all .3s ease!important
+}
+.sidebar-link.active,.sidebar-link:hover,.nav-link.active,.nav-link:hover{
+    background:#e6f4ea!important;color:#166534!important;border-left-color:#22c55e!important
+}
+.sidebar-icon,.nav-icon{width:auto!important;height:auto!important;font-size:1.25rem!important}
+.main{
+    flex:1 1 0%!important;width:auto!important;margin-left:16rem!important;
+    padding:2.5rem!important;background:#f9fafb!important
+}
+.content-pane,.pane{
+    display:none;max-width:none!important;margin:0!important;
+    animation:fadeIn .5s ease-in-out
+}
+.content-pane.active,.pane.active{display:block}
+.hero-card,.hero{
+    padding:0!important;margin:0 0 1rem!important;background:transparent!important;
+    border:0!important;box-shadow:none!important
+}
+.hero-card h1,.content-pane h2,.pane h2,.section-heading{
+    margin:0 0 1.5rem!important;color:#166534!important;
+    font-size:1.875rem!important;line-height:2.25rem!important;font-weight:700!important
+}
+.content-pane h3,.pane h3{
+    color:#166534!important;font-size:1.25rem!important;line-height:1.75rem!important;font-weight:700!important
+}
+p,li,label{color:#334155;font-size:1rem!important;line-height:1.625!important}
+.text-block{
+    padding:0!important;margin-bottom:1rem!important;background:transparent!important;
+    border:0!important;box-shadow:none!important
+}
+.text-block p{margin-bottom:.75rem}
+.objective-list{
+    display:grid!important;gap:1rem!important;padding:0!important;margin:0!important;list-style:none!important
+}
+.objective-item{
+    display:flex!important;align-items:flex-start!important;gap:.75rem!important;
+    padding:1rem!important;background:#fff!important;border:0!important;
+    border-radius:.5rem!important;box-shadow:0 1px 2px rgba(0,0,0,.05)!important
+}
+.objective-check{width:auto!important;min-width:auto!important;font-size:1.5rem!important;line-height:1.2!important}
+.speech-controls{
+    padding:.75rem 1rem!important;margin-bottom:1.5rem!important;
+    background:#dcfce7!important;border:0!important;border-radius:.5rem!important
+}
+.speech-btn{
+    border-radius:.375rem!important;padding:.5rem 1rem!important;
+    font-size:.875rem!important;font-weight:600!important
+}
+.speech-btn.play{background:#16a34a!important;color:#fff!important}
+.speech-btn.pause{background:#eab308!important;color:#fff!important}
+.speech-btn.stop{background:#ef4444!important;color:#fff!important}
+.accordion,.content-accordion{
+    background:transparent!important;border:0!important;border-radius:0!important;
+    box-shadow:none!important;margin-bottom:1rem!important
+}
+.accordion-toggle,.content-accordion>summary{
+    padding:1rem!important;background:#dcfce7!important;border:1px solid #86efac!important;
+    border-radius:.5rem!important;color:#166534!important;font-size:1.125rem!important;
+    font-weight:700!important
+}
+.accordion-panel,.content-accordion .accordion-body{
+    padding:1rem 1rem 1.25rem!important;margin-bottom:1.5rem!important;
+    background:#fff!important;border:1px solid #86efac!important;border-top:0!important;
+    border-bottom-left-radius:.5rem!important;border-bottom-right-radius:.5rem!important
+}
+.card,.activity-card,.quiz-card,.resource-card,.bibliography-item{
+    padding:1.5rem!important;margin-bottom:1rem!important;background:#fff!important;
+    border:0!important;border-left:4px solid #22c55e!important;border-radius:.5rem!important;
+    box-shadow:0 1px 2px rgba(0,0,0,.05)!important
+}
+.quiz-option,.activity-question,.quiz-question{border-radius:.5rem!important}
+.resource-card a,.resource-link{color:#334155!important;text-decoration:underline!important}
+.qr-box,.resource-qr{
+    width:2cm!important;height:2cm!important;border:1px solid #86efac!important;
+    border-radius:.25rem!important;background:#f0fdf4!important
+}
+.mobile-header,.mobile-top{display:none!important}
+.mobile-logo{
+    width:100px!important;height:100px!important;margin:0 auto .5rem!important;
+    padding:.5rem!important;background:#fff!important;border-radius:9999px!important;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.10)!important;overflow:hidden!important
+}
+.mobile-logo img{max-width:80%!important;max-height:80%!important;object-fit:contain!important}
+.mobile-nav,.mobile-top select{
+    width:100%!important;margin-top:.5rem!important;padding:.5rem!important;
+    border:1px solid #e5e7eb!important;border-radius:.375rem!important;background:#fff!important
+}
+.bibliography-credit,.ova-institutional-footer{
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:.15rem!important;width:100%!important;
+    margin-top:3rem!important;padding-top:1.5rem!important;
+    border-top:2px solid #e2e8f0!important;text-align:center!important;
+    font-family:'Poppins',sans-serif!important
+}
+.bibliography-credit-label,.ova-institutional-footer .footer-label{
+    color:#475569!important;font-weight:500!important;font-size:1rem!important
+}
+.bibliography-credit-name,.ova-institutional-footer .footer-name{
+    color:#166534!important;font-weight:700!important;font-size:1.125rem!important;
+    line-height:1.75rem!important
+}
+.bibliography-credit-org,.ova-institutional-footer .footer-org{
+    color:#64748b!important;font-size:.875rem!important;line-height:1.25rem!important
+}
+@media(max-width:767px){
+    .sidebar{display:none!important}
+    .main{margin-left:0!important;width:100%!important;padding:13rem .75rem .75rem!important}
+    .mobile-header,.mobile-top{
+        position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:50!important;
+        display:flex!important;flex-direction:column!important;align-items:center!important;
+        padding:1rem!important;background:#f8fafc!important;border:0!important;border-radius:0!important;
+        box-shadow:0 2px 4px rgba(0,0,0,.1)!important
+    }
+}
+@media(max-width:639px){
+    .hero-card h1,.content-pane h2,.pane h2,.section-heading{
+        font-size:1.5rem!important;line-height:2rem!important
+    }
+}
+</style>
+
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand-badge">
+            <img src="img/logo.webp" alt="Logo CINTIA">
+        </div>
+        <a href="#" class="nav-link active" data-target="introduccion"><span class="nav-icon">🚀</span> Introducción</a>
+        <a href="#" class="nav-link" data-target="objetivos"><span class="nav-icon">🎯</span> Objetivos</a>
+        <a href="#" class="nav-link" data-target="contenido"><span class="nav-icon">📚</span> Contenido</a>
+        <a href="#" class="nav-link" data-target="actividades"><span class="nav-icon">✍️</span> Actividades</a>
+        <a href="#" class="nav-link" data-target="evaluacion"><span class="nav-icon">✔️</span> Evaluación</a>
+        <a href="#" class="nav-link" data-target="recursos"><span class="nav-icon">📖</span> Recursos</a>
+        <a href="#" class="nav-link" data-target="bibliografia"><span class="nav-icon">📚</span> Bibliografía</a>
+    </aside>
+
+    <main class="main">
+        <div class="mobile-top">
+            <div class="mobile-logo">
+                <img src="img/logo.webp" alt="Logo CINTIA">
+            </div>
+            <h3 style="margin-bottom: 12px; text-align: center;">Microservicios y API REST</h3>
+            <select id="mobile-nav">
+                <option value="introduccion">🚀 Introducción</option>
+                <option value="objetivos">🎯 Objetivos</option>
+                <option value="contenido">📚 Contenido</option>
+                <option value="actividades">✍️ Actividades</option>
+                <option value="evaluacion">✔️ Evaluación</option>
+                <option value="recursos">📖 Recursos</option>
+                <option value="bibliografia">📚 Bibliografía</option>
+            </select>
+        </div>
+
+        <section id="introduccion" class="pane active">
+            <div class="section-intro">
+                <h2>Microservicios (API REST)</h2>
+            </div>
+
+            <div class="card">
+                <p>Cuando un sistema crece (por ejemplo, una plataforma de pedidos), se vuelve difícil mantener todo en un solo “bloque” de software. Una forma de organizarlo es separar la solución en servicios pequeños, cada uno responsable de una parte del negocio: usuarios, productos, pedidos, pagos, etc. A esa forma de construir sistemas se le conoce como arquitectura de microservicios.</p>
+                <div class="video-embed">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/p3FXICN3o58?si=h1GAqpDiXdRCVU92" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+                <p style="margin-top: 18px;">Para que esos servicios se puedan comunicar, normalmente se exponen como APIs. En esta guía nos enfocamos en el estilo más común: API REST, que usa HTTP (como cuando navegas en internet) y suele intercambiar información en formato JSON. Verás cómo se ubica una API REST en la arquitectura, cómo se diseñan endpoints de manera básica y un ejemplo mínimo de despliegue en contenedor para probar un servicio.</p>
+            </div>
+        </section>
+
+        <section id="objetivos" class="pane">
+            <div class="section-intro">
+                <h2>Objetivos de Aprendizaje</h2>
+            </div>
+            <ul class="objective-list">
+                <li class="objective-item"><div class="objective-check">&#128172;</div><p>Explicar el rol de los microservicios dentro de una arquitectura de sistema y cómo se integran para construir una solución completa.</p></li>
+                <li class="objective-item"><div class="objective-check">&#129504;</div><p>Comprender qué es una API REST como “contrato” de comunicación y proponer un diseño básico de endpoints para un caso real.</p></li>
+                <li class="objective-item"><div class="objective-check">&#128640;</div><p>Desplegar una API mínima en un contenedor (con Dockerfile) y probar sus endpoints con navegador, Postman o curl.</p></li>
+            </ul>
+        </section>
+
+        <section id="contenido" class="pane">
+            <div class="section-intro">
+                <h2>Microservicios (API REST): diseño básico de endpoints y despliegue mínimo de servicios.</h2>
+            </div>
+            <h3>¿Qué es una API REST y por qué es importante?</h3>
+            <p>Una API REST es una forma de exponer funcionalidades de un servicio a través de internet usando HTTP. En REST se trabaja con recursos (por ejemplo, “usuarios” o “productos”). Cada recurso se identifica con una ruta (URL) llamada endpoint.</p>
+            <p>Figura 3. Flujo básico de una petición REST dentro del sistema.</p>
+            <div class="content-image">
+                <img src="img/tema-2-img-1.png" alt="Figura 3. Flujo básico de una petición REST dentro del sistema.">
+            </div>
+
+            <details class="content-accordion sub-accordion" open>
+                <summary>Conceptos clave</summary>
+                <div class="accordion-body">
+                    <div class="flip-grid">
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Concepto</span><div class="flip-title">Recurso</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Definición</span><p>La “cosa” del negocio que se maneja: usuarios, productos, pedidos.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Concepto</span><div class="flip-title">Endpoint</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Definición</span><p>Ruta para acceder a un recurso. Ej.: /usuarios o /productos/15.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Concepto</span><div class="flip-title">Método HTTP</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Definición</span><p>Acción que se quiere hacer sobre el recurso (consultar, crear, actualizar, borrar).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Concepto</span><div class="flip-title">JSON</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Definición</span><p>Formato común para enviar/recibir datos. Parece un objeto con llaves y valores.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Concepto</span><div class="flip-title">Código de estado</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Definición</span><p>Número que indica el resultado: 200 (ok), 404 (no existe), etc.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Concepto</span><div class="flip-title">Stateless (sin estado)</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Definición</span><p>Cada petición trae lo necesario; el servidor no “adivina” lo que pasó antes.</p></div></div></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="content-accordion sub-accordion">
+                <summary>Métodos HTTP más usados en APIs REST</summary>
+                <div class="accordion-body">
+                    <table>
+                        <thead><tr><th>Método</th><th>¿Para qué sirve?</th><th>Ejemplo</th></tr></thead>
+                        <tbody>
+                            <tr><td>GET</td><td>Consultar información</td><td>GET /productos</td></tr>
+                            <tr><td>POST</td><td>Crear un recurso</td><td>POST /productos</td></tr>
+                            <tr><td>PUT</td><td>Actualizar completo (reemplaza)</td><td>PUT /productos/15</td></tr>
+                            <tr><td>PATCH</td><td>Actualizar parcial</td><td>PATCH /productos/15</td></tr>
+                            <tr><td>DELETE</td><td>Eliminar un recurso</td><td>DELETE /productos/15</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details class="content-accordion sub-accordion">
+                <summary>Códigos de estado típicos</summary>
+                <div class="accordion-body">
+                    <div class="flip-grid three">
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Código</span><div class="flip-title">200 OK</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Significado</span><p>Todo salió bien (consulta o actualización).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Código</span><div class="flip-title">201 Created</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Significado</span><p>Se creó un recurso (normalmente con POST).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Código</span><div class="flip-title">400 Bad Request</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Significado</span><p>La petición está mal (faltan datos, formato incorrecto).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Código</span><div class="flip-title">404 Not Found</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Significado</span><p>No existe el recurso solicitado.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Código</span><div class="flip-title">500 Internal Server Error</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Significado</span><p>Error del servidor (algo falló internamente).</p></div></div></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="content-accordion">
+                <summary>Diseño básico de endpoints (caso guiado)</summary>
+                <div class="accordion-body">
+                    <p>Imagina una app de pedidos. Un microservicio de “Productos” podría exponer endpoints como estos. Lo importante es que las rutas sean claras y representen recursos.</p>
+                    <table>
+                        <thead><tr><th>Acción</th><th>Método</th><th>Endpoint</th><th>Código esperado</th></tr></thead>
+                        <tbody>
+                            <tr><td>Listar productos</td><td>GET</td><td>/v1/productos</td><td>200</td></tr>
+                            <tr><td>Consultar un producto</td><td>GET</td><td>/v1/productos/{id}</td><td>200/404</td></tr>
+                            <tr><td>Crear producto</td><td>POST</td><td>/v1/productos</td><td>201/400</td></tr>
+                            <tr><td>Actualizar producto</td><td>PUT</td><td>/v1/productos/{id}</td><td>200/400/404</td></tr>
+                            <tr><td>Eliminar producto</td><td>DELETE</td><td>/v1/productos/{id}</td><td>200/404</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details class="content-accordion">
+                <summary>¿Por qué se usan contenedores (Docker) en microservicios?</summary>
+                <div class="accordion-body">
+                    <p>En microservicios es común desplegar cada servicio de forma independiente. Para que el despliegue sea repetible, cada servicio se empaca como una imagen y se ejecuta en un contenedor. Esto ayuda a que el servicio se comporte de forma similar en el computador del desarrollador, en pruebas y en servidor.</p>
+                    <p>Un Dockerfile describe cómo se construye la imagen del microservicio. Estructura mínima típica:</p>
+                    <div class="code-box">FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]</div>
+                </div>
+            </details>
+
+            <details class="content-accordion">
+                <summary>Ejemplo práctico mínimo: desplegar y probar una API REST en contenedor</summary>
+                <div class="accordion-body">
+                    <p>Este ejemplo es “por encima”: la idea es ver una API funcionando, consumir 1–2 endpoints y relacionarlo con la arquitectura (cliente → API). Puedes usar Postman o curl para probar.</p>
+                    <details class="content-accordion sub-accordion" open>
+                        <summary>Archivos del ejemplo (API mínima con FastAPI)</summary>
+                        <div class="accordion-body">
+                            <div class="code-box">api-demo/
+main.py
+requirements.txt
+Dockerfile</div>
+
+                            <p>main.py (API con 2 endpoints: /salud y /productos):</p>
+                            <div class="code-box">from fastapi import FastAPI
+app = FastAPI()
+
+PRODUCTOS = [
+    {"id": 1, "nombre": "Cuaderno"},
+    {"id": 2, "nombre": "Lapicero"}
+]
+
+@app.get('/salud')
+def salud():
+    return {'estado': 'ok'}
+
+@app.get('/productos')
+def listar_productos():
+    return PRODUCTOS</div>
+
+                            <p>requirements.txt:</p>
+                            <div class="code-box">fastapi
+uvicorn</div>
+
+                            <p>Dockerfile:</p>
+                            <div class="code-box">FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]</div>
+                        </div>
+                    </details>
+
+                    <div class="content-image">
+                        <img src="img/tema-2-img-2.png" alt="Imagen del ejemplo práctico mínimo de la guía.">
+                    </div>
+
+                    <details class="content-accordion sub-accordion">
+                        <summary>Pasos básicos (comandos mínimos)</summary>
+                        <div class="accordion-body">
+                            <table>
+                                <thead><tr><th>Paso</th><th>Comando</th></tr></thead>
+                                <tbody>
+                                    <tr><td>1) Construir imagen</td><td>docker build -t api-demo:1.0 .</td></tr>
+                                    <tr><td>2) Ejecutar contenedor</td><td>docker run -d --name api-demo -p 8080:8000 api-demo:1.0</td></tr>
+                                    <tr><td>3) Verificar que está corriendo</td><td>docker ps</td></tr>
+                                    <tr><td>4) Ver logs (si hay error)</td><td>docker logs api-demo</td></tr>
+                                    <tr><td>5) Detener y borrar</td><td>docker stop api-demo docker rm api-demo</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+
+                    <details class="content-accordion sub-accordion">
+                        <summary>Prueba rápida de endpoints</summary>
+                        <div class="accordion-body">
+                            <div class="flip-grid three">
+                                <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Navegador</span><div class="flip-title">/salud</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Prueba rápida</span><p>• Navegador: http://localhost:8080/salud</p></div></div></div>
+                                <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Navegador</span><div class="flip-title">/productos</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Prueba rápida</span><p>• Navegador: http://localhost:8080/productos</p></div></div></div>
+                                <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Curl</span><div class="flip-title">Opcional</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Prueba rápida</span><p>• Con curl (opcional): curl http://localhost:8080/salud curl http://localhost:8080/productos</p></div></div></div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </details>
+
+           
+        </section>
+
+        <section id="actividades" class="pane">
+            <div class="section-intro">
+                <h2>Cuestionarios o actividades complementarias</h2>
+            </div>
+            <div class="card panel-card">
+                <h3>Actividad 1. Diseño de endpoints</h3>
+                <p><strong>Propósito:</strong> proponer un diseño básico de API REST para un microservicio.</p>
+                <p><strong>Modalidad:</strong> individual.</p>
+                <p><strong>Instrucciones:</strong></p>
+                <p>1) Elige un microservicio: Usuarios, Productos o Pedidos.</p>
+                <p>2) Crea una tabla con mínimo 5 endpoints (acción, método, endpoint, código esperado).</p>
+                <p>3) Incluye versionado /v1 y usa nombres en plural (ej. /v1/usuarios).</p>
+                <p>4) Justifica 2 decisiones: por ejemplo, por qué usas GET para consultar y POST para crear.</p>
+                <p><strong>Evidencia:</strong> tabla + justificación.</p>
+            </div>
+
+            <div class="card panel-card">
+                <h3>Actividad 2. Despliegue mínimo de una API en contenedor</h3>
+                <p><strong>Propósito:</strong> ver una API REST corriendo y probar endpoints, relacionándolo con la arquitectura.</p>
+                <p><strong>Modalidad:</strong> individual.</p>
+                <p><strong>Instrucciones:</strong></p>
+                <p>1) Reproduce el ejemplo ‘api-demo’ (archivos main.py, requirements.txt y Dockerfile).</p>
+                <p>2) Ejecuta los comandos mínimos: build, run, ps, logs (si aplica), stop y rm.</p>
+                <p>3) Prueba /salud y /productos (navegador o Postman).</p>
+                <p>4) Escribe 5–6 líneas: ¿dónde está el servicio (contenedor)? ¿qué hace el puerto publicado? ¿qué devuelve la API?</p>
+                <p><strong>Evidencia:</strong> capturas de pantalla (endpoint + docker ps) + reflexión corta.</p>
+            </div>
+
+             <div class="card panel-card">
+                <h3>Actividad 3. Relaciona concepto y definición</h3>
+                <p style="margin-bottom: 14px;">Selecciona primero un concepto y luego su definición correcta.</p>
+                <div class="match-layout">
+                    <div>
+                        <div class="match-item" data-id="endpoint">Endpoint</div>
+                        <div class="match-item" data-id="json">JSON</div>
+                        <div class="match-item" data-id="stateless">Stateless</div>
+                        <div class="match-item" data-id="dockerfile">Dockerfile</div>
+                    </div>
+                    <div>
+                        <div class="match-target" data-id="dockerfile">Archivo que describe cómo construir la imagen del servicio.</div>
+                        <div class="match-target" data-id="stateless">Cada petición trae lo necesario y no depende del historial.</div>
+                        <div class="match-target" data-id="endpoint">Ruta URL usada para acceder a un recurso.</div>
+                        <div class="match-target" data-id="json">Formato de intercambio de datos basado en pares clave-valor.</div>
+                    </div>
+                </div>
+                <div id="match-feedback" class="feedback info">Empieza seleccionando un concepto.</div>
+            </div>
+
+            <div class="card panel-card">
+                <h3>Actividad 4. Mini simulador: ¿qué devuelve esta acción?</h3>
+                <p style="margin-bottom: 14px;">Completa la simulación seleccionando el método, el endpoint y el código de respuesta que mejor representan la solicitud del cliente.</p>
+                <div class="simulator-shell">
+                    <div class="simulator-console">
+                        <h4>Escenario</h4>
+                        <div class="simulator-line"><strong>Cliente:</strong> Aplicación web de pedidos</div>
+                        <div class="simulator-line"><strong>Necesidad:</strong> consultar la lista de productos disponibles</div>
+                        <div class="simulator-line"><strong>Recurso:</strong> productos</div>
+                        <div class="simulator-line"><strong>Versión:</strong> v1</div>
+                        <div class="simulator-line"><strong>Construcción actual:</strong></div>
+                        <div class="simulator-line" id="sim-request-line">[método] [endpoint]</div>
+                        <div class="simulator-line" id="sim-response-line">Respuesta esperada: [código]</div>
+                        <div class="simulator-line" id="sim-json-line">JSON esperado: [...]</div>
+                    </div>
+                    <div class="simulator-builder">
+                        <div class="simulator-step">
+                            <h4>1. Método HTTP</h4>
+                            <div class="simulator-choice" data-sim-group="method">
+                                <button type="button" data-value="GET">GET</button>
+                                <button type="button" data-value="POST">POST</button>
+                                <button type="button" data-value="DELETE">DELETE</button>
+                            </div>
+                        </div>
+                        <div class="simulator-step">
+                            <h4>2. Endpoint</h4>
+                            <div class="simulator-choice" data-sim-group="endpoint">
+                                <button type="button" data-value="/v1/productos">/v1/productos</button>
+                                <button type="button" data-value="/v1/productos/{id}">/v1/productos/{id}</button>
+                                <button type="button" data-value="/v1/pedidos">/v1/pedidos</button>
+                            </div>
+                        </div>
+                        <div class="simulator-step">
+                            <h4>3. Código esperado</h4>
+                            <div class="simulator-choice" data-sim-group="status">
+                                <button type="button" data-value="200">200 OK</button>
+                                <button type="button" data-value="201">201 Created</button>
+                                <button type="button" data-value="404">404 Not Found</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="action-btn" type="button" onclick="evaluateSimulator()">Validar simulación</button>
+                            <button class="action-btn secondary" type="button" onclick="resetSimulator()">Reiniciar simulación</button>
+                        </div>
+                        <div id="scenario-feedback" class="feedback info show" style="margin-top: 14px;">
+                            Selecciona una opción en cada paso para construir la solicitud de la API.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="evaluacion" class="pane">
+            <div class="card panel-card">
+                <h2>Evaluación</h2>
+                <p style="margin-bottom: 18px;">Responde el quiz de verificación y comprueba tu comprensión del tema.</p>
+                <div id="quiz"></div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="action-btn" onclick="checkQuiz()">Calificar evaluación</button>
+                    <button class="action-btn secondary" onclick="resetQuiz()">Reiniciar</button>
+                </div>
+                <div id="quiz-result" class="quiz-result"></div>
+            </div>
+        </section>
+
+        <section id="recursos" class="pane">
+            <div class="section-intro">
+                <h2>Anexos</h2>
+            </div>
+            <div class="card panel-card resource-card">
+                <div>
+                    <h3>Infografía de la temática</h3>
+                    <a href="https://drive.google.com/file/d/1WBrLIfL5AItBj_ic_e3cVMwoWRVwNdWL/view?usp=sharing">Ir al recurso</a>
+                </div>
+                <div class="qr-box"><img src="img/infografia-microservicios.png"  style="width: 80px; height: 80px;" alt="QR" ></div>
+            </div>
+            <div class="card panel-card resource-card">
+                <div>
+                    <h3>Video Explicativo de la temática:</h3>
+                    <a href="https://www.youtube.com/watch?v=p3FXICN3o58">Ir al recurso</a>
+                </div>
+                <div class="qr-box"><img src="img/qr-microservicios.png" style="width: 80px; height: 80px;"  alt="QR"></div>
+            </div>
+        </section>
+
+        <section id="bibliografia" class="pane">
+            <div class="section-intro">
+                <h2>Bibliografía</h2>
+            </div>
+            <div class="bibliography-list">
+                <article class="bibliography-item">Docker. (s. f.). Dockerfile reference. Recuperado el 17 de marzo de 2026, de https://docs.docker.com/reference/dockerfile/</article>
+                <article class="bibliography-item">FastAPI. (s. f.). FastAPI. Recuperado el 17 de marzo de 2026, de https://fastapi.tiangolo.com</article>
+                <article class="bibliography-item">Fielding, R. T. (2000). Architectural styles and the design of network-based software architectures [Tesis de doctorado, University of California, Irvine]. https://roy.gbiv.com/pubs/dissertation/top.htm</article>
+                <article class="bibliography-item">Fielding, R., Nottingham, M., y Reschke, J. (Junio de 2022). RFC 9110: HTTP semantics (RFC 9110, STD 97). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc9110.html</article>
+                <article class="bibliography-item">Lewis, J., y Fowler, M. (25 de marzo de 2014). Microservices: A definition of this new architectural term. MartinFowler.com. https://martinfowler.com/articles/microservices.html</article>
+                <article class="bibliography-item">MDN contributors. (4 de julio de 2025). HTTP request methods. MDN Web Docs. https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods</article>
+                <article class="bibliography-item">OpenAPI Initiative. (24 de octubre de 2024). OpenAPI specification v3.1.1. https://spec.openapis.org/oas/v3.1.1.html</article>
+                <article class="bibliography-item">Richardson, C. (2018). Microservices patterns: With examples in Java. Manning Publications. https://www.manning.com/books/microservices-patterns</article>
+            </div>
+            <footer class="bibliography-credit text-green-800">
+                <div class="bibliography-credit-label">Creado por:</div>
+                <div class="bibliography-credit-name">Centro de Innovaci&oacute;n en TIC para el apoyo de la Docencia CINTIA</div>
+                <div class="bibliography-credit-org">Universidad de Córdoba</div>
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        const links = Array.from(document.querySelectorAll('.nav-link'));
+        const panes = Array.from(document.querySelectorAll('.pane'));
+        const mobileNav = document.getElementById('mobile-nav');
+        const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+        let preferredVoice = null;
+        let activeSpeechPane = null;
+        let activeUtterance = null;
+
+        function switchPane(id) {
+            stopSpeech();
+            panes.forEach(pane => pane.classList.toggle('active', pane.id === id));
+            links.forEach(link => link.classList.toggle('active', link.dataset.target === id));
+            if (mobileNav && mobileNav.value !== id) mobileNav.value = id;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        links.forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                switchPane(this.dataset.target);
+            });
+        });
+
+        if (mobileNav) {
+            mobileNav.addEventListener('change', function() {
+                switchPane(this.value);
+            });
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = this.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(item => item.classList.toggle('active', item === this));
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === target));
+            });
+        });
+
+        document.querySelectorAll('[data-flip]').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+            });
+        });
+
+        function pickPreferredVoice() {
+            if (!synth) return null;
+            const voices = synth.getVoices();
+            if (!voices.length) return null;
+
+            const latinLangs = ['es-MX', 'es-US', 'es-CO', 'es-419'];
+            const latinNameHints = ['paulina', 'sabina', 'monica', 'microsoft dalia', 'margarita', 'helen', 'laura'];
+
+            const exactLatin = voices.find(voice => latinLangs.includes(voice.lang));
+            if (exactLatin) return exactLatin;
+
+            const latinByName = voices.find(voice => {
+                const name = voice.name.toLowerCase();
+                return latinNameHints.some(hint => name.includes(hint));
+            });
+            if (latinByName) return latinByName;
+
+            return voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('es')) || voices[0];
+        }
+
+        function updateSpeechNotes() {
+            const noteText = !synth
+                ? 'Lectura por voz no disponible en este navegador.'
+                : preferredVoice
+                    ? 'Voz: ' + preferredVoice.name + ' (' + preferredVoice.lang + ')'
+                    : 'Voz: Espanol del sistema';
+
+            document.querySelectorAll('.speech-note').forEach(note => {
+                note.textContent = noteText;
+                note.classList.toggle('unsupported', !synth);
+            });
+        }
+
+        function createSpeechControls(pane) {
+            const controls = document.createElement('div');
+            controls.className = 'speech-controls';
+            controls.dataset.speechPane = pane.id;
+            controls.innerHTML =
+                '<button type="button" class="speech-btn play">Leer</button>' +
+                '<button type="button" class="speech-btn pause" disabled>Pausar</button>' +
+                '<button type="button" class="speech-btn stop" disabled>Detener</button>' +
+                '<div class="speech-rate-wrap">' +
+                    '<label>Velocidad:</label>' +
+                    '<input type="range" class="speech-rate" min="0.7" max="1.5" step="0.1" value="1">' +
+                '</div>' +
+                '<div class="speech-note"></div>';
+
+            const intro = pane.querySelector('.section-intro');
+            if (intro && intro.nextSibling) {
+                pane.insertBefore(controls, intro.nextSibling);
+            } else {
+                pane.insertBefore(controls, pane.firstChild);
+            }
+        }
+
+        panes.forEach(createSpeechControls);
+
+        function getPaneSpeechText(pane) {
+            const clone = pane.cloneNode(true);
+            clone.querySelectorAll('.speech-controls, script, style, button, input, select, textarea').forEach(node => node.remove());
+
+            clone.querySelectorAll('.flip-card').forEach(card => {
+                const title = card.querySelector('.flip-front .flip-title');
+                const back = card.querySelector('.flip-back p');
+                const replacement = document.createElement('p');
+                replacement.textContent = title && back
+                    ? title.textContent.trim() + '. ' + back.textContent.trim()
+                    : card.textContent.trim();
+                card.replaceWith(replacement);
+            });
+
+            const text = (clone.innerText || clone.textContent || '')
+                .replace(/\s+/g, ' ')
+                .replace(/`/g, '')
+                .trim();
+
+            return text;
+        }
+
+        function updateSpeechButtons() {
+            document.querySelectorAll('.speech-controls').forEach(ctrl => {
+                const isActive = ctrl.dataset.speechPane === activeSpeechPane && synth && synth.speaking;
+                const isPaused = isActive && synth.paused;
+                ctrl.querySelector('.speech-btn.play').disabled = !synth;
+                ctrl.querySelector('.speech-btn.pause').disabled = !isActive || isPaused;
+                ctrl.querySelector('.speech-btn.stop').disabled = !isActive;
+            });
+        }
+
+        function stopSpeech() {
+            if (!synth) return;
+            synth.cancel();
+            activeSpeechPane = null;
+            activeUtterance = null;
+            updateSpeechButtons();
+        }
+
+        function startSpeech(paneId) {
+            if (!synth) return;
+            const pane = document.getElementById(paneId);
+            if (!pane) return;
+
+            const text = getPaneSpeechText(pane);
+            if (!text) return;
+
+            if (synth.speaking) synth.cancel();
+
+            const rateInput = document.querySelector('.speech-controls[data-speech-pane="' + paneId + '"] .speech-rate');
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = preferredVoice ? preferredVoice.lang : 'es-ES';
+            utterance.rate = rateInput ? Number(rateInput.value) : 1;
+            utterance.pitch = 1;
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.onend = function() {
+                activeSpeechPane = null;
+                activeUtterance = null;
+                updateSpeechButtons();
+            };
+
+            utterance.onerror = function() {
+                activeSpeechPane = null;
+                activeUtterance = null;
+                updateSpeechButtons();
+            };
+
+            activeSpeechPane = paneId;
+            activeUtterance = utterance;
+            synth.speak(utterance);
+            updateSpeechButtons();
+        }
+
+        function setupSpeech() {
+            if (synth) {
+                preferredVoice = pickPreferredVoice();
+                if (typeof synth.onvoiceschanged !== 'undefined') {
+                    synth.onvoiceschanged = function() {
+                        preferredVoice = pickPreferredVoice();
+                        updateSpeechNotes();
+                    };
+                }
+            }
+
+            updateSpeechNotes();
+            updateSpeechButtons();
+
+            document.querySelectorAll('.speech-controls').forEach(ctrl => {
+                const paneId = ctrl.dataset.speechPane;
+                const playBtn = ctrl.querySelector('.speech-btn.play');
+                const pauseBtn = ctrl.querySelector('.speech-btn.pause');
+                const stopBtn = ctrl.querySelector('.speech-btn.stop');
+
+                playBtn.addEventListener('click', function() {
+                    if (!synth) return;
+                    if (activeSpeechPane === paneId && synth.paused) {
+                        synth.resume();
+                        updateSpeechButtons();
+                        return;
+                    }
+                    startSpeech(paneId);
+                });
+
+                pauseBtn.addEventListener('click', function() {
+                    if (!synth || activeSpeechPane !== paneId || !synth.speaking) return;
+                    synth.pause();
+                    updateSpeechButtons();
+                });
+
+                stopBtn.addEventListener('click', function() {
+                    stopSpeech();
+                });
+
+                ctrl.querySelector('.speech-rate').addEventListener('input', function() {
+                    if (activeSpeechPane === paneId && activeUtterance && synth && synth.speaking) {
+                        const wasPaused = synth.paused;
+                        startSpeech(paneId);
+                        if (wasPaused) synth.pause();
+                    }
+                });
+            });
+        }
+
+        setupSpeech();
+
+        const endpointState = {
+            action: 'Listar',
+            method: 'GET',
+            resource: '/v1/productos',
+            status: '200'
+        };
+
+        function updateEndpointPreview() {
+            const preview = document.getElementById('endpoint-preview');
+            if (!preview) return;
+            const map = {
+                'Listar': 'Consulta una colección de recursos.',
+                'Consultar': 'Consulta un recurso específico por identificador.',
+                'Crear': 'Envía datos para registrar un nuevo recurso.',
+                'Actualizar': 'Modifica un recurso existente.',
+                'Eliminar': 'Solicita borrar un recurso.'
+            };
+
+            preview.innerHTML =
+                '<span class="muted">Acción seleccionada</span>\n' +
+                endpointState.action + '\n\n' +
+                '<span class="muted">Propuesta</span>\n' +
+                '<span class="good">' + endpointState.method + '</span> ' + endpointState.resource + '\n\n' +
+                '<span class="muted">Respuesta esperada</span>\n' +
+                '<span class="warn">HTTP ' + endpointState.status + '</span>\n\n' +
+                '<span class="muted">Interpretación</span>\n' +
+                map[endpointState.action] + '\n';
+        }
+
+        document.querySelectorAll('[data-group]').forEach(group => {
+            group.addEventListener('click', function(event) {
+                const btn = event.target.closest('.choice-btn');
+                if (!btn) return;
+                this.querySelectorAll('.choice-btn').forEach(item => item.classList.remove('selected'));
+                btn.classList.add('selected');
+                endpointState[this.dataset.group] = btn.dataset.value;
+                updateEndpointPreview();
+            });
+        });
+
+        updateEndpointPreview();
+
+        let selectedMatch = null;
+        const matchFeedback = document.getElementById('match-feedback');
+        const matchItems = document.querySelectorAll('.match-item');
+        const matchTargets = document.querySelectorAll('.match-target');
+        let matchCount = 0;
+
+        matchItems.forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.classList.contains('done')) return;
+                matchItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMatch = this;
+                matchFeedback.className = 'feedback info show';
+                matchFeedback.textContent = 'Ahora selecciona la definición correspondiente.';
+            });
+        });
+
+        matchTargets.forEach(target => {
+            target.addEventListener('click', function() {
+                if (!selectedMatch || this.classList.contains('done')) return;
+                if (selectedMatch.dataset.id === this.dataset.id) {
+                    selectedMatch.classList.remove('selected');
+                    selectedMatch.classList.add('done');
+                    this.classList.add('done');
+                    matchCount += 1;
+                    selectedMatch = null;
+                    if (matchCount === 4) {
+                        matchFeedback.className = 'feedback success show';
+                        matchFeedback.textContent = 'Excelente. Relacionaste correctamente todos los conceptos.';
+                    } else {
+                        matchFeedback.className = 'feedback success show';
+                        matchFeedback.textContent = 'Correcto. Continúa con el siguiente par.';
+                    }
+                } else {
+                    this.classList.add('selected');
+                    setTimeout(() => this.classList.remove('selected'), 350);
+                    matchFeedback.className = 'feedback error show';
+                    matchFeedback.textContent = 'Esa relación no corresponde. Intenta de nuevo.';
+                }
+            });
+        });
+
+        const simulatorState = {
+            method: '',
+            endpoint: '',
+            status: ''
+        };
+
+        function renderSimulator() {
+            const requestLine = document.getElementById('sim-request-line');
+            const responseLine = document.getElementById('sim-response-line');
+            const jsonLine = document.getElementById('sim-json-line');
+            if (!requestLine || !responseLine || !jsonLine) return;
+
+            requestLine.textContent = (simulatorState.method || '[método]') + ' ' + (simulatorState.endpoint || '[endpoint]');
+            responseLine.textContent = 'Respuesta esperada: ' + (simulatorState.status || '[código]');
+
+            if (simulatorState.method === 'GET' && simulatorState.endpoint === '/v1/productos') {
+                jsonLine.textContent = 'JSON esperado: [{"id":1,"nombre":"Cuaderno"},{"id":2,"nombre":"Lapicero"}]';
+            } else if (!simulatorState.method && !simulatorState.endpoint) {
+                jsonLine.textContent = 'JSON esperado: [...]';
+            } else {
+                jsonLine.textContent = 'JSON esperado: depende de la combinación elegida';
+            }
+        }
+
+        document.querySelectorAll('[data-sim-group]').forEach(group => {
+            group.addEventListener('click', function(event) {
+                const button = event.target.closest('button');
+                if (!button) return;
+                this.querySelectorAll('button').forEach(item => item.classList.remove('selected'));
+                button.classList.add('selected');
+                simulatorState[this.dataset.simGroup] = button.dataset.value;
+                renderSimulator();
+            });
+        });
+
+        function evaluateSimulator() {
+            const feedback = document.getElementById('scenario-feedback');
+            feedback.classList.add('show');
+
+            if (!simulatorState.method || !simulatorState.endpoint || !simulatorState.status) {
+                feedback.className = 'feedback info show';
+                feedback.innerHTML = 'Aún faltan decisiones. Completa el método, el endpoint y el código esperado.';
+                return;
+            }
+
+            const isCorrect =
+                simulatorState.method === 'GET' &&
+                simulatorState.endpoint === '/v1/productos' &&
+                simulatorState.status === '200';
+
+            if (isCorrect) {
+                feedback.className = 'feedback success show';
+                feedback.innerHTML = '<strong>Correcto.</strong> Para consultar una colección de productos, la combinación adecuada es <code>GET /v1/productos</code> con respuesta <code>200 OK</code>. La API debería devolver una lista en JSON.';
+            } else {
+                feedback.className = 'feedback error show';
+                feedback.innerHTML = '<strong>Revisa la combinación.</strong> Si el cliente quiere consultar una colección, normalmente se usa <code>GET</code>; si consulta productos, el recurso esperado es <code>/v1/productos</code>; y si la consulta sale bien, la respuesta típica es <code>200 OK</code>.';
+            }
+        }
+
+        function resetSimulator() {
+            simulatorState.method = '';
+            simulatorState.endpoint = '';
+            simulatorState.status = '';
+            document.querySelectorAll('[data-sim-group] button').forEach(button => button.classList.remove('selected'));
+            renderSimulator();
+            const feedback = document.getElementById('scenario-feedback');
+            feedback.className = 'feedback info show';
+            feedback.innerHTML = 'Selecciona una opción en cada paso para construir la solicitud de la API.';
+        }
+
+        renderSimulator();
+
+        const quizQuestions = [
+            ['En una arquitectura de microservicios, ¿qué significa “microservicio”?', ['Una aplicación completa en un solo servidor', 'Un servicio pequeño con responsabilidad clara que expone una API', 'Una base de datos compartida', 'Un archivo Dockerfile'], 1],
+            ['¿Cuál es el objetivo principal de una API REST?', ['Dibujar diagramas', 'Permitir comunicación entre cliente y servicio usando HTTP', 'Reemplazar la base de datos', 'Eliminar el uso de JSON'], 1],
+            ['¿Qué representa un endpoint?', ['El computador del usuario', 'La ruta URL para acceder a un recurso', 'El lenguaje de programación', 'El sistema operativo'], 1],
+            ['Si quieres consultar la lista de productos, ¿qué método es el más apropiado?', ['POST', 'GET', 'DELETE', 'PATCH'], 1],
+            ['¿Qué código de estado es más común cuando un recurso no existe?', ['201', '404', '200', '500'], 1],
+            ['¿Qué describe un Dockerfile?', ['Cómo construir una imagen para ejecutar el servicio', 'Cómo detener contenedores automáticamente', 'Cómo medir CPU', 'Cómo cambiar el navegador'], 0],
+            ['En REST, ¿qué significa “stateless”?', ['Que el servidor no responde', 'Que cada petición trae lo necesario y no depende de peticiones anteriores', 'Que solo funciona con GET', 'Que siempre devuelve 500'], 1],
+            ['¿Qué ventaja típica ofrecen los microservicios frente al monolito?', ['Más simple en coordinación siempre', 'Despliegue independiente por servicio', 'Obliga a una sola base de datos', 'Elimina la necesidad de probar'], 1],
+            ['¿Cuál comando se usa para ejecutar un contenedor a partir de una imagen?', ['docker build', 'docker run', 'docker ps', 'docker logs'], 1],
+            ['En el ejemplo, ¿para qué sirve -p 8080:8000?', ['Para borrar la imagen', 'Para publicar el puerto del contenedor en el host', 'Para crear un volumen', 'Para cambiar el código'], 1]
+        ];
+
+        const quizContainer = document.getElementById('quiz');
+        quizQuestions.forEach((item, idx) => {
+            const [question, options, answer] = item;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'quiz-question';
+            wrapper.dataset.answer = answer;
+            wrapper.innerHTML = '<p><strong>' + (idx + 1) + '.</strong> ' + question + '</p>' +
+                options.map((option, optionIndex) =>
+                    '<label class="quiz-option"><input type="radio" name="q' + (idx + 1) + '" value="' + optionIndex + '"> ' + option + '</label>'
+                ).join('');
+            quizContainer.appendChild(wrapper);
+        });
+
+        function checkQuiz() {
+            const questions = Array.from(document.querySelectorAll('.quiz-question'));
+            let score = 0;
+
+            questions.forEach(question => {
+                const answer = question.dataset.answer;
+                const selected = question.querySelector('input:checked');
+                question.style.borderColor = '#dcfce7';
+                if (selected && selected.value === answer) {
+                    score += 1;
+                    question.style.borderColor = '#22c55e';
+                } else {
+                    question.style.borderColor = '#fca5a5';
+                }
+            });
+
+            const result = document.getElementById('quiz-result');
+            const percent = Math.round((score / questions.length) * 100);
+            result.classList.add('show');
+
+            if (percent >= 80) {
+                result.style.background = '#dcfce7';
+                result.style.color = '#166534';
+                result.innerHTML = '<strong>Resultado:</strong> ' + score + '/' + questions.length + ' (' + percent + '%). Tienes una comprensión sólida del tema.';
+            } else if (percent >= 60) {
+                result.style.background = '#fef3c7';
+                result.style.color = '#92400e';
+                result.innerHTML = '<strong>Resultado:</strong> ' + score + '/' + questions.length + ' (' + percent + '%). Vas bien, pero conviene repasar métodos HTTP, endpoints y códigos.';
+            } else {
+                result.style.background = '#fee2e2';
+                result.style.color = '#991b1b';
+                result.innerHTML = '<strong>Resultado:</strong> ' + score + '/' + questions.length + ' (' + percent + '%). Te recomiendo volver al contenido y repetir el quiz.';
+            }
+        }
+
+        function resetQuiz() {
+            document.querySelectorAll('#quiz input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.quiz-question').forEach(question => question.style.borderColor = '#dcfce7');
+            const result = document.getElementById('quiz-result');
+            result.classList.remove('show');
+            result.innerHTML = '';
+        }
+    </script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
+

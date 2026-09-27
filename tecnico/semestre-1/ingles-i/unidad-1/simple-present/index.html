@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OVA: Simple Present</title>
+  <link rel="stylesheet" href="tailwind.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{font-family:'Poppins',sans-serif}
+    .sidebar-link{transition:all .3s ease;border-left:4px solid transparent}
+    .sidebar-link.active,.sidebar-link:hover{background:#e6f4ea;color:#166534;border-left-color:#22c55e}
+    .content-pane{display:none;animation:fadeIn .5s ease-in-out}
+    .content-pane.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .quiz-option:hover{background:#f0fdf4}
+    .quiz-option.selected{background:#dcfce7;border-color:#22c55e}
+    .drag-item{cursor:grab}
+    .drop-zone{min-height:48px}
+    .drop-zone.filled{background:#ecfdf5}
+    .sortable-token{cursor:grab}
+    .token-bin{min-height:52px}
+    .speak-btn{transition:transform .08s ease}
+    .speak-btn:active{transform:scale(.92)}
+    .pill{border:1px dashed #86efac}
+    .tag{border:1px solid #d1fae5}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    code{background:#f1f5f9;padding:.1rem .35rem;border-radius:.35rem}
+    /* Estilos para el sidebar estático */
+    .sticky-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    
+    /* Scrollbar personalizado para el sidebar */
+    .sticky-sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sticky-sidebar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    
+    .sticky-sidebar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    
+    .sticky-sidebar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+  </style>
+</head>
+<body class="bg-slate-50">
+
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col sticky-sidebar"> 
+    <div class="p-4">
+      <div style="width:150px;height:150px" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500">
+        <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+      </div>
+    </div>
+    <nav class="mt-6 flex-1">
+      <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+      <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+      <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+      <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+      <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+      <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+      <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+    <!-- Mobile header -->
+    <div class="md:hidden mb-6">
+      <select id="mobile-nav" class="w-full p-2 border rounded-md bg-white shadow-sm">
+        <option value="introduccion">🚀 Introducción</option>
+        <option value="objetivos">🎯 Objetivos</option>
+        <option value="contenido">📚 Contenido</option>
+        <option value="actividades">✍️ Actividades</option>
+        <option value="evaluacion">✔️ Evaluación</option>
+        <option value="recursos">📖 Recursos</option>
+        <option value="bibliografia">📚 Bibliografía</option>
+      </select>
+    </div>
+
+    <!-- Introducción -->
+    <section id="introduccion" class="content-pane active">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Simple Present</h2>
+      <p class="text-slate-700 leading-relaxed mb-4">
+        En esta sección aprenderás uno de los tiempos verbales más importantes y usados en inglés: el <b>presente simple</b>!
+      </p>
+      
+      <div class="mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-3">📌 ¿Para qué sirve?</h3>
+        <p class="text-slate-700 mb-3">El Simple Present se utiliza para hablar de:</p>
+        <ul class="list-disc ml-6 text-slate-700 space-y-1">
+          <li>Rutinas y hábitos diarios → <em>I wake up at 6:00 a.m.</em></li>
+          <li>Hechos o verdades universales → <em>The sun rises in the east.</em></li>
+          <li>Situaciones permanentes → <em>She lives in Montería.</em></li>
+        </ul>
+      </div>
+
+      <div class="mb-6">
+        <p class="text-slate-700 mb-3">
+          💡 Es como el "lenguaje de la rutina": te permite contar lo que haces todos los días, describir cómo es tu vida y hablar de costumbres en general.
+        </p>
+        <p class="text-slate-700 mb-3">En este OVA lo aprenderás paso a paso, con:</p>
+        <ul class="list-disc ml-6 text-slate-700 space-y-1">
+          <li>Explicaciones sencillas y ejemplos de tu vida escolar 👩‍🏫.</li>
+          <li>Conexiones con la tecnología y programación 💻, como:
+            <ul class="list-disc ml-6 mt-1 space-y-1">
+              <li><em>I check my email every morning.</em></li>
+              <li><em>We study programming on Saturdays.</em></li>
+            </ul>
+          </li>
+          <li>Actividades interactivas para que lo pongas en práctica 🎮.</li>
+        </ul>
+      </div>
+
+      <div class="p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg text-green-900">
+        ✨ Al final, podrás usar el Simple Present para expresar tu rutina diaria completa en inglés y hasta describir procesos tecnológicos, como si fueran pasos de un algoritmo.
+      </div>
+    </section>
+
+    <!-- Objetivos -->
+    <section id="objetivos" class="content-pane">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Learning goals</h2>
+      <ul class="space-y-4">
+        <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="mr-3 text-2xl text-green-700">🧠</span><span>Comprender el uso del Simple Present como el tiempo verbal que nos permite hablar de rutinas, hábitos y hechos que son parte de la vida diaria de un estudiante.</span></li>
+        <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="mr-3 text-2xl text-green-700">🧩</span><span>Construir oraciones afirmativas en Simple Present, aprendiendo a usar correctamente los verbos en primera y tercera persona: <em>I play football / She plays football.</em></span></li>
+        <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="mr-3 text-2xl text-green-700">🗣️</span><span>Formar oraciones negativas en Simple Present, utilizando los auxiliares do not (don't) y does not (doesn't) para expresar lo que no hacemos: <em>I don't watch TV in the morning / He doesn't like coffee.</em></span></li>
+        <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="mr-3 text-2xl text-green-700">❓</span><span>Elaborar preguntas en Simple Present con los auxiliares Do y Does para pedir y dar información sobre rutinas: <em>Do you go to school every day? / Does she study programming on Saturdays?</em></span></li>
+        <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="mr-3 text-2xl text-green-700">📊</span><span>Integrar adverbios de frecuencia en oraciones en Simple Present para describir con más detalle la regularidad de nuestras acciones: <em>I always brush my teeth / She sometimes checks her email.</em></span></li>
+      </ul>
+    </section>
+
+    <!-- Contenido -->
+    <section id="contenido" class="content-pane">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Simple Present</h2>
+
+      <div class="mb-6">
+        <p class="text-slate-700 leading-relaxed mb-4">
+          📖 El Simple Present es el tiempo verbal que usamos para hablar de lo que hacemos de manera habitual y de cosas que siempre son ciertas. Nos permite describir rutinas diarias, actividades escolares, hobbies o incluso costumbres familiares. También se utiliza para expresar hechos generales que no cambian. Por ejemplo: "We have English class on Mondays" (rutina escolar), "My father works in a hospital" (situación permanente), o "Water freezes at 0°C" (hecho científico). Es como el tiempo del "siempre" y del "normalmente", porque nos ayuda a contar lo que forma parte de nuestra vida de todos los días.
+        </p>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">Affirmative structure:</h3>
+        <p class="text-slate-700 mb-2">
+          Sujeto + Verbo (forma base)<br>
+          En tercera persona singular (he, she, it) añadimos -s / -es al verbo.
+        </p>
+        <p class="text-slate-700 mb-2"><b>Ejemplos:</b></p>
+        <ul class="grid sm:grid-cols-2 gap-3">
+          <li class="p-3 bg-white rounded border flex items-center justify-between">
+            <span>I go to school every day.</span>
+            <button class="speak-btn bg-green-600 text-white rounded px-3 py-1" onclick="speak('I go to school every day')">🔊</button>
+          </li>
+          <li class="p-3 bg-white rounded border flex items-center justify-between">
+            <span>She <u>studies</u> programming on Saturdays.</span>
+            <button class="speak-btn bg-green-600 text-white rounded px-3 py-1" onclick="speak('She studies programming on Saturdays')">🔊</button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">Negative structure:</h3>
+        <p class="text-slate-700 mb-2">
+          Sujeto + do not (don't) / does not (doesn't) + Verbo (base)<br>
+          Usamos don't con I/you/we/they y doesn't con he/she/it.
+        </p>
+        <p class="text-slate-700 mb-2"><b>Ejemplos:</b></p>
+        <ul class="grid sm:grid-cols-2 gap-3">
+          <li class="p-3 bg-white rounded border flex items-center justify-between">
+            <span>I <u>don't</u> watch TV in the morning.</span>
+            <button class="speak-btn bg-green-600 text-white rounded px-3 py-1" onclick="speak('I do not watch TV in the morning')">🔊</button>
+          </li>
+          <li class="p-3 bg-white rounded border flex items-center justify-between">
+            <span>He <u>doesn't</u> like vegetables.</span>
+            <button class="speak-btn bg-green-600 text-white rounded px-3 py-1" onclick="speak('He does not like vegetables')">🔊</button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">Interrogative structure:</h3>
+        <p class="text-slate-700 mb-2">
+          Do / Does + Sujeto + Verbo (base) + ?<br>
+          Usamos Do con I/you/we/they y Does con he/she/it.
+        </p>
+        <p class="text-slate-700 mb-2"><b>Ejemplos:</b></p>
+        <ul class="grid sm:grid-cols-2 gap-3">
+          <li class="p-3 bg-white rounded border flex items-center justify-between">
+            <span><b>Do</b> you play soccer after school?</span>
+            <button class="speak-btn bg-green-600 text-white rounded px-3 py-1" onclick="speak('Do you play soccer after school?')">🔊</button>
+          </li>
+          <li class="p-3 bg-white rounded border flex items-center justify-between">
+            <span><b>Does</b> she check her email every day?</span>
+            <button class="speak-btn bg-green-600 text-white rounded px-3 py-1" onclick="speak('Does she check her email every day?')">🔊</button>
+          </li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- Actividades -->
+    <section id="actividades" class="content-pane">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+
+      <!-- Drag & Drop: Affirmative / Negative / Question -->
+      <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">1) Clasifica las oraciones</h3>
+        <p class="text-slate-600 mb-4">Arrastra cada oración a su categoría: <b>Afirmativa</b>, <b>Negativa</b> o <b>Pregunta</b>.</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div id="drag-bank" class="grid grid-cols-1 gap-2"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div class="drop-zone p-3 bg-green-50 border rounded" data-type="Affirmative"><b>Afirmativa</b></div>
+            <div class="drop-zone p-3 bg-green-50 border rounded" data-type="Negative"><b>Negativa</b></div>
+            <div class="drop-zone p-3 bg-green-50 border rounded" data-type="Question"><b>Pregunta</b></div>
+          </div>
+        </div>
+        <button id="check-sort" class="mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700">Verificar</button>
+        <div id="sort-result" class="mt-3 font-medium"></div>
+      </div>
+
+      <!-- True/False with feedback -->
+      <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">2) Verdadero o Falso</h3>
+        <p class="text-slate-600 mb-3">Marca V o F y lee la explicación.</p>
+        <div id="tf-list" class="space-y-3"></div>
+        <button id="check-tf" class="mt-3 bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700">Comprobar</button>
+        <div id="tf-result" class="mt-3 font-medium"></div>
+      </div>
+
+      <!-- Cloze -->
+      <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">3) Completa con don’t / doesn’t / do / does</h3>
+        <div id="cloze-list" class="space-y-3"></div>
+        <button id="check-cloze" class="mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700">Comprobar</button>
+        <div id="cloze-result" class="mt-3 font-medium"></div>
+      </div>
+
+      <!-- Ordering -->
+      <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mb-6">
+        <h3 class="text-xl font-bold text-green-700 mb-2">4) Ordena la pregunta</h3>
+        <p class="text-slate-600 mb-3">Arrastra las palabras para formar preguntas correctas.</p>
+        <div id="order-list" class="space-y-4"></div>
+        <button id="check-order" class="mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700">Comprobar</button>
+        <div id="order-result" class="mt-3 font-medium"></div>
+      </div>
+
+    </section>
+
+    <!-- Evaluación -->
+    <section id="evaluacion" class="content-pane">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <p class="text-slate-600 mb-4">Responde todas las preguntas. Tienes ítems de selección múltiple, completar y producción.</p>
+        <div id="quiz-container" class="space-y-6"></div>
+        <button id="submit-quiz-btn" class="mt-2 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Finalizar evaluación</button>
+        <button id="reset-quiz-btn" class="mt-2 ml-2 bg-slate-100 text-slate-800 font-semibold py-2 px-6 rounded-lg hover:bg-slate-200">Reintentar</button>
+        <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+
+        <!-- Producción escrita -->
+        <div class="mt-8 border-t pt-6">
+          <h3 class="text-xl font-bold text-green-700 mb-2">📝 Ejercicio de Producción Escrita – My Routine</h3>
+          <p class="text-slate-600 mb-2"><strong>Instrucciones:</strong></p>
+          <p class="text-slate-600 mb-4">
+            Imagina que un amigo tuyo de otro país quiere saber cómo es tu vida como estudiante en la semana y qué haces los sábados cuando estudias programación. Escribe un pequeño texto de 8 a 10 oraciones en Simple Present.
+          </p>
+          <textarea id="writing" class="w-full border rounded p-3" rows="6" placeholder="Ej.: I wake up at 6:00 a.m. every day. I go to school from Monday to Friday. I study programming on Saturdays. I don't watch TV in the morning..."></textarea>
+          <div class="text-sm text-slate-500 mt-2">Guárdalo o copia/pega en tu plataforma para envío.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recursos -->
+    <section id="recursos" class="content-pane">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+      <ul class="space-y-4">
+        <li class="bg-white p-4 rounded-lg shadow-md border-l-4 border-green-500">
+          <h3 class="font-bold text-green-700">British Council – Present Simple</h3>
+          <a class="underline text-slate-700 hover:text-green-700" href="https://learnenglish.britishcouncil.org/grammar/a1-a2-grammar/present-simple" target="_blank">Ir al recurso</a>
+        </li>
+        <li class="bg-white p-4 rounded-lg shadow-md border-l-4 border-green-500">
+          <h3 class="font-bold text-green-700">YouGlish – Pronunciación</h3>
+          <a class="underline text-slate-700 hover:text-green-700" href="https://youglish.com/" target="_blank">Ir al recurso</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Bibliografía -->
+    <section id="bibliografia" class="content-pane">
+      <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+      <div class="space-y-6">
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+          <span class="block text-slate-700">Flores Kastanis, P. (2016). <i>English 1</i> (2.ª ed.). Grupo Editorial Patria.</span>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+          <span class="block text-slate-700">Pulido Méndez, P. (2022). <i>Comunicación en lenguas extranjeras (inglés) N2: FCOV05</i>. Editorial Tutor Formación.</span>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+          <span class="block text-slate-700">British Council. (2023). <i>Present Simple</i>. https://learnenglish.britishcouncil.org</span>
+        </div>
+      </div>
+
+      <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+        <p class="text-slate-600 font-medium">Creado por:</p>
+        <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+        <p class="text-green-800 font-bold text-lg">Universidad de Córdoba</p>
+      </footer>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ===== Navegación panes ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('.sidebar-link');
+  const panes = document.querySelectorAll('.content-pane');
+  const mobile = document.getElementById('mobile-nav');
+
+  function switchPane(id){
+    console.log('Switching to:', id); // Debug
+    panes.forEach(p=>p.classList.remove('active'));
+    const targetPane = document.getElementById(id);
+    if(targetPane) {
+      targetPane.classList.add('active');
+    } else {
+      console.error('Pane not found:', id);
+    }
+    links.forEach(l=>l.classList.toggle('active', l.dataset.target===id));
+    if(mobile && mobile.value!==id) mobile.value=id;
+  }
+  
+  // Asegurar que la introducción esté visible al cargar
+  switchPane('introduccion');
+  
+  links.forEach(l=>l.addEventListener('click', e=>{
+    e.preventDefault();
+    switchPane(l.dataset.target);
+  }));
+  mobile && mobile.addEventListener('change', e=>switchPane(e.target.value));
+});
+
+/* ===== TTS ===== */
+function speak(text){
+  try{
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='en-US';
+    speechSynthesis.speak(u);
+  }catch(e){
+    alert('Tu navegador no permite pronunciación automática.');
+  }
+}
+
+/* ===== Micro quiz ===== */
+const MICRO_Q = [
+  {q:'She _________ English every day.', opts:['study','studies','studying','studied'], a:'studies'},
+  {q:'They _________ breakfast at 7:00 a.m.', opts:['have','has','having','had'], a:'have'},
+  {q:'_________ you like pizza?', opts:['Do','Does','Did','Doing'], a:'Do'},
+  {q:'My brother doesn\'t _________ video games in the morning.', opts:['play','plays','playing','played'], a:'play'},
+  {q:'The sun _________ in the east.', opts:['rise','rises','rising','rised'], a:'rises'}
+];
+function renderMicroQuiz(){
+  const c=document.getElementById('micro-quiz'); if(!c) return;
+  c.innerHTML='';
+  MICRO_Q.forEach((item,i)=>{
+    const block=document.createElement('div');
+    block.className='p-3 border rounded';
+    let opts='';
+    item.opts.forEach(o=>{
+      opts += `<div class="quiz-option p-2 border-2 border-slate-200 rounded cursor-pointer" data-value="${o}">${o}</div>`;
+    });
+    block.innerHTML=`
+      <p class="font-medium text-slate-800 mb-2">${i+1}. ${item.q}</p>
+      <div class="space-y-2">${opts}</div>
+      <div class="quiz-feedback mt-2 text-sm"></div>
+    `;
+    block.querySelectorAll('.quiz-option').forEach(opt=>{
+      opt.addEventListener('click',()=>{
+        block.querySelectorAll('.quiz-option').forEach(el=>el.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+    c.appendChild(block);
+  });
+}
+renderMicroQuiz();
+document.getElementById('micro-quiz-btn')?.addEventListener('click',()=>{
+  const blocks=document.querySelectorAll('#micro-quiz > div');
+  let score=0;
+  blocks.forEach((b,idx)=>{
+    const sel=b.querySelector('.quiz-option.selected');
+    const fb=b.querySelector('.quiz-feedback');
+    if(sel && sel.dataset.value===MICRO_Q[idx].a){
+      score++; fb.innerHTML = `<span class="text-green-700 font-semibold">✔️ Correcto</span>`;
+    }else{
+      fb.innerHTML = `<span class="text-red-700 font-semibold">❌ Revisa la regla.</span>`;
+    }
+  });
+  const res=document.getElementById('micro-quiz-res');
+  res.textContent=`Puntaje: ${score} / ${MICRO_Q.length}`;
+  res.className = score===MICRO_Q.length ? 'mt-3 font-medium text-green-700' : 'mt-3 font-medium text-red-700';
+});
+
+/* ===== Drag & Drop: clasificar ===== */
+const SORT_ITEMS = [
+  {text:'I wake up at 6:00 a.m. to get ready for school.', type:'Affirmative'},
+  {text:'She doesn\'t go to school on Saturdays because she studies programming.', type:'Negative'},
+  {text:'Do you check your email before starting class?', type:'Question'},
+  {text:'My classmates use the computer in the afternoon.', type:'Affirmative'},
+  {text:'We don\'t play video games during the programming lesson.', type:'Negative'},
+  {text:'Does he study programming every Saturday morning?', type:'Question'},
+  {text:'They usually have lunch at school after English class.', type:'Affirmative'}
+];
+function renderSort(){
+  const drag=document.getElementById('drag-bank'); if(!drag) return;
+  drag.innerHTML='';
+  SORT_ITEMS.forEach(s=>{
+    const el=document.createElement('div');
+    el.className='drag-item p-2 bg-white border rounded pill';
+    el.draggable=true; el.textContent=s.text; el.dataset.type=s.type;
+    el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',s.text); e.dataTransfer.setData('type',s.type);});
+    drag.appendChild(el);
+  });
+  document.querySelectorAll('.drop-zone').forEach(dz=>{
+    dz.addEventListener('dragover',e=>e.preventDefault());
+    dz.addEventListener('drop',e=>{
+      e.preventDefault();
+      const txt=e.dataTransfer.getData('text/plain');
+      const t=e.dataTransfer.getData('type');
+      const tag=document.createElement('div');
+      tag.className='px-2 py-1 bg-white rounded border text-slate-700 mt-1';
+      tag.textContent=txt;
+      tag.dataset.type=t;
+      dz.appendChild(tag);
+    });
+  });
+}
+renderSort();
+document.getElementById('check-sort')?.addEventListener('click',()=>{
+  const zones=document.querySelectorAll('.drop-zone');
+  let ok=0, total=0;
+  zones.forEach(z=>{
+    [...z.querySelectorAll('div')].forEach(child=>{
+      if(child.dataset && child.dataset.type){ total++; }
+      const correct = child.dataset?.type===z.dataset.type;
+      child.style.borderColor = correct ? '#22c55e' : '#ef4444';
+      if(correct) ok++;
+    });
+  });
+  const res=document.getElementById('sort-result');
+  res.textContent=`Correctas: ${ok} / ${total}`;
+  res.className = ok===total ? 'mt-3 font-medium text-green-700' : 'mt-3 font-medium text-red-700';
+});
+
+/* ===== True/False ===== */
+const TF = [
+  {stmt:'Con he/she/it el verbo lleva -s (o -es/-ies).', ans:true, exp:'Ej.: She studies, He goes.'},
+  {stmt:'Para negar con she se usa "don’t".', ans:false, exp:'Se usa "doesn’t" + verbo base.'},
+  {stmt:'Las preguntas con you usan "Does".', ans:false, exp:'Con you → Do you...?'},
+  {stmt:'Con doesn’t el verbo va con -s.', ans:false, exp:'Nunca: siempre va en forma base.'}
+];
+function renderTF(){
+  const c=document.getElementById('tf-list'); if(!c) return;
+  c.innerHTML='';
+  TF.forEach((row,i)=>{
+    const div=document.createElement('div');
+    div.className='p-3 border rounded flex items-center justify-between gap-3';
+    div.innerHTML=`
+      <div class="flex-1">${i+1}. ${row.stmt}</div>
+      <div class="flex items-center gap-2">
+        <label class="flex items-center gap-1"><input type="radio" name="tf-${i}" value="true"/> V</label>
+        <label class="flex items-center gap-1"><input type="radio" name="tf-${i}" value="false"/> F</label>
+      </div>
+      <div class="text-sm text-slate-500 tf-exp"></div>
+    `;
+    c.appendChild(div);
+  });
+}
+renderTF();
+document.getElementById('check-tf')?.addEventListener('click',()=>{
+  const rows=[...document.querySelectorAll('#tf-list > div')];
+  let ok=0;
+  rows.forEach((r,i)=>{
+    const val=(r.querySelector('input[type=radio]:checked')||{}).value;
+    const exp=r.querySelector('.tf-exp');
+    if(String(TF[i].ans)===val){ ok++; exp.innerHTML='<span class="text-green-700 font-semibold">✔️ Correcto.</span> '+TF[i].exp; }
+    else{ exp.innerHTML='<span class="text-red-700 font-semibold">❌ Revisa.</span> '+TF[i].exp; }
+  });
+  const res=document.getElementById('tf-result');
+  res.textContent=`Correctas: ${ok} / ${TF.length}`;
+  res.className = ok===TF.length ? 'mt-3 font-medium text-green-700' : 'mt-3 font-medium text-red-700';
+});
+
+/* ===== Cloze do/does/don’t/doesn’t ===== */
+const CLOZE = [
+  {text:'___ you study programming in the evening?', answer:'Do'},
+  {text:'He ___ go to class on Sundays.', answer:"doesn’t"},
+  {text:'She ___ check email at night.', answer:"doesn’t"},
+  {text:'___ she live in Lorica?', answer:'Does'},
+  {text:'We ___ ride a motorbike to class.', answer:"don’t"}
+];
+function renderCloze(){
+  const c=document.getElementById('cloze-list'); if(!c) return;
+  c.innerHTML='';
+  CLOZE.forEach((row,i)=>{
+    const div=document.createElement('div');
+    div.className='p-3 border rounded';
+    div.innerHTML=`
+      <label class="block mb-2 text-slate-800">${i+1}. ${row.text.replace('___', '<input class="cloze-input border rounded px-2 py-1 w-28" data-answer="'+row.answer+'">')}</label>
+      <div class="text-sm text-slate-500">Clue: interrogative form, negative form, negative form, interrogative form, negative form</div>
+    `;
+    c.appendChild(div);
+  });
+}
+renderCloze();
+document.getElementById('check-cloze')?.addEventListener('click',()=>{
+  const inputs=document.querySelectorAll('.cloze-input');
+  let ok=0;
+  inputs.forEach(inp=>{
+    const val=inp.value.trim().toLowerCase();
+    const ans=inp.dataset.answer.toLowerCase();
+    const correct = val===ans;
+    inp.style.borderColor = correct ? '#22c55e' : '#ef4444';
+    if(correct) ok++;
+  });
+  const res=document.getElementById('cloze-result');
+  res.textContent = `Correctas: ${ok} / ${inputs.length}`;
+  res.className = ok===inputs.length ? 'mt-3 font-medium text-green-700' : 'mt-3 font-medium text-red-700';
+});
+
+/* ===== Ordering preguntas ===== */
+const ORDER_ITEMS = [
+  {tokens:['Do','you','study','programming','at','night','?'], solution:'Do you study programming at night ?'},
+  {tokens:['Does','she','go','to','class','on','Mondays','?'], solution:'Does she go to class on Mondays ?'},
+  {tokens:['Where','do','you','have','lunch','?'], solution:'Where do you have lunch ?'}
+];
+function renderOrdering(){
+  const c=document.getElementById('order-list'); if(!c) return;
+  c.innerHTML='';
+  ORDER_ITEMS.forEach((row,idx)=>{
+    const box=document.createElement('div');
+    box.className='p-3 border rounded';
+    const bin=document.createElement('div');
+    bin.className='token-bin flex flex-wrap gap-2 p-2 bg-green-50 rounded';
+    bin.dataset.index=idx;
+
+    const pool=document.createElement('div');
+    pool.className='flex flex-wrap gap-2 p-2 mt-2 bg-white rounded border';
+    row.tokens.forEach(t=>{
+      const tok=document.createElement('span');
+      tok.className='sortable-token select-none px-3 py-1 bg-white rounded border shadow-sm';
+      tok.textContent=t;
+      tok.draggable=true;
+      tok.addEventListener('dragstart',e=>{
+        e.dataTransfer.setData('text/plain',t);
+        e.dataTransfer.setData('source','pool');
+      });
+      pool.appendChild(tok);
+    });
+
+    bin.addEventListener('dragover',e=>e.preventDefault());
+    bin.addEventListener('drop',e=>{
+      e.preventDefault();
+      const text=e.dataTransfer.getData('text/plain');
+      const lbl=document.createElement('span');
+      lbl.className='px-3 py-1 bg-white rounded border';
+      lbl.textContent=text;
+      lbl.draggable=true;
+      lbl.addEventListener('dragstart',ev=>{
+        ev.dataTransfer.setData('text/plain',text);
+        ev.dataTransfer.setData('source','bin');
+      });
+      bin.appendChild(lbl);
+    });
+
+    pool.addEventListener('dragover',e=>e.preventDefault());
+    pool.addEventListener('drop',e=>{
+      e.preventDefault();
+      const text=e.dataTransfer.getData('text/plain');
+      const from=e.dataTransfer.getData('source');
+      if(from==='bin'){
+        const lbl=[...bin.children].find(el=>el.textContent===text);
+        if(lbl){ pool.appendChild(lbl); }
+      }
+    });
+
+    box.innerHTML=`<p class="font-medium text-slate-800 mb-2">${idx+1}. Forma la pregunta correcta</p>`;
+    box.appendChild(bin);
+    box.appendChild(pool);
+    c.appendChild(box);
+  });
+}
+renderOrdering();
+
+document.getElementById('check-order')?.addEventListener('click',()=>{
+  const bins=document.querySelectorAll('.token-bin');
+  let ok=0;
+  bins.forEach((bin,i)=>{
+    const formed=[...bin.children].map(el=>el.textContent).join(' ');
+    const sol=ORDER_ITEMS[i].solution;
+    const correct = formed.trim()===sol.trim();
+    bin.style.border = correct ? '2px solid #22c55e' : '2px solid #ef4444';
+    if(correct) ok++;
+  });
+  const res=document.getElementById('order-result');
+  res.textContent = `Correctas: ${ok} / ${bins.length}`;
+  res.className = ok===bins.length ? 'mt-3 font-medium text-green-700' : 'mt-3 font-medium text-red-700';
+});
+
+/* ===== Speaking recorder ===== */
+let mediaRecorder, chunks=[];
+const startBtn=document.getElementById('rec-start');
+const stopBtn=document.getElementById('rec-stop');
+const statusEl=document.getElementById('rec-status');
+const outEl=document.getElementById('rec-audio');
+
+startBtn?.addEventListener('click', async ()=>{
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream);
+    chunks=[];
+    mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRecorder.onstop=()=>{
+      const blob=new Blob(chunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      outEl.innerHTML = `
+        <audio controls class="w-full mt-2"><source src="${url}" type="audio/webm"></audio>
+        <a class="inline-block mt-2 underline text-green-700" href="${url}" download="simple_present_speaking.webm">Descargar audio</a>
+      `;
+    };
+    mediaRecorder.start();
+    startBtn.disabled=true; stopBtn.disabled=false;
+    statusEl.textContent='Grabando... responde y di 3 oraciones en tercera persona.';
+  }catch(e){
+    alert('No se pudo acceder al micrófono. Revisa permisos del navegador.');
+  }
+});
+stopBtn?.addEventListener('click', ()=>{
+  if(mediaRecorder && mediaRecorder.state!=='inactive'){
+    mediaRecorder.stop();
+    startBtn.disabled=false; stopBtn.disabled=true;
+    statusEl.textContent='Grabación detenida.';
+  }
+});
+
+/* ===== Evaluación (18 ítems) ===== */
+const QUIZ = [
+  {type:'mcq', q:'Elige la afirmativa correcta:', opts:['He go to class.','He goes to class.','He going to class.','He is go to class.'], a:'He goes to class.', ok:'Correcto.', ko:'Tercera persona: goes.'},
+  {type:'mcq', q:'Negativa correcta:', opts:['She don’t study.','She doesn’t study.','She doesn’t studies.','She not study.'], a:'She doesn’t study.', ok:'Bien.', ko:'Con doesn’t el verbo va base.'},
+  {type:'mcq', q:'Pregunta Yes/No correcta:', opts:['Do she study?','Does she study?','Does she studies?','She does study?'], a:'Does she study?', ok:'Exacto.', ko:'Does + sujeto + base.'},
+  {type:'mcq', q:'Completa: They ___ programming at night.', opts:['study','studies','is study','are study'], a:'study', ok:'Correcto.', ko:'They + verbo base.'},
+  {type:'mcq', q:'Completa: He ___ lunch at noon.', opts:['have','has','having','haves'], a:'has', ok:'Muy bien.', ko:'He/She/It → has.'},
+  {type:'mcq', q:'Traduce: "¿Dónde estudias?"', opts:['Where do you study?','Where you study?','Where are you study?','Where does you study?'], a:'Where do you study?', ok:'Correcto.', ko:'Wh- + do + you.'},
+  {type:'mcq', q:'Selecciona la negativa correcta:', opts:['We doesn’t go to class.','We don’t go to class.','We not go to class.','We doesn’t goes to class.'], a:'We don’t go to class.', ok:'Bien.', ko:'We → don’t.'},
+  {type:'mcq', q:'Interrogativa correcta para Berástegui:', opts:['Does he go to class in Berástegui?','Do he go to class in Berástegui?','Does he goes to class in Berástegui?','He does go to class in Berástegui?'], a:'Does he go to class in Berástegui?', ok:'Perfecto.', ko:'Does + go (base).'},
+  {type:'mcq', q:'Completa: She ___ programming videos at night.', opts:['watch','watches','watchs','is watch'], a:'watches', ok:'Correcto.', ko:'Add -es after ch.'},
+  {type:'mcq', q:'Traduce: "Nosotros no estudiamos los domingos."', opts:['We don’t study on Sundays.','We doesn’t study on Sundays.','We not study on Sundays.','We do not studies on Sundays.'], a:'We don’t study on Sundays.', ok:'Muy bien.', ko:'We → don’t + base.'},
+  {type:'mcq', q:'Elige la mejor opción:', opts:['I studies programming.','I study programming.','I study programmings.','I am study programming.'], a:'I study programming.', ok:'Correcto.', ko:'I + base form.'},
+  {type:'mcq', q:'Traduce: "¿A qué hora almuerzas?"', opts:['What time you have lunch?','What time do you have lunch?','At what time do you has lunch?','When do you has lunch?'], a:'What time do you have lunch?', ok:'Bien.', ko:'Do you have (no has).'},
+  // Cloze dentro del banco
+  {type:'cloze', q:'___ you check email at night?', a:'Do', ok:'Correcto.', ko:'Con you: Do.'},
+  {type:'cloze', q:'He ___ go to class on Sundays.', a:"doesn’t", ok:'Bien.', ko:'He → doesn’t + base.'},
+  {type:'cloze', q:'___ she study in Lorica?', a:'Does', ok:'Perfecto.', ko:'She → Does.'},
+  {type:'cloze', q:'We ___ wake up at 6 a.m.', a:"don’t", ok:'Correcto.', ko:'We → don’t.'},
+  {type:'cloze', q:'She ___ lunch at noon.', a:'has', ok:'Exacto.', ko:'She → has.'},
+  {type:'mcq', q:'Selecciona la opción natural:', opts:['Do you study programming at night?','Are you study programming at night?','You study programming at night do?','Do you studies programming at night?'], a:'Do you study programming at night?', ok:'Excelente.', ko:'Do + you + base.'}
+];
+
+function renderQuiz(){
+  const c=document.getElementById('quiz-container'); if(!c) return;
+  c.innerHTML='';
+  QUIZ.forEach((item,idx)=>{
+    const block=document.createElement('div');
+    block.className='p-4 border rounded';
+    if(item.type==='mcq'){
+      let optionsHTML='';
+      item.opts.forEach(o=>{
+        optionsHTML += `<div class="quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer" data-value="${o}">${o}</div>`;
+      });
+      block.innerHTML = `
+        <p class="font-semibold mb-2">${idx+1}. ${item.q}</p>
+        <div class="space-y-2">${optionsHTML}</div>
+        <div class="quiz-feedback mt-2 text-sm"></div>
+      `;
+      block.querySelectorAll('.quiz-option').forEach(opt=>{
+        opt.addEventListener('click',()=>{
+          block.querySelectorAll('.quiz-option').forEach(el=>el.classList.remove('selected'));
+          opt.classList.add('selected');
+        });
+      });
+    }else if(item.type==='cloze'){
+      block.innerHTML = `
+        <p class="font-semibold mb-2">${idx+1}. ${item.q.replace('___', '<input class="quiz-cloze border rounded px-2 py-1 w-28" data-answer="'+item.a+'">')}</p>
+        <div class="quiz-feedback mt-2 text-sm"></div>
+      `;
+    }
+    c.appendChild(block);
+  });
+}
+renderQuiz();
+
+document.getElementById('submit-quiz-btn')?.addEventListener('click',()=>{
+  const blocks=[...document.querySelectorAll('#quiz-container > div')];
+  let score=0, total=QUIZ.length;
+  blocks.forEach((b,i)=>{
+    const item=QUIZ[i];
+    const fb=b.querySelector('.quiz-feedback');
+    if(item.type==='mcq'){
+      const sel=b.querySelector('.quiz-option.selected');
+      if(sel && sel.dataset.value===item.a){
+        score++; fb.innerHTML=`<span class="text-green-700 font-semibold">✔️ ${item.ok}</span>`;
+      }else{
+        fb.innerHTML=`<span class="text-red-700 font-semibold">❌ ${item.ko}</span>`;
+      }
+    }else{
+      const inp=b.querySelector('.quiz-cloze');
+      if(inp && inp.value.trim().toLowerCase()===String(item.a).toLowerCase()){
+        score++; fb.innerHTML=`<span class="text-green-700 font-semibold">✔️ ${item.ok}</span>`;
+        inp.style.borderColor='#22c55e';
+      }else{
+        fb.innerHTML=`<span class="text-red-700 font-semibold">❌ ${item.ko}</span>`;
+        if(inp) inp.style.borderColor='#ef4444';
+      }
+    }
+  });
+  const res=document.getElementById('quiz-result');
+  res.textContent = `Tu puntuación es: ${score} de ${total}.`;
+  res.className = score/total>=0.7 ? 'mt-4 text-lg font-bold text-green-700' : 'mt-4 text-lg font-bold text-red-700';
+});
+document.getElementById('reset-quiz-btn')?.addEventListener('click',()=>{
+  renderQuiz();
+  document.getElementById('quiz-result').textContent='';
+});
+</script>
+  <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

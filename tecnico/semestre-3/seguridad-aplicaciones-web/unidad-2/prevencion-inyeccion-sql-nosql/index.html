@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Prevención de Inyección SQL y NoSQL</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .zoom-container { position: relative; display: block; }
+        .zoom-btn {
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(255,255,255,0.9); border: 1px solid #cbd5e1;
+            border-radius: 9999px; width: 2.25rem; height: 2.25rem;
+            cursor: pointer; font-size: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .zoom-btn:hover { background: #f0fdf4; }
+        #zoom-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            align-items: center; justify-content: center; padding: 2rem;
+            cursor: zoom-out;
+        }
+        #zoom-overlay.active { display: flex; }
+        #zoom-overlay img { max-width: 100%; max-height: 100%; border-radius: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">💉 Prevención de Inyección SQL y NoSQL</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La inyección de código ha ocupado consistentemente un lugar entre las vulnerabilidades más críticas en cada edición del OWASP Top 10 desde su primera publicación en 2003, y continúa siendo, más de dos décadas después, una de las causas más frecuentes de filtraciones masivas de datos a nivel mundial. La razón de su persistencia no es la falta de soluciones técnicas conocidas —la prevención mediante consultas preparadas es una técnica bien establecida y documentada desde hace años—, sino la falta de aplicación consistente de estas técnicas por parte de los desarrolladores.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el contexto colombiano, incidentes de inyección SQL han afectado a entidades de diversos sectores, desde pequeños comercios electrónicos hasta, en casos documentados por el CCP (Centro Cibernético Policial), portales gubernamentales municipales con infraestructura de desarrollo limitada. La proliferación de sistemas de gestión desarrollados internamente por pequeñas y medianas empresas de ciudades intermedias como Montería, sin la supervisión de especialistas en seguridad, incrementa significativamente la exposición a este tipo de vulnerabilidad en el tejido empresarial regional.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Para el estudiante del Técnico Profesional en Programación Web, este tema representa una de las competencias técnicas más críticas de toda su formación: prácticamente cualquier aplicación que interactúe con una base de datos —que es la inmensa mayoría de las aplicaciones web profesionales— requiere la implementación correcta de mecanismos de prevención de inyección.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este OVA sabrás identificar los distintos tipos de inyección y aplicarás consultas preparadas como tu defensa principal en cada consulta a base de datos. <span class="text-xl">🛡️</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Explicar el funcionamiento técnico de los ataques de inyección SQL y NoSQL, reconociendo los puntos de la aplicación donde estos ataques suelen originarse.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Aplicar consultas preparadas como mecanismo principal de prevención de inyección, implementándolas de forma consistente en las operaciones con bases de datos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Identificar estrategias complementarias de defensa en profundidad contra inyección, fortaleciendo la resistencia de las aplicaciones backend ante una de las vulnerabilidades más críticas y persistentes en la historia de la seguridad web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Justificar por qué la inyección SQL continúa siendo una de las vulnerabilidades más persistentes en el desarrollo web actual, a pesar de existir soluciones técnicas ampliamente documentadas.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>💉 Tipos de Ataques de Inyección</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Si bien la inyección SQL es la variante más conocida y documentada, el principio de inyección de código se manifiesta en múltiples contextos tecnológicos, todos compartiendo la misma causa raíz conceptual.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig1.png" alt="Tipos de ataques de inyección" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 1. Tipos de ataques de inyección según el lenguaje o sistema objetivo: SQL, NoSQL, comandos del sistema operativo y LDAP. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-slate-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-slate-100 text-left">
+                                                <th class="px-4 py-3 border-b">Tipo</th>
+                                                <th class="px-4 py-3 border-b">Dónde ocurre</th>
+                                                <th class="px-4 py-3 border-b">Ejemplo de riesgo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b font-semibold">SQL Injection</td>
+                                                <td class="px-4 py-3 border-b">Consultas a bases relacionales (MySQL, PostgreSQL, SQL Server) por concatenación</td>
+                                                <td class="px-4 py-3 border-b">Insertar <code class="bg-slate-100 px-1 rounded">' OR '1'='1</code> evita la autenticación</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b font-semibold">NoSQL Injection</td>
+                                                <td class="px-4 py-3 border-b">Consultas documentales (MongoDB) con JSON del usuario sin validar</td>
+                                                <td class="px-4 py-3 border-b">Enviar <code class="bg-slate-100 px-1 rounded">{"$gt": ""}</code> salta la validación de credenciales</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b font-semibold">Command Injection</td>
+                                                <td class="px-4 py-3 border-b">Llamadas del backend a comandos del SO (exec, system) sin sanitizar</td>
+                                                <td class="px-4 py-3 border-b">Agregar <code class="bg-slate-100 px-1 rounded">; rm -rf /</code> ejecuta comandos destructivos</td>
+                                            </tr>
+                                            <tr class="odd:bg-white even:bg-slate-50">
+                                                <td class="px-4 py-3 border-b font-semibold">LDAP Injection</td>
+                                                <td class="px-4 py-3 border-b">Consultas a directorios LDAP (Active Directory) sin escape</td>
+                                                <td class="px-4 py-3 border-b">Insertar <code class="bg-slate-100 px-1 rounded">*)(uid=*)</code> devuelve todo el directorio</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🧩</span> En todos los casos, la causa raíz es idéntica: el sistema mezcla código ejecutable (la consulta SQL, el comando del sistema, el filtro LDAP) con datos proporcionados por el usuario sin establecer una separación clara entre ambos. <span class="text-xl">⚠️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🔒 Consultas Preparadas: el Mecanismo Fundamental de Prevención</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Las <strong>consultas preparadas</strong> (prepared statements) constituyen la técnica de prevención más efectiva y ampliamente recomendada contra la inyección SQL, ya que abordan el problema desde su causa estructural en lugar de intentar filtrar o escapar caracteres peligrosos después de que el daño potencial ya está presente en la cadena de texto.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig2.png" alt="Consulta vulnerable vs consulta preparada" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 2. Comparación entre una consulta SQL vulnerable construida por concatenación y una consulta preparada segura mediante parámetros vinculados. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">⚙️ El principio fundamental es que el motor de base de datos primero recibe y compila la <strong>estructura</strong> de la consulta SQL (con marcadores de posición en lugar de valores reales), y solo después recibe los <strong>valores</strong> de los parámetros, los cuales se tratan exclusivamente como datos literales sin posibilidad de ser interpretados como código SQL ejecutable, sin importar qué caracteres especiales contengan.</p>
+
+                                <p class="text-slate-700 mb-3">El siguiente ejemplo amplía el concepto a un caso de uso completo: una función de búsqueda de usuarios por múltiples criterios opcionales, escenario común donde los desarrolladores principiantes suelen recurrir incorrectamente a la concatenación de cadenas:</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">// Búsqueda dinámica con múltiples filtros opcionales, 100% segura
+async function buscarUsuarios(pool, filtros) {
+    let sql = "SELECT id, nombre, email FROM usuarios WHERE 1=1";
+    const params = [];
+
+    if (filtros.nombre) {
+        params.push(`%${filtros.nombre}%`);
+        sql += ` AND nombre LIKE $${params.length}`;
+    }
+    if (filtros.rol) {
+        params.push(filtros.rol);
+        sql += ` AND rol = $${params.length}`;
+    }
+
+    const resultado = await pool.query(sql, params);
+    return resultado.rows;
+}</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Búsqueda dinámica con filtros opcionales construida de forma segura mediante consultas preparadas.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🍃 Inyección NoSQL: el Caso de MongoDB</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Con la creciente adopción de bases de datos NoSQL como MongoDB en aplicaciones web modernas, ha surgido una variante de inyección específica para estos sistemas, que explota la capacidad de los formatos de consulta basados en JSON para aceptar operadores especiales en lugar de valores literales esperados.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig3.png" alt="Inyección NoSQL en MongoDB" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 3. Ejemplo de inyección NoSQL en MongoDB mediante el operador $ne, y su mitigación mediante validación de tipos. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <p class="mt-4 mb-4">🚫 A diferencia de la inyección SQL tradicional, la inyección NoSQL <strong>no requiere caracteres especiales de escape</strong> sino el envío de objetos JSON con operadores del motor de base de datos (como <code class="bg-slate-100 px-1 rounded">$ne</code>, <code class="bg-slate-100 px-1 rounded">$gt</code> o <code class="bg-slate-100 px-1 rounded">$where</code>) en lugar de los valores de texto plano que la aplicación espera recibir.</p>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔍</span> Esto subraya la importancia de validar estrictamente el <strong>tipo de dato</strong> de cada campo recibido, no únicamente su contenido. <span class="text-xl">✅</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🛡️ Estrategias Complementarias de Defensa contra Inyección</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Si bien las consultas preparadas constituyen la defensa principal y obligatoria, una estrategia de seguridad robusta incorpora capas adicionales de protección que actúan como respaldo ante posibles errores humanos o escenarios no contemplados.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig4.png" alt="Cinco estrategias de defensa en profundidad" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 4. Cinco estrategias complementarias de defensa en profundidad contra ataques de inyección. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚖️</span> Ninguna de estas estrategias sustituye a las consultas preparadas, sino que las complementan: incluso con consultas preparadas correctamente implementadas, otorgar al usuario de base de datos de la aplicación permisos administrativos completos sigue representando un riesgo innecesario. <span class="text-xl">🔑</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🗺️ Mapa de Vectores de Inyección según la Capa de la Aplicación</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Los ataques de inyección no se limitan a la interacción directa con la base de datos: pueden originarse en cualquier punto de la aplicación donde se reciba input externo, por lo que resulta útil mapear las distintas capas y puntos de entrada donde estos vectores de ataque pueden manifestarse.</p>
+
+                                <div class="zoom-container mx-auto max-w-xl">
+                                    <img src="img/fig5.png" alt="Vectores de inyección según la capa" class="w-full rounded shadow-sm zoomable" loading="lazy">
+                                    <button class="zoom-btn" aria-label="Zoom imagen">🔍</button>
+                                </div>
+                                <div class="mt-2 text-sm text-slate-600">Figura 5. Vectores de inyección según la capa de la aplicación donde se origina el dato: formularios, APIs, archivos subidos, base de datos y sistema operativo. Fuente: elaboración propia mediante Python (Matplotlib).</div>
+
+                                <div class="mt-4 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🎯</span> Cada punto de entrada requiere las mismas técnicas fundamentales de defensa: consultas preparadas para la base de datos, validación estricta de tipos y formatos, y sanitización de nombres de archivo, adaptadas al contexto específico de cada capa. Un atacante solo necesita encontrar <strong>un único punto de entrada desprotegido</strong> para comprometer la aplicación completa. <span class="text-xl">🕵️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📝 Actividad 1: Refactorización de Código Vulnerable (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            De acuerdo con el siguiente sistema de búsqueda, resuelve el proceso contemplado al final.
+                        </p>
+                        <p class="text-sm text-slate-600 italic mb-2">Sistema de búsqueda a refactorizar:</p>
+                        <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">const express = require("express");
+const { Pool } = require("pg");
+const app = express();
+const pool = new Pool({ host: "localhost", user: "postgres", password: "", database: "tienda" });
+
+app.get("/productos", async (req, res) => {
+    const nombre = req.query.nombre;
+    const categoria = req.query.categoria;
+    const sql = "SELECT * FROM productos WHERE nombre LIKE '%" + nombre
+        + "%' AND categoria = '" + categoria + "'";
+    const resultado = await pool.query(sql);
+    res.json(resultado.rows);
+});</code></pre>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Refactoriza el código completo utilizando consultas preparadas con <code class="bg-white px-1 rounded">pg</code> (parámetros vinculados), documentando cada cambio realizado y demostrando con capturas de pantalla que la funcionalidad original de búsqueda (por nombre y por categoría) se mantiene intacta.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Práctica de Protección de Endpoints con Informe Técnico (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En equipos de 3 estudiantes, desarrollen una pequeña API REST con al menos 3 endpoints que interactúen con una base de datos MySQL, implementando consultas preparadas en todos los casos.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Informe técnico documentando las pruebas realizadas para verificar la resistencia a inyección SQL, incluyendo capturas de los intentos de inyección bloqueados exitosamente.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🤔 Actividad 3: Cuestionario de Autoevaluación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Responde los siguientes puntos argumentando con tus propias palabras, apoyándote en ejemplos concretos siempre que sea posible:
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 mb-4 text-slate-700">
+                            <li>Explica por qué una consulta preparada previene la inyección SQL incluso si el atacante introduce caracteres especiales como comillas simples en su entrada.</li>
+                            <li>Un sistema de inventario de una ferretería de Lorica permite buscar productos mediante una consulta SQL construida por concatenación. Aplica el enfoque de consulta preparada y reescribe conceptualmente la consulta.</li>
+                            <li>Analiza las similitudes y diferencias entre la inyección SQL tradicional y la inyección NoSQL en MongoDB, considerando tanto la causa técnica como las estrategias de mitigación.</li>
+                            <li>Evalúa por qué, a pesar de ser una vulnerabilidad ampliamente documentada desde hace más de 20 años, la inyección SQL sigue apareciendo consistentemente entre las vulnerabilidades más reportadas en aplicaciones web actuales.</li>
+                        </ul>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Documento escrito con las 4 respuestas argumentadas, desde la comprensión básica de los conceptos hasta el análisis crítico y la evaluación de por qué la vulnerabilidad persiste.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">💉 SQL Injection Prevention Cheat Sheet — OWASP</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial de OWASP con las técnicas de prevención de inyección SQL, incluyendo consultas preparadas y validación por lista blanca.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-sql-injection-owasp.png" alt="QR SQL Injection Prevention Cheat Sheet OWASP" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📖 MySQL 8.0 Reference Manual — Prepared Statements</h3>
+                            <p class="text-slate-600 mb-2">Documentación oficial de MySQL sobre el funcionamiento y beneficios de las consultas preparadas del lado del servidor.</p>
+                            <a href="https://dev.mysql.com/doc/refman/8.0/en/sql-prepared-statements.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-mysql-prepared.png" alt="QR MySQL Prepared Statements" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🍃 Security Checklist for Self-Managed Deployments — MongoDB</h3>
+                            <p class="text-slate-600 mb-2">Lista oficial de MongoDB con las medidas de seguridad recomendadas, incluyendo control de acceso y validación de entradas.</p>
+                            <a href="https://www.mongodb.com/docs/manual/administration/security-checklist/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-mongodb-security.png" alt="QR MongoDB Security Checklist" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Oracle Corporation. (s.f.). <i>MySQL 8.0 Reference Manual: Prepared Statements</i>. Recuperado en 2026, de<br>
+                            <a href="https://dev.mysql.com/doc/refman/8.0/en/sql-prepared-statements.html" class="text-green-700 underline break-all" target="_blank">https://dev.mysql.com/doc/refman/8.0/en/sql-prepared-statements.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (s.f.). <i>SQL Injection Prevention Cheat Sheet</i>.<br>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" class="text-green-700 underline break-all" target="_blank">https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PHP Group. (s.f.). <i>PDO: Sentencias preparadas y procedimientos almacenados</i>. Recuperado en 2026, de<br>
+                            <a href="https://www.php.net/manual/es/pdo.prepared-statements.php" class="text-green-700 underline break-all" target="_blank">https://www.php.net/manual/es/pdo.prepared-statements.php</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MongoDB Inc. (s.f.). <i>Security Checklist for Self-Managed Deployments</i>. Recuperado en 2026, de<br>
+                            <a href="https://www.mongodb.com/docs/manual/administration/security-checklist/" class="text-green-700 underline break-all" target="_blank">https://www.mongodb.com/docs/manual/administration/security-checklist/</a>
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Overlay de zoom para imágenes — usado por el JS de zoom -->
+    <div id="zoom-overlay">
+        <img id="zoom-overlay-img" src="" alt="Imagen ampliada">
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Por qué una consulta preparada previene la inyección SQL incluso si el atacante introduce comillas simples?",
+                options: [
+                    "Porque elimina automáticamente todas las comillas de la entrada",
+                    "Porque el motor compila primero la estructura de la consulta y luego trata los valores exclusivamente como datos literales, no como código",
+                    "Porque cifra la consulta antes de enviarla a la base de datos",
+                    "Porque bloquea cualquier entrada que contenga caracteres especiales"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la causa raíz común a la inyección SQL, NoSQL, de comandos y LDAP?",
+                options: [
+                    "Todas requieren acceso físico al servidor",
+                    "Todas dependen de contraseñas débiles",
+                    "El sistema mezcla código ejecutable con datos del usuario sin una separación clara entre ambos",
+                    "Todas solo afectan a bases de datos relacionales"
+                ],
+                correct: 2
+            },
+            {
+                question: "¿Cómo se diferencia la inyección NoSQL en MongoDB de la inyección SQL tradicional?",
+                options: [
+                    "La inyección NoSQL no existe, solo es un mito",
+                    "La inyección NoSQL requiere comillas simples igual que la SQL",
+                    "La inyección NoSQL envía operadores del motor (como $ne o $gt) en un objeto JSON, en lugar de caracteres de escape en una cadena de texto",
+                    "La inyección NoSQL solo afecta a bases de datos en la nube"
+                ],
+                correct: 2
+            },
+            {
+                question: "Si ya se implementaron consultas preparadas correctamente, ¿por qué sigue siendo importante aplicar el principio de menor privilegio al usuario de base de datos?",
+                options: [
+                    "No es necesario, las consultas preparadas son suficientes por sí solas",
+                    "Porque reduce el daño potencial si esa cuenta se ve comprometida por otra vía distinta a la inyección SQL directa",
+                    "Porque hace que las consultas se ejecuten más rápido",
+                    "Porque es un requisito legal en todos los países"
+                ],
+                correct: 1
+            },
+            {
+                question: "¿Por qué la inyección SQL sigue siendo una de las vulnerabilidades más reportadas a pesar de estar documentada desde hace más de 20 años?",
+                options: [
+                    "Porque no existen soluciones técnicas conocidas todavía",
+                    "Porque las consultas preparadas dejaron de funcionar en las bases de datos modernas",
+                    "Porque la causa no es la falta de soluciones técnicas, sino la falta de aplicación consistente de estas técnicas por parte de los desarrolladores",
+                    "Porque solo afecta a sistemas obsoletos que ya no se usan"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Zoom de imágenes: click en el botón 🔍 abre la imagen en un overlay ampliado
+        const zoomOverlay = document.getElementById('zoom-overlay');
+        const zoomOverlayImg = document.getElementById('zoom-overlay-img');
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const img = this.previousElementSibling;
+                zoomOverlayImg.src = img.src;
+                zoomOverlayImg.alt = img.alt;
+                zoomOverlay.classList.add('active');
+            });
+        });
+        zoomOverlay.addEventListener('click', () => zoomOverlay.classList.remove('active'));
+    </script>
+
+    <!-- Resaltado de sintaxis para los bloques de código Node.js/JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

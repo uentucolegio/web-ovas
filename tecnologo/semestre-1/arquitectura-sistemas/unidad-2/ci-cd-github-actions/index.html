@@ -1,0 +1,1658 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="tailwind.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: CI/CD con GitHub Actions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f8fafc;
+            --panel: #ffffff;
+            --soft: #f0fdf4;
+            --line: #d1fae5;
+            --text: #334155;
+            --muted: #64748b;
+            --brand: #16a34a;
+            --brand-dark: #166534;
+            --warning: #f59e0b;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            background: #f8fafc;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+        body { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 290px;
+            background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+            border-right: 1px solid #dcfce7;
+            padding: 24px 18px;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .brand-badge {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 18px;
+            padding: 10px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #22c55e;
+            box-shadow: 0 20px 40px rgba(22, 163, 74, 0.18);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-badge img {
+            max-width: 82%;
+            max-height: 82%;
+            object-fit: contain;
+            display: block;
+        }
+        .brand-copy { display: none; }
+        .brand-copy h1 { font-size: 1.15rem; color: var(--brand-dark); margin-bottom: 8px; }
+        .brand-copy p { font-size: 0.9rem; color: var(--muted); }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+            padding: 16px 18px;
+            border-radius: 0;
+            margin-bottom: 2px;
+            transition: 0.2s ease;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: #e7f5ed;
+            color: var(--brand-dark);
+            transform: none;
+        }
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: inherit;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .main { flex: 1; padding: 28px 32px; background: #f8fafc; }
+        .mobile-top {
+            display: none;
+            background: white;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        .mobile-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 12px;
+            padding: 8px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .mobile-logo img {
+            max-width: 82%;
+            max-height: 82%;
+            object-fit: contain;
+        }
+        .mobile-top select {
+            width: 100%;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: white;
+        }
+        .pane { display: none; max-width: 1400px; margin: 0 auto; }
+        .pane.active { display: block; }
+        .hero { display: none; }
+        .eyebrow { display: none; }
+        h2 { color: var(--brand-dark); font-size: 2rem; margin-bottom: 18px; font-weight: 700; }
+        h3 { color: var(--brand-dark); font-size: 1.3rem; margin-bottom: 12px; font-weight: 700; }
+        p, li { color: var(--text); line-height: 1.75; font-size: 1rem; }
+        .lead { font-size: 1rem; color: var(--text); max-width: none; }
+        .grid { display: grid; gap: 18px; }
+        .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .card {
+            background: var(--panel);
+            border: 1px solid #dcfce7;
+            border-radius: 16px;
+            padding: 26px 28px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+            margin-bottom: 18px;
+        }
+        .card.soft { background: #ffffff; }
+        .panel-card {
+            border-left: 5px solid #22c55e;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .section-intro {
+            margin-bottom: 22px;
+        }
+        .content-accordion {
+            margin-bottom: 18px;
+            background: #ffffff;
+            border: 1px solid #dcfce7;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+        }
+        .content-accordion[open] {
+            border-color: #86efac;
+        }
+        .content-accordion summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 20px 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--brand-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: #ffffff;
+        }
+        .content-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+        .content-accordion summary::after {
+            content: '+';
+            font-size: 1.6rem;
+            line-height: 1;
+            color: #16a34a;
+            flex-shrink: 0;
+        }
+        .content-accordion[open] summary::after {
+            content: '−';
+        }
+        .sub-accordion {
+            margin-top: 18px;
+            border-radius: 14px;
+            box-shadow: none;
+            background: #f8fff9;
+        }
+        .sub-accordion summary {
+            padding: 16px 18px;
+            font-size: 1.02rem;
+            background: #f8fff9;
+        }
+        .sub-accordion .accordion-body {
+            padding: 0 18px 18px;
+        }
+        .accordion-body {
+            padding: 0 24px 24px;
+        }
+        .accordion-body > *:first-child {
+            margin-top: 0;
+        }
+        .accordion-body > p,
+        .accordion-body > table,
+        .accordion-body > .image-placeholder,
+        .accordion-body > .code-box,
+        .accordion-body > .flip-grid {
+            margin-top: 16px;
+        }
+        .check-line {
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        .check-mark {
+            color: #16a34a;
+            font-size: 2rem;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        .objective-list {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+        }
+        .objective-item {
+            display: grid;
+            grid-template-columns: 2rem minmax(0, 1fr);
+            align-items: center;
+            column-gap: 1rem;
+            padding: 1.15rem 1.3rem;
+            background: #fff;
+            border: 1px solid #edf2f7;
+            border-left: 6px solid var(--brand);
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
+        .objective-check {
+            display: block;
+            width: 2rem;
+            min-width: 2rem;
+            font-size: 1.35rem;
+            line-height: 1.2;
+            text-align: center;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
+        }
+        .objective-item p {
+            margin: 0;
+            min-width: 0;
+        }
+        .qr-box {
+            width: 96px;
+            height: 96px;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            background: #ffffff;
+            flex-shrink: 0;
+        }
+        .resource-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+        .resource-card a {
+            color: #1e3a8a;
+        }
+        .pill-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        .pill {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: var(--brand-dark);
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+        .info-box {
+            border-left: 5px solid var(--brand);
+            background: var(--soft);
+            padding: 18px 18px 18px 20px;
+            border-radius: 16px;
+            margin: 16px 0;
+        }
+        .section-space { margin-bottom: 24px; }
+        .timeline { display: grid; gap: 14px; margin-top: 16px; }
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        .timeline-dot {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #bbf7d0, #22c55e);
+            color: var(--brand-dark);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            box-shadow: 0 12px 24px rgba(34, 197, 94, 0.18);
+        }
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+        .tab-btn, .choice-btn, .action-btn, .mini-btn {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s ease;
+        }
+        .tab-btn {
+            padding: 11px 14px;
+            border-radius: 12px;
+            background: #ecfdf5;
+            color: var(--brand-dark);
+            border: 1px solid #bbf7d0;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #166534, #16a34a);
+            color: white;
+            border-color: transparent;
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .flip-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+        .flip-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .flip-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .flip-card { perspective: 1200px; min-height: 180px; cursor: pointer; }
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            min-height: 180px;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+        }
+        .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+        .flip-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 20px;
+            backface-visibility: hidden;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .flip-front { background: linear-gradient(160deg, #166534 0%, #16a34a 100%); color: white; }
+        .flip-back { background: white; border: 1px solid #bbf7d0; transform: rotateY(180deg); }
+        .flip-tag { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }
+        .flip-title { font-size: 1.05rem; font-weight: 700; line-height: 1.4; }
+        .endpoint-builder {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 18px;
+            align-items: start;
+        }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .choice-btn {
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: var(--text);
+            font-weight: 600;
+        }
+        .choice-btn.selected { background: #166534; color: white; border-color: #166534; }
+        .code-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 20px;
+            padding: 22px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.96rem;
+            line-height: 1.8;
+            min-height: 240px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .code-box .good { color: #86efac; }
+        .code-box .muted { color: #94a3b8; }
+        .code-box .warn { color: #fcd34d; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #dcfce7;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { background: #166534; color: white; font-size: 0.94rem; }
+        tr:nth-child(even) td { background: #f8fff9; }
+        .match-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .match-item, .match-target {
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid #d1fae5;
+            background: white;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .match-item:hover, .match-target:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .match-item.selected, .match-target.selected { border-color: #16a34a; background: #f0fdf4; }
+        .match-item.done, .match-target.done { border-color: #22c55e; background: #dcfce7; cursor: default; }
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .feedback.show { display: block; }
+        .feedback.success { background: #dcfce7; color: #166534; }
+        .feedback.error { background: #fee2e2; color: #991b1b; }
+        .feedback.info { background: #eff6ff; color: #1d4ed8; }
+        .lab-steps { counter-reset: step; display: grid; gap: 14px; margin-top: 14px; }
+        .lab-step {
+            background: white;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 16px 18px 16px 68px;
+            position: relative;
+        }
+        .lab-step::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 18px;
+            top: 16px;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+        .action-btn {
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #166534, #16a34a);
+            color: white;
+            font-weight: 700;
+        }
+        .action-btn.secondary { background: #334155; }
+        .mini-btn {
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: var(--brand-dark);
+            border: 1px solid #bbf7d0;
+            font-weight: 600;
+        }
+        .quiz-question {
+            background: white;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .quiz-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+        .quiz-result {
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 18px;
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .resource-list li, .biblio-list li { margin-left: 18px; margin-bottom: 12px; }
+        .footer-note { margin-top: 18px; color: var(--muted); font-size: 0.92rem; }
+        .bibliography-list {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+            align-items: stretch;
+        }
+        .bibliography-item,
+        .bibliography-credit,
+        .bibliography-credit-label,
+        .bibliography-credit-name,
+        .bibliography-credit-org {
+            font-family: 'Poppins', sans-serif;
+        }
+        .bibliography-item {
+            display: block;
+            width: 100%;
+            padding: 1.35rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            text-align: left;
+            overflow-wrap: anywhere;
+            background: #fff;
+            border: 1px solid #edf2f7;
+            border-left: 6px solid var(--brand);
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
+        .bibliography-item a {
+            color: var(--brand-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .bibliography-item a:hover {
+            text-decoration: underline;
+        }
+        .bibliography-credit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.15rem;
+            width: 100%;
+            margin-top: 2rem;
+            padding-top: 1.6rem;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        .bibliography-credit-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.92rem;
+        }
+        .bibliography-credit-name {
+            display: block;
+            max-width: 900px;
+            margin-top: 0.2rem;
+            color: var(--brand-dark);
+            font-size: clamp(1.1rem, 2vw, 1.45rem);
+            font-weight: 700;
+            line-height: 1.2;
+            text-wrap: balance;
+        }
+        .bibliography-credit-org {
+            display: block;
+            margin-top: 0.1rem;
+            color: var(--muted);
+            font-size: clamp(0.9rem, 1.6vw, 1rem);
+        }
+        .image-placeholder {
+            min-height: 240px;
+            border: 2px dashed #86efac;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #f8fff9 0%, #eefbf2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            color: var(--muted);
+            font-weight: 600;
+            margin: 18px 0;
+        }
+        .content-image {
+            margin: 18px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #dcfce7;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+        .content-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .video-embed {
+            margin: 18px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            background: #000;
+        }
+        .video-embed iframe {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            border: 0;
+        }
+        .speech-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 0 0 18px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        }
+        .speech-btn {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            padding: 10px 14px;
+            border-radius: 999px;
+            color: white;
+            transition: 0.2s ease;
+        }
+        .speech-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .speech-btn.play { background: #16a34a; }
+        .speech-btn.pause { background: #f59e0b; }
+        .speech-btn.stop { background: #ef4444; }
+        .speech-rate-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #166534;
+            font-weight: 600;
+        }
+        .speech-rate-wrap input {
+            accent-color: #ef4444;
+        }
+        .speech-note {
+            color: #166534;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+        .speech-note.unsupported {
+            color: #991b1b;
+            margin-left: 0;
+        }
+        .work-area {
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid #d1fae5;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+        }
+        .work-area label {
+            display: block;
+            font-weight: 600;
+            color: var(--brand-dark);
+            margin-bottom: 8px;
+        }
+        .work-area textarea, .work-area input {
+            width: 100%;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: white;
+            margin-bottom: 14px;
+        }
+        .work-area textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+        .simulator-shell {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+        .simulator-console {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+        }
+        .simulator-console h4 {
+            color: #86efac;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        .simulator-line {
+            margin-bottom: 10px;
+            line-height: 1.7;
+            font-family: Consolas, Monaco, monospace;
+            white-space: pre-wrap;
+        }
+        .simulator-line strong { color: #f8fafc; }
+        .simulator-builder {
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+            border: 1px solid #d1fae5;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .simulator-step {
+            margin-bottom: 18px;
+        }
+        .simulator-step h4 {
+            color: var(--brand-dark);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .simulator-choice {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .simulator-choice button {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: var(--text);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .simulator-choice button.selected {
+            background: #166534;
+            color: white;
+            border-color: #166534;
+        }
+        @media (max-width: 1080px) {
+            .grid.two, .grid.three, .flip-grid, .endpoint-builder, .match-layout, .simulator-shell { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 860px) {
+            body { display: block; }
+            .sidebar { display: none; }
+            .mobile-top { display: block; }
+            .main { padding: 18px; }
+            .hero, .card { padding: 20px; }
+            h2 { font-size: 1.65rem; }
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+            }
+            th, td {
+                min-width: 150px;
+            }
+            .speech-controls {
+                align-items: flex-start;
+            }
+            .speech-note {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+<style id="normalizacion-institucional-cintia">
+html,body{
+    width:100%;min-height:100%;overflow-x:hidden;max-width:100vw;
+    background:#f8fafc!important
+}
+body{
+    margin:0!important;padding:0!important;color:#334155!important;
+    font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif!important;
+    line-height:1.5!important;-webkit-font-smoothing:antialiased
+}
+.layout{display:flex!important;min-height:100vh!important;width:100%!important}
+.sidebar{
+    position:fixed!important;top:0!important;left:0!important;
+    width:16rem!important;height:100vh!important;overflow-y:auto!important;
+    z-index:40!important;padding:0!important;background:#fff!important;
+    border-right:0!important;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.10),0 4px 6px -4px rgba(0,0,0,.10)!important
+}
+.sidebar-logo{padding:1rem!important;display:flex!important;justify-content:center!important}
+.sidebar-logo-frame,.brand-badge{
+    width:150px!important;height:150px!important;padding:.5rem!important;margin:0 auto!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    background:#fff!important;border-radius:9999px!important;border:2px solid #22c55e!important;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.10),0 4px 6px -4px rgba(0,0,0,.10)!important;
+    overflow:hidden!important
+}
+.sidebar-logo-frame img,.brand-badge img{
+    max-width:80%!important;max-height:80%!important;object-fit:contain!important
+}
+.sidebar-nav{margin-top:1.5rem!important;padding-bottom:0!important}
+.sidebar-link,.nav-link{
+    display:flex!important;align-items:center!important;gap:.75rem!important;
+    padding:.75rem 1.5rem!important;margin:0!important;border-left:4px solid transparent!important;
+    border-radius:0!important;color:#334155!important;font-size:1rem!important;
+    font-weight:500!important;text-decoration:none!important;transition:all .3s ease!important
+}
+.sidebar-link.active,.sidebar-link:hover,.nav-link.active,.nav-link:hover{
+    background:#e6f4ea!important;color:#166534!important;border-left-color:#22c55e!important
+}
+.sidebar-icon,.nav-icon{width:auto!important;height:auto!important;font-size:1.25rem!important}
+.main{
+    flex:1 1 0%!important;width:auto!important;margin-left:16rem!important;
+    padding:2.5rem!important;background:#f9fafb!important
+}
+.content-pane,.pane{
+    display:none;max-width:none!important;margin:0!important;
+    animation:fadeIn .5s ease-in-out
+}
+.content-pane.active,.pane.active{display:block}
+.hero-card,.hero{
+    padding:0!important;margin:0 0 1rem!important;background:transparent!important;
+    border:0!important;box-shadow:none!important
+}
+.hero-card h1,.content-pane h2,.pane h2,.section-heading{
+    margin:0 0 1.5rem!important;color:#166534!important;
+    font-size:1.875rem!important;line-height:2.25rem!important;font-weight:700!important
+}
+.content-pane h3,.pane h3{
+    color:#166534!important;font-size:1.25rem!important;line-height:1.75rem!important;font-weight:700!important
+}
+p,li,label{color:#334155;font-size:1rem!important;line-height:1.625!important}
+.text-block{
+    padding:0!important;margin-bottom:1rem!important;background:transparent!important;
+    border:0!important;box-shadow:none!important
+}
+.text-block p{margin-bottom:.75rem}
+.objective-list{
+    display:grid!important;gap:1rem!important;padding:0!important;margin:0!important;list-style:none!important
+}
+.objective-item{
+    display:flex!important;align-items:flex-start!important;gap:.75rem!important;
+    padding:1rem!important;background:#fff!important;border:0!important;
+    border-radius:.5rem!important;box-shadow:0 1px 2px rgba(0,0,0,.05)!important
+}
+.objective-check{width:auto!important;min-width:auto!important;font-size:1.5rem!important;line-height:1.2!important}
+.speech-controls{
+    padding:.75rem 1rem!important;margin-bottom:1.5rem!important;
+    background:#dcfce7!important;border:0!important;border-radius:.5rem!important
+}
+.speech-btn{
+    border-radius:.375rem!important;padding:.5rem 1rem!important;
+    font-size:.875rem!important;font-weight:600!important
+}
+.speech-btn.play{background:#16a34a!important;color:#fff!important}
+.speech-btn.pause{background:#eab308!important;color:#fff!important}
+.speech-btn.stop{background:#ef4444!important;color:#fff!important}
+.accordion,.content-accordion{
+    background:transparent!important;border:0!important;border-radius:0!important;
+    box-shadow:none!important;margin-bottom:1rem!important
+}
+.accordion-toggle,.content-accordion>summary{
+    padding:1rem!important;background:#dcfce7!important;border:1px solid #86efac!important;
+    border-radius:.5rem!important;color:#166534!important;font-size:1.125rem!important;
+    font-weight:700!important
+}
+.accordion-panel,.content-accordion .accordion-body{
+    padding:1rem 1rem 1.25rem!important;margin-bottom:1.5rem!important;
+    background:#fff!important;border:1px solid #86efac!important;border-top:0!important;
+    border-bottom-left-radius:.5rem!important;border-bottom-right-radius:.5rem!important
+}
+.card,.activity-card,.quiz-card,.resource-card,.bibliography-item{
+    padding:1.5rem!important;margin-bottom:1rem!important;background:#fff!important;
+    border:0!important;border-left:4px solid #22c55e!important;border-radius:.5rem!important;
+    box-shadow:0 1px 2px rgba(0,0,0,.05)!important
+}
+.quiz-option,.activity-question,.quiz-question{border-radius:.5rem!important}
+.resource-card a,.resource-link{color:#334155!important;text-decoration:underline!important}
+.qr-box,.resource-qr{
+    width:2cm!important;height:2cm!important;border:1px solid #86efac!important;
+    border-radius:.25rem!important;background:#f0fdf4!important
+}
+.mobile-header,.mobile-top{display:none!important}
+.mobile-logo{
+    width:100px!important;height:100px!important;margin:0 auto .5rem!important;
+    padding:.5rem!important;background:#fff!important;border-radius:9999px!important;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.10)!important;overflow:hidden!important
+}
+.mobile-logo img{max-width:80%!important;max-height:80%!important;object-fit:contain!important}
+.mobile-nav,.mobile-top select{
+    width:100%!important;margin-top:.5rem!important;padding:.5rem!important;
+    border:1px solid #e5e7eb!important;border-radius:.375rem!important;background:#fff!important
+}
+.bibliography-credit,.ova-institutional-footer{
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:.15rem!important;width:100%!important;
+    margin-top:3rem!important;padding-top:1.5rem!important;
+    border-top:2px solid #e2e8f0!important;text-align:center!important;
+    font-family:'Poppins',sans-serif!important
+}
+.bibliography-credit-label,.ova-institutional-footer .footer-label{
+    color:#475569!important;font-weight:500!important;font-size:1rem!important
+}
+.bibliography-credit-name,.ova-institutional-footer .footer-name{
+    color:#166534!important;font-weight:700!important;font-size:1.125rem!important;
+    line-height:1.75rem!important
+}
+.bibliography-credit-org,.ova-institutional-footer .footer-org{
+    color:#64748b!important;font-size:.875rem!important;line-height:1.25rem!important
+}
+@media(max-width:767px){
+    .sidebar{display:none!important}
+    .main{margin-left:0!important;width:100%!important;padding:13rem .75rem .75rem!important}
+    .mobile-header,.mobile-top{
+        position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:50!important;
+        display:flex!important;flex-direction:column!important;align-items:center!important;
+        padding:1rem!important;background:#f8fafc!important;border:0!important;border-radius:0!important;
+        box-shadow:0 2px 4px rgba(0,0,0,.1)!important
+    }
+}
+@media(max-width:639px){
+    .hero-card h1,.content-pane h2,.pane h2,.section-heading{
+        font-size:1.5rem!important;line-height:2rem!important
+    }
+}
+</style>
+
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand-badge">
+            <img src="img/logo.webp" alt="Logo CINTIA">
+        </div>
+        <a href="#" class="nav-link active" data-target="introduccion"><span class="nav-icon">🚀</span> Introducción</a>
+        <a href="#" class="nav-link" data-target="objetivos"><span class="nav-icon">🎯</span> Objetivos</a>
+        <a href="#" class="nav-link" data-target="contenido"><span class="nav-icon">📚</span> Contenido</a>
+        <a href="#" class="nav-link" data-target="actividades"><span class="nav-icon">✍️</span> Actividades</a>
+        <a href="#" class="nav-link" data-target="evaluacion"><span class="nav-icon">✔️</span> Evaluación</a>
+        <a href="#" class="nav-link" data-target="recursos"><span class="nav-icon">📖</span> Recursos</a>
+        <a href="#" class="nav-link" data-target="bibliografia"><span class="nav-icon">📚</span> Bibliografía</a>
+    </aside>
+
+    <main class="main">
+        <div class="mobile-top">
+            <div class="mobile-logo">
+                <img src="img/logo.webp" alt="Logo CINTIA">
+            </div>
+            <h3 style="margin-bottom: 12px; text-align: center;">CI/CD con GitHub Actions</h3>
+            <select id="mobile-nav">
+                <option value="introduccion">🚀 Introducción</option>
+                <option value="objetivos">🎯 Objetivos</option>
+                <option value="contenido">📚 Contenido</option>
+                <option value="actividades">✍️ Actividades</option>
+                <option value="evaluacion">✔️ Evaluación</option>
+                <option value="recursos">📖 Recursos</option>
+                <option value="bibliografia">📚 Bibliografía</option>
+            </select>
+        </div>
+
+        <section id="introduccion" class="pane active">
+            <div class="section-intro">
+                <h2>CI/CD (Integración continua y despliegue/entrega continua) con GitHub Actions</h2>
+            </div>
+
+            <div class="card">
+                <p>En sistemas basados en servicios (y microservicios), el código cambia con frecuencia y cada servicio puede evolucionar a su propio ritmo. Si cada cambio se prueba y se despliega “a mano”, es fácil cometer errores: olvidar una prueba, subir una versión incorrecta o publicar un servicio sin validar.</p>
+                <div class="video-embed">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/L7cpSHGNRgg?si=F4imAmcUXSPC3CCN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+                <p style="margin-top: 18px;">CI/CD aporta una respuesta arquitectónica: automatiza el camino desde que un desarrollador sube código al repositorio hasta que ese código se valida (CI) y, en muchos casos, se entrega o despliega de forma controlada (CD). En esta guía verás cómo se representa ese flujo y cómo se implementa un ejemplo mínimo con GitHub Actions.</p>
+            </div>
+        </section>
+
+        <section id="objetivos" class="pane">
+            <div class="section-intro">
+                <h2>Objetivos de Aprendizaje</h2>
+            </div>
+            <ul class="objective-list">
+                <li class="objective-item"><div class="objective-check">&#128172;</div><p>Explicar el rol de CI/CD dentro de una arquitectura basada en servicios: cómo automatiza pruebas, construcción (build) y despliegue para publicar servicios de forma controlada.</p></li>
+                <li class="objective-item"><div class="objective-check">&#8596;&#65039;</div><p>Diferenciar Integración Continua (CI) y Entrega/Despliegue Continuo (CD) con ejemplos simples y resultados esperados.</p></li>
+                <li class="objective-item"><div class="objective-check">&#128064;</div><p>Reconocer los elementos básicos de un pipeline en GitHub Actions (workflow, trigger, job, steps, runner, artefactos y secrets) usando vocabulario claro.</p></li>
+                <li class="objective-item"><div class="objective-check">&#128736;&#65039;</div><p>Configurar un workflow mínimo de CI en GitHub Actions para una API (por encima): instalar dependencias y ejecutar una validación básica (lint o test).</p></li>
+            </ul>
+        </section>
+
+        <section id="contenido" class="pane">
+            <div class="section-intro">
+                <h2>CI/CD (Integración continua y despliegue/entrega continua) con GitHub Actions: rol en la arquitectura y automatización con GitHub Actions.</h2>
+            </div>
+            <h3>El rol de CI/CD en la arquitectura</h3>
+            <p>CI/CD se entiende mejor si lo ubicas como una “línea de producción” del software. En arquitectura, conecta tres piezas: (1) el repositorio de código (GitHub), (2) la automatización de validaciones (CI) y (3) la entrega/despliegue controlado (CD). El objetivo es reducir riesgos: que un cambio pase por chequeos repetibles antes de llegar a un ambiente donde lo usen personas reales.</p>
+            <p>Figura 1. CI/CD con GitHub Actions dentro del ciclo de desarrollo y despliegue.</p>
+            <div class="content-image">
+                <img src="img/tema-3-img-1.png" alt="Figura 1. CI/CD con GitHub Actions dentro del ciclo de desarrollo y despliegue">
+            </div>
+            <p>Lectura del diagrama: un push o un pull request activa un workflow. El workflow ejecuta validaciones (por ejemplo, pruebas) y genera un resultado. Si todo sale bien, puede producir un artefacto (por ejemplo, un paquete o una imagen) y, si la organización lo permite, desplegarlo a un ambiente.</p>
+
+            <details class="content-accordion sub-accordion" open>
+                <summary>Conceptos clave (vocabulario simple)</summary>
+                <div class="accordion-body">
+                    <p>Estos términos se repiten en cualquier pipeline. Aprenderlos te ayuda a comprender qué está pasando cuando “pasa o falla” una ejecución.</p>
+                    <div class="flip-grid">
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">CI</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Integrar cambios frecuentemente y validarlos automáticamente (pruebas, lint, build).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">CD</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Entregar o desplegar cambios de forma controlada a un ambiente.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Pipeline</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Secuencia de etapas que se ejecutan en orden (validar → construir → entregar/desplegar).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Workflow</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Archivo `.yml` que define qué se ejecuta y cuándo.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Trigger</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Evento que inicia el workflow (push, pull_request, manual).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Job</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Bloque de trabajo dentro del workflow.</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Step</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Paso dentro de un job (comando o acción).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Runner</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Máquina que ejecuta los jobs (ej.: ubuntu-latest).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Artefacto</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Archivo generado por el pipeline (zip, reporte, paquete).</p></div></div></div>
+                        <div class="flip-card" data-flip><div class="flip-inner"><div class="flip-face flip-front"><span class="flip-tag">Término</span><div class="flip-title">Secret</div><span class="flip-tag">clic para voltear</span></div><div class="flip-face flip-back"><span class="flip-tag">Explicación</span><p>Dato sensible (token/clave) que no debe escribirse en el código.</p></div></div></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="content-accordion sub-accordion">
+                <summary>CI vs CD: ¿en qué se diferencian?</summary>
+                <div class="accordion-body">
+                    <table>
+                        <thead><tr><th>Aspecto</th><th>CI (Integración continua)</th><th>CD (Entrega/Despliegue continuo)</th></tr></thead>
+                        <tbody>
+                            <tr><td>Objetivo</td><td>Detectar errores pronto y asegurar calidad básica.</td><td>Publicar cambios de forma controlada (con menos riesgo).</td></tr>
+                            <tr><td>Salida típica</td><td>Tests/lint/build exitoso.</td><td>Servicio actualizado en un ambiente (staging o producción).</td></tr>
+                            <tr><td>Ejemplo simple</td><td>Al hacer push, correr validaciones.</td><td>Si CI pasa, desplegar con permisos/aprobación.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details class="content-accordion">
+                <summary>El pipeline mínimo para una API (por encima)</summary>
+                <div class="accordion-body">
+                    <p>Un pipeline mínimo se puede entender como 4 etapas. No siempre están todas automatizadas al 100%, pero ayudan a ordenar el proceso.</p>
+                    <table>
+                        <thead><tr><th>Etapa</th><th>¿Qué hace?</th><th>Evidencia de que pasó</th></tr></thead>
+                        <tbody>
+                            <tr><td>1) Integrar</td><td>Subir cambios al repositorio (push) o proponer cambios (pull request).</td><td>Commit/PR en GitHub.</td></tr>
+                            <tr><td>2) Validar (CI)</td><td>Instalar dependencias y correr validaciones básicas (lint o tests).</td><td>Workflow en verde (✅).</td></tr>
+                            <tr><td>3) Construir (Build)</td><td>Generar un artefacto: paquete, zip o imagen (si aplica).</td><td>Artefacto publicado o build exitoso.</td></tr>
+                            <tr><td>4) Entregar/Desplegar (CD)</td><td>Actualizar un ambiente (staging/prod) de forma controlada.</td><td>Versión nueva desplegada y verificada.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details class="content-accordion">
+                <summary>GitHub Actions: estructura mínima de un workflow</summary>
+                <div class="accordion-body">
+                    <p>Un workflow se guarda en la ruta .github/workflows/. Es un archivo YAML (.yml). Lo más importante es entender: (1) cuándo se ejecuta (on), (2) en qué máquina (runs-on) y (3) qué pasos (steps) hace.</p>
+                    <table>
+                        <thead><tr><th>Trigger</th><th>¿Cuándo se usa?</th></tr></thead>
+                        <tbody>
+                            <tr><td>push</td><td>Cada vez que subes cambios a una rama (útil para CI).</td></tr>
+                            <tr><td>pull_request</td><td>Cuando abres o actualizas un PR (ideal antes de unir cambios).</td></tr>
+                            <tr><td>workflow_dispatch</td><td>Ejecución manual (validación o despliegue controlado).</td></tr>
+                        </tbody>
+                    </table>
+                    <p>Ejemplo mínimo (CI) para una API Node.js: instala dependencias y corre pruebas (o una validación).</p>
+                    <p>Archivo: .github/workflows/ci.yml</p>
+                    <div class="code-box">name: CI - API
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Ejecutar validación (tests o lint)
+        run: npm test</div>
+                    <p>Nota: si tu proyecto no tiene tests todavía, se puede reemplazar “npm test” por “npm run lint” o por un comando de validación básico. La meta es comprender el flujo y observar la ejecución en la pestaña Actions.</p>
+                </div>
+            </details>
+
+            <details class="content-accordion">
+                <summary>CD (despliegue) como idea: qué se automatiza y qué se protege</summary>
+                <div class="accordion-body">
+                    <p>En muchos equipos, el despliegue a producción no se deja automático sin control. Se usan ambientes (staging/prod), revisiones y aprobaciones. Para desplegar se requieren credenciales (secrets) que deben guardarse en GitHub y no escribirse en el código.</p>
+                    <p>Ejemplo conceptual (no obligatorio en clase): si CI pasa, un job de CD podría copiar un artefacto a un servidor o publicar una imagen. Lo clave es entender: CD = automatizar la entrega/despliegue con permisos y controles.</p>
+                </div>
+            </details>
+
+        </section>
+
+        <section id="actividades" class="pane">
+            <div class="section-intro">
+                <h2>Cuestionarios o actividades complementarias</h2>
+            </div>
+            <div class="card panel-card">
+                <h3>Actividad 1. Diagrama del pipeline en tu arquitectura (teórica)</h3>
+                <p><strong>Propósito:</strong> ubicar CI/CD dentro de la arquitectura de tu sistema y reconocer qué se valida y qué se despliega.</p>
+                <p><strong>Instrucciones:</strong></p>
+                <p>Dibuja un diagrama similar a la Figura 1, pero adaptado a tu caso (tu API del Tema 2).</p>
+                <p>Marca: repositorio, CI (validaciones), artefacto y ambiente (staging o producción).</p>
+                <p>En 5–8 líneas, explica dónde encaja Docker (Tema 1) si tu servicio se despliega en contenedores.</p>
+                <p><strong>Entregable:</strong> diagrama + explicación corta.</p>
+            </div>
+
+            <div class="card panel-card">
+                <h3>Actividad 2. Configurar un workflow mínimo (práctica por encima)</h3>
+                <p><strong>Propósito:</strong> ejecutar CI automáticamente en GitHub Actions.</p>
+                <p><strong>Instrucciones:</strong></p>
+                <p>Crea un repositorio en GitHub con tu API (o usa uno existente).</p>
+                <p>Crea la carpeta .github/workflows/ y agrega el archivo ci.yml (basado en el ejemplo).</p>
+                <p>Haz push a main y verifica en la pestaña “Actions” que el workflow se ejecuta.</p>
+                <p>Toma una captura del workflow en verde (✅) y pega el enlace del repositorio.</p>
+                <p><strong>Entregable:</strong> enlace del repo + captura de la ejecución exitosa.</p>
+            </div>
+
+            <div class="card panel-card">
+                <h3>Actividad 3. Mini simulador: construye un pipeline mínimo</h3>
+                <p style="margin-bottom: 14px;">Arma una secuencia coherente de CI para una API en GitHub Actions.</p>
+                <div class="simulator-shell">
+                    <div class="simulator-console">
+                        <h4>Escenario</h4>
+                        <div class="simulator-line"><strong>Proyecto:</strong> API en Node.js</div>
+                        <div class="simulator-line"><strong>Objetivo:</strong> validar automáticamente cambios subidos al repositorio</div>
+                        <div class="simulator-line"><strong>Construcción actual:</strong></div>
+                        <div class="simulator-line" id="sim-request-line">[trigger]</div>
+                        <div class="simulator-line" id="sim-response-line">[validación]</div>
+                        <div class="simulator-line" id="sim-json-line">[resultado esperado]</div>
+                    </div>
+                    <div class="simulator-builder">
+                        <div class="simulator-step">
+                            <h4>1. ¿Qué evento inicia el workflow?</h4>
+                            <div class="simulator-choice" data-sim-group="trigger">
+                                <button type="button" data-value="push">push a main</button>
+                                <button type="button" data-value="docker">construir una imagen manualmente</button>
+                                <button type="button" data-value="server">reiniciar el servidor</button>
+                            </div>
+                        </div>
+                        <div class="simulator-step">
+                            <h4>2. ¿Qué validación mínima ejecuta CI?</h4>
+                            <div class="simulator-choice" data-sim-group="validacion">
+                                <button type="button" data-value="test">Instalar dependencias y correr test/lint</button>
+                                <button type="button" data-value="skip">Saltar validaciones</button>
+                                <button type="button" data-value="secret">Mostrar secrets en consola</button>
+                            </div>
+                        </div>
+                        <div class="simulator-step">
+                            <h4>3. Si todo sale bien, ¿qué evidencia esperas?</h4>
+                            <div class="simulator-choice" data-sim-group="resultado">
+                                <button type="button" data-value="verde">Workflow en verde</button>
+                                <button type="button" data-value="fallo">Error sin revisar logs</button>
+                                <button type="button" data-value="manual">Nada automático</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="action-btn" type="button" onclick="evaluateSimulator()">Validar simulación</button>
+                            <button class="action-btn secondary" type="button" onclick="resetSimulator()">Reiniciar simulación</button>
+                        </div>
+                        <div id="scenario-feedback" class="feedback info show" style="margin-top: 14px;">
+                            Selecciona una opción en cada paso para construir un flujo básico de CI.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card panel-card">
+                <h3>Actividad 4. Relaciona conceptos clave del pipeline</h3>
+                <p style="margin-bottom: 14px;">Selecciona primero el concepto y luego su definición correspondiente.</p>
+                <div class="match-layout">
+                    <div>
+                        <div class="match-item" data-id="trigger">Trigger</div>
+                        <div class="match-item" data-id="runner">Runner</div>
+                        <div class="match-item" data-id="artefacto">Artefacto</div>
+                        <div class="match-item" data-id="secret">Secret</div>
+                    </div>
+                    <div>
+                        <div class="match-target" data-id="runner">Máquina que ejecuta los jobs del workflow.</div>
+                        <div class="match-target" data-id="trigger">Evento que inicia el workflow.</div>
+                        <div class="match-target" data-id="secret">Dato sensible que no debe escribirse en el código.</div>
+                        <div class="match-target" data-id="artefacto">Archivo generado por el pipeline.</div>
+                    </div>
+                </div>
+                <div id="match-feedback" class="feedback info">Empieza seleccionando un concepto.</div>
+            </div>
+        </section>
+
+        <section id="evaluacion" class="pane">
+            <div class="card panel-card">
+                <h2>Evaluación</h2>
+                <p style="margin-bottom: 18px;">Responde el quiz de verificación y comprueba tu comprensión de CI/CD con GitHub Actions.</p>
+                <div id="quiz"></div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="action-btn" onclick="checkQuiz()">Calificar evaluación</button>
+                    <button class="action-btn secondary" onclick="resetQuiz()">Reiniciar</button>
+                </div>
+                <div id="quiz-result" class="quiz-result"></div>
+            </div>
+        </section>
+
+        <section id="recursos" class="pane">
+            <div class="section-intro">
+                <h2>Anexos</h2>
+            </div>
+            <div class="card panel-card resource-card">
+                <div>
+                    <h3>CI-CD El camino del código</h3>
+                    <a href="https://www.youtube.com/watch?v=L7cpSHGNRgg">Ir al recurso</a>
+                </div>
+                <div class="qr-box"><img src="img/qr-video-ci-cd.png" style= "width: 90px; height:90px;"alt="QR"></div>
+            </div>
+            <div class="card panel-card resource-card">
+                <div>
+                    <h3>Infografía de la temática</h3>
+                    <a href="tema 3 unidad 2 img 1.png">Ir al recurso</a>
+                </div>
+                <div class="qr-box"><img src="img/qr-infografia-ci-cd.png" style="width: 90px; height: 90px;" alt=""></div>
+            </div>
+        </section>
+
+        <section id="bibliografia" class="pane">
+            <div class="section-intro">
+                <h2>Bibliografía</h2>
+            </div>
+            <div class="bibliography-list">
+                <article class="bibliography-item">Fowler, M. (2006, May 1). Continuous Integration. Martin Fowler. https://martinfowler.com/articles/continuousIntegration.html</article>
+                <article class="bibliography-item">Humble, J., & Farley, D. (2010). Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation. Addison-Wesley.</article>
+                <article class="bibliography-item">GitHub. (s. f.). GitHub Actions documentation. https://docs.github.com/actions</article>
+                <article class="bibliography-item">GitHub. (s. f.). Workflow syntax for GitHub Actions. https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions</article>
+                <article class="bibliography-item">Atlassian. (s. f.). CI/CD. Atlassian. https://www.atlassian.com/continuous-delivery/ci-vs-ci-vs-cd</article>
+                <article class="bibliography-item">Red Hat. (s. f.). What is CI/CD? Red Hat. https://www.redhat.com/en/topics/devops/what-is-ci-cd</article>
+            </div>
+            <footer class="bibliography-credit text-green-800">
+                <div class="bibliography-credit-label">Creado por:</div>
+                <div class="bibliography-credit-name">Centro de Innovaci&oacute;n en TIC para el apoyo de la Docencia CINTIA</div>
+                <div class="bibliography-credit-org">Universidad de Córdoba</div>
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        const links = Array.from(document.querySelectorAll('.nav-link'));
+        const panes = Array.from(document.querySelectorAll('.pane'));
+        const mobileNav = document.getElementById('mobile-nav');
+        const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+        let preferredVoice = null;
+        let activeSpeechPane = null;
+        let activeUtterance = null;
+
+        function switchPane(id) {
+            stopSpeech();
+            panes.forEach(pane => pane.classList.toggle('active', pane.id === id));
+            links.forEach(link => link.classList.toggle('active', link.dataset.target === id));
+            if (mobileNav && mobileNav.value !== id) mobileNav.value = id;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        links.forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                switchPane(this.dataset.target);
+            });
+        });
+
+        if (mobileNav) {
+            mobileNav.addEventListener('change', function() {
+                switchPane(this.value);
+            });
+        }
+
+        document.querySelectorAll('[data-flip]').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+            });
+        });
+
+        function getPaneLabel(pane) {
+            const title = pane.querySelector('h2');
+            return title ? title.textContent.trim() : 'esta seccion';
+        }
+
+        function pickPreferredVoice() {
+            if (!synth) return null;
+            const voices = synth.getVoices();
+            if (!voices.length) return null;
+
+            const latinLangs = ['es-MX', 'es-US', 'es-CO', 'es-419'];
+            const latinNameHints = ['paulina', 'sabina', 'monica', 'microsoft dalia', 'margarita', 'helen', 'laura'];
+
+            const exactLatin = voices.find(voice => latinLangs.includes(voice.lang));
+            if (exactLatin) return exactLatin;
+
+            const latinByName = voices.find(voice => {
+                const name = voice.name.toLowerCase();
+                return latinNameHints.some(hint => name.includes(hint));
+            });
+            if (latinByName) return latinByName;
+
+            return voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('es')) || voices[0];
+        }
+
+        function updateSpeechNotes() {
+            const noteText = !synth
+                ? 'Lectura por voz no disponible en este navegador.'
+                : preferredVoice
+                    ? 'Voz: ' + preferredVoice.name + ' (' + preferredVoice.lang + ')'
+                    : 'Voz: Espanol del sistema';
+
+            document.querySelectorAll('.speech-note').forEach(note => {
+                note.textContent = noteText;
+                note.classList.toggle('unsupported', !synth);
+            });
+        }
+
+        function createSpeechControls(pane) {
+            const controls = document.createElement('div');
+            controls.className = 'speech-controls';
+            controls.dataset.speechPane = pane.id;
+            controls.innerHTML =
+                '<button type="button" class="speech-btn play">Leer</button>' +
+                '<button type="button" class="speech-btn pause" disabled>Pausar</button>' +
+                '<button type="button" class="speech-btn stop" disabled>Detener</button>' +
+                '<div class="speech-rate-wrap">' +
+                    '<label>Velocidad:</label>' +
+                    '<input type="range" class="speech-rate" min="0.7" max="1.5" step="0.1" value="1">' +
+                '</div>' +
+                '<div class="speech-note"></div>';
+
+            const intro = pane.querySelector('.section-intro');
+            if (intro && intro.nextSibling) {
+                pane.insertBefore(controls, intro.nextSibling);
+            } else {
+                pane.insertBefore(controls, pane.firstChild);
+            }
+        }
+
+        panes.forEach(createSpeechControls);
+
+        function getPaneSpeechText(pane) {
+            const clone = pane.cloneNode(true);
+            clone.querySelectorAll('.speech-controls, script, style, button, input, select, textarea').forEach(node => node.remove());
+
+            clone.querySelectorAll('.flip-card').forEach(card => {
+                const title = card.querySelector('.flip-front .flip-title');
+                const back = card.querySelector('.flip-back p');
+                const replacement = document.createElement('p');
+                replacement.textContent = title && back
+                    ? title.textContent.trim() + '. ' + back.textContent.trim()
+                    : card.textContent.trim();
+                card.replaceWith(replacement);
+            });
+
+            const text = (clone.innerText || clone.textContent || '')
+                .replace(/\s+/g, ' ')
+                .replace(/`/g, '')
+                .trim();
+
+            return text;
+        }
+
+        function updateSpeechButtons() {
+            document.querySelectorAll('.speech-controls').forEach(ctrl => {
+                const isActive = ctrl.dataset.speechPane === activeSpeechPane && synth && synth.speaking;
+                const isPaused = isActive && synth.paused;
+                ctrl.querySelector('.speech-btn.play').disabled = !synth;
+                ctrl.querySelector('.speech-btn.pause').disabled = !isActive || isPaused;
+                ctrl.querySelector('.speech-btn.stop').disabled = !isActive;
+            });
+        }
+
+        function stopSpeech() {
+            if (!synth) return;
+            synth.cancel();
+            activeSpeechPane = null;
+            activeUtterance = null;
+            updateSpeechButtons();
+        }
+
+        function startSpeech(paneId) {
+            if (!synth) return;
+            const pane = document.getElementById(paneId);
+            if (!pane) return;
+
+            const text = getPaneSpeechText(pane);
+            if (!text) return;
+
+            if (synth.speaking) synth.cancel();
+
+            const rateInput = document.querySelector('.speech-controls[data-speech-pane="' + paneId + '"] .speech-rate');
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = preferredVoice ? preferredVoice.lang : 'es-ES';
+            utterance.rate = rateInput ? Number(rateInput.value) : 1;
+            utterance.pitch = 1;
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.onend = function() {
+                activeSpeechPane = null;
+                activeUtterance = null;
+                updateSpeechButtons();
+            };
+
+            utterance.onerror = function() {
+                activeSpeechPane = null;
+                activeUtterance = null;
+                updateSpeechButtons();
+            };
+
+            activeSpeechPane = paneId;
+            activeUtterance = utterance;
+            synth.speak(utterance);
+            updateSpeechButtons();
+        }
+
+        function setupSpeech() {
+            if (synth) {
+                preferredVoice = pickPreferredVoice();
+                if (typeof synth.onvoiceschanged !== 'undefined') {
+                    synth.onvoiceschanged = function() {
+                        preferredVoice = pickPreferredVoice();
+                        updateSpeechNotes();
+                    };
+                }
+            }
+
+            updateSpeechNotes();
+            updateSpeechButtons();
+
+            document.querySelectorAll('.speech-controls').forEach(ctrl => {
+                const paneId = ctrl.dataset.speechPane;
+                const playBtn = ctrl.querySelector('.speech-btn.play');
+                const pauseBtn = ctrl.querySelector('.speech-btn.pause');
+                const stopBtn = ctrl.querySelector('.speech-btn.stop');
+
+                playBtn.addEventListener('click', function() {
+                    if (!synth) return;
+                    if (activeSpeechPane === paneId && synth.paused) {
+                        synth.resume();
+                        updateSpeechButtons();
+                        return;
+                    }
+                    startSpeech(paneId);
+                });
+
+                pauseBtn.addEventListener('click', function() {
+                    if (!synth || activeSpeechPane !== paneId || !synth.speaking) return;
+                    synth.pause();
+                    updateSpeechButtons();
+                });
+
+                stopBtn.addEventListener('click', function() {
+                    stopSpeech();
+                });
+
+                ctrl.querySelector('.speech-rate').addEventListener('input', function() {
+                    if (activeSpeechPane === paneId && activeUtterance && synth && synth.speaking) {
+                        const wasPaused = synth.paused;
+                        startSpeech(paneId);
+                        if (wasPaused) synth.pause();
+                    }
+                });
+            });
+        }
+
+        setupSpeech();
+
+        let selectedMatch = null;
+        const matchFeedback = document.getElementById('match-feedback');
+        const matchItems = document.querySelectorAll('.match-item');
+        const matchTargets = document.querySelectorAll('.match-target');
+        let matchCount = 0;
+
+        matchItems.forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.classList.contains('done')) return;
+                matchItems.forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMatch = this;
+                matchFeedback.className = 'feedback info show';
+                matchFeedback.textContent = 'Ahora selecciona la definición correspondiente.';
+            });
+        });
+
+        matchTargets.forEach(target => {
+            target.addEventListener('click', function() {
+                if (!selectedMatch || this.classList.contains('done')) return;
+                if (selectedMatch.dataset.id === this.dataset.id) {
+                    selectedMatch.classList.remove('selected');
+                    selectedMatch.classList.add('done');
+                    this.classList.add('done');
+                    matchCount += 1;
+                    selectedMatch = null;
+                    if (matchCount === 4) {
+                        matchFeedback.className = 'feedback success show';
+                        matchFeedback.textContent = 'Excelente. Relacionaste correctamente todos los conceptos del pipeline.';
+                    } else {
+                        matchFeedback.className = 'feedback success show';
+                        matchFeedback.textContent = 'Correcto. Continúa con el siguiente par.';
+                    }
+                } else {
+                    this.classList.add('selected');
+                    setTimeout(() => this.classList.remove('selected'), 350);
+                    matchFeedback.className = 'feedback error show';
+                    matchFeedback.textContent = 'Esa relación no corresponde. Intenta de nuevo.';
+                }
+            });
+        });
+
+        const simulatorState = {
+            trigger: '',
+            validacion: '',
+            resultado: ''
+        };
+
+        function renderSimulator() {
+            const requestLine = document.getElementById('sim-request-line');
+            const responseLine = document.getElementById('sim-response-line');
+            const jsonLine = document.getElementById('sim-json-line');
+            if (!requestLine || !responseLine || !jsonLine) return;
+
+            requestLine.textContent = simulatorState.trigger || '[trigger]';
+            responseLine.textContent = simulatorState.validacion || '[validación]';
+            jsonLine.textContent = simulatorState.resultado || '[resultado esperado]';
+        }
+
+        document.querySelectorAll('[data-sim-group]').forEach(group => {
+            group.addEventListener('click', function(event) {
+                const button = event.target.closest('button');
+                if (!button) return;
+                this.querySelectorAll('button').forEach(item => item.classList.remove('selected'));
+                button.classList.add('selected');
+                simulatorState[this.dataset.simGroup] = button.dataset.value;
+                renderSimulator();
+            });
+        });
+
+        function evaluateSimulator() {
+            const feedback = document.getElementById('scenario-feedback');
+            feedback.classList.add('show');
+
+            if (!simulatorState.trigger || !simulatorState.validacion || !simulatorState.resultado) {
+                feedback.className = 'feedback info show';
+                feedback.innerHTML = 'Aún faltan decisiones. Completa trigger, validación y resultado esperado.';
+                return;
+            }
+
+            const isCorrect =
+                simulatorState.trigger === 'push' &&
+                simulatorState.validacion === 'test' &&
+                simulatorState.resultado === 'verde';
+
+            if (isCorrect) {
+                feedback.className = 'feedback success show';
+                feedback.innerHTML = '<strong>Correcto.</strong> Un flujo básico de CI puede iniciarse con un <code>push</code>, instalar dependencias y ejecutar <code>test/lint</code>, y dejar como evidencia un workflow en verde.';
+            } else {
+                feedback.className = 'feedback error show';
+                feedback.innerHTML = '<strong>Revisa la combinación.</strong> CI busca validar cambios automáticamente: normalmente se activa por <code>push</code> o <code>pull_request</code>, corre validaciones básicas y deja una evidencia clara de éxito o fallo.';
+            }
+        }
+
+        function resetSimulator() {
+            simulatorState.trigger = '';
+            simulatorState.validacion = '';
+            simulatorState.resultado = '';
+            document.querySelectorAll('[data-sim-group] button').forEach(button => button.classList.remove('selected'));
+            renderSimulator();
+            const feedback = document.getElementById('scenario-feedback');
+            feedback.className = 'feedback info show';
+            feedback.innerHTML = 'Selecciona una opción en cada paso para construir un flujo básico de CI.';
+        }
+
+        renderSimulator();
+
+        const quizQuestions = [
+            ['En una arquitectura basada en servicios, CI sirve principalmente para:', ['Ejecutar el servicio en producción sin permisos.', 'Validar automáticamente cambios (pruebas/lint/build) cada vez que se integra código.', 'Reemplazar el repositorio de GitHub por Docker.', 'Guardar secrets en el código para desplegar más rápido.'], 1],
+            ['¿Cuál es la diferencia más clara entre CI y CD?', ['CI crea contenedores; CD escribe APIs.', 'CI valida y construye; CD entrega o despliega cambios de forma controlada.', 'CI solo se usa en producción; CD solo en desarrollo.', 'No hay diferencia, son lo mismo.'], 1],
+            ['En GitHub Actions, un “trigger” es:', ['El archivo Dockerfile del servicio.', 'El evento que inicia el workflow (push, pull_request, manual).', 'El servidor donde corre la base de datos.', 'El comando para detener un contenedor.'], 1],
+            ['¿Qué es un “runner” en GitHub Actions?', ['Un usuario que aprueba el PR.', 'La máquina que ejecuta los jobs del workflow (por ejemplo, ubuntu-latest).', 'Un repositorio donde se guardan imágenes.', 'Un endpoint de la API.'], 1],
+            ['¿Cuál de estas prácticas protege mejor un despliegue a producción?', ['Guardar credenciales en un archivo del repositorio.', 'Ejecutar CD sin validaciones.', 'Usar secrets y ambientes con aprobaciones (staging/prod).', 'Hacer todo manual sin revisar logs.'], 2]
+        ];
+
+        const quizContainer = document.getElementById('quiz');
+        quizQuestions.forEach((item, idx) => {
+            const [question, options, answer] = item;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'quiz-question';
+            wrapper.dataset.answer = answer;
+            wrapper.innerHTML = '<p><strong>' + (idx + 1) + '.</strong> ' + question + '</p>' +
+                options.map((option, optionIndex) =>
+                    '<label class="quiz-option"><input type="radio" name="q' + (idx + 1) + '" value="' + optionIndex + '"> ' + option + '</label>'
+                ).join('');
+            quizContainer.appendChild(wrapper);
+        });
+
+        function checkQuiz() {
+            const questions = Array.from(document.querySelectorAll('.quiz-question'));
+            let score = 0;
+
+            questions.forEach(question => {
+                const answer = question.dataset.answer;
+                const selected = question.querySelector('input:checked');
+                question.style.borderColor = '#dcfce7';
+                if (selected && selected.value === answer) {
+                    score += 1;
+                    question.style.borderColor = '#22c55e';
+                } else {
+                    question.style.borderColor = '#fca5a5';
+                }
+            });
+
+            const result = document.getElementById('quiz-result');
+            const percent = Math.round((score / questions.length) * 100);
+            result.classList.add('show');
+
+            if (percent >= 80) {
+                result.style.background = '#dcfce7';
+                result.style.color = '#166534';
+                result.innerHTML = '<strong>Resultado:</strong> ' + score + '/' + questions.length + ' (' + percent + '%). Tienes una comprensión sólida del tema.';
+            } else if (percent >= 60) {
+                result.style.background = '#fef3c7';
+                result.style.color = '#92400e';
+                result.innerHTML = '<strong>Resultado:</strong> ' + score + '/' + questions.length + ' (' + percent + '%). Vas bien, pero conviene repasar CI, CD y los componentes básicos de GitHub Actions.';
+            } else {
+                result.style.background = '#fee2e2';
+                result.style.color = '#991b1b';
+                result.innerHTML = '<strong>Resultado:</strong> ' + score + '/' + questions.length + ' (' + percent + '%). Te recomiendo volver al contenido y repetir el quiz.';
+            }
+        }
+
+        function resetQuiz() {
+            document.querySelectorAll('#quiz input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.quiz-question').forEach(question => question.style.borderColor = '#dcfce7');
+            const result = document.getElementById('quiz-result');
+            result.classList.remove('show');
+            result.innerHTML = '';
+        }
+    </script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
+

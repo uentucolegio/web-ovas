@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Tablas de Verdad</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para la App */
+        .sidebar-link {
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link:hover {
+            background-color: #f0fdf4; /* green-50 */
+            color: #166534; /* green-800 */
+            border-left-color: #22c55e; /* green-500 */
+        }
+        .sidebar-link.active {
+            background-color: #dcfce7; /* green-100 */
+            color: #15803d; /* green-700 */
+            border-left-color: #22c55e; /* green-500 */
+            font-weight: 600;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .accordion-btn.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+        .accordion-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            padding: 0 1rem;
+        }
+        .accordion-panel.show {
+            max-height: 2000px; /* Ajusta según el contenido máximo esperado */
+            padding: 1rem;
+        }
+
+        /* Estilos del modal de imagen */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .image-modal .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+        .image-modal img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .image-modal .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-['Poppins',_sans-serif]">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain rounded-full" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Tablas de Verdad</h2>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    <span class="text-2xl">🤔</span> <strong>¿Alguna vez te has preguntado cómo una computadora toma decisiones?</strong> Desde verificar si tu contraseña es correcta hasta decidir si un personaje en un videojuego debe saltar, todo se basa en la lógica.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Las <span class="font-bold text-green-800">tablas de verdad</span> son el corazón de esa lógica. Son una herramienta fundamental que nos permite entender cómo funcionan las condiciones en la programación y cómo se conectan diferentes ideas para llegar a un resultado. A lo largo de esta unidad aprenderás cómo <span class="font-bold">construir tablas de verdad</span> y cómo <span class="font-bold">interpretarlas para resolver problemas lógicos y computacionales</span> de manera eficiente <span class="text-xl">⚙️</span>.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        Entender este concepto es clave en el mundo de la programación <span class="text-xl">💻</span>, porque te permite <span class="font-bold">crear código claro, preciso y sin errores</span>, enseñándole al computador a tomar decisiones, paso a paso <span class="text-xl">✨</span>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Comprender qué es una tabla de verdad y cuál es su propósito en la lógica y la programación.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔍</span>
+                        <span>Identificar los operadores lógicos básicos (AND, OR, NOT), sus símbolos (Ʌ, V, ~) y su significado.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📝</span>
+                        <span>Construir tablas de verdad para proposiciones compuestas utilizando los operadores lógicos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💻</span>
+                        <span>Aplicar el razonamiento lógico para analizar y resolver problemas prácticos contextualizados en el ámbito rural y tecnológico.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+                    <!-- Acordeón 1 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2" data-target="#panel-conceptos">
+                           <span>1. ¿Qué es una Tabla de Verdad?</span> <span class="accordion-icon ml-2 text-2xl font-light">+</span>
+                        </button>
+                    </div>
+                    <div id="panel-conceptos" class="accordion-panel bg-white border border-t-0 border-green-300 rounded-b-lg mb-6">
+                        <div class="space-y-4 text-slate-700 leading-relaxed">
+                            <p>Una <strong>tabla de verdad</strong> es una forma de representar todas las posibles combinaciones de valores verdaderos o falsos de una proposición compuesta. Sirve para <strong>analizar el comportamiento lógico</strong> de una afirmación, y es clave en programación, electrónica digital y razonamiento computacional.</p>
+                            <div class="mt-4 p-4 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
+                                <h4 class="font-bold text-green-800 mb-2">Analogía del Interruptor 💡</h4>
+                                <p>Imagina que tienes dos interruptores que controlan una lámpara. Cada interruptor puede estar <strong>encendido</strong> (Verdadero) o <strong>apagado</strong> (Falso). Una tabla de verdad te permite ver <strong>qué pasa con la lámpara según cómo estén los interruptores</strong>.</p>
+                            </div>
+                             <h3 class="text-xl font-bold text-green-700 mb-2 pt-4">¿Por qué es útil en programación?</h3>
+                            <p>En programación, usamos condiciones para tomar decisiones. Por ejemplo, para un sistema de riego en una finca, el código podría ser:</p>
+                            <div class="bg-gray-800 text-white p-4 rounded-md font-mono text-sm my-2">
+                                <span class="text-purple-400">if</span> <span class="text-sky-300">hay_lluvia</span> == <span class="text-orange-400">Falso</span> <span class="text-purple-400">AND</span> <span class="text-sky-300">humedad</span> &lt; <span class="text-orange-400">30</span> <span class="text-purple-400">then</span>:
+                                <br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-yellow-300">activar_riego()</span>
+                            </div>
+                             <p class="pt-2">Las <strong>tablas de verdad</strong> te ayudan a entender cómo funcionan estas decisiones lógicas. Y eso es <strong>muy útil en programación</strong>, porque programar es como enseñarle al computador a tomar decisiones, paso a paso, sin errores.</p>
+                        </div>
+                    </div>
+                    <!-- Acordeón 2 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2" data-target="#panel-operadores">
+                            <span>2. Operadores Lógicos y Ejemplos</span> <span class="accordion-icon ml-2 text-2xl font-light">+</span>
+                        </button>
+                    </div>
+                    <div id="panel-operadores" class="accordion-panel bg-white border border-t-0 border-green-300 rounded-b-lg mb-6">
+                       <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <p>En lógica y programación, usamos palabras como <strong>AND, OR, y NOT</strong> para hacer conexiones lógicas.</p>
+                           <!-- Tabla de Operadores -->
+                           <div class="overflow-x-auto">
+                               <table class="min-w-full text-sm text-left border border-green-300 rounded-lg">
+                                   <thead class="bg-green-100">
+                                       <tr>
+                                           <th class="py-2 px-4 border-b border-green-300">Operador</th>
+                                           <th class="py-2 px-4 border-b border-green-300">Conector</th>
+                                           <th class="py-2 px-4 border-b border-green-300">Significado</th>
+                                       </tr>
+                                   </thead>
+                                   <tbody>
+                                       <tr class="bg-white"><td class="py-2 px-4 border-b border-green-100">AND</td><td class="py-2 px-4 border-b border-green-100">Ʌ</td><td class="py-2 px-4 border-b border-green-100">y</td></tr>
+                                       <tr class="bg-white"><td class="py-2 px-4 border-b border-green-100">OR</td><td class="py-2 px-4 border-b border-green-100">V</td><td class="py-2 px-4 border-b border-green-100">o</td></tr>
+                                       <tr class="bg-white"><td class="py-2 px-4">NOT</td><td class="py-2 px-4">~</td><td class="py-2 px-4">No</td></tr>
+                                   </tbody>
+                               </table>
+                           </div>
+                           
+                           <!-- Ejemplo AND -->
+                           <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                               <h4 class="font-bold text-green-800 mb-2">Ejemplo #1 - Operador AND (y) Ʌ</h4>
+                               <p class="mb-2"><strong>Situación:</strong> "La vaca tiene alimento <strong>y</strong> hay agua en el bebedero". <br>Esta afirmación completa solo es verdadera si ambas partes son verdaderas.</p>
+                               <div class="overflow-x-auto my-4">
+                                   <table class="w-full max-w-md mx-auto text-sm text-center border border-gray-300 rounded-lg bg-white shadow-md">
+                                       <thead class="bg-gray-100">
+                                           <tr>
+                                               <th class="py-2 px-4 font-semibold">Alimento (P)</th>
+                                               <th class="py-2 px-4 font-semibold">Agua (Q)</th>
+                                               <th class="py-2 px-4 font-semibold">P Ʌ Q (Resultado)</th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                           <tr><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t font-bold text-red-600">Falso</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t font-bold text-red-600">Falso</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t font-bold text-red-600">Falso</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t font-bold text-green-600">Verdadero</td></tr>
+                                       </tbody>
+                                   </table>
+                               </div>
+                           </div>
+                           
+                           <!-- Ejemplo OR -->
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                               <h4 class="font-bold text-green-800 mb-2">Ejemplo #2 - Operador OR (o) V</h4>
+                               <p class="mb-2"><strong>Situación:</strong> "El sistema de alimentación se activa si hay pasto <strong>o</strong> hay silo disponible". <br>Esta afirmación es verdadera si al menos una de las dos condiciones es verdadera.</p>
+                               <div class="overflow-x-auto my-4">
+                                   <table class="w-full max-w-md mx-auto text-sm text-center border border-gray-300 rounded-lg bg-white shadow-md">
+                                       <thead class="bg-gray-100">
+                                           <tr>
+                                               <th class="py-2 px-4 font-semibold">Pasto (P)</th>
+                                               <th class="py-2 px-4 font-semibold">Silo (Q)</th>
+                                               <th class="py-2 px-4 font-semibold">P V Q (Resultado)</th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                           <tr><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t font-bold text-red-600">Falso</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t font-bold text-green-600">Verdadero</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t font-bold text-green-600">Verdadero</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t font-bold text-green-600">Verdadero</td></tr>
+                                       </tbody>
+                                   </table>
+                               </div>
+                           </div>
+
+                           <!-- Ejemplo NOT -->
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                               <h4 class="font-bold text-green-800 mb-2">Ejemplo #3 - Operador NOT (No) ~</h4>
+                               <p class="mb-2"><strong>Situación:</strong> "Un sistema de riego debe activarse sólo si <strong>NO</strong> ha llovido". <br>Este operador niega o invierte el valor de verdad. Si es Verdadero, lo convierte en Falso, y viceversa.</p>
+                               <div class="overflow-x-auto my-4">
+                                   <table class="w-full max-w-sm mx-auto text-sm text-center border border-gray-300 rounded-lg bg-white shadow-md">
+                                       <thead class="bg-gray-100">
+                                           <tr>
+                                               <th class="py-2 px-4 font-semibold">Lluvia (P)</th>
+                                               <th class="py-2 px-4 font-semibold">~P (Resultado)</th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                           <tr><td class="py-2 px-4 border-t">Falso</td><td class="py-2 px-4 border-t font-bold text-green-600">Verdadero</td></tr>
+                                           <tr><td class="py-2 px-4 border-t">Verdadero</td><td class="py-2 px-4 border-t font-bold text-red-600">Falso</td></tr>
+                                       </tbody>
+                                   </table>
+                               </div>
+                           </div>
+                       </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividades Prácticas -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+                <div class="space-y-8">
+                    <!-- Ejercicio 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Ejercicio 1. Encendido del tractor</h3>
+                        <p class="mb-2"><span class="font-semibold">Situación:</span> El tractor de una finca sólo puede encender si hay gasolina <strong>o</strong> hay diésel.</p>
+                        <p class="mb-2"><span class="font-semibold">Pregunta:</span> Si <strong>no hay gasolina</strong> (Falso) pero <strong>sí hay diésel</strong> (Verdadero), ¿el tractor enciende?</p>
+                        <div class="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded">
+                            <input type="text" data-answer="verdadero" class="activity-input w-full p-2 border rounded-md" placeholder="Escribe tu respuesta aquí (Verdadero o Falso)...">
+                        </div>
+                    </div>
+                    <!-- Ejercicio 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Ejercicio 2. Alimentación del ganado</h3>
+                        <p class="mb-2"><span class="font-semibold">Situación:</span> El ganado <strong>no</strong> debe ser alimentado si <strong>ya comió</strong>.</p>
+                        <p class="mb-2"><span class="font-semibold">Pregunta:</span> Si la condición "ya comió" es Verdadera, ¿se debe activar el sistema de alimentación?</p>
+                         <div class="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded">
+                            <input type="text" data-answer="falso" class="activity-input w-full p-2 border rounded-md" placeholder="Escribe tu respuesta aquí (Verdadero o Falso)...">
+                        </div>
+                    </div>
+                    <!-- Ejercicio 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Ejercicio 3. Alerta de la aplicación</h3>
+                        <p class="mb-2"><span class="font-semibold">Situación:</span> Una aplicación para granjas muestra una alerta si <strong>no</strong> se han recolectado los huevos.</p>
+                        <p class="mb-2"><span class="font-semibold">Pregunta:</span> Si la condición "se han recolectado los huevos" es Falsa, ¿la aplicación muestra una alerta?</p>
+                        <div class="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded">
+                            <input type="text" data-answer="verdadero" class="activity-input w-full p-2 border rounded-md" placeholder="Escribe tu respuesta aquí (Verdadero o Falso)...">
+                        </div>
+                    </div>
+                </div>
+                <button id="check-activity-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Verificar respuestas</button>
+                <div id="activity-result" class="mt-4 font-medium"></div>
+            </div>
+            
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container" class="space-y-8">
+                        <!-- Pregunta 1 -->
+                        <div class="quiz-question" data-correct="b">
+                            <p class="font-semibold text-slate-800 mb-2">1. ¿Cuál es el resultado de la operación lógica `Verdadero Y Falso`?</p>
+                            <div class="space-y-2"><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="a" class="mr-3">Verdadero</label><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="b" class="mr-3">Falso</label></div>
+                        </div>
+                        <!-- Pregunta 2 -->
+                        <div class="quiz-question" data-correct="c">
+                            <p class="font-semibold text-slate-800 mb-2">2. Para que el operador OR (`V`) dé como resultado `Falso`, ¿cómo deben ser sus proposiciones?</p>
+                             <div class="space-y-2"><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="a" class="mr-3">Al menos una debe ser Falsa.</label><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="b" class="mr-3">Ambas deben ser Verdaderas.</label><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="c" class="mr-3">Ambas deben ser Falsas.</label></div>
+                        </div>
+                         <!-- Pregunta 3 -->
+                        <div class="quiz-question" data-correct="b">
+                            <p class="font-semibold text-slate-800 mb-2">3. ¿Cuál es la función principal del operador NOT (`~`)?</p>
+                             <div class="space-y-2"><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="a" class="mr-3">Combinar dos valores.</label><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="b" class="mr-3">Invertir el valor de verdad de una proposición.</label><label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="c" class="mr-3">Comparar si dos valores son iguales.</label></div>
+                        </div>
+                    </div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre tablas de verdad y lógica proposicional, te recomendamos explorar los siguientes enlaces:</p>
+                <ul class="space-y-4">
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><h3 class="font-bold text-green-700">Introducción a las Tablas de Verdad (Khan Academy)</h3><a href="https://es.khanacademy.org/computing/computer-science/logic/logic-and-circuits/a/truth-tables" target="_blank" class="text-sm text-slate-700 hover:text-green-700 underline">Ir al recurso</a></li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><h3 class="font-bold text-green-700">Juego de Operadores Lógicos (Wordwall)</h3><a href="https://wordwall.net/es/resource/35923910/l%C3%B3gica/operadores-l%C3%B3gicos" target="_blank" class="text-sm text-slate-700 hover:text-green-700 underline">Ir al juego</a></li>
+                </ul>
+            </div>
+            
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Epp, S. (2011). <i>Lógica y razonamiento matemático</i>. Pearson.</span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Allen, D. (2007). <i>Lógica para computación</i>. Pearson Educación.</span></div>
+                </div>
+            </div>
+             <!-- Footer/Credits -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const mobileNav = document.getElementById('mobile-nav');
+        const contentPanes = document.querySelectorAll('.content-pane');
+        const accordionBtns = document.querySelectorAll('.accordion-btn');
+        const checkActivityBtn = document.getElementById('check-activity-btn');
+        const submitQuizBtn = document.getElementById('submit-quiz-btn');
+
+        // Función para cambiar de panel
+        function switchPane(targetId) {
+            contentPanes.forEach(pane => {
+                pane.classList.remove('active');
+            });
+            const targetPane = document.getElementById(targetId);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+        }
+
+        // Navegación Sidebar
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                const targetId = this.getAttribute('data-target');
+                switchPane(targetId);
+                mobileNav.value = targetId;
+            });
+        });
+
+        // Navegación Móvil
+        mobileNav.addEventListener('change', function() {
+            const targetId = this.value;
+            switchPane(targetId);
+            sidebarLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('data-target') === targetId);
+            });
+        });
+        
+        // Lógica del Acordeón
+        accordionBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const panel = document.querySelector(targetId);
+                const isActive = button.classList.contains('active');
+                
+                // Cerrar todos los demás
+                accordionBtns.forEach(btn => {
+                    if (btn !== button) {
+                        btn.classList.remove('active');
+                        document.querySelector(btn.getAttribute('data-target')).classList.remove('show');
+                    }
+                });
+                
+                // Abrir/cerrar el actual
+                if (isActive) {
+                    button.classList.remove('active');
+                    panel.classList.remove('show');
+                } else {
+                    button.classList.add('active');
+                    panel.classList.add('show');
+                }
+            });
+        });
+
+        // Lógica de Actividades
+        if (checkActivityBtn) {
+            checkActivityBtn.addEventListener('click', () => {
+                const inputs = document.querySelectorAll('.activity-input');
+                let correctCount = 0;
+                inputs.forEach(input => {
+                    const userAnswer = input.value.trim().toLowerCase();
+                    const correctAnswer = input.getAttribute('data-answer');
+                    if (userAnswer === correctAnswer) {
+                        input.classList.remove('border-red-500');
+                        input.classList.add('border-green-500');
+                        correctCount++;
+                    } else {
+                        input.classList.remove('border-green-500');
+                        input.classList.add('border-red-500');
+                    }
+                });
+                const resultDiv = document.getElementById('activity-result');
+                resultDiv.textContent = `Tienes ${correctCount} de ${inputs.length} respuestas correctas.`;
+                resultDiv.className = correctCount === inputs.length ? 'mt-4 font-medium text-green-600' : 'mt-4 font-medium text-red-600';
+            });
+        }
+        
+        // Lógica de Evaluación (Quiz)
+        if (submitQuizBtn) {
+            submitQuizBtn.addEventListener('click', () => {
+                const questions = document.querySelectorAll('.quiz-question');
+                let score = 0;
+                questions.forEach(question => {
+                    const selected = question.querySelector('input[type="radio"]:checked');
+                    if (selected && selected.value === question.getAttribute('data-correct')) {
+                        score++;
+                    }
+                });
+                const resultDiv = document.getElementById('quiz-result');
+                const percentage = (score / questions.length) * 100;
+                resultDiv.innerHTML = `Tu puntuación es: ${score} de ${questions.length} (${percentage.toFixed(0)}%).`;
+                if (percentage >= 60) {
+                    resultDiv.className = 'mt-4 text-lg font-bold text-green-700';
+                } else {
+                    resultDiv.className = 'mt-4 text-lg font-bold text-red-700';
+                }
+            });
+        }
+    });
+    </script>
+
+<!-- Plugin de accesibilidad -->
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
+
+

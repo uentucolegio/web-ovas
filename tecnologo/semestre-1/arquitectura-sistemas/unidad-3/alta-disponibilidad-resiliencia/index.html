@@ -1,0 +1,823 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="tailwind.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Alta Disponibilidad y Resiliencia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--green-50:#f0fdf4;--green-100:#dcfce7;--green-200:#bbf7d0;--green-500:#22c55e;--green-600:#16a34a;--green-700:#15803d;--green-800:#166534;--slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--yellow-100:#fef9c3;--yellow-500:#eab308;--yellow-700:#a16207;--red-100:#fee2e2;--red-500:#ef4444;--red-700:#b91c1c;--shadow-sm:0 1px 2px rgba(15,23,42,.06);--shadow-md:0 10px 25px rgba(15,23,42,.08);--shadow-lg:0 18px 40px rgba(15,23,42,.12);--radius-lg:18px;--radius-md:14px}
+        html,body{width:100%;min-height:100%;overflow-x:hidden;background:var(--slate-50)}
+        body{display:flex;min-height:100vh;font-family:"Poppins","Segoe UI",Tahoma,sans-serif;color:var(--slate-700);line-height:1.6}
+        img{display:block;max-width:100%;height:auto} button,select,input{font:inherit} button{border:0;cursor:pointer} a{color:inherit;text-decoration:none}
+        .layout{display:flex;min-height:100vh;width:100%}.sidebar{width:290px;background:linear-gradient(180deg,#ffffff 0%,#f0fdf4 100%);border-right:1px solid #dcfce7;padding:24px 18px;position:sticky;top:0;min-height:100vh;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.08);flex-shrink:0}.sidebar-logo{padding:0 0 18px;display:flex;justify-content:center}.sidebar-logo-frame{width:150px;height:150px;padding:10px;border-radius:999px;background:#fff;border:2px solid var(--green-500);box-shadow:0 20px 40px rgba(22,163,74,.18);display:flex;align-items:center;justify-content:center;overflow:hidden}.sidebar-logo-frame img{max-width:82%;max-height:82%;object-fit:contain;display:block}.sidebar-nav{padding-bottom:1.5rem}.sidebar-link{display:flex;align-items:center;gap:12px;padding:16px 18px;color:var(--slate-700);font-weight:500;transition:.2s ease;font-size:1rem}.sidebar-link:hover,.sidebar-link.active{background:#e7f5ed;color:var(--green-800)}.sidebar-icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}.main{flex:1;padding:28px 32px;background:var(--slate-50)}.mobile-header{display:none;background:#fff;border:1px solid #dcfce7;border-radius:18px;padding:18px;margin-bottom:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}.mobile-logo{width:100px;height:100px;margin:0 auto 12px;padding:8px;border-radius:999px;background:#fff;border:2px solid var(--green-500);display:flex;align-items:center;justify-content:center;overflow:hidden}.mobile-logo img{max-width:82%;max-height:82%;object-fit:contain;display:block}.mobile-nav{width:100%;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;background:#fff;box-shadow:none}.content-pane{display:none;max-width:1400px;margin:0 auto}.content-pane.active{display:block}.content-stack{display:grid;gap:18px}
+        .hero-card{background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:18px}.eyebrow,.hero-meta,.hero-chip{display:none}.hero-card h1,.content-pane h2,.hero-card .section-heading{color:var(--green-800);font-size:2rem;line-height:1.25;margin:0 0 18px;font-weight:700}.hero-card p{font-size:1rem;line-height:1.75}.section-heading{font-size:2rem;font-weight:700;margin-bottom:18px}
+        p,li{color:var(--slate-700);line-height:1.75;font-size:1rem}
+        .text-block,.activity-card,.quiz-card,.resource-card,.figure-card,.bibliography-item,.objective-item,.example-card,.accordion{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(15,23,42,.06);border:1px solid #dcfce7}
+        .text-block{padding:26px 28px;margin-bottom:18px}.text-block p+p,.mini-card p+p,.example-card p+p{margin-top:16px}
+        .video-card{margin:18px 0;background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(15,23,42,.06);border:1px solid #dcfce7}
+        .video-embed{position:relative;width:100%;padding-top:56.25%;border-radius:.8rem;overflow:hidden;background:#000}
+        .video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+        .objective-item,.activity-card,.quiz-card,.resource-card,.bibliography-item{border-left:6px solid var(--green-500)}
+        .objective-list{list-style:none;display:grid;gap:1.15rem;padding:0;margin:0}.objective-item{display:grid;grid-template-columns:2rem minmax(0,1fr);align-items:center;column-gap:1rem;padding:1.15rem 1.3rem;background:#fff;border:1px solid #edf2f7;border-radius:18px;box-shadow:0 2px 10px rgba(15,23,42,.04)}.objective-check{display:block;width:2rem;min-width:2rem;color:inherit;font-size:1.35rem;line-height:1.2;text-align:center;background:none;border:0;box-shadow:none;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol",sans-serif}.objective-item p{margin:0;min-width:0}
+        .speech-controls{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.2rem;background:linear-gradient(90deg,#dff8e6,#d5f7dc);border-radius:16px;margin-bottom:18px;border:1px solid #b8efc9}.speech-main{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;min-width:0}.speech-btn{padding:.7rem 1.25rem;border-radius:999px;color:#fff;font-weight:700;min-width:88px}.speech-btn:disabled{opacity:.55;cursor:not-allowed}.speech-btn.play{background:#17a94d}.speech-btn.pause{background:#f2c95d}.speech-btn.stop{background:#ea9489}.speech-speed{display:flex;align-items:center;gap:.65rem;color:var(--green-800);font-size:.95rem;font-weight:600;min-width:0}.speech-speed input{accent-color:#ef4444}.speech-voice{color:var(--green-800);font-size:.95rem;text-align:right;min-width:0;overflow-wrap:anywhere}
+        .accordion-list{display:grid;gap:18px}.accordion{overflow:hidden}.accordion-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:20px 24px;background:#fff;color:var(--green-800);text-align:left;font-weight:700;font-size:1.25rem}.accordion-toggle span:first-child{flex:1}.accordion-toggle span:last-child{display:block;color:#16a34a;font-size:1.6rem;font-weight:700;line-height:1;flex-shrink:0}.accordion-panel{display:none;padding:0 24px 24px}.accordion.open .accordion-panel{display:block}
+        .two-col,.flip-grid,.figure-grid{display:grid;gap:1rem}.two-col,.figure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.figure-grid > :only-child{grid-column:1/-1}.flip-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:stretch}.mini-card{padding:1.15rem;border-radius:var(--radius-md);background:#fff;border:1px solid #dfe8ee}.mini-card h3,.mini-card h4,.example-card h4,.module-title,.figure-card h4{color:var(--green-800)}.formula-card{padding:1rem 1.15rem;border-radius:var(--radius-md);background:#f8fbfd;border:1px solid #dfe8ee;color:var(--green-800);font-weight:600;margin:1rem 0;overflow-x:auto}.formula-inline{font-family:"Courier New",Courier,monospace;white-space:nowrap;font-size:1rem}.flip-card{perspective:1000px;min-height:225px;max-width:100%}.flip-card button{width:100%;height:100%;background:transparent}.flip-inner{position:relative;width:100%;min-height:225px;transition:transform .55s ease;transform-style:preserve-3d}.flip-card.flipped .flip-inner{transform:rotateY(180deg)}.flip-face{position:absolute;inset:0;padding:1.35rem 1.45rem;border-radius:24px;backface-visibility:hidden;box-shadow:none;border:0;display:flex;flex-direction:column;justify-content:space-between}.flip-front{background:#1d9442;color:#fff}.flip-back{background:#fff;color:var(--slate-700);border:1px solid #b9efc4;transform:rotateY(180deg)}.flip-label{color:rgba(255,255,255,.72);font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem}.flip-back .flip-label{color:#9ca3af}.flip-front h3{color:#fff;font-size:1.05rem;line-height:1.25}.flip-back h3{color:var(--green-800);font-size:1.05rem;line-height:1.25}.flip-front p{color:rgba(255,255,255,.92)}.flip-back p{color:var(--slate-700)}.flip-back strong,.flip-back .formula-inline{color:var(--green-800)}.example-card{margin-top:1rem;padding:1.2rem;border-radius:var(--radius-lg);background:#fff;box-shadow:none;border:1px solid #dfe8ee}
+        .figure-card{padding:1.2rem 1.3rem}.figure-image{width:100%;border-radius:var(--radius-md);overflow:hidden;border:1px dashed #b9d8c2;background:#f8fbfd;min-height:220px;display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;color:var(--slate-600)}.figure-card h4{margin:.9rem 0 .35rem}
+        .table-shell{margin-top:1rem;background:#fff;border-radius:.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .ova-table{width:100%;border-collapse:collapse;background:#fff;border-radius:.5rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:560px}
+        .ova-table th{background-color:#166534;color:#fff;font-weight:600;padding:.75rem 1rem;text-align:left;font-size:.875rem}
+        .ova-table td{padding:.75rem 1rem;border-bottom:1px solid #e5e7eb;font-size:.875rem;color:#374151}
+        .ova-table tbody tr:nth-child(even){background-color:#f9fafb}
+        .ova-table tbody tr:hover{background-color:#f0fdf4}
+        .ova-table tbody tr:last-child td{border-bottom:none}
+        .decision-pills{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.9rem}.decision-pill{padding:.45rem .75rem;border-radius:999px;background:#fff;color:var(--slate-700);font-size:.9rem;border:1px solid #dfe8ee}.table-note{margin-top:.55rem;color:var(--slate-500);font-size:.86rem}
+        #contenido .accordion{border:1px solid #b9efc4;border-left:1px solid #b9efc4;background:#fcfffd}
+        #contenido .accordion .mini-card,#contenido .example-card,#contenido .figure-card,#contenido .formula-card{border-left:0}
+        #contenido .accordion .mini-card{background:#fff}
+        .image-placeholder-label{font-weight:600;color:var(--green-800);margin-bottom:.35rem}
+        .activity-card,.quiz-card,.resource-card{padding:1.45rem 1.65rem;margin-bottom:1.1rem}.module-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem}.module-title{font-size:1.2rem;font-weight:700}.score-chip{padding:.32rem .7rem;border-radius:999px;background:var(--green-50);color:var(--green-700);font-size:.84rem;font-weight:600;white-space:nowrap;border:1px solid var(--green-200)}.activity-question,.quiz-question{padding:1rem 1.15rem;background:var(--slate-50);border-radius:18px;border:1px solid var(--slate-200);overflow-wrap:anywhere}.activity-question+.activity-question,.quiz-question+.quiz-question{margin-top:.9rem}.activity-options{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.85rem}.activity-option{padding:.65rem .9rem;border-radius:999px;background:#fff;border:1px solid var(--green-200);color:var(--green-800);font-weight:500;transition:.2s;text-align:left;white-space:normal;line-height:1.45;justify-content:flex-start}.activity-option:hover,.resource-link:hover,.reset-btn:hover,.quiz-btn:hover{transform:translateY(-1px)}.activity-option:hover{background:var(--green-50)}.activity-option.correct{background:var(--green-100);border-color:var(--green-500)}.activity-option.incorrect{background:var(--red-100);border-color:var(--red-500);color:var(--red-700)}.feedback{margin-top:.8rem;padding:.8rem .95rem;border-radius:var(--radius-md);font-size:.95rem;display:none}.feedback.show{display:block}.feedback.correct{background:var(--green-100);color:var(--green-800)}.feedback.incorrect{background:var(--red-100);color:var(--red-700)}
+        .reset-btn,.quiz-btn,.resource-link{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.7rem 1rem;border-radius:999px;font-weight:600}.reset-btn,.quiz-btn{background:var(--green-600);color:#fff}.reset-btn.secondary{background:var(--slate-500)}.resource-link{background:none;color:#1e3a8a;width:fit-content;text-decoration:underline;padding:0}.quiz-options{display:grid;gap:.8rem;margin-top:.8rem}.quiz-option{display:flex;align-items:flex-start;gap:.75rem;padding:.95rem 1rem;border-radius:18px;background:#f8fafc;border:1px solid #dbe7ee}.quiz-option input{margin-top:.25rem}.quiz-summary{padding:1rem 1.15rem;border-radius:var(--radius-md);border-left:4px solid var(--green-500)}.quiz-summary.success{background:var(--green-100);color:var(--green-800)}.quiz-summary.warning{background:var(--yellow-100);color:var(--yellow-700);border-left-color:var(--yellow-500)}.quiz-summary.error{background:var(--red-100);color:var(--red-700);border-left-color:var(--red-500)}
+        .bibliography-list{list-style:none;display:grid;gap:1rem;padding:0;margin:0;align-items:stretch}.bibliography-item,.bibliography-credit,.bibliography-credit-label,.bibliography-credit-name,.bibliography-credit-org{font-family:"Poppins","Segoe UI",Tahoma,sans-serif}.bibliography-item{display:block;width:100%;padding:1.35rem 1.5rem;font-size:1rem;line-height:1.7;text-align:left;overflow-wrap:anywhere}.bibliography-item a{color:var(--green-700);font-weight:600;text-decoration:none}.bibliography-item a:hover{text-decoration:underline}.bibliography-credit{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;width:100%;margin-top:2rem;padding-top:1.6rem;border-top:2px solid var(--slate-200);text-align:center}.bibliography-credit-label{display:block;font-weight:600;color:var(--slate-700);font-size:.92rem}.bibliography-credit-name{display:block;max-width:900px;margin-top:.2rem;color:var(--green-800);font-size:clamp(1.1rem,2vw,1.45rem);font-weight:700;line-height:1.2;text-wrap:balance}.bibliography-credit-org{display:block;margin-top:.1rem;color:#64748b;font-size:clamp(.9rem,1.6vw,1rem)}.placeholder-card{padding:1rem 1.1rem;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--slate-50),#fff);border:1px dashed var(--slate-200);color:var(--slate-600)}.actions-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}.resource-split{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}.resource-qr{width:120px;height:120px;border:1px dashed var(--green-500);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--green-700);font-size:.9rem;text-align:center;background:var(--green-50);flex-shrink:0;overflow:hidden}.resource-qr img{width:100%;height:100%;object-fit:contain;display:block}
+        .simulator-card{margin-top:1rem;padding:1.2rem;border-radius:var(--radius-lg);background:#fff;border:1px solid #dfe8ee}
+        .simulator-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:1rem;margin-top:1rem}
+        .simulator-panel{padding:1rem 1.1rem;border-radius:18px;background:#f8fafc;border:1px solid #dbe7ee}
+        .simulator-panel h4{color:var(--green-800);margin-bottom:.65rem}
+        .simulator-panel p+p{margin-top:.6rem}
+        .simulator-controls{display:grid;gap:.85rem}
+        .simulator-controls label{display:grid;gap:.35rem;font-weight:600;color:var(--green-800)}
+        .simulator-controls select{padding:.8rem .9rem;border-radius:14px;border:1px solid var(--slate-200);background:#fff;color:var(--slate-700)}
+        .simulator-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.2rem}
+        .simulator-output{margin-top:.9rem;padding:1rem 1.05rem;border-radius:16px;border-left:4px solid var(--slate-500);background:#fff}
+        .simulator-output.success{border-left-color:var(--green-500);background:var(--green-100);color:var(--green-800)}
+        .simulator-output.warning{border-left-color:var(--yellow-500);background:var(--yellow-100);color:var(--yellow-700)}
+        .simulator-output.error{border-left-color:var(--red-500);background:var(--red-100);color:var(--red-700)}
+        .simulator-output code{font-family:"Courier New",Courier,monospace}
+        .image-modal{position:fixed;inset:0;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;padding:1.25rem;z-index:1000}.image-modal.active{display:flex}.image-modal-inner{position:relative;max-width:min(1100px,94vw);max-height:90vh}.image-modal img{max-width:100%;max-height:90vh;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);background:#fff}.image-modal button{position:absolute;top:-.85rem;right:-.85rem;width:2.7rem;height:2.7rem;border-radius:999px;background:#fff;color:var(--slate-800);box-shadow:var(--shadow-md);font-size:1.15rem}
+        @media (max-width:1200px){.flip-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+        @media (max-width:1024px){.two-col,.figure-grid,.simulator-grid{grid-template-columns:1fr}.main{padding:24px}}
+        @media (max-width:900px){.speech-controls{align-items:stretch;padding:.95rem 1rem}.speech-main{flex-direction:column;align-items:flex-start;width:100%}.speech-btn{width:100%}.speech-speed{width:100%;justify-content:space-between}.speech-speed input{flex:1;margin-left:.5rem;min-width:0}.speech-voice{text-align:left;width:100%}}
+        @media (max-width:767px){.sidebar{display:none}.main{padding:18px}.mobile-header{display:block}.text-block,.activity-card,.quiz-card,.resource-card,.bibliography-item{padding:18px}.objective-item{grid-template-columns:1.7rem minmax(0,1fr);column-gap:.75rem;padding:1rem}.objective-check{width:1.7rem;min-width:1.7rem;font-size:1.15rem}.speech-controls{align-items:stretch;padding:.95rem 1rem}.speech-main{flex-direction:column;align-items:flex-start;width:100%}.speech-btn{width:100%}.speech-speed{width:100%;justify-content:space-between}.speech-speed input{flex:1;margin-left:.5rem;min-width:0}.speech-voice{text-align:left}.hero-meta,.activity-options,.actions-row,.resource-split,.module-header{flex-direction:column;align-items:stretch}.activity-option,.reset-btn,.quiz-btn{width:100%}.score-chip{width:fit-content;max-width:100%;white-space:normal}.resource-link{width:auto}.accordion-toggle{padding:16px 18px;font-size:1.05rem}.accordion-panel{padding:0 18px 18px}.flip-grid,.two-col,.figure-grid{grid-template-columns:1fr}.flip-card,.flip-inner{min-height:190px}.table-shell{margin-top:.8rem;border-radius:16px;padding:.85rem}.ova-table{min-width:480px}.table-note{font-size:.8rem}.quiz-option{padding:.85rem}.resource-qr{width:100%;height:90px}}
+        @media (max-width:480px){.main{padding:16px}.hero-card h1,.hero-card .section-heading,.content-pane h2{font-size:2rem}.text-block,.activity-card,.quiz-card,.resource-card,.bibliography-item{padding:16px}.objective-item{grid-template-columns:1.5rem minmax(0,1fr);column-gap:.65rem;padding:.95rem}.objective-check{width:1.5rem;min-width:1.5rem;font-size:1.05rem}.bibliography-credit{margin-top:1.5rem;padding-top:1.3rem}.bibliography-credit-label{font-size:.88rem}.bibliography-credit-name{font-size:1.02rem}.bibliography-credit-org{font-size:.88rem}table{min-width:420px}th,td{padding:.75rem .8rem}}
+        /* Ajuste visual para igualar la referencia base del ejemplo */
+        html,body{width:100%;min-height:100%;overflow-x:hidden;background:#f8fafc}
+        body{display:flex;min-height:100vh;background:#f8fafc}
+        .layout{display:flex;min-height:100vh;width:100%}
+        .sidebar{width:16rem;background:#fff;padding:0;position:relative;top:auto;left:auto;height:auto;overflow:visible;box-shadow:0 10px 15px rgba(15,23,42,.08)}
+        .sidebar-logo{padding:1rem}
+        .sidebar-logo-frame{width:150px;height:150px;padding:.5rem;border-radius:999px;background:#fff;border:2px solid var(--green-500);box-shadow:0 10px 15px rgba(15,23,42,.08)}
+        .sidebar-nav{margin-top:1.5rem}
+        .sidebar-link{gap:.75rem;padding:.75rem 1.5rem;border-left:4px solid transparent;font-weight:500;font-size:1rem}
+        .sidebar-link:hover,.sidebar-link.active{background:#e6f4ea;color:#166534;border-left-color:#22c55e}
+        .sidebar-icon{width:auto;height:auto;font-size:1.2rem}
+        .main{flex:1;margin-left:0;padding:1rem;background:#f9fafb}
+        .mobile-header{display:none;background:#fff;border:1px solid #dcfce7;border-radius:18px;padding:18px;margin-bottom:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}
+        .mobile-logo{width:100px;height:100px;margin:0 auto 12px;padding:8px;border-radius:999px;background:#fff;border:2px solid var(--green-500);box-shadow:none}
+        .mobile-nav{width:100%;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;background:#fff}
+        .content-pane{max-width:none;margin:0}
+        .hero-card{background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:1rem}
+        .hero-card h1,.content-pane h2,.hero-card .section-heading{font-size:1.5rem;line-height:1.25;color:var(--green-800);font-weight:700;margin-bottom:1rem}
+        .hero-card p{color:var(--slate-700);line-height:1.75;margin-bottom:1rem}
+        .text-block{background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:1rem}
+        .text-block p{margin-bottom:1rem}
+        #introduccion .hero-card p{display:none}
+        #introduccion .hero-card h1{margin-bottom:0}
+        .video-card{margin:1rem 0 1.25rem;padding:0;background:transparent;border:0;box-shadow:none}
+        .speech-controls{padding:.75rem 1rem;background:#dcfce7;border:0;border-radius:.5rem;gap:.75rem}
+        .speech-btn{padding:.5rem 1rem}
+        .objective-list{gap:1rem}
+        .objective-item{display:flex;align-items:flex-start;gap:.75rem;padding:1rem;background:#fff;border:0;border-radius:.5rem;box-shadow:0 1px 3px rgba(15,23,42,.1)}
+        .objective-check{width:auto;min-width:auto;font-size:1.5rem}
+        .accordion-list{gap:1rem}
+        .accordion{background:transparent;border:0;box-shadow:none;border-radius:0}
+        .accordion-toggle{padding:1rem;background:var(--green-100);border:1px solid #86efac;border-radius:.5rem;color:var(--green-800);font-size:1.125rem}
+        .accordion.open .accordion-toggle{border-bottom-left-radius:0;border-bottom-right-radius:0}
+        .accordion-panel{padding:1rem 1rem 1.25rem;background:#fff;border:1px solid #86efac;border-top:0;border-bottom-left-radius:.5rem;border-bottom-right-radius:.5rem;margin-bottom:1.5rem}
+        .mini-card,.example-card,.figure-card,.formula-card{border:0;box-shadow:none;border-radius:.5rem;background:transparent;padding:0}
+        .mini-card + .flip-grid,.mini-card + .figure-grid,.mini-card + .table-shell,.mini-card + .simulator-card,.flip-grid + .example-card,.figure-grid + .example-card{margin-top:1rem}
+        .flip-face{border-radius:1rem}
+        .activity-card,.quiz-card,.resource-card,.bibliography-item{padding:1.5rem;background:#fff;border:0;border-left:4px solid var(--green-500);border-radius:.5rem;box-shadow:0 1px 3px rgba(15,23,42,.1)}
+        .module-title,.figure-card h4,.mini-card h3,.mini-card h4,.example-card h4{color:var(--green-700)}
+        .quiz-option{border-radius:.5rem}
+        .resource-link{color:var(--slate-700)}
+        .resource-qr{border:1px solid #86efac;border-radius:.25rem;background:#f0fdf4;width:2cm;height:2cm}
+        .bibliography-list{gap:1rem}
+        @media (min-width:640px){.main{padding:1.5rem}.hero-card h1,.content-pane h2,.hero-card .section-heading{font-size:1.875rem}}
+        @media (min-width:768px){.main{padding:2.5rem}}
+        @media (max-width:767px){.sidebar{display:none}.main{padding:1rem}.mobile-header{display:flex;flex-direction:column;align-items:center}.text-block,.activity-card,.quiz-card,.resource-card,.bibliography-item{padding:1rem}.accordion-toggle{font-size:1rem}.accordion-panel{padding:1rem}}
+    </style>
+<style id="normalizacion-institucional-cintia">
+/* ===== Normalización institucional: misma referencia visual de la plantilla base ===== */
+html, body {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    max-width: 100vw;
+    background: #f8fafc !important;
+}
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #334155 !important;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    line-height: 1.5 !important;
+    -webkit-font-smoothing: antialiased;
+}
+.layout {
+    display: flex !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+}
+.sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 16rem !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    z-index: 40 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border-right: 0 !important;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.10) !important;
+}
+.sidebar-logo {
+    padding: 1rem !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+.sidebar-logo-frame {
+    width: 150px !important;
+    height: 150px !important;
+    padding: .5rem !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #fff !important;
+    border-radius: 9999px !important;
+    border: 2px solid #22c55e !important;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.10) !important;
+    overflow: hidden !important;
+}
+.sidebar-logo-frame img {
+    max-width: 80% !important;
+    max-height: 80% !important;
+    object-fit: contain !important;
+}
+.sidebar-nav {
+    margin-top: 1.5rem !important;
+    padding-bottom: 0 !important;
+}
+.sidebar-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: .75rem !important;
+    padding: .75rem 1.5rem !important;
+    margin: 0 !important;
+    border-left: 4px solid transparent !important;
+    border-radius: 0 !important;
+    color: #334155 !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: all .3s ease !important;
+}
+.sidebar-link.active,
+.sidebar-link:hover {
+    background: #e6f4ea !important;
+    color: #166534 !important;
+    border-left-color: #22c55e !important;
+}
+.sidebar-icon {
+    width: auto !important;
+    height: auto !important;
+    font-size: 1.25rem !important;
+}
+.main {
+    flex: 1 1 0% !important;
+    width: auto !important;
+    margin-left: 16rem !important;
+    padding: 2.5rem !important;
+    background: #f9fafb !important;
+}
+.content-pane {
+    display: none;
+    max-width: none !important;
+    margin: 0 !important;
+    animation: fadeIn .5s ease-in-out;
+}
+.content-pane.active { display: block; }
+.hero-card {
+    padding: 0 !important;
+    margin: 0 0 1rem !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.hero-card h1,
+.content-pane h2,
+.section-heading {
+    margin: 0 0 1.5rem !important;
+    color: #166534 !important;
+    font-size: 1.875rem !important;
+    line-height: 2.25rem !important;
+    font-weight: 700 !important;
+}
+.content-pane h3 {
+    color: #166534 !important;
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+    font-weight: 700 !important;
+}
+p, li, label {
+    color: #334155;
+    font-size: 1rem !important;
+    line-height: 1.625 !important;
+}
+.text-block {
+    padding: 0 !important;
+    margin-bottom: 1rem !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.text-block p { margin-bottom: .75rem; }
+
+.objective-list {
+    display: grid !important;
+    gap: 1rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+}
+.objective-item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+    padding: 1rem !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-radius: .5rem !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05) !important;
+}
+.objective-check {
+    width: auto !important;
+    min-width: auto !important;
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+}
+
+.speech-controls {
+    padding: .75rem 1rem !important;
+    margin-bottom: 1.5rem !important;
+    background: #dcfce7 !important;
+    border: 0 !important;
+    border-radius: .5rem !important;
+}
+.speech-btn {
+    border-radius: .375rem !important;
+    padding: .5rem 1rem !important;
+    font-size: .875rem !important;
+    font-weight: 600 !important;
+}
+.speech-btn.play { background: #16a34a !important; color: #fff !important; }
+.speech-btn.pause { background: #eab308 !important; color: #fff !important; }
+.speech-btn.stop { background: #ef4444 !important; color: #fff !important; }
+
+.accordion-list { gap: 1rem !important; }
+.accordion {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+.accordion-toggle {
+    padding: 1rem !important;
+    background: #dcfce7 !important;
+    border: 1px solid #86efac !important;
+    border-radius: .5rem !important;
+    color: #166534 !important;
+    font-size: 1.125rem !important;
+    font-weight: 700 !important;
+}
+.accordion.open .accordion-toggle {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+.accordion-panel {
+    padding: 1rem 1rem 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+    background: #fff !important;
+    border: 1px solid #86efac !important;
+    border-top: 0 !important;
+    border-bottom-left-radius: .5rem !important;
+    border-bottom-right-radius: .5rem !important;
+}
+
+.activity-card,
+.quiz-card,
+.resource-card,
+.bibliography-item {
+    padding: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-left: 4px solid #22c55e !important;
+    border-radius: .5rem !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05) !important;
+}
+.quiz-option,
+.activity-question,
+.quiz-question {
+    border-radius: .5rem !important;
+}
+.resource-link {
+    color: #334155 !important;
+    text-decoration: underline !important;
+}
+.resource-qr {
+    width: 2cm !important;
+    height: 2cm !important;
+    border: 1px solid #86efac !important;
+    border-radius: .25rem !important;
+    background: #f0fdf4 !important;
+}
+
+.mobile-header {
+    display: none !important;
+}
+.mobile-logo {
+    width: 100px !important;
+    height: 100px !important;
+    margin: 0 auto .5rem !important;
+    padding: .5rem !important;
+    background: #fff !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,.10) !important;
+    overflow: hidden !important;
+}
+.mobile-logo img {
+    max-width: 80% !important;
+    max-height: 80% !important;
+    object-fit: contain !important;
+}
+.mobile-nav {
+    width: 100% !important;
+    margin-top: .5rem !important;
+    padding: .5rem !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: .375rem !important;
+    background: #fff !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05) !important;
+}
+
+.ova-institutional-footer {
+    margin-top: 3rem !important;
+    padding-top: 1.5rem !important;
+    border-top: 2px solid #e2e8f0 !important;
+    text-align: center !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+.ova-institutional-footer .footer-label {
+    color: #475569 !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+}
+.ova-institutional-footer .footer-name {
+    color: #166534 !important;
+    font-weight: 700 !important;
+    font-size: 1.125rem !important;
+    line-height: 1.75rem !important;
+}
+.ova-institutional-footer .footer-org {
+    color: #64748b !important;
+    font-size: .875rem !important;
+    line-height: 1.25rem !important;
+}
+
+@media (max-width: 767px) {
+    .sidebar { display: none !important; }
+    .main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 13rem .75rem .75rem !important;
+    }
+    .mobile-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 50 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 1rem !important;
+        background: #f8fafc !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,.1) !important;
+    }
+}
+@media (max-width: 639px) {
+    .hero-card h1,
+    .content-pane h2,
+    .section-heading {
+        font-size: 1.5rem !important;
+        line-height: 2rem !important;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" aria-label="Navegación principal">
+            <div class="sidebar-logo"><div class="sidebar-logo-frame"><img src="img/logo.webp" alt="Logo institucional"></div></div>
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-target="introduccion"><span class="sidebar-icon">&#128640;</span><span>Introducción</span></a>
+                <a href="#" class="sidebar-link" data-target="objetivos"><span class="sidebar-icon">&#127919;</span><span>Objetivos</span></a>
+                <a href="#" class="sidebar-link" data-target="contenido"><span class="sidebar-icon">&#128218;</span><span>Contenido</span></a>
+                <a href="#" class="sidebar-link" data-target="actividades"><span class="sidebar-icon">&#9997;&#65039;</span><span>Actividades</span></a>
+                <a href="#" class="sidebar-link" data-target="evaluacion"><span class="sidebar-icon">&#10004;&#65039;</span><span>Evaluación</span></a>
+                <a href="#" class="sidebar-link" data-target="recursos"><span class="sidebar-icon">&#128214;</span><span>Recursos</span></a>
+                <a href="#" class="sidebar-link" data-target="bibliografia"><span class="sidebar-icon">&#128218;</span><span>Bibliografía</span></a>
+            </nav>
+        </aside>
+        <main class="main">
+            <div class="mobile-header">
+                <div class="mobile-logo"><img src="img/logo.webp" alt="Logo institucional"></div>
+                <select id="mobile-nav" class="mobile-nav" aria-label="Cambiar sección">
+                    <option value="introduccion">&#128640; Introducción</option>
+                    <option value="objetivos">&#127919; Objetivos</option>
+                    <option value="contenido">&#128218; Contenido</option>
+                    <option value="actividades">&#9997;&#65039; Actividades</option>
+                    <option value="evaluacion">&#10004;&#65039; Evaluación</option>
+                    <option value="recursos">&#128214; Recursos</option>
+                    <option value="bibliografia">&#128218; Bibliografía</option>
+                </select>
+            </div>
+            <section id="introduccion" class="content-pane active">
+                <div class="hero-card" data-speech-content>
+                    <h1>Alta disponibilidad y tolerancia a fallos</h1>
+                    <p>La arquitectura resiliente busca que el servicio continúe disponible incluso cuando alguno de sus componentes falla.</p>
+                </div>
+                <div class="speech-controls" data-section-id="introduccion">
+                    <div class="speech-main">
+                        <button class="speech-btn play" data-action="play">Leer</button>
+                        <button class="speech-btn pause" data-action="pause" disabled>Pausar</button>
+                        <button class="speech-btn stop" data-action="stop" disabled>Detener</button>
+                        <div class="speech-speed"><label for="speed-introduccion">Velocidad:</label><input id="speed-introduccion" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+                    </div>
+                    <span class="speech-voice" data-voice-label>Voz: Español del navegador</span>
+                </div>
+                <div class="text-block" data-speech-content>
+                    <p>En sistemas reales (plataformas académicas, comercio electrónico, APIs de inventario), no solo importa que la aplicación funcione, sino que esté disponible cuando los usuarios la necesitan. Una caída en horas pico puede afectar matrículas, ventas, o la operación diaria de una institución.</p>
+                    <div class="video-card"><div class="video-embed"><iframe src="https://www.youtube.com/embed/dyG14FvFkMM" title="Video explicativo sobre alta disponibilidad y resiliencia" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></div>
+                    <p>Para reducir caídas, la arquitectura incorpora estrategias de continuidad: evitar puntos únicos de falla, agregar redundancia, definir failover, y preparar backups y planes de recuperación. En esta guía verás estos conceptos con vocabulario sencillo y un enfoque arquitectónico.</p>
+                </div>
+            </section>
+            <section id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <div class="speech-controls" data-section-id="objetivos">
+                    <div class="speech-main">
+                        <button class="speech-btn play" data-action="play">Leer</button>
+                        <button class="speech-btn pause" data-action="pause" disabled>Pausar</button>
+                        <button class="speech-btn stop" data-action="stop" disabled>Detener</button>
+                        <div class="speech-speed"><label for="speed-objetivos">Velocidad:</label><input id="speed-objetivos" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+                    </div>
+                    <span class="speech-voice" data-voice-label>Voz: Español del navegador</span>
+                </div>
+                <ul class="objective-list" data-speech-content>
+                    <li class="objective-item"><div class="objective-check">&#9881;&#65039;</div><p>Explicar, desde la arquitectura de sistemas, qué significan alta disponibilidad, tolerancia a fallos y resiliencia, y por qué son importantes para un servicio.</p></li>
+                    <li class="objective-item"><div class="objective-check">&#128295;</div><p>Identificar puntos únicos de falla (SPOF) en una arquitectura sencilla y proponer mejoras básicas con redundancia (por ejemplo, varias instancias de una API).</p></li>
+                    <li class="objective-item"><div class="objective-check">&#128257;</div><p>Comprender el concepto de failover y el papel del balanceo de carga (load balancer) como idea central para continuidad del servicio.</p></li>
+                    <li class="objective-item"><div class="objective-check">&#128190;</div><p>Diferenciar backup y disasterrecovery (DR), y describir un plan básico de recuperación usando términos simples (RTO/RPO a nivel introductorio).</p></li>
+                </ul>
+            </section>
+            <section id="contenido" class="content-pane">
+                <div class="speech-controls" data-section-id="contenido">
+                    <div class="speech-main">
+                        <button class="speech-btn play" data-action="play">Leer</button>
+                        <button class="speech-btn pause" data-action="pause" disabled>Pausar</button>
+                        <button class="speech-btn stop" data-action="stop" disabled>Detener</button>
+                        <div class="speech-speed"><label for="speed-contenido">Velocidad:</label><input id="speed-contenido" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+                    </div>
+                    <span class="speech-voice" data-voice-label>Voz: Español del navegador</span>
+                </div>
+                <div class="accordion-list" data-speech-content>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>1. Rol de la alta disponibilidad y la tolerancia a fallos</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card"><p>En arquitectura, alta disponibilidad (HA) significa diseñar el sistema para que esté “casi siempre” disponible. Tolerancia a fallos significa que, si una parte falla, el sistema sigue funcionando (total o parcialmente) sin detenerse por completo. Resiliencia es la capacidad de resistir fallas y recuperarse rápido.</p><p>En un nivel básico, el objetivo es claro: reducir el impacto de fallas comunes (un servidor que se apaga, una aplicación que se cae, una base de datos que no responde) para que el usuario final no pierda el servicio.</p></div>
+                            <div class="flip-grid">
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Concepto</div><h3>Alta disponibilidad</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Concepto</div><h3>Alta disponibilidad</h3></div><p>Diseñar el sistema para que esté disponible la mayor parte del tiempo.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Concepto</div><h3>Tolerancia a fallos</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Concepto</div><h3>Tolerancia a fallos</h3></div><p>Si una parte falla, el sistema sigue funcionando total o parcialmente.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Concepto</div><h3>Resiliencia</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Concepto</div><h3>Resiliencia</h3></div><p>Capacidad de resistir fallas y recuperarse rápido.</p></div></div></button></article>
+                            </div>
+                            <div class="figure-grid"><article class="figure-card"><div class="figure-image"><img src="img/image1.png" alt="Figura 1. Arquitectura simple vs arquitectura con redundancia" class="zoomable-image"></div><h4>Figura 1. Arquitectura simple vs arquitectura con redundancia</h4><p>Figura 1. Arquitectura simple (con riesgo) vs arquitectura con redundancia (más disponible).</p></article></div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>2. Puntos únicos de falla (SPOF) y redundancia</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card"><p>Un SPOF (Single Point ofFailure) es un componente que, si falla, detiene el servicio completo. Ejemplos típicos: una sola instancia de la API, una única base de datos, un único servidor de archivos, o una única conexión a internet.</p><p>La idea básica para mejorar es la redundancia: tener más de una opción. Por ejemplo, dos instancias de la API (API 1 y API 2) para que, si una cae, la otra atienda solicitudes.</p></div>
+                            <div class="flip-grid">
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">SPOF</div><h3>Una sola API</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">SPOF</div><h3>Una sola API</h3></div><p>Si la única instancia falla, todo el servicio se detiene.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">SPOF</div><h3>Una sola base de datos</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">SPOF</div><h3>Una sola base de datos</h3></div><p>Si no responde, la aplicación pierde acceso a la información crítica.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Mejora</div><h3>Redundancia</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Mejora</div><h3>Redundancia</h3></div><p>Tener más de una instancia o componente para evitar depender de un solo punto.</p></div></div></button></article>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>3. Failover y balanceo de carga</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card"><p>Failover es el cambio a un “reemplazo” cuando algo falla. Por ejemplo, si la API 1 deja de responder, el sistema debe enviar el tráfico a la API 2. Muchas arquitecturas logran esto usando un balanceador de carga (load balancer) que reparte solicitudes y evita enviar tráfico a instancias caídas (healthchecks).</p><p>Nota: en este curso no buscamos configurar un balanceador real; lo importante es entender la función dentro de la arquitectura.</p></div>
+                            <div class="flip-grid">
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Continuidad</div><h3>Failover</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Continuidad</div><h3>Failover</h3></div><p>Cambio automático a un componente o instancia de respaldo cuando el principal falla.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Continuidad</div><h3>Balanceador</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Continuidad</div><h3>Balanceo de carga</h3></div><p>Reparte solicitudes entre varias instancias y evita enviar tráfico a las que están caídas.</p></div></div></button></article>
+                            </div>
+                            <article class="example-card"><h4>Figura 2. Balanceo + failover (concepto)</h4><div class="figure-image" style="margin-top:1rem"><img src="img/figura-balanceo-failover.png" alt="Figura 2. Balanceo y failover con detección de falla y redirección automática" class="zoomable-image"></div></article>
+                        </div>
+                    </article>
+                    <article class="accordion open">
+                        <button class="accordion-toggle" type="button"><span>4. Backups, DR y buenas prácticas mínimas</span><span>+</span></button>
+                        <div class="accordion-panel">
+                            <div class="mini-card"><p>Un backup es una copia de seguridad de datos (por ejemplo, de la base de datos o archivos). Sirve para recuperar información si ocurre un error humano, daño, borrado accidental o ataque. DisasterRecovery (DR) es el plan para recuperar el sistema completo (servicio + datos) después de un incidente mayor.</p><p>Dos conceptos básicos para planear recuperación: RPO (Recovery Point Objective): cuánta información se puede “perder” como máximo. RTO (Recovery Time Objective): cuánto tiempo máximo se acepta estar caído.</p></div>
+                            <div class="flip-grid">
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Recuperación</div><h3>Backup</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Recuperación</div><h3>Backup</h3></div><p>Copia de seguridad de datos para poder restaurarlos si ocurre un incidente.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Recuperación</div><h3>DR</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Recuperación</div><h3>Disaster Recovery</h3></div><p>Plan para recuperar el sistema completo después de un incidente mayor.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Recuperación</div><h3>RPO</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Recuperación</div><h3>RPO</h3></div><p>Cantidad máxima de datos que se puede perder.</p></div></div></button></article>
+                                <article class="flip-card"><button class="flip-trigger" type="button"><div class="flip-inner"><div class="flip-face flip-front"><div><div class="flip-label">Recuperación</div><h3>RTO</h3></div><p>Toca para ampliar.</p></div><div class="flip-face flip-back"><div><div class="flip-label">Recuperación</div><h3>RTO</h3></div><p>Tiempo máximo objetivo para recuperar el servicio tras una caída.</p></div></div></button></article>
+                            </div>
+                            <div class="mini-card"><p>A nivel introductorio, una arquitectura más resiliente suele incluir: redundancia de servicios críticos, backups programados y pruebas de restauración, monitoreo básico y documentación simple sobre qué hacer cuando ocurre una falla.</p></div>
+                            <article class="simulator-card">
+                                <h4>Simulador de continuidad del servicio</h4>
+                                <p>Usa este simulador para observar qué pasa cuando un componente falla y qué decisión básica puede mejorar la disponibilidad.</p>
+                                <div class="simulator-grid">
+                                    <div class="simulator-panel">
+                                        <h4>Escenario de falla</h4>
+                                        <div class="simulator-controls" data-api-simulator>
+                                            <label>
+                                                Componente afectado
+                                                <select data-sim-endpoint>
+                                                    <option value="api">Falla API principal</option>
+                                                    <option value="db">Falla base de datos única</option>
+                                                    <option value="backup">Borrado accidental de datos</option>
+                                                </select>
+                                            </label>
+                                            <label>
+                                                Arquitectura actual
+                                                <select data-sim-token>
+                                                    <option value="simple">Sin redundancia</option>
+                                                    <option value="redundante">Con redundancia y monitoreo</option>
+                                                    <option value="dr">Con redundancia + backup/DR</option>
+                                                </select>
+                                            </label>
+                                            <div class="simulator-actions">
+                                                <button type="button" class="quiz-btn" data-sim-run>Simular continuidad</button>
+                                                <button type="button" class="reset-btn secondary" data-sim-reset>Reiniciar simulador</button>
+                                            </div>
+                                            <div class="simulator-output" data-sim-output>Selecciona un componente y una arquitectura para ver el impacto de la falla y la mejora recomendada.</div>
+                                        </div>
+                                    </div>
+                                    <div class="simulator-panel">
+                                        <h4>Guía rápida</h4>
+                                        <p><strong>SPOF</strong>: si falla, tumba todo el servicio.</p>
+                                        <p><strong>Failover</strong>: cambia el tráfico a una instancia sana.</p>
+                                        <p><strong>Backup</strong>: recupera datos.</p>
+                                        <p><strong>DR</strong>: recupera el sistema completo después de un incidente mayor.</p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                </div>
+            </section>
+            <section id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades de aprendizaje</h2>
+                <div class="speech-controls" data-section-id="actividades">
+                    <div class="speech-main">
+                        <button class="speech-btn play" data-action="play">Leer</button>
+                        <button class="speech-btn pause" data-action="pause" disabled>Pausar</button>
+                        <button class="speech-btn stop" data-action="stop" disabled>Detener</button>
+                        <div class="speech-speed"><label for="speed-actividades">Velocidad:</label><input id="speed-actividades" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+                    </div>
+                    <span class="speech-voice" data-voice-label>Voz: Español del navegador</span>
+                </div>
+                <div class="activity-card activity-module" data-module>
+                    <div class="module-header"><div><div class="module-title">Actividad 1. Detectar puntos únicos de falla (SPOF)</div><p>Situación: en el escenario descrito, completa la tabla marcando si cada componente es un SPOF y proponiendo una mejora simple.</p></div><div class="score-chip">Aciertos: <span data-score>0</span>/3</div></div>
+                    <div class="activity-question" data-question><p>Si solo existe una instancia de la API, ¿qué representa dentro de la arquitectura?</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: una sola API puede convertirse en un punto único de falla.">Un SPOF</button><button class="activity-option" type="button" data-feedback="Si es única, no hay redundancia todavía.">Una redundancia</button><button class="activity-option" type="button" data-feedback="No es un backup; es un componente activo del sistema.">Un backup</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Qué mejora básica reduce el riesgo si la API principal falla?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Eso no agrega continuidad del servicio.">Cambiar el nombre del endpoint</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: agregar otra instancia crea redundancia y permite continuidad.">Tener dos instancias de la API</button><button class="activity-option" type="button" data-feedback="Un solo servidor más grande no elimina por sí solo el SPOF.">Solo aumentar CPU</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Qué ayuda a detectar rápidamente que un servicio cayó?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Los colores de la interfaz no reemplazan observabilidad.">Cambiar el tema visual</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: el monitoreo básico permite detectar fallas y reaccionar rápido.">Monitoreo y alertas</button><button class="activity-option" type="button" data-feedback="La contraseña no indica si el sistema está caído.">Contraseña fuerte</button></div><div class="feedback"></div></div>
+                    <div class="actions-row"><button type="button" class="reset-btn secondary" data-reset-module>Reiniciar actividad</button></div>
+                </div>
+                <div class="activity-card activity-module" data-module>
+                    <div class="module-header"><div><div class="module-title">Actividad 2. Conceptos clave de recuperación</div><p>Relaciona las ideas principales de resiliencia, backups y failover con su función en la arquitectura.</p></div><div class="score-chip">Aciertos: <span data-score>0</span>/4</div></div>
+                    <div class="activity-question" data-question><p>¿Qué significa failover?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Eso describe backup, no failover.">Guardar una copia de seguridad</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: failover es cambiar a un componente de respaldo cuando el principal falla.">Cambiar a un componente de respaldo cuando el principal falla</button><button class="activity-option" type="button" data-feedback="Eso sería escalado, no failover.">Agregar más memoria al servidor</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Qué indica el RPO?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Ese es el tiempo de recuperación, asociado al RTO.">Tiempo máximo para recuperar el servicio</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: RPO indica la cantidad máxima de datos que se puede perder.">Cantidad máxima de datos que se puede perder</button><button class="activity-option" type="button" data-feedback="Eso no define pérdida de datos.">Número de servidores requeridos</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Qué indica el RTO?</p><div class="activity-options"><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: RTO es el tiempo máximo objetivo para recuperar el servicio tras una caída.">Tiempo máximo objetivo para recuperar el servicio</button><button class="activity-option" type="button" data-feedback="Eso corresponde a RPO.">Cantidad máxima de datos que se puede perder</button><button class="activity-option" type="button" data-feedback="No define ancho de banda.">Capacidad de red disponible</button></div><div class="feedback"></div></div>
+                    <div class="activity-question" data-question><p>¿Qué acción permite confiar realmente en los backups?</p><div class="activity-options"><button class="activity-option" type="button" data-feedback="Guardar backups sin probarlos no garantiza recuperación real.">Hacerlos una vez y no revisarlos</button><button class="activity-option" type="button" data-correct="true" data-feedback="Correcto: probar restauraciones periódicamente confirma que el backup sirve cuando ocurre un incidente.">Probar restauraciones periódicamente</button><button class="activity-option" type="button" data-feedback="Guardarlo en el mismo sitio aumenta el riesgo.">Dejarlos solo en el mismo servidor</button></div><div class="feedback"></div></div>
+                    <div class="actions-row"><button type="button" class="reset-btn secondary" data-reset-module>Reiniciar actividad</button></div>
+                </div>
+            </section>
+            <section id="evaluacion" class="content-pane">
+                <div class="quiz-card" id="quiz-evaluacion" data-correct='[1,1,1,1,2]' data-feedback-correct='["Correcto: alta disponibilidad busca que el sistema esté disponible la mayor parte del tiempo.","Correcto: un SPOF es un componente que si falla tumba todo el servicio.","Correcto: failover significa cambiar a un componente de respaldo cuando el principal falla.","Correcto: RPO indica la cantidad máxima de datos que se puede perder.","Correcto: para confiar en los backups, hay que probar restauraciones periódicamente."]' data-feedback-incorrect='["HA se relaciona con continuidad del servicio, no con costo ni número de usuarios.","Piensa en un componente cuya falla detiene el servicio completo.","Failover no es escalar ni comprimir: es continuidad mediante reemplazo.","RPO no es tiempo de recuperación; se relaciona con pérdida de datos.","Un backup sin restauración probada puede fallar cuando más se necesita."]'>
+                    <div class="module-header"><div><h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2><p>Responde el quiz de verificación y comprueba tu comprensión sobre alta disponibilidad, resiliencia, failover y recuperación.</p></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>1.</strong> Alta disponibilidad (HA) se refiere principalmente a:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q1" value="0"> Que el sistema tenga muchos usuarios</label><label class="quiz-option"><input type="radio" name="q1" value="1"> Que el sistema esté disponible la mayor parte del tiempo</label><label class="quiz-option"><input type="radio" name="q1" value="2"> Que el sistema use contraseñas fuertes</label><label class="quiz-option"><input type="radio" name="q1" value="3"> Que el sistema sea más barato</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>2.</strong> Un SPOF es:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q2" value="0"> Un componente opcional</label><label class="quiz-option"><input type="radio" name="q2" value="1"> Un componente que, si falla, tumba todo el servicio</label><label class="quiz-option"><input type="radio" name="q2" value="2"> Un tipo de backup</label><label class="quiz-option"><input type="radio" name="q2" value="3"> Una métrica de rendimiento</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>3.</strong> Failover significa:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q3" value="0"> Aumentar memoria del servidor</label><label class="quiz-option"><input type="radio" name="q3" value="1"> Cambiar a un componente de respaldo cuando el principal falla</label><label class="quiz-option"><input type="radio" name="q3" value="2"> Comprimir archivos para ahorrar espacio</label><label class="quiz-option"><input type="radio" name="q3" value="3"> Bloquear a los usuarios</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>4.</strong> RPO (Recovery Point Objective) indica:</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q4" value="0"> Tiempo máximo para recuperar el servicio</label><label class="quiz-option"><input type="radio" name="q4" value="1"> Cantidad máxima de datos que se puede perder</label><label class="quiz-option"><input type="radio" name="q4" value="2"> Número de servidores necesarios</label><label class="quiz-option"><input type="radio" name="q4" value="3"> Tipo de autenticación</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="quiz-question" data-quiz-question><p><strong>5.</strong> ¿Cuál acción es clave para confiar en tus backups?</p><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q5" value="0"> Hacer el backup una vez y nunca tocarlo</label><label class="quiz-option"><input type="radio" name="q5" value="1"> Guardar el backup en el mismo servidor</label><label class="quiz-option"><input type="radio" name="q5" value="2"> Probar restauraciones periódicamente</label><label class="quiz-option"><input type="radio" name="q5" value="3"> Desactivar el monitoreo</label></div><div class="feedback" data-feedback-slot></div></div>
+                    <div class="actions-row"><button type="button" class="quiz-btn" id="check-quiz">Comprobar evaluación</button><button type="button" class="reset-btn secondary" id="reset-quiz">Reiniciar quiz</button></div>
+                    <div class="quiz-result" id="quiz-result"></div>
+                </div>
+            </section>
+            <section id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <div class="speech-controls" data-section-id="recursos">
+                    <div class="speech-main">
+                        <button class="speech-btn play" data-action="play">Leer</button>
+                        <button class="speech-btn pause" data-action="pause" disabled>Pausar</button>
+                        <button class="speech-btn stop" data-action="stop" disabled>Detener</button>
+                        <div class="speech-speed"><label for="speed-recursos">Velocidad:</label><input id="speed-recursos" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+                    </div>
+                    <span class="speech-voice" data-voice-label>Voz: Español del navegador</span>
+                </div>
+                <div class="resource-card" data-speech-content><div class="resource-split"><div><div class="module-title">Video de la temática</div><div class="actions-row"><a class="resource-link" href="https://youtu.be/dyG14FvFkMM" target="_blank" rel="noopener">Ir al recurso</a></div></div><div class="resource-qr"><img src="img/image2.png" alt="QR del video de la temática"></div></div></div>
+                <div class="resource-card" data-speech-content><div class="resource-split"><div><div class="module-title">Infografía de la temática</div><div class="actions-row"><a class="resource-link" href="https://drive.google.com/file/d/1Y2bUJdxPTuzLF1YW_AoIZLhTAvDD4x6W/view?usp=sharing" target="_blank" rel="noopener">Ir al recurso</a></div></div><div class="resource-qr"><img src="img/image3.png" alt="QR de la infografía de la temática"></div></div></div>
+            </section>
+            <section id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="speech-controls" data-section-id="bibliografia">
+                    <div class="speech-main">
+                        <button class="speech-btn play" data-action="play">Leer</button>
+                        <button class="speech-btn pause" data-action="pause" disabled>Pausar</button>
+                        <button class="speech-btn stop" data-action="stop" disabled>Detener</button>
+                        <div class="speech-speed"><label for="speed-bibliografia">Velocidad:</label><input id="speed-bibliografia" type="range" min="0.5" max="2" step="0.1" value="1"></div>
+                    </div>
+                    <span class="speech-voice" data-voice-label>Voz: Español del navegador</span>
+                </div>
+                <div class="bibliography-list" data-speech-content>
+                    <article class="bibliography-item">Beyer, B., Jones, C., Petoff, J., & Murphy, N. R. (Eds.). (2016). <em>Site Reliability Engineering: How Google Runs Production Systems</em>. O’Reilly Media. https://sre.google/sre-book/table-of-contents/</article>
+                    <article class="bibliography-item">Amazon Web Services. (2023). <em>AWS Well-Architected Framework – Reliability Pillar</em>. https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html</article>
+                    <article class="bibliography-item">Google Cloud. (s. f.). <em>Arquitecturas confiables (Reliability)</em>. Google Cloud Architecture Center. https://cloud.google.com/architecture</article>
+                    <article class="bibliography-item">Microsoft. (s. f.). <em>Reliability y resiliencia (Azure Architecture Center)</em>. https://learn.microsoft.com/azure/architecture/</article>
+                    <article class="bibliography-item">NIST. (2010). <em>SP 800-34 Rev. 1: Contingency Planning Guide for Federal Information Systems</em>. https://csrc.nist.gov/publications/detail/sp/800-34/rev-1/final</article>
+                    <article class="bibliography-item">ISO. (2019). <em>ISO 22301: Business continuity management systems — Requirements</em>. https://www.iso.org/standard/75106.html</article>
+                    <article class="bibliography-item">NGINX. (s. f.). <em>High Availability y Load Balancing – conceptos básicos</em>. https://www.nginx.com/resources/glossary/load-balancing/</article>
+                </div>
+                
+            </section>
+        </main>
+    </div>
+    <div class="image-modal" id="image-modal" aria-hidden="true"><div class="image-modal-inner"><button type="button" id="close-image-modal" aria-label="Cerrar imagen ampliada">&#10005;</button><img src="" alt="" id="image-modal-target"></div></div>
+    <script>
+        (function(){
+            const sidebarLinks=document.querySelectorAll('.sidebar-link');
+            const panes=document.querySelectorAll('.content-pane');
+            const mobileNav=document.getElementById('mobile-nav');
+            const quickLinks=document.querySelectorAll('[data-target-link]');
+            const accordions=document.querySelectorAll('.accordion');
+            const flipCards=document.querySelectorAll('.flip-card');
+            const moduleResetButtons=document.querySelectorAll('[data-reset-module]');
+            const imageModal=document.getElementById('image-modal');
+            const imageModalTarget=document.getElementById('image-modal-target');
+            const closeImageModalBtn=document.getElementById('close-image-modal');
+            const zoomableImages=document.querySelectorAll('.zoomable-image');
+            const simulator=document.querySelector('[data-api-simulator]');
+            const synth=window.speechSynthesis;
+            let currentUtterance=null,currentSpeechSection=null,selectedVoice=null;
+            panes.forEach((pane)=>{
+                if(pane.querySelector('.bibliography-credit')){return}
+                pane.insertAdjacentHTML('beforeend','');
+            });
+            function setActivePane(targetId){stopSpeech();panes.forEach((pane)=>pane.classList.toggle('active',pane.id===targetId));sidebarLinks.forEach((link)=>link.classList.toggle('active',link.dataset.target===targetId));if(mobileNav){mobileNav.value=targetId}window.scrollTo({top:0,behavior:'smooth'})}
+            sidebarLinks.forEach((link)=>link.addEventListener('click',(event)=>{event.preventDefault();setActivePane(link.dataset.target)}));
+            if(mobileNav){mobileNav.addEventListener('change',(event)=>setActivePane(event.target.value))}
+            quickLinks.forEach((link)=>link.addEventListener('click',()=>setActivePane(link.dataset.targetLink)));
+            function syncAccordionIcon(accordion){const icon=accordion.querySelector('.accordion-toggle span:last-child');if(icon){icon.textContent=accordion.classList.contains('open')?'−':'+'}}
+            accordions.forEach((accordion)=>{syncAccordionIcon(accordion);const toggle=accordion.querySelector('.accordion-toggle');toggle.addEventListener('click',()=>{accordion.classList.toggle('open');syncAccordionIcon(accordion)})});
+            flipCards.forEach((card)=>{const trigger=card.querySelector('.flip-trigger');trigger.addEventListener('click',()=>card.classList.toggle('flipped'))});
+            function updateModuleScore(module){const questions=module.querySelectorAll('[data-question]');let correct=0;questions.forEach((question)=>{if(question.dataset.answered==='true'&&question.dataset.correct==='true'){correct+=1}});const slot=module.querySelector('[data-score]');if(slot){slot.textContent=String(correct)}}
+            document.querySelectorAll('.activity-option').forEach((button)=>{
+                button.addEventListener('click',()=>{
+                    const question=button.closest('[data-question]');
+                    const module=button.closest('[data-module]');
+                    const feedback=question.querySelector('.feedback');
+                    if(question.dataset.answered==='true'){return}
+                    const isCorrect=button.dataset.correct==='true';
+                    question.dataset.answered='true';
+                    question.dataset.correct=String(isCorrect);
+                    question.querySelectorAll('.activity-option').forEach((option)=>{option.disabled=true;if(option===button){option.classList.add(isCorrect?'correct':'incorrect')}else if(option.dataset.correct==='true'){option.classList.add('correct')}});
+                    feedback.textContent=button.dataset.feedback||'';
+                    feedback.className='feedback show '+(isCorrect?'correct':'incorrect');
+                    updateModuleScore(module);
+                });
+            });
+            moduleResetButtons.forEach((button)=>button.addEventListener('click',()=>{const module=button.closest('[data-module]');module.querySelectorAll('[data-question]').forEach((question)=>{delete question.dataset.answered;delete question.dataset.correct;const feedback=question.querySelector('.feedback');feedback.className='feedback';feedback.textContent='';question.querySelectorAll('.activity-option').forEach((option)=>{option.disabled=false;option.classList.remove('correct','incorrect')})});updateModuleScore(module)}));
+            if(simulator){
+                const endpointSelect=simulator.querySelector('[data-sim-endpoint]');
+                const tokenSelect=simulator.querySelector('[data-sim-token]');
+                const output=simulator.querySelector('[data-sim-output]');
+                const runButton=simulator.querySelector('[data-sim-run]');
+                const resetButton=simulator.querySelector('[data-sim-reset]');
+                function renderSimulationResult(){
+                    const endpoint=endpointSelect.value;
+                    const token=tokenSelect.value;
+                    let cssClass='success';
+                    let message='';
+                    const scenarios={
+                        api:{
+                            simple:{status:'Servicio caído',impact:'La API principal era un SPOF y el usuario pierde acceso.',suggestion:'Agregar una segunda instancia y balanceo de carga.'},
+                            redundante:{status:'Servicio continúa',impact:'El balanceador redirige el tráfico a la instancia sana.',suggestion:'Mantener health checks y monitoreo activo.'},
+                            dr:{status:'Servicio continúa',impact:'La redundancia mantiene la atención y el plan DR cubre incidentes mayores.',suggestion:'Documentar el procedimiento de recuperación.'}
+                        },
+                        db:{
+                            simple:{status:'Servicio muy afectado',impact:'La base de datos única falla y la aplicación no puede responder.',suggestion:'Reducir SPOF con replicación, respaldo y plan de recuperación.'},
+                            redundante:{status:'Recuperación parcial',impact:'Hay mejor detección, pero si la base sigue siendo única el riesgo persiste.',suggestion:'Sumar estrategia de réplica o recuperación para datos.'},
+                            dr:{status:'Recuperable',impact:'El servicio puede restaurarse según el plan de respaldo y DR.',suggestion:'Definir RTO/RPO realistas y probar restauraciones.'}
+                        },
+                        backup:{
+                            simple:{status:'Riesgo alto',impact:'Sin backup ni DR, el borrado accidental puede causar pérdida grave.',suggestion:'Programar backups y probar restauraciones periódicamente.'},
+                            redundante:{status:'Riesgo moderado',impact:'La redundancia no reemplaza un backup si el problema es de datos.',suggestion:'Agregar backups y procedimientos claros de restauración.'},
+                            dr:{status:'Recuperación posible',impact:'Los datos pueden restaurarse según el backup y el plan de DR.',suggestion:'Verificar periódicamente que la restauración funcione.'}
+                        }
+                    };
+                    const endpointLabels={api:'Falla API principal',db:'Falla base de datos única',backup:'Borrado accidental de datos'};
+                    const loadLabels={simple:'sin redundancia',redundante:'con redundancia y monitoreo',dr:'con redundancia + backup/DR'};
+                    const result=scenarios[endpoint][token];
+                    if(token==='simple'){cssClass='error'}
+                    else if(token==='redundante'){cssClass='warning'}
+                    message=`<strong>Continuidad simulada</strong><p>Escenario: <code>${endpointLabels[endpoint]}</code> con arquitectura <code>${loadLabels[token]}</code>.</p><p>Resultado esperado: <code>${result.status}</code>. Impacto: ${result.impact}</p><p>Mejora sugerida: ${result.suggestion}</p>`;
+                    output.className='simulator-output '+cssClass;
+                    output.innerHTML=message;
+                }
+                runButton.addEventListener('click',renderSimulationResult);
+                resetButton.addEventListener('click',()=>{
+                    endpointSelect.value='api';
+                    tokenSelect.value='simple';
+                    output.className='simulator-output';
+                    output.textContent='Selecciona un componente y una arquitectura para ver el impacto de la falla y la mejora recomendada.';
+                });
+            }
+            const quiz=document.getElementById('quiz-evaluacion');
+            const quizResult=document.getElementById('quiz-result');
+            const checkQuizButton=document.getElementById('check-quiz');
+            const resetQuizButton=document.getElementById('reset-quiz');
+            function renderQuizResult(correctCount,total){const percentage=Math.round(correctCount/total*100);let cssClass='success',title='¡Excelente!';if(percentage<80&&percentage>=60){cssClass='warning';title='Buen trabajo'}else if(percentage<60){cssClass='error';title='Sigue practicando'}quizResult.innerHTML=`<div class="quiz-summary ${cssClass}"><strong>${title}</strong><p>Respuestas correctas: ${correctCount} de ${total} (${percentage} %).</p></div>`}
+            if(checkQuizButton){checkQuizButton.addEventListener('click',()=>{const correctAnswers=JSON.parse(quiz.dataset.correct);const feedbackCorrect=JSON.parse(quiz.dataset.feedbackCorrect);const feedbackIncorrect=JSON.parse(quiz.dataset.feedbackIncorrect);const questions=quiz.querySelectorAll('[data-quiz-question]');let correctCount=0;questions.forEach((question,index)=>{const selected=question.querySelector("input[type='radio']:checked");const feedback=question.querySelector('[data-feedback-slot]');if(!selected){feedback.textContent='Selecciona una respuesta antes de comprobar.';feedback.className='feedback show incorrect';return}const isCorrect=Number(selected.value)===correctAnswers[index];if(isCorrect){correctCount+=1}feedback.textContent=isCorrect?feedbackCorrect[index]:feedbackIncorrect[index];feedback.className='feedback show '+(isCorrect?'correct':'incorrect')});renderQuizResult(correctCount,questions.length)})}
+            if(resetQuizButton){resetQuizButton.addEventListener('click',()=>{quiz.querySelectorAll("input[type='radio']").forEach((input)=>input.checked=false);quiz.querySelectorAll('[data-feedback-slot]').forEach((feedback)=>{feedback.textContent='';feedback.className='feedback'});quizResult.innerHTML=''})}
+            function openImageModal(src,alt){imageModalTarget.src=src;imageModalTarget.alt=alt||'Imagen ampliada';imageModal.classList.add('active');imageModal.setAttribute('aria-hidden','false')}
+            function closeImageModal(){imageModal.classList.remove('active');imageModal.setAttribute('aria-hidden','true');imageModalTarget.src='';imageModalTarget.alt=''}
+            zoomableImages.forEach((image)=>image.addEventListener('click',()=>openImageModal(image.getAttribute('src'),image.getAttribute('alt'))));
+            closeImageModalBtn.addEventListener('click',closeImageModal);
+            imageModal.addEventListener('click',(event)=>{if(event.target===imageModal){closeImageModal()}});
+            document.addEventListener('keydown',(event)=>{if(event.key==='Escape'){closeImageModal()}});
+            function updateVoiceLabels(){document.querySelectorAll('[data-voice-label]').forEach((label)=>{label.textContent='Voz: '+(selectedVoice?`${selectedVoice.name} (${selectedVoice.lang})`:'Español del navegador')})}
+            function loadVoices(){const voices=synth?synth.getVoices():[];if(!voices.length){updateVoiceLabels();return}const latinMatch=voices.find((voice)=>/es-(CO|MX|US|419)/i.test(voice.lang)||/paulina|helena|sabin|sofia|maria/i.test(voice.name));const spanishFallback=voices.find((voice)=>voice.lang.toLowerCase().startsWith('es'));selectedVoice=latinMatch||spanishFallback||null;updateVoiceLabels()}
+            function getSectionText(sectionId){const section=document.getElementById(sectionId);if(!section){return ''}const blocks=section.querySelectorAll('[data-speech-content]');const parts=[];blocks.forEach((block)=>{const clone=block.cloneNode(true);clone.querySelectorAll('button').forEach((element)=>element.remove());const text=clone.innerText.replace(/\s+/g,' ').trim();if(text){parts.push(text)}});return parts.join('. ')}
+            function resetSpeechButtons(){document.querySelectorAll('.speech-controls').forEach((controls)=>{const play=controls.querySelector("[data-action='play']");const pause=controls.querySelector("[data-action='pause']");const stop=controls.querySelector("[data-action='stop']");play.disabled=false;play.textContent='Leer';pause.disabled=true;stop.disabled=true})}
+            function stopSpeech(){if(synth&&synth.speaking){synth.cancel()}currentUtterance=null;currentSpeechSection=null;resetSpeechButtons()}
+            if(synth){loadVoices();if(typeof synth.onvoiceschanged!=='undefined'){synth.onvoiceschanged=loadVoices}}
+            document.querySelectorAll('.speech-controls').forEach((controls)=>{
+                const sectionId=controls.dataset.sectionId;
+                const play=controls.querySelector("[data-action='play']");
+                const pause=controls.querySelector("[data-action='pause']");
+                const stop=controls.querySelector("[data-action='stop']");
+                const speed=controls.querySelector("input[type='range']");
+                play.addEventListener('click',()=>{
+                    if(!synth){return}
+                    if(currentSpeechSection===sectionId&&synth.paused){synth.resume();play.textContent='Leer';play.disabled=true;pause.disabled=false;stop.disabled=false;return}
+                    stopSpeech();
+                    const text=getSectionText(sectionId);
+                    if(!text){return}
+                    const utterance=new SpeechSynthesisUtterance(text);
+                    utterance.lang=selectedVoice?selectedVoice.lang:'es-ES';
+                    utterance.rate=Number(speed.value);
+                    if(selectedVoice){utterance.voice=selectedVoice}
+                    utterance.onend=()=>stopSpeech();
+                    utterance.onerror=()=>stopSpeech();
+                    currentUtterance=utterance;
+                    currentSpeechSection=sectionId;
+                    synth.speak(utterance);
+                    play.disabled=true;pause.disabled=false;stop.disabled=false;
+                });
+                pause.addEventListener('click',()=>{if(!synth||!synth.speaking){return}synth.pause();play.disabled=false;play.textContent='Continuar';pause.disabled=true});
+                stop.addEventListener('click',()=>stopSpeech());
+                speed.addEventListener('change',()=>{if(currentSpeechSection===sectionId&&currentUtterance){stopSpeech()}});
+            });
+        })();
+    </script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+<footer class="ova-institutional-footer mt-12 pt-6 border-t-2 border-slate-200 text-center">
+    <p class="footer-label text-slate-600 font-medium">Creado por:</p>
+    <p class="footer-name text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+    <p class="footer-org text-slate-500 text-sm">Universidad de Córdoba</p>
+</footer>
+</body>
+</html>
+

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: 🔒 HTTPS/TLS y certificados digitales</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .zoom-image-wrap {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .zoom-image-wrap img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .zoom-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 2;
+            background: rgba(22, 101, 52, 0.92);
+            color: #fff;
+            border: 0;
+            border-radius: 9999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .zoom-btn:hover { background: rgba(21, 128, 61, 0.98); transform: translateY(-1px); }
+        .zoom-btn:focus { outline: 2px solid #86efac; outline-offset: 2px; }
+        .zoom-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+        }
+        .zoom-modal.active { display: flex; }
+        .zoom-modal-content {
+            position: relative;
+            width: min(96vw, 1100px);
+            max-height: 92vh;
+            overflow: auto;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        }
+        .zoom-modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            border: 0;
+            border-radius: 9999px;
+            background: #14532d;
+            color: white;
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .zoom-modal-close:hover { background: #166534; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🔒 HTTPS/TLS y certificados digitales</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                                <p class="mb-4">Cuando un navegador se conecta a un sitio web mediante HTTP, la información viaja en texto plano: cualquier dispositivo intermedio en la red podría leer o modificar los datos. El protocolo <strong>TLS</strong> (Transport Layer Security) resuelve este problema añadiendo una capa de cifrado y autenticación sobre la conexión, dando lugar a HTTPS.</p>
+                                <p class="mb-4">La confianza en una conexión HTTPS no depende solo del cifrado, sino también de los <strong>certificados digitales</strong>: documentos electrónicos firmados por una autoridad de certificación (CA) que garantizan que el servidor con el que se está hablando es realmente quien dice ser. En esta OVA se estudia el proceso de establecimiento de una conexión TLS, la estructura de la cadena de confianza y las buenas prácticas para gestionar certificados en un servidor web.</p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">🔐</span> El candado del navegador es solo la señal visible de un proceso criptográfico completo que protege la confidencialidad e integridad de cada comunicación. <span class="text-xl">✅</span>
+                    </p>
+                </div>
+
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Explicar el funcionamiento del protocolo TLS y su papel en la protección de las comunicaciones web.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Identificar los elementos de un certificado digital y el concepto de cadena de confianza.</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Configurar la obtención e instalación de certificados TLS mediante una autoridad de certificación gratuita (Let's Encrypt).</span>
+                    </li>
+
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Detectar errores comunes de configuración TLS y aplicar la corrección adecuada.</span>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🤝 1. El protocolo TLS y el saludo (handshake)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Antes de intercambiar datos de la aplicación, el cliente y el servidor realizan un proceso llamado <strong>handshake TLS</strong>, en el que acuerdan la versión del protocolo, el conjunto de algoritmos criptográficos a utilizar y las claves de sesión. Durante este proceso, el servidor presenta su certificado digital, que el cliente valida antes de continuar con la comunicación cifrada.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig1.png" data-zoom-alt="Proceso simplificado del handshake TLS entre cliente y servidor">🔍 Ampliar</button>
+                                        <img src="img/fig1.png" alt="Proceso simplificado del handshake TLS entre cliente y servidor" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Proceso simplificado del handshake TLS entre cliente y servidor.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🤝</span> Todo el handshake ocurre en milisegundos antes de que el usuario perciba cualquier retraso, gracias a optimizaciones como la reanudación de sesión TLS.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>📜 2. Certificados digitales y cadena de confianza</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Un certificado digital contiene, entre otros datos, el nombre de dominio para el que fue emitido, la clave pública del servidor, el periodo de validez y la firma digital de la autoridad emisora. Los navegadores no confían en cada certificado de forma individual, sino en un conjunto reducido de autoridades raíz (Root CA) preinstaladas.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig2.png" data-zoom-alt="Cadena de confianza entre la autoridad raíz, la CA intermedia y el certificado del sitio">🔍 Ampliar</button>
+                                        <img src="img/fig2.png" alt="Cadena de confianza entre la autoridad raíz, la CA intermedia y el certificado del sitio" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Cadena de confianza entre la autoridad raíz, la CA intermedia y el certificado del sitio.</figcaption>
+                                </figure>
+
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Autoridad raíz (Root CA)</h3>
+                                        <p class="text-sm">Entidad de máxima confianza, preinstalada en el sistema operativo o navegador.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Autoridad intermedia</h3>
+                                        <p class="text-sm">Firmada por la raíz; emite certificados finales sin exponer la clave raíz.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Certificado del sitio</h3>
+                                        <p class="text-sm">Firmado por la CA intermedia; identifica el dominio concreto que se visita.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⛓️</span> Estas autoridades firman certificados intermedios, que a su vez firman los certificados de los sitios web, formando una <strong>cadena de confianza</strong> verificable.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>⚖️ 3. HTTP frente a HTTPS</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">La diferencia entre HTTP y HTTPS no es solo el candado que muestra el navegador: implica una diferencia real en la confidencialidad e integridad de los datos transmitidos, especialmente relevante cuando se envían credenciales, datos personales o información de pago.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig3.png" data-zoom-alt="Comparación entre una conexión HTTP y una conexión HTTPS">🔍 Ampliar</button>
+                                        <img src="img/fig3.png" alt="Comparación entre una conexión HTTP y una conexión HTTPS" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Comparación entre una conexión HTTP y una conexión HTTPS.</figcaption>
+                                </figure>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">💳</span> Cualquier formulario que solicite contraseñas, datos personales o de pago debe transmitirse exclusivamente mediante HTTPS, sin excepción.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🔁 4. Obtención y renovación de certificados</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Actualmente, servicios como <strong>Let's Encrypt</strong> permiten obtener certificados TLS válidos de forma gratuita y automatizada mediante el protocolo ACME. El ciclo de vida de un certificado incluye la generación de una solicitud de firma (CSR), la validación del control sobre el dominio, la emisión del certificado y su renovación periódica antes del vencimiento.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig4.png" data-zoom-alt="Ciclo de vida de un certificado digital, desde su solicitud hasta su renovación">🔍 Ampliar</button>
+                                        <img src="img/fig4.png" alt="Ciclo de vida de un certificado digital, desde su solicitud hasta su renovación" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Ciclo de vida de un certificado digital, desde su solicitud hasta su renovación.</figcaption>
+                                </figure>
+                                <p class="mt-6 mb-3 font-semibold text-slate-800">Ejemplo de emisión y renovación automática de un certificado con Certbot (Let's Encrypt):</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-bash">sudo certbot --nginx -d miapp.edu.co -d www.miapp.edu.co
+
+# Verificar la renovación automática (tarea programada)
+sudo certbot renew --dry-run</code></pre>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🩹 5. Errores comunes de configuración TLS</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Una implementación incorrecta de TLS puede dar una falsa sensación de seguridad. Entre los errores más frecuentes se encuentran el uso de certificados autofirmados en producción, mantener habilitados protocolos obsoletos como SSLv3 o TLS 1.0, dejar vencer un certificado sin renovarlo a tiempo, y no forzar la redirección de HTTP hacia HTTPS.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/fig5.png" data-zoom-alt="Errores comunes de configuración TLS y su corrección recomendada">🔍 Ampliar</button>
+                                        <img src="img/fig5.png" alt="Errores comunes de configuración TLS y su corrección recomendada" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Errores comunes de configuración TLS y su corrección recomendada.</figcaption>
+                                </figure>
+                                <p class="mt-6 mb-3 font-semibold text-slate-800">Fragmento de referencia para inspeccionar un certificado desde la línea de comandos:</p>
+
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-bash">openssl s_client -connect miapp.edu.co:443 -servername miapp.edu.co < /dev/null | \
+    openssl x509 -noout -dates -issuer -subject</code></pre>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚠️</span> Un certificado vencido o un protocolo obsoleto habilitado son señales de alerta que cualquier herramienta de auditoría detecta de inmediato, aun cuando la conexión siga mostrando "https".</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 1: Instalación de un certificado TLS (Individual)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Configure un servidor Nginx o Apache en un entorno local y obtenga un certificado TLS mediante Let's Encrypt (o un certificado autofirmado si no cuenta con un dominio público). Configure la redirección automática de HTTP a HTTPS y verifique la conexión desde el navegador.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> evidencia (capturas) de la instalación del certificado y de la redirección HTTP a HTTPS funcionando.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">🔎 Enfoque:</span> aplicación práctica del proceso completo de emisión e instalación de un certificado TLS.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Análisis de un sitio real (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En grupos de máximo tres integrantes, analicen la configuración TLS de un sitio web público utilizando una herramienta de análisis en línea. Identifiquen la versión de TLS utilizada, la autoridad emisora del certificado y su fecha de vencimiento. Presenten sus hallazgos en un informe breve con recomendaciones de mejora si corresponde.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> informe breve con los hallazgos del análisis y recomendaciones de mejora.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">👥 Modalidad:</span> trabajo colaborativo en equipos de máximo tres estudiantes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Cuestionario de autoevaluación para verificar la comprensión del handshake TLS, la cadena de confianza de certificados, la diferencia entre HTTP y HTTPS, y los errores comunes de configuración.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📎 Anexos</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Material complementario asociado a los conceptos desarrollados en esta unidad.</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — ANEXOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🔏 Documentación oficial de Let's Encrypt</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial para la emisión y renovación automática de certificados TLS gratuitos.</p>
+                            <a href="https://letsencrypt.org/docs/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-1.png" alt="QR 🔏 Documentación oficial de Let's Encrypt" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🛡️ OWASP Transport Layer Protection Cheat Sheet</h3>
+                            <p class="text-slate-600 mb-2">Recomendaciones de OWASP para la configuración segura de TLS en servidores web.</p>
+                            <a href="https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-2.png" alt="QR 🛡️ OWASP Transport Layer Protection Cheat Sheet" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🧪 Qualys SSL Labs - SSL Server Test</h3>
+                            <p class="text-slate-600 mb-2">Herramienta en línea para auditar la configuración TLS de cualquier servidor público.</p>
+                            <a href="https://www.ssllabs.com/ssltest/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-3.png" alt="QR 🧪 Qualys SSL Labs - SSL Server Test" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — ANEXOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Internet Engineering Task Force. (2018). <i>RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3</i>. https://datatracker.ietf.org/doc/html/rfc8446
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Let's Encrypt. (2024). <i>Documentación oficial</i>. Internet Security Research Group. https://letsencrypt.org/docs/
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            OWASP Foundation. (2023). <i>Transport Layer Protection Cheat Sheet</i>. https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Qualys SSL Labs. (2024). <i>SSL Server Test - Metodología de evaluación</i>. https://www.ssllabs.com/ssltest/
+                        </span>
+                    </div>
+
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Rubiales Gómez, D. (2022). <i>Ciberseguridad para desarrolladores web</i>. RA-MA Editorial.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="zoom-modal" class="zoom-modal" aria-hidden="true">
+        <div class="zoom-modal-content">
+            <button type="button" class="zoom-modal-close" id="zoom-modal-close" aria-label="Cerrar imagen ampliada">×</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "Durante el handshake TLS, ¿qué presenta el servidor al cliente para que este valide su identidad?",
+                options: ["Su dirección IP pública", "Su certificado digital", "El código fuente de la aplicación", "La contraseña del administrador"],
+                correct: 1
+            },
+            {
+                question: "¿Por qué un navegador confía en el certificado de un sitio web que nunca ha visitado antes?",
+                options: ["Porque el sitio se lo indica en un archivo de texto", "Porque el certificado forma parte de una cadena de confianza que termina en una autoridad raíz preinstalada", "Porque todos los certificados son válidos por defecto", "Porque el usuario debe aceptar manualmente cada certificado"],
+                correct: 1
+            },
+            {
+                question: "¿En qué caso sería aceptable usar un certificado autofirmado en lugar de uno emitido por una CA reconocida?",
+                options: ["En un sitio de producción con miles de usuarios finales", "En un entorno de pruebas o desarrollo interno, no accesible públicamente", "En un sitio de comercio electrónico con pagos en línea", "En cualquier situación, ya que son equivalentes"],
+                correct: 1
+            },
+            {
+                question: "¿Por qué mantener habilitado el protocolo TLS 1.0 representa un riesgo, aunque la conexión siga siendo \"HTTPS\"?",
+                options: ["Porque TLS 1.0 tiene debilidades criptográficas conocidas que pueden ser explotadas, aunque exista cifrado", "Porque TLS 1.0 es más lento que HTTP sin cifrar", "Porque TLS 1.0 no permite el uso de certificados digitales", "Porque los navegadores actuales no pueden interpretar TLS 1.0"],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+
+        // Zoom de imágenes del contenido
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomModalImage = document.getElementById('zoom-modal-image');
+        const zoomModalClose = document.getElementById('zoom-modal-close');
+
+        function closeZoomModal() {
+            zoomModal.classList.remove('active');
+            zoomModal.setAttribute('aria-hidden', 'true');
+            zoomModalImage.src = '';
+            zoomModalImage.alt = '';
+        }
+
+        document.querySelectorAll('.zoom-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                zoomModalImage.src = button.dataset.zoomImage;
+                zoomModalImage.alt = button.dataset.zoomAlt || 'Imagen ampliada';
+                zoomModal.classList.add('active');
+                zoomModal.setAttribute('aria-hidden', 'false');
+            });
+        });
+
+        zoomModalClose.addEventListener('click', closeZoomModal);
+        zoomModal.addEventListener('click', event => {
+            if (event.target === zoomModal) closeZoomModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && zoomModal.classList.contains('active')) closeZoomModal();
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

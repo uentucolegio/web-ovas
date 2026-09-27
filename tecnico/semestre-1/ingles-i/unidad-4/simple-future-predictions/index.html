@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Simple Future and Predictions</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .act1-option { transition: all 0.2s ease; }
+        .act1-option:hover { background-color: #f0fdf4; }
+        .act1-option.correct-answer {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .act1-option.wrong-answer {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+        .act1-option.locked { pointer-events: none; opacity: 0.85; }
+        .act2-btn { transition: all 0.2s ease; }
+        .act2-btn:disabled { cursor: not-allowed; }
+        .badge-locked { filter: grayscale(1); opacity: 0.45; }
+        #reading-progress-bar, #points-progress-bar { transition: width 0.5s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Simple Future and Predictions: imagina el futuro en inglés</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La tecnología cambia constantemente y muchas de las herramientas que hoy parecen innovadoras podrían formar parte de nuestra vida cotidiana en pocos años. ¿Cómo serán las ciudades del futuro? 🏙️ ¿Qué tareas realizarán los robots? 🤖 ¿Cómo cambiará la inteligencia artificial nuestra forma de estudiar y trabajar? Hablar sobre estas posibilidades también es una oportunidad para usar el inglés en contextos reales.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En este OVA aprenderás a utilizar el <strong>Simple Future</strong> con <strong>will</strong> y <strong>going to</strong> para formular predicciones y expresar tus ideas sobre lo que podría suceder en el mundo tecnológico. A través de ejemplos y situaciones cercanas a la programación, podrás imaginar el futuro mientras desarrollas nuevas habilidades para comunicarte en inglés: dirás lo que crees que sucederá con la inteligencia artificial, la programación y otras innovaciones, usando estructuras sencillas y vocabulario relacionado con tu formación tecnológica.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    ¿Cómo vas a trabajar este contenido? Primero explorarás ejemplos y predicciones para reconocer cuándo utilizar <em>will</em> y <em>going to</em>. Luego pondrás en práctica lo aprendido con actividades de selección y clasificación que te darán puntos e insignias 🏅, y cerrarás con una autoevaluación para comprobar tu avance.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Let's imagine the future! What will technology look like in the next few years? Al terminar este OVA podrás hacer tus propias predicciones en inglés sobre el futuro de la tecnología y el trabajo. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Identificar la estructura del futuro simple con <em>will</em> y <em>going to</em> en oraciones afirmativas, negativas e interrogativas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Distinguir cuándo usar <em>will</em> (predicciones y opiniones) y cuándo usar <em>going to</em> (planes, intenciones y evidencias presentes) en contextos tecnológicos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Aplicar el futuro simple para clasificar y completar situaciones relacionadas con la programación, la inteligencia artificial y el mundo laboral.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Crear predicciones propias sobre el futuro de la tecnología y del trabajo utilizando el vocabulario adecuado en inglés (RA4).</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Contenido</h2>
+                    <p class="text-slate-700 leading-relaxed mb-4">
+                        Hablar del futuro nos permite imaginar cómo pueden cambiar nuestras actividades, profesiones y formas de interactuar con la tecnología. En inglés, una de las estructuras más utilizadas para expresar predicciones sobre lo que creemos que sucederá es el <strong>Simple Future</strong>. En esta sección aprenderás a construir oraciones afirmativas, negativas e interrogativas, además de algunas expresiones que te ayudarán a comunicar tus predicciones de manera más natural.
+                    </p>
+
+                    <!-- GAMIFICACIÓN: misión de lectura -->
+                    <div class="mb-6 p-4 bg-white border border-green-300 rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                            <p class="font-bold text-green-800">🎮 Misión de lectura: explora los 4 temas</p>
+                            <span id="reading-progress-label" class="text-sm font-semibold text-slate-600">0 de 4 temas explorados</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
+                            <div id="reading-progress-bar" class="bg-green-500 h-4 rounded-full" style="width:0%"></div>
+                        </div>
+                        <p id="reading-progress-msg" class="text-sm text-slate-600 mt-2">Abre cada tema para llenar tu barra de progreso y ganar <strong>+5 puntos</strong> por tema. 🔓</p>
+                    </div>
+
+                    <!-- ACORDEÓN 1: WILL -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>1. Will: predicciones y opiniones 💭</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Usamos <strong>will</strong> para expresar <strong>predicciones basadas en lo que pensamos o creemos</strong> que sucederá. Es la forma más directa de hablar del futuro cuando damos una opinión:
+                                </p>
+                                <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg mb-4">
+                                    <p class="text-green-800 font-semibold text-lg">🤖 AI <u>will change</u> the way we work.</p>
+                                    <p class="text-slate-600 text-sm">La inteligencia artificial cambiará la forma en que trabajamos. (Es lo que yo creo.)</p>
+                                </div>
+                                <p class="mb-2 font-semibold text-green-800">Estructura con will:</p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border border-green-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-green-100 text-green-800">
+                                                <th class="p-3 text-left border-b border-green-200">Forma</th>
+                                                <th class="p-3 text-left border-b border-green-200">Estructura</th>
+                                                <th class="p-3 text-left border-b border-green-200">Ejemplo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b border-green-100">
+                                                <td class="p-3 font-semibold text-green-700">Afirmativa ✅</td>
+                                                <td class="p-3">Sujeto + <strong>will</strong> + verbo base</td>
+                                                <td class="p-3"><em>Robots <strong>will help</strong> programmers.</em></td>
+                                            </tr>
+                                            <tr class="border-b border-green-100 bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-700">Negativa ❌</td>
+                                                <td class="p-3">Sujeto + <strong>will not (won't)</strong> + verbo base</td>
+                                                <td class="p-3"><em>Computers <strong>won't replace</strong> human creativity.</em></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="p-3 font-semibold text-green-700">Interrogativa ❓</td>
+                                                <td class="p-3"><strong>Will</strong> + sujeto + verbo base?</td>
+                                                <td class="p-3"><em><strong>Will</strong> people <strong>work</strong> from home in 2035?</em></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
+                                    <p class="text-yellow-800 text-sm">
+                                        <strong>⚠️ Ojo:</strong> después de <em>will</em> el verbo va SIEMPRE en forma base: <em>Technology will <u>create</u> new jobs</em> ✅ — nunca <em>will creates</em> ni <em>will creating</em> ❌. Palabras como <em>I think, probably, maybe, I believe</em> suelen acompañar a <em>will</em> porque marcan una opinión.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2: GOING TO -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>2. Going to: planes, intenciones y evidencias 📅</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Usamos <strong>be going to</strong> para hablar de <strong>planes, intenciones o predicciones basadas en una evidencia presente</strong> (algo que ya podemos ver o que ya está decidido):
+                                </p>
+                                <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg mb-4">
+                                    <p class="text-green-800 font-semibold text-lg">📱 They <u>are going to develop</u> a new app.</p>
+                                    <p class="text-slate-600 text-sm">Van a desarrollar una nueva aplicación. (El proyecto ya está planeado.)</p>
+                                </div>
+                                <p class="mb-2 font-semibold text-green-800">Estructura con going to:</p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border border-green-200 rounded-lg">
+                                        <thead>
+                                            <tr class="bg-green-100 text-green-800">
+                                                <th class="p-3 text-left border-b border-green-200">Forma</th>
+                                                <th class="p-3 text-left border-b border-green-200">Estructura</th>
+                                                <th class="p-3 text-left border-b border-green-200">Ejemplo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b border-green-100">
+                                                <td class="p-3 font-semibold text-green-700">Afirmativa ✅</td>
+                                                <td class="p-3">Sujeto + <strong>am/is/are going to</strong> + verbo base</td>
+                                                <td class="p-3"><em>Sara <strong>is going to study</strong> web development.</em></td>
+                                            </tr>
+                                            <tr class="border-b border-green-100 bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-700">Negativa ❌</td>
+                                                <td class="p-3">Sujeto + <strong>am/is/are not going to</strong> + verbo base</td>
+                                                <td class="p-3"><em>We <strong>aren't going to use</strong> that old server.</em></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="p-3 font-semibold text-green-700">Interrogativa ❓</td>
+                                                <td class="p-3"><strong>Am/Is/Are</strong> + sujeto + <strong>going to</strong> + verbo base?</td>
+                                                <td class="p-3"><em><strong>Are</strong> you <strong>going to learn</strong> Python?</em></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
+                                    <p class="text-yellow-800 text-sm">
+                                        <strong>⚠️ Evidencia presente:</strong> si puedes VER la señal de lo que va a pasar, usa <em>going to</em>: <em>Look at the computer! It <u>is going to turn off</u>; the battery is at 1%.</em> 🔋
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3: WILL VS GOING TO -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>3. Will vs Going to: ¿cuál elegir? ⚖️</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Las dos estructuras hablan del futuro, pero no siempre se usan de la misma manera. Antes de elegir, piensa en la <strong>intención del mensaje</strong>. No necesitas memorizar muchos ejemplos; enfócate en comprender la situación y comunicar tu idea con claridad:
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div class="p-5 bg-green-50 border border-green-300 rounded-xl">
+                                        <h4 class="font-bold text-green-800 mb-2">WILL 💭</h4>
+                                        <p class="text-sm mb-2 font-semibold text-green-700">Predicciones y opiniones</p>
+                                        <ul class="text-sm space-y-2">
+                                            <li>• Lo que <strong>piensas o crees</strong> que sucederá.</li>
+                                            <li>• Suele ir con <em>I think, I believe, probably, maybe</em>.</li>
+                                            <li>• <em>I think robots <strong>will help</strong> people with more tasks.</em></li>
+                                            <li>• <em>Programmers <strong>will need</strong> new digital skills.</em></li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-5 bg-teal-50 border border-teal-300 rounded-xl">
+                                        <h4 class="font-bold text-teal-800 mb-2">GOING TO 📅</h4>
+                                        <p class="text-sm mb-2 font-semibold text-teal-700">Planes, intenciones y evidencias</p>
+                                        <ul class="text-sm space-y-2">
+                                            <li>• Algo <strong>ya decidido o planeado</strong>.</li>
+                                            <li>• Una <strong>evidencia presente</strong> que puedes ver.</li>
+                                            <li>• <em>Laura <strong>is going to learn</strong> Python next month.</em></li>
+                                            <li>• <em>Look at those dark clouds! It <strong>is going to rain</strong>.</em> ⛈️</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- Mini reto gamificado -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Mini reto rápido (+5 puntos)</p>
+                                    <p class="text-slate-700 text-sm mb-3">Completa la oración: <em>"My classmates ______ a website for the final project. They already have the plan."</em></p>
+                                    <div class="flex flex-wrap gap-3">
+                                        <button id="mini-reto-will" class="act2-btn bg-white border-2 border-green-400 text-green-700 font-semibold py-2 px-4 rounded-lg text-sm hover:bg-green-50">will create</button>
+                                        <button id="mini-reto-goingto" class="act2-btn bg-white border-2 border-teal-400 text-teal-700 font-semibold py-2 px-4 rounded-lg text-sm hover:bg-teal-50">are going to create</button>
+                                    </div>
+                                    <p id="mini-reto-feedback" class="text-sm mt-3 font-semibold"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4: PREDICTIONS -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>4. Predictions: The Future of Work 🔮</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">
+                                    El mundo laboral está cambiando junto con la tecnología. Nuevas herramientas digitales, la inteligencia artificial y la automatización están transformando la manera en que las personas trabajan y las habilidades que necesitan. Por eso, podemos hacer <strong>predictions</strong> sobre cómo podrían ser los trabajos y, especialmente, la programación en los próximos años:
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <p class="text-2xl mb-1">👩‍💻</p>
+                                        <p class="font-semibold text-green-800 text-sm mb-1">Programmers <em>will use</em> AI tools more often.</p>
+                                        <p class="text-slate-600 text-xs">Los programadores usarán herramientas de IA con más frecuencia.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <p class="text-2xl mb-1">🏠</p>
+                                        <p class="font-semibold text-green-800 text-sm mb-1">More people <em>will work</em> remotely in the future.</p>
+                                        <p class="text-slate-600 text-xs">Más personas trabajarán de forma remota en el futuro.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <p class="text-2xl mb-1">🧩</p>
+                                        <p class="font-semibold text-green-800 text-sm mb-1">Programmers <em>will need</em> new digital skills.</p>
+                                        <p class="text-slate-600 text-xs">Los programadores necesitarán nuevas habilidades digitales.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <p class="text-2xl mb-1">💼</p>
+                                        <p class="font-semibold text-green-800 text-sm mb-1">I believe programming <em>will become</em> more important.</p>
+                                        <p class="text-slate-600 text-xs">Creo que la programación será cada vez más importante.</p>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800 text-sm">
+                                        <strong>💬 Your turn:</strong> escribe en tu cuaderno tres predicciones propias sobre el futuro del trabajo en tecnología. Usa <em>will</em> para tus opiniones (<em>I think developers will…</em>) y <em>going to</em> para tus planes (<em>I am going to learn…</em>). Después ve a la sección <strong>Actividades</strong> y gana puntos poniendo a prueba lo aprendido. 🏆
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+
+                <!-- GAMIFICACIÓN: marcador e insignias -->
+                <div class="mb-6 p-4 bg-white border border-green-300 rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                        <p class="font-bold text-green-800">🏆 Tu marcador</p>
+                        <span class="text-lg font-bold text-green-700"><span id="score-display">0</span> / 185 puntos</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden mb-3">
+                        <div id="points-progress-bar" class="bg-green-500 h-4 rounded-full" style="width:0%"></div>
+                    </div>
+                    <div class="flex flex-wrap gap-3 text-sm">
+                        <span id="badge-explorer" class="badge-locked bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full">🧭 Explorer (20 pts)</span>
+                        <span id="badge-predictor" class="badge-locked bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full">🔮 Predictor (80 pts)</span>
+                        <span id="badge-futurologist" class="badge-locked bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full">🚀 Futurologist (150 pts)</span>
+                    </div>
+                    <p class="text-slate-600 text-sm mt-2">Gana puntos explorando el Contenido y respondiendo las actividades. ¡Desbloquea las tres insignias y conviértete en Futurologist! 🚀</p>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧠 Actividad 1: What will happen? — Multiple Choice</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Lee cada situación y selecciona la opción que expresa correctamente una idea sobre el futuro. Recibirás retroalimentación inmediata y <strong>+10 puntos</strong> por cada respuesta correcta. Solo tienes un intento por pregunta, ¡piensa bien! 💭
+                        </p>
+                        <div id="activity1-container" class="space-y-6"></div>
+                        <div id="activity1-result" class="mt-4 text-lg font-bold"></div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> responder las 8 preguntas identificando la forma correcta del futuro (will / going to) en cada situación.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧠 Actividad 2: Will or Going to? — Classify the Future</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Lee cada situación y clasifícala en la categoría correcta: <strong>WILL 💭</strong> (predicciones y opiniones) o <strong>GOING TO 📅</strong> (planes, intenciones y evidencia presente). Cada clasificación correcta vale <strong>+10 puntos</strong>.
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <div class="p-3 bg-green-50 border border-green-300 rounded-lg text-center">
+                                <p class="font-bold text-green-800">WILL 💭</p>
+                                <p class="text-xs text-slate-600">Predictions &amp; opinions</p>
+                                <p id="will-count" class="text-sm font-semibold text-green-700 mt-1">0 clasificadas</p>
+                            </div>
+                            <div class="p-3 bg-teal-50 border border-teal-300 rounded-lg text-center">
+                                <p class="font-bold text-teal-800">GOING TO 📅</p>
+                                <p class="text-xs text-slate-600">Plans, intentions &amp; evidence</p>
+                                <p id="goingto-count" class="text-sm font-semibold text-teal-700 mt-1">0 clasificadas</p>
+                            </div>
+                        </div>
+                        <div id="activity2-container" class="space-y-4"></div>
+                        <div id="activity2-result" class="mt-4 text-lg font-bold"></div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> clasificar las 8 situaciones en la categoría correcta. <strong>Reto extra:</strong> después de clasificar, escribe en tu cuaderno la palabra o información que te ayudó a decidir en cada caso (ej: <em>I think, already planned, look at…</em>).
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre <em>will</em> y <em>going to</em>. Selecciona la respuesta correcta para cada pregunta y al final pulsa "Finalizar evaluación".</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">British Council — Future forms: will, be going to and present continuous</h3>
+                            <p class="text-slate-600 mb-2">Explicación clara de las formas de futuro en inglés, con ejemplos y ejercicios interactivos de práctica del sitio LearnEnglish.</p>
+                            <a href="https://learnenglish.britishcouncil.org/grammar/b1-b2-grammar/future-forms-will-be-going-to-present-continuous" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-1.png" alt="QR British Council Future forms" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Cambridge Dictionary — Future: will and shall</h3>
+                            <p class="text-slate-600 mb-2">Gramática de referencia del Cambridge Dictionary sobre el futuro con will y shall: usos, formas y errores comunes.</p>
+                            <a href="https://dictionary.cambridge.org/grammar/british-grammar/future-will-and-shall" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-2.png" alt="QR Cambridge Dictionary Future will and shall" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Perfect English Grammar — Will or be going to?</h3>
+                            <p class="text-slate-600 mb-2">Comparación directa entre will y going to con explicaciones sencillas y ejercicios descargables para practicar.</p>
+                            <a href="https://www.perfect-english-grammar.com/will-or-be-going-to.html" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-3.png" alt="QR Perfect English Grammar Will or be going to" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            British Council. (s. f.). <i>Future forms: 'will', 'be going to' and present continuous</i>. LearnEnglish.<br>
+                            <a href="https://learnenglish.britishcouncil.org/grammar/b1-b2-grammar/future-forms-will-be-going-to-present-continuous" class="text-green-700 underline break-all" target="_blank">https://learnenglish.britishcouncil.org/grammar/b1-b2-grammar/future-forms-will-be-going-to-present-continuous</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cambridge University Press &amp; Assessment. (s. f.). <i>Future: will and shall</i>. Cambridge Dictionary.<br>
+                            <a href="https://dictionary.cambridge.org/grammar/british-grammar/future-will-and-shall" class="text-green-700 underline break-all" target="_blank">https://dictionary.cambridge.org/grammar/british-grammar/future-will-and-shall</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Flores Kastanis, P. (2016). <i>English 1</i> (2.ª ed.). Grupo Editorial Patria.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Murphy, R. (2019). <i>English Grammar in Use</i> (5th ed.). Cambridge University Press.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Oxford University Press. (s. f.). <i>Oxford Learner's Dictionaries</i>.<br>
+                            <a href="https://www.oxfordlearnersdictionaries.com/" class="text-green-700 underline break-all" target="_blank">https://www.oxfordlearnersdictionaries.com/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Perfect English Grammar. (s. f.). <i>Will or be going to?</i><br>
+                            <a href="https://www.perfect-english-grammar.com/will-or-be-going-to.html" class="text-green-700 underline break-all" target="_blank">https://www.perfect-english-grammar.com/will-or-be-going-to.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Pulido Méndez, P. (2022). <i>Comunicación en lenguas extranjeras (inglés) N2</i>. Editorial Tutor Formación.
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de la autoevaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "Complete the prediction: \"In ten years, most companies ______ artificial intelligence in their daily work.\"",
+                options: ["will use", "uses", "used", "are use"],
+                correct: 0
+            },
+            {
+                question: "Your team already planned to migrate the website to a new server next weekend. What do you say?",
+                options: ["We migrated the website yesterday.", "We are going to migrate the website next weekend.", "We will probably never migrate the website.", "We migrate the website every day."],
+                correct: 1
+            },
+            {
+                question: "Which sentence expresses a prediction based on an OPINION?",
+                options: ["The developers are going to release the update tomorrow; it is scheduled.", "The app crashed last night.", "I believe smartphones will translate languages in real time.", "Look at the progress bar! The download is going to finish."],
+                correct: 2
+            },
+            {
+                question: "The server room is very hot and the fans stopped working. What is the correct sentence?",
+                options: ["The server will crashed.", "The server crashed tomorrow.", "The server is crashing every day.", "The server is going to crash."],
+                correct: 3
+            },
+            {
+                question: "Choose the correct NEGATIVE sentence about the future:",
+                options: ["Robots won't replace human programmers completely.", "Robots will not to replace human programmers.", "Robots not will replace human programmers.", "Robots won't replaced human programmers."],
+                correct: 0
+            },
+            {
+                question: "Choose the correct QUESTION about the future:",
+                options: ["Will people works in virtual offices?", "Will people work in virtual offices?", "People will work in virtual offices?", "Do people will work in virtual offices?"],
+                correct: 1
+            },
+            {
+                question: "Ana has decided to take an online course on databases next semester. What is her plan?",
+                options: ["Ana took a course on databases.", "Ana will probably hate databases.", "Ana is going to take an online course on databases.", "Ana takes a course on databases every day."],
+                correct: 2
+            },
+            {
+                question: "Which sentence uses \"will\" correctly?",
+                options: ["Technology will creating new digital jobs.", "Technology will creates new digital jobs.", "Technology will created new digital jobs.", "Technology will create new digital jobs."],
+                correct: 3
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS Y GAMIFICACIÓN
+         ============================================= -->
+    <script>
+        // ------------------ Sistema de puntos e insignias ------------------
+        const MAX_PUNTOS = 185; // 4 temas x5 + mini reto x5 + Act.1 (8x10) + Act.2 (8x10)
+        let puntos = 0;
+
+        function agregarPuntos(n) {
+            puntos += n;
+            document.getElementById('score-display').textContent = puntos;
+            const pct = Math.min(100, Math.round((puntos / MAX_PUNTOS) * 100));
+            document.getElementById('points-progress-bar').style.width = pct + '%';
+            // Insignias por niveles de puntos
+            if (puntos >= 20)  document.getElementById('badge-explorer').classList.remove('badge-locked');
+            if (puntos >= 80)  document.getElementById('badge-predictor').classList.remove('badge-locked');
+            if (puntos >= 150) document.getElementById('badge-futurologist').classList.remove('badge-locked');
+        }
+
+        // ------------------ Misión de lectura (barra de progreso) ------------------
+        const panelesLeidos = new Set();
+        const TOTAL_PANELES = 4;
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.target;
+                if (!panelesLeidos.has(id)) {
+                    panelesLeidos.add(id);
+                    agregarPuntos(5);
+                    const n = panelesLeidos.size;
+                    document.getElementById('reading-progress-bar').style.width = Math.round((n / TOTAL_PANELES) * 100) + '%';
+                    document.getElementById('reading-progress-label').textContent = `${n} de ${TOTAL_PANELES} temas explorados`;
+                    const msg = document.getElementById('reading-progress-msg');
+                    if (n === TOTAL_PANELES) {
+                        msg.innerHTML = '🎉 ¡Misión de lectura completa! Ganaste <strong>20 puntos</strong>. Ahora ve a <strong>Actividades</strong> a seguir sumando.';
+                    } else {
+                        msg.innerHTML = `✅ +5 puntos. Te faltan <strong>${TOTAL_PANELES - n}</strong> tema(s) por explorar.`;
+                    }
+                }
+            });
+        });
+
+        // ------------------ Mini reto del contenido ------------------
+        (function() {
+            const fb = document.getElementById('mini-reto-feedback');
+            const btnWill = document.getElementById('mini-reto-will');
+            const btnGoing = document.getElementById('mini-reto-goingto');
+            let resuelto = false;
+            btnGoing.addEventListener('click', function() {
+                if (resuelto) return;
+                resuelto = true;
+                agregarPuntos(5);
+                this.classList.add('bg-teal-100');
+                btnWill.disabled = true; btnGoing.disabled = true;
+                fb.textContent = '✅ Correct! El proyecto ya está planeado ("They already have the plan"), por eso usamos going to. +5 puntos';
+                fb.className = 'text-sm mt-3 font-semibold text-green-700';
+            });
+            btnWill.addEventListener('click', function() {
+                if (resuelto) return;
+                resuelto = true;
+                this.classList.add('bg-red-100');
+                btnWill.disabled = true; btnGoing.disabled = true;
+                fb.textContent = '❌ Not quite. Como el plan ya existe ("They already have the plan"), la respuesta correcta es "are going to create".';
+                fb.className = 'text-sm mt-3 font-semibold text-red-600';
+            });
+        })();
+
+        // ------------------ Actividad 1: Multiple Choice (8 preguntas) ------------------
+        const activity1Data = [
+            {
+                q: "Artificial Intelligence is becoming more common in programming. What do you think will happen?",
+                opts: ["Programmers will use AI tools more often.", "Programmers used AI tools yesterday.", "Programmers are using paper to code."],
+                correct: 0,
+                why: "Es una predicción sobre el futuro: sujeto + will + verbo base."
+            },
+            {
+                q: "Laura has decided to study Python next month. What is her plan?",
+                opts: ["Laura will probably study robotics.", "Laura is going to learn Python.", "Laura learned Python last year."],
+                correct: 1,
+                why: "Es un plan ya decidido, por eso usamos going to."
+            },
+            {
+                q: "Many companies now use online platforms and virtual meetings. What is a possible prediction?",
+                opts: ["More people will work remotely in the future.", "More people worked remotely yesterday.", "People are going to stop using computers."],
+                correct: 0,
+                why: "Una predicción lógica sobre el futuro se expresa con will."
+            },
+            {
+                q: "A technology company already has a plan to create a new mobile application. What are they going to do?",
+                opts: ["They created a new app.", "They are going to develop a new app.", "They will probably stop using technology."],
+                correct: 1,
+                why: "El plan ya existe (already has a plan): going to."
+            },
+            {
+                q: "Which sentence expresses a prediction based on an opinion?",
+                opts: ["I think robots will help people with more tasks.", "Robots helped people last week.", "The engineers are going to test the robot tomorrow."],
+                correct: 0,
+                why: "\"I think\" marca una opinión, y las opiniones sobre el futuro usan will."
+            },
+            {
+                q: "Which sentence is a prediction about a programmer's future?",
+                opts: ["Programmers write code every day.", "Programmers studied new languages last year.", "Programmers will need new digital skills."],
+                correct: 2,
+                why: "Habla del futuro con will + verbo base (will need)."
+            },
+            {
+                q: "Look at those dark clouds. What is going to happen?",
+                opts: ["It is going to rain.", "It will use artificial intelligence.", "It rained next week."],
+                correct: 0,
+                why: "Hay una evidencia presente (las nubes oscuras): going to."
+            },
+            {
+                q: "Which sentence correctly uses will?",
+                opts: ["Technology will creates new jobs.", "Technology will create new jobs.", "Technology will creating new jobs."],
+                correct: 1,
+                why: "Después de will el verbo siempre va en forma base: will create."
+            }
+        ];
+
+        (function() {
+            const cont = document.getElementById('activity1-container');
+            let respondidas = 0, correctas = 0;
+            activity1Data.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.q}</p>
+                    <div class="grid grid-cols-1 gap-3">
+                        ${item.opts.map((opt, i) => `
+                            <div class="act1-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer"
+                                 data-a1question="${index}" data-a1option="${i}">
+                                <span class="font-medium text-green-700 mr-2">${String.fromCharCode(97+i)})</span> ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p class="a1-feedback text-sm mt-2 font-semibold" data-a1feedback="${index}"></p>
+                `;
+                cont.appendChild(div);
+            });
+
+            cont.querySelectorAll('.act1-option').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    const qi = parseInt(this.dataset.a1question);
+                    const oi = parseInt(this.dataset.a1option);
+                    const item = activity1Data[qi];
+                    const grupo = cont.querySelectorAll(`[data-a1question="${qi}"]`);
+                    grupo.forEach(o => o.classList.add('locked'));
+                    const fb = cont.querySelector(`[data-a1feedback="${qi}"]`);
+                    respondidas++;
+                    if (oi === item.correct) {
+                        this.classList.add('correct-answer');
+                        correctas++;
+                        agregarPuntos(10);
+                        fb.textContent = `✅ Correct! +10 puntos. ${item.why}`;
+                        fb.className = 'a1-feedback text-sm mt-2 font-semibold text-green-700';
+                    } else {
+                        this.classList.add('wrong-answer');
+                        grupo[item.correct].classList.add('correct-answer');
+                        fb.textContent = `❌ Incorrect. La respuesta correcta es la ${String.fromCharCode(97+item.correct)}). ${item.why}`;
+                        fb.className = 'a1-feedback text-sm mt-2 font-semibold text-red-600';
+                    }
+                    if (respondidas === activity1Data.length) {
+                        const res = document.getElementById('activity1-result');
+                        res.textContent = `🏁 Actividad 1 completada: ${correctas} de ${activity1Data.length} correctas (+${correctas * 10} puntos).`;
+                        res.className = `mt-4 text-lg font-bold ${correctas >= 5 ? 'text-green-700' : 'text-red-600'}`;
+                    }
+                });
+            });
+        })();
+
+        // ------------------ Actividad 2: Clasificar WILL vs GOING TO ------------------
+        const activity2Data = [
+            { q: "A. I think AI will create new job opportunities.", answer: "will", clue: "\"I think\" indica opinión." },
+            { q: "B. Sara is going to study web development next semester.", answer: "goingto", clue: "Es un plan ya decidido." },
+            { q: "C. Maybe robots will work with programmers in the future.", answer: "will", clue: "\"Maybe\" indica una predicción incierta." },
+            { q: "D. Our class is going to create a website for the final project.", answer: "goingto", clue: "Es una intención/plan del grupo." },
+            { q: "E. I believe programming will become more important.", answer: "will", clue: "\"I believe\" marca una opinión." },
+            { q: "F. Look at the computer! It is going to turn off; the battery is at 1%.", answer: "goingto", clue: "Hay evidencia presente: la batería al 1%." },
+            { q: "G. Probably more companies will use artificial intelligence.", answer: "will", clue: "\"Probably\" acompaña predicciones con will." },
+            { q: "H. They are going to develop a new app. The project is already planned.", answer: "goingto", clue: "\"Already planned\": el plan ya existe." }
+        ];
+
+        (function() {
+            const cont = document.getElementById('activity2-container');
+            let respondidas = 0, correctas = 0, enWill = 0, enGoing = 0;
+            activity2Data.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-slate-50 border border-slate-200 rounded-lg';
+                div.innerHTML = `
+                    <p class="font-medium text-slate-800 mb-3">${item.q}</p>
+                    <div class="flex flex-wrap gap-3">
+                        <button class="act2-btn a2-will bg-white border-2 border-green-400 text-green-700 font-semibold py-1 px-4 rounded-full text-sm hover:bg-green-50" data-a2index="${index}">WILL 💭</button>
+                        <button class="act2-btn a2-goingto bg-white border-2 border-teal-400 text-teal-700 font-semibold py-1 px-4 rounded-full text-sm hover:bg-teal-50" data-a2index="${index}">GOING TO 📅</button>
+                    </div>
+                    <p class="a2-feedback text-sm mt-2 font-semibold" data-a2feedback="${index}"></p>
+                `;
+                cont.appendChild(div);
+            });
+
+            function responder(index, eleccion, btn) {
+                const item = activity2Data[index];
+                const fila = btn.closest('div.p-4');
+                fila.querySelectorAll('button').forEach(b => b.disabled = true);
+                const fb = cont.querySelector(`[data-a2feedback="${index}"]`);
+                respondidas++;
+                if (eleccion === item.answer) {
+                    correctas++;
+                    agregarPuntos(10);
+                    btn.classList.add(eleccion === 'will' ? 'bg-green-100' : 'bg-teal-100');
+                    fb.textContent = `✅ Correct! +10 puntos. Pista: ${item.clue}`;
+                    fb.className = 'a2-feedback text-sm mt-2 font-semibold text-green-700';
+                } else {
+                    btn.classList.add('bg-red-100');
+                    const nombre = item.answer === 'will' ? 'WILL 💭' : 'GOING TO 📅';
+                    fb.textContent = `❌ Incorrect. Esta situación va en ${nombre}. Pista: ${item.clue}`;
+                    fb.className = 'a2-feedback text-sm mt-2 font-semibold text-red-600';
+                }
+                if (item.answer === 'will') enWill++; else enGoing++;
+                document.getElementById('will-count').textContent = `${enWill} clasificadas`;
+                document.getElementById('goingto-count').textContent = `${enGoing} clasificadas`;
+                if (respondidas === activity2Data.length) {
+                    const res = document.getElementById('activity2-result');
+                    res.textContent = `🏁 Actividad 2 completada: ${correctas} de ${activity2Data.length} correctas (+${correctas * 10} puntos).`;
+                    res.className = `mt-4 text-lg font-bold ${correctas >= 5 ? 'text-green-700' : 'text-red-600'}`;
+                }
+            }
+
+            cont.querySelectorAll('.a2-will').forEach(b => b.addEventListener('click', function() { responder(parseInt(this.dataset.a2index), 'will', this); }));
+            cont.querySelectorAll('.a2-goingto').forEach(b => b.addEventListener('click', function() { responder(parseInt(this.dataset.a2index), 'goingto', this); }));
+        })();
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

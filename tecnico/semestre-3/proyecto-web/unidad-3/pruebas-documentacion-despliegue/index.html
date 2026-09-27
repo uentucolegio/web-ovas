@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Pruebas, Documentación y Despliegue</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .reveal-card {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .reveal-card .reveal-back { display: none; }
+        .reveal-card.opened .reveal-back { display: block; }
+        .reveal-card.opened {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.chip-selected {
+            background-color: #166534;
+            color: white;
+        }
+        .chip.chip-done-correct {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+        }
+        .chip.chip-done-wrong {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            cursor: default;
+        }
+        .step-chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .step-chip.step-ok {
+            background-color: #bbf7d0;
+            border-color: #22c55e;
+            cursor: default;
+            opacity: 0.85;
+        }
+        .step-chip.step-error {
+            background-color: #fecaca;
+            border-color: #ef4444;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: #166534;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🏁 La última milla: probar, documentar y publicar tu proyecto</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Tu proyecto web ya tiene frontend, backend y base de datos funcionando juntos. Sin embargo, un proyecto que "funciona en mi computador" todavía no está terminado. Falta la <strong>última milla</strong>: comprobar con pruebas que todo hace lo que debe hacer, escribir la documentación que permitirá a otras personas entenderlo y usarlo, y publicarlo en un servidor real para que cualquiera pueda acceder desde internet.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Esta guía corresponde al <strong>Tema 3 de la Unidad 3: Pruebas, documentación técnica, manual de usuario y despliegue</strong>. Aquí aprenderás a diseñar casos de prueba para los flujos principales de tu aplicación (formularios, casos de uso y operaciones CRUD completas), a redactar un README claro y un manual de usuario, y a preparar el entorno para desplegar tu solución con servicios gratuitos como GitHub Pages, Render o Railway.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Este cierre no es un trámite: en la industria del software, las pruebas evitan que los errores lleguen al usuario, la documentación hace que un proyecto sobreviva a su autor y el despliegue es lo que convierte el código en un producto real. Con este tema completas la evidencia final del curso: <strong>aplicación web completa desplegada, código fuente documentado y presentación final</strong>.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Un proyecto probado, documentado y publicado en internet deja de ser una tarea de clase y se convierte en tu primera pieza de portafolio profesional. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧪</span>
+                        <span>Diseñar y ejecutar pruebas funcionales y de integración sobre los casos de uso, formularios y flujos CRUD del proyecto web, registrando cada caso de prueba con sus pasos y resultados.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📄</span>
+                        <span>Elaborar la documentación técnica del proyecto, incluyendo un README completo (descripción, requisitos, instalación, uso y estructura) y comentarios útiles en el código fuente.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📘</span>
+                        <span>Distinguir el manual de usuario de la documentación técnica y redactar un manual claro, orientado al usuario final de la aplicación.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🚀</span>
+                        <span>Desplegar la solución en un entorno de producción gratuito, preparando variables de entorno y dependencias, y verificando la publicación con una lista de chequeo.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex flex-wrap items-center justify-between gap-3">
+                        <p class="font-bold text-green-800">🔍 Misión de lectura: recorre las 4 estaciones, descubre las tarjetas y supera el mini reto de cada una</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="contenido-puntos">0</span></p>
+                    </div>
+
+                    <!-- Acordeón 1: Pruebas funcionales y de integración -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-pruebas">
+                            <span>🧪 Pruebas funcionales y de integración: ¿de verdad funciona?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-pruebas" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="pruebas-intro" class="content-section">
+                                <p class="mb-4">
+                                    Probar no es "hacer clic a ver si abre". Una <strong>prueba funcional</strong> verifica que cada funcionalidad haga exactamente lo que se espera, vista desde el usuario: que el formulario de registro rechace un correo inválido, que el botón "Guardar" realmente guarde, que el mensaje de error aparezca cuando debe. Una <strong>prueba de integración</strong> va más allá: comprueba que las piezas trabajen <em>juntas</em>, por ejemplo que lo que el usuario escribe en el frontend llegue al backend, se guarde en la base de datos y vuelva a aparecer en el listado.
+                                </p>
+                                <p class="mb-3 font-semibold text-green-800">¿Qué probar en tu proyecto integrador?</p>
+                                <ul class="list-disc pl-6 mb-4 space-y-1">
+                                    <li><strong>Casos de uso principales:</strong> las acciones que definen tu aplicación (registrar una reserva, publicar un producto, consultar una cita…).</li>
+                                    <li><strong>Formularios:</strong> con datos válidos <em>y</em> con datos inválidos (campos vacíos, correos mal escritos, textos demasiado largos).</li>
+                                    <li><strong>Flujos CRUD completos:</strong> crear un registro, verlo en el listado, editarlo y eliminarlo, confirmando en cada paso que la base de datos quedó como debía.</li>
+                                    <li><strong>Mensajes al usuario:</strong> que los avisos de éxito, error y carga aparezcan en el momento correcto.</li>
+                                </ul>
+                                <p class="mb-3">
+                                    Para que las pruebas sean repetibles y no dependan de la memoria de nadie, se documentan como <strong>casos de prueba</strong>. Cada caso registra un identificador, el escenario que se prueba, los pasos para reproducirlo, el resultado esperado y el resultado obtenido. Así se ve un caso de prueba aplicado a un proyecto de reservas:
+                                </p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2">ID</th>
+                                                <th class="border border-green-300 p-2">Escenario</th>
+                                                <th class="border border-green-300 p-2">Pasos</th>
+                                                <th class="border border-green-300 p-2">Resultado esperado</th>
+                                                <th class="border border-green-300 p-2">Resultado obtenido</th>
+                                                <th class="border border-green-300 p-2">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">CP-01</td>
+                                                <td class="border border-green-300 p-2">Crear reserva con datos válidos</td>
+                                                <td class="border border-green-300 p-2">1. Iniciar sesión. 2. Ir a "Nueva reserva". 3. Llenar todos los campos. 4. Clic en "Guardar".</td>
+                                                <td class="border border-green-300 p-2">Mensaje de éxito y la reserva aparece en el listado</td>
+                                                <td class="border border-green-300 p-2">Mensaje de éxito y reserva visible en el listado</td>
+                                                <td class="border border-green-300 p-2 text-center font-bold text-green-700">✅ Pasa</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">CP-02</td>
+                                                <td class="border border-green-300 p-2">Crear reserva con correo inválido</td>
+                                                <td class="border border-green-300 p-2">1. Ir a "Nueva reserva". 2. Escribir "juan@" en el correo. 3. Clic en "Guardar".</td>
+                                                <td class="border border-green-300 p-2">Mensaje de error y la reserva NO se guarda</td>
+                                                <td class="border border-green-300 p-2">La reserva se guardó con el correo incompleto</td>
+                                                <td class="border border-green-300 p-2 text-center font-bold text-red-600">❌ Falla</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-4">
+                                    El caso CP-02 es un <strong>hallazgo</strong>: un error real que el equipo debe corregir antes del despliegue. Probar con datos "malos" a propósito es justamente lo que diferencia a un buen tester.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz clic en cada tarjeta para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-pruebas" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="pruebas-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): al probar el flujo "crear producto", el dato se guarda en la base de datos pero no aparece en el listado del frontend. ¿Qué tipo de prueba detectó el problema?</p>
+                                <div id="choice-pruebas" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-pruebas-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 2: Documentación técnica -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-documentacion">
+                            <span>📄 Documentación técnica: el README y los comentarios que salvan proyectos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-documentacion" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="documentacion-intro" class="content-section">
+                                <p class="mb-4">
+                                    La <strong>documentación técnica</strong> está dirigida a otros desarrolladores (incluido tu "yo" de dentro de seis meses). Su pieza central es el <strong>README</strong>: el archivo que cualquier persona lee primero al abrir tu repositorio. Un README completo para tu proyecto integrador debe responder cinco preguntas: qué es, qué necesita, cómo se instala, cómo se usa y cómo está organizado.
+                                </p>
+                                <pre class="mb-4"><code># Sistema de Reservas "AgendaYa"
+
+Aplicación web para gestionar reservas de canchas deportivas.
+Proyecto integrador — Técnico Profesional en Programación Web.
+
+## Requisitos
+- Node.js 18 o superior
+- MySQL 8
+
+## Instalación
+1. Clonar el repositorio: git clone https://github.com/equipo/agendaya.git
+2. Instalar dependencias: npm install
+3. Copiar .env.ejemplo como .env y completar las credenciales
+4. Importar la base de datos: db/agendaya.sql
+
+## Uso
+- npm start inicia el servidor en http://localhost:3000
+- Usuario de prueba: demo@correo.com / Demo1234
+
+## Estructura del proyecto
+- /public     → frontend (HTML, CSS, JS)
+- /src/rutas  → endpoints del backend
+- /db         → script SQL de la base de datos</code></pre>
+                                <p class="mb-4">
+                                    La otra mitad de la documentación técnica son los <strong>comentarios en el código</strong>. Un buen comentario explica el <em>porqué</em> de una decisión, no repite lo obvio. Compara: <code>// suma 1 a i</code> no aporta nada, mientras que <code>// Se valida aquí y no en el frontend porque el usuario puede desactivar JavaScript</code> le ahorra horas a quien mantenga el código. Documenta especialmente las funciones públicas, las reglas de negocio y cualquier solución que no sea evidente.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz clic en cada sección del README para descubrir qué debe contener (+4 puntos la primera vez):</p>
+                                <div id="reveal-documentacion" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="documentacion-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): ¿cuál de estos comentarios sí aporta valor a la documentación del código?</p>
+                                <div id="choice-documentacion" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-documentacion-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 3: Manual de usuario -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-manual">
+                            <span>📘 Manual de usuario: explicar sin tecnicismos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-manual" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="manual-intro" class="content-section">
+                                <p class="mb-4">
+                                    El <strong>manual de usuario</strong> se escribe para la persona que va a <em>usar</em> la aplicación, no para quien la programó. Esa persona no sabe qué es un endpoint ni le interesa: quiere saber cómo registrarse, cómo hacer una reserva y qué hacer si olvidó su contraseña. Por eso el manual usa lenguaje cotidiano, va paso a paso y se apoya en capturas de pantalla.
+                                </p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-100">
+                                                <th class="border border-green-300 p-2 text-left">Aspecto</th>
+                                                <th class="border border-green-300 p-2 text-left">Documentación técnica</th>
+                                                <th class="border border-green-300 p-2 text-left">Manual de usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">¿Para quién?</td>
+                                                <td class="border border-green-300 p-2">Desarrolladores y personal técnico</td>
+                                                <td class="border border-green-300 p-2">Usuario final de la aplicación</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">¿Qué explica?</td>
+                                                <td class="border border-green-300 p-2">Cómo está construido, se instala y se mantiene el sistema</td>
+                                                <td class="border border-green-300 p-2">Cómo se usa la aplicación pantalla por pantalla</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">¿Qué lenguaje usa?</td>
+                                                <td class="border border-green-300 p-2">Técnico: dependencias, rutas, base de datos</td>
+                                                <td class="border border-green-300 p-2">Cotidiano: botones, pantallas, pasos numerados</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-green-300 p-2 font-semibold">Ejemplo de contenido</td>
+                                                <td class="border border-green-300 p-2"><code>npm install</code>, estructura de carpetas, script SQL</td>
+                                                <td class="border border-green-300 p-2">"Haz clic en el botón verde <strong>Reservar</strong>", capturas, preguntas frecuentes</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mb-3 font-semibold text-green-800">Mini ejemplo de una página del manual de "AgendaYa":</p>
+                                <div class="p-4 bg-slate-50 border border-slate-300 rounded-lg mb-4">
+                                    <p class="font-bold text-slate-800 mb-2">3. Cómo hacer una reserva</p>
+                                    <ol class="list-decimal pl-6 space-y-1 text-sm">
+                                        <li>Ingresa a la aplicación con tu correo y contraseña.</li>
+                                        <li>En el menú principal, haz clic en <strong>Nueva reserva</strong>.</li>
+                                        <li>Elige la cancha, la fecha y la hora disponibles (las horas ocupadas aparecen en gris).</li>
+                                        <li>Haz clic en el botón verde <strong>Confirmar reserva</strong>.</li>
+                                        <li>Verás el mensaje "Reserva creada" y recibirás la confirmación en tu correo.</li>
+                                    </ol>
+                                    <p class="text-xs text-slate-500 mt-2 italic">💡 ¿Problemas? Si la hora que quieres aparece en gris, ya fue reservada por otra persona: intenta con otro horario.</p>
+                                </div>
+                                <p class="mb-4">
+                                    Un buen manual de usuario incluye: requisitos para usar la aplicación (navegador, conexión), cómo ingresar, una sección por cada función principal con pasos numerados y capturas, y una lista de preguntas frecuentes o problemas comunes con su solución.
+                                </p>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz clic en cada tarjeta para descubrir qué lleva el manual (+4 puntos la primera vez):</p>
+                                <div id="reveal-manual" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="manual-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): ¿cuál de estas frases pertenece a un manual de usuario y NO a la documentación técnica?</p>
+                                <div id="choice-manual" class="grid grid-cols-1 gap-3"></div>
+                                <p id="choice-manual-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón 4: Despliegue -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-despliegue">
+                            <span>🚀 Despliegue: de "funciona en mi máquina" a producción</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-despliegue" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="despliegue-intro" class="content-section">
+                                <p class="mb-4">
+                                    <strong>Desplegar</strong> es publicar tu aplicación en un servidor de internet para que funcione sin depender de tu computador. Antes de publicar hay que <strong>preparar el entorno</strong>:
+                                </p>
+                                <ul class="list-disc pl-6 mb-4 space-y-1">
+                                    <li><strong>Variables de entorno:</strong> las contraseñas de la base de datos, llaves de API y URLs nunca van escritas en el código. Se guardan en un archivo <code>.env</code> (que se agrega a <code>.gitignore</code> para no subirlo al repositorio) y en producción se configuran en el panel del servicio de hosting.</li>
+                                    <li><strong>Dependencias declaradas:</strong> el archivo <code>package.json</code> (Node.js) o <code>composer.json</code> (PHP) debe listar todo lo que el proyecto necesita, para que el servidor pueda instalarlo con un solo comando.</li>
+                                    <li><strong>Configuración de producción:</strong> desactivar mensajes de depuración, usar la URL real del backend en el frontend y verificar que la base de datos de producción tenga las tablas creadas.</li>
+                                </ul>
+                                <p class="mb-3 font-semibold text-green-800">Opciones gratuitas para estudiantes:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                                    <div class="p-4 bg-slate-50 border border-slate-300 rounded-lg">
+                                        <p class="font-bold text-green-700 mb-1">🌐 GitHub Pages</p>
+                                        <p class="text-sm">Publica el <strong>frontend estático</strong> (HTML, CSS, JS) directamente desde tu repositorio. Ideal si tu frontend consume un backend alojado en otro servicio.</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 border border-slate-300 rounded-lg">
+                                        <p class="font-bold text-green-700 mb-1">⚙️ Render / Railway</p>
+                                        <p class="text-sm">Alojan el <strong>backend</strong> (Node.js, Python, PHP…) conectado a tu repositorio: cada push puede volver a desplegar automáticamente la aplicación.</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 border border-slate-300 rounded-lg">
+                                        <p class="font-bold text-green-700 mb-1">🗄️ Bases de datos gestionadas</p>
+                                        <p class="text-sm">Los mismos Render y Railway (y servicios como Aiven o Neon) ofrecen <strong>PostgreSQL o MySQL</strong> con planes gratuitos: te dan las credenciales que configuras como variables de entorno.</p>
+                                    </div>
+                                </div>
+                                <p class="mb-3 font-semibold text-green-800">Lista de chequeo antes de decir "está publicado":</p>
+                                <ul class="space-y-2 mb-4">
+                                    <li class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">☑️ El código está en el repositorio, sin archivos <code>.env</code> ni contraseñas subidas.</li>
+                                    <li class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">☑️ Las variables de entorno están configuradas en el panel del hosting.</li>
+                                    <li class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">☑️ La base de datos de producción existe y tiene sus tablas creadas.</li>
+                                    <li class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">☑️ El frontend apunta a la URL real del backend (no a <code>localhost</code>).</li>
+                                    <li class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">☑️ Los casos de prueba principales se repitieron sobre la URL pública y pasan.</li>
+                                    <li class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">☑️ El README incluye el enlace de la aplicación desplegada.</li>
+                                </ul>
+                                <p class="text-sm text-teal-800 font-semibold mb-3">🔍 Haz clic en cada tarjeta para descubrirla (+4 puntos la primera vez):</p>
+                                <div id="reveal-despliegue" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+                            <div id="despliegue-reto" class="content-section bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <p class="text-sm text-teal-800 font-semibold mb-2">🎯 Mini reto (+5 pts): tu backend necesita la contraseña de la base de datos en producción. ¿Dónde debe estar?</p>
+                                <div id="choice-despliegue" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                                <p id="choice-despliegue-msg" class="text-sm mt-2 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-2">Actividades</h2>
+                <div class="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <p class="font-bold text-green-800">🎮 Completa los 2 desafíos y gana tus insignias de cierre del proyecto</p>
+                        <p class="text-green-800 font-semibold">⭐ Puntos: <span id="actividades-puntos">0</span></p>
+                    </div>
+                    <div id="insignias-bar" class="flex flex-wrap gap-2 mt-2">
+                        <span id="insignia-tester" class="text-sm bg-white border border-slate-300 text-slate-400 px-3 py-1 rounded-full">🧪 Insignia Tester: pendiente</span>
+                        <span id="insignia-publicador" class="text-sm bg-white border border-slate-300 text-slate-400 px-3 py-1 rounded-full">🚀 Insignia Publicador: pendiente</span>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧪 Actividad 1: Arma tu caso de prueba y clasifica los hallazgos</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            <strong>Parte A.</strong> Un caso de prueba bien documentado sigue un orden lógico. Haz clic en las partes en el orden correcto en que se registran, desde la identificación hasta el veredicto (+3 pts por acierto):
+                        </p>
+                        <div id="orden-caso-destino" class="min-h-[3rem] p-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg mb-3 flex flex-wrap gap-2"></div>
+                        <div id="orden-caso-origen" class="flex flex-wrap gap-2 mb-2"></div>
+                        <p id="orden-caso-msg" class="text-sm font-semibold mb-4"></p>
+
+                        <p class="mb-3 text-slate-700 leading-relaxed">
+                            <strong>Parte B.</strong> Ejecutaste las pruebas del sistema "AgendaYa" y registraste los resultados. Haz clic en un hallazgo y luego en el veredicto correcto: <strong>¿Pasa o Falla?</strong> (+4 pts por acierto):
+                        </p>
+                        <div id="hallazgos-chips" class="flex flex-wrap gap-2 mb-4"></div>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="hallazgo-btn bg-green-100 border border-green-400 text-green-800 font-semibold py-2 px-4 rounded-lg" data-tipo="pasa">✅ Pasa</button>
+                            <button class="hallazgo-btn bg-red-100 border border-red-400 text-red-800 font-semibold py-2 px-4 rounded-lg" data-tipo="falla">❌ Falla</button>
+                        </div>
+                        <p id="hallazgos-msg" class="text-sm mt-3 font-semibold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Con tu equipo, documenten al menos 6 casos de prueba reales de su proyecto (mínimo 2 de integración) usando la tabla de la sección Contenido, ejecútenlos y registren los hallazgos con su estado Pasa/Falla.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🚀 Actividad 2: Checklist de despliegue y ¿dónde va cada cosa?</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            <strong>Parte A.</strong> Vas a publicar el proyecto en producción. Haz clic en los pasos en el orden correcto para lograr un despliegue sin sustos (+3 pts por acierto):
+                        </p>
+                        <div id="orden-deploy-destino" class="min-h-[3rem] p-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg mb-3 flex flex-wrap gap-2"></div>
+                        <div id="orden-deploy-origen" class="flex flex-wrap gap-2 mb-2"></div>
+                        <p id="orden-deploy-msg" class="text-sm font-semibold mb-4"></p>
+
+                        <p class="mb-3 text-slate-700 leading-relaxed">
+                            <strong>Parte B.</strong> Clasifica cada elemento según el documento al que pertenece: <strong>README</strong> (documentación técnica), <strong>Manual de usuario</strong> o <strong>Ninguno</strong> (no debe publicarse) (+4 pts por acierto):
+                        </p>
+                        <div id="docs-chips" class="flex flex-wrap gap-2 mb-4"></div>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="docs-btn bg-blue-100 border border-blue-400 text-blue-800 font-semibold py-2 px-4 rounded-lg" data-tipo="readme">📄 README</button>
+                            <button class="docs-btn bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-4 rounded-lg" data-tipo="manual">📘 Manual de usuario</button>
+                            <button class="docs-btn bg-slate-100 border border-slate-400 text-slate-800 font-semibold py-2 px-4 rounded-lg" data-tipo="ninguno">🚫 Ninguno</button>
+                        </div>
+                        <p id="docs-msg" class="text-sm mt-3 font-semibold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> Aplicación del equipo desplegada en un servicio gratuito (GitHub Pages, Render o Railway), con README completo en el repositorio, manual de usuario entregado y el enlace público funcionando, listos para la presentación final.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1: GitHub Pages -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación de GitHub Pages (en español)</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial para publicar el frontend de tu proyecto como sitio web gratuito directamente desde tu repositorio.</p>
+                            <a href="https://docs.github.com/es/pages" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-1.png" alt="QR Documentación de GitHub Pages" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2: MDN Learn -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN Web Docs: Aprende desarrollo web</h3>
+                            <p class="text-slate-600 mb-2">Área de aprendizaje de MDN con módulos sobre HTML, CSS, JavaScript, pruebas y programación del lado del servidor.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Learn" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-2.png" alt="QR MDN Aprende desarrollo web" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3: Render Docs -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Render: documentación oficial</h3>
+                            <p class="text-slate-600 mb-2">Guías rápidas para desplegar backends en Node.js, Python o PHP y bases de datos PostgreSQL con plan gratuito.</p>
+                            <a href="https://render.com/docs" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-3.png" alt="QR Render documentación" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript</i>. Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Cabezas Granado, L. M. &amp; González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i>. Anaya Multimedia.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Recio García, J. A. (2016). <i>HTML5, CSS3 y JQuery: curso práctico</i>. RA-MA.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Orós Cabello, J. C. (2014). <i>Diseño de páginas Web con XHTML, JavaScript y CSS</i>. RA-MA.</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">GitHub. (s. f.). <i>Documentación de GitHub Pages</i>. GitHub Docs.<br>
+                            <a href="https://docs.github.com/es/pages" class="text-green-700 underline break-all" target="_blank">https://docs.github.com/es/pages</a>
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Mozilla Developer Network. (s. f.). <i>Aprende desarrollo web</i>. MDN Web Docs.<br>
+                            <a href="https://developer.mozilla.org/es/docs/Learn" class="text-green-700 underline break-all" target="_blank">https://developer.mozilla.org/es/docs/Learn</a>
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Render. (s. f.). <i>Render documentation</i>. Render.<br>
+                            <a href="https://render.com/docs" class="text-green-700 underline break-all" target="_blank">https://render.com/docs</a>
+                        </span>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">Universidad de Córdoba. (2025). <i>Plan de curso: Proyecto Web</i>. Técnico Profesional en Programación Web.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito de una prueba funcional en el proyecto web?",
+                options: ["Medir la velocidad del servidor", "Verificar que cada funcionalidad haga lo esperado desde la perspectiva del usuario", "Contar las líneas de código del proyecto", "Diseñar la interfaz gráfica de la aplicación"],
+                correct: 1
+            },
+            {
+                question: "¿Qué comprueba una prueba de integración?",
+                options: ["Que el logo del proyecto se vea bien", "Que cada función trabaje de forma aislada", "Que frontend, backend y base de datos funcionen correctamente en conjunto", "Que el código no tenga comentarios"],
+                correct: 2
+            },
+            {
+                question: "Un caso de prueba bien documentado debe registrar:",
+                options: ["Solo el nombre del programador que lo ejecutó", "ID, escenario, pasos, resultado esperado y resultado obtenido", "Únicamente los errores encontrados", "La cantidad de horas trabajadas por el equipo"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál de estas secciones NO debería estar en el README público del proyecto?",
+                options: ["Requisitos e instrucciones de instalación", "Descripción del proyecto", "Las contraseñas reales de la base de datos de producción", "Estructura de carpetas del proyecto"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es la diferencia principal entre el manual de usuario y la documentación técnica?",
+                options: ["El manual de usuario explica cómo usar la aplicación al usuario final; la documentación técnica explica cómo está construida, para desarrolladores", "El manual de usuario es más largo que la documentación técnica", "La documentación técnica lleva imágenes y el manual no", "No hay diferencia: son el mismo documento con distinto nombre"],
+                correct: 0
+            },
+            {
+                question: "En producción, la contraseña de la base de datos debe guardarse en:",
+                options: ["Un comentario dentro del código JavaScript", "El README del repositorio", "Una variable de entorno configurada en el panel del hosting", "Un mensaje fijado del grupo de WhatsApp del equipo"],
+                correct: 2
+            },
+            {
+                question: "¿Qué opción gratuita es adecuada para publicar un frontend estático (HTML, CSS y JS)?",
+                options: ["GitHub Pages", "Un archivo .zip enviado por correo", "phpMyAdmin", "El archivo .env del proyecto"],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Contenido
+         ============================================= -->
+    <script>
+        // ---- Gamificación de la sección Contenido: puntos de la misión de lectura ----
+        let contenidoPuntos = 0;
+        const puntosEl = document.getElementById('contenido-puntos');
+        function sumarPuntos(n) {
+            contenidoPuntos += n;
+            puntosEl.textContent = contenidoPuntos;
+        }
+
+        // Helper: tarjetas "revelar" (+puntos la primera vez)
+        function renderReveal(containerId, items, puntos) {
+            const container = document.getElementById(containerId);
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reveal-card border-2 border-slate-200 rounded-lg p-3 bg-white';
+                card.innerHTML = `
+                    <p class="font-bold text-green-800">${item.titulo}</p>
+                    <p class="reveal-back text-sm text-slate-600 mt-2">${item.texto}</p>
+                `;
+                card.addEventListener('click', function() {
+                    if (!this.classList.contains('opened')) {
+                        this.classList.add('opened');
+                        sumarPuntos(puntos);
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        // Helper: mini reto de opción única (+puntos si acierta a la primera)
+        function renderChoice(containerId, msgId, opciones, correcta, puntos) {
+            const container = document.getElementById(containerId);
+            const msg = document.getElementById(msgId);
+            let resuelto = false;
+            opciones.forEach((texto, i) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white text-left';
+                btn.textContent = texto;
+                btn.addEventListener('click', function() {
+                    if (resuelto) return;
+                    if (i === correcta) {
+                        resuelto = true;
+                        this.classList.add('chip-done-correct');
+                        msg.textContent = `✅ ¡Correcto! +${puntos} puntos. Mini reto superado.`;
+                        msg.className = 'text-sm mt-2 font-semibold text-green-700';
+                        sumarPuntos(puntos);
+                    } else {
+                        this.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ No es esa. Revisa la explicación de la estación e inténtalo de nuevo.';
+                        msg.className = 'text-sm mt-2 font-semibold text-red-600';
+                    }
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        // Estación 1: pruebas
+        renderReveal('reveal-pruebas', [
+            { titulo: '🧪 Prueba funcional', texto: 'Verifica que UNA funcionalidad haga lo esperado desde la vista del usuario: un formulario que valida, un botón que guarda, un mensaje que aparece.' },
+            { titulo: '🔗 Prueba de integración', texto: 'Verifica que las piezas trabajen JUNTAS: el dato viaja del frontend al backend, se guarda en la base de datos y vuelve a mostrarse en la interfaz.' },
+            { titulo: '📋 Caso de prueba', texto: 'Registro repetible de una prueba: ID, escenario, pasos, resultado esperado y resultado obtenido. Si otro compañero lo ejecuta, debe llegar al mismo veredicto.' },
+            { titulo: '🐞 Hallazgo', texto: 'Diferencia entre lo esperado y lo obtenido: un error real por corregir antes del despliegue. Probar con datos inválidos a propósito es la mejor forma de encontrarlos.' }
+        ], 4);
+        renderChoice('choice-pruebas', 'choice-pruebas-msg', [
+            'Una prueba de integración: el flujo completo crear → guardar → listar no funciona en conjunto',
+            'Una prueba de ortografía del código',
+            'Ninguna: si se guardó en la base de datos, todo está bien',
+            'Una prueba de velocidad del servidor'
+        ], 0, 5);
+
+        // Estación 2: documentación técnica
+        renderReveal('reveal-documentacion', [
+            { titulo: '📝 Descripción', texto: 'Qué es el proyecto, qué problema resuelve y en qué contexto se creó. Dos o tres frases claras que orienten a quien llega al repositorio.' },
+            { titulo: '📦 Requisitos', texto: 'Software y versiones necesarias para ejecutar el proyecto: Node.js 18, MySQL 8, navegador moderno… Sin esto, la instalación se vuelve adivinanza.' },
+            { titulo: '⚙️ Instalación y uso', texto: 'Pasos numerados para clonar, instalar dependencias, configurar el .env, importar la base de datos y arrancar la aplicación, con los comandos exactos.' },
+            { titulo: '🗂️ Estructura', texto: 'Mapa de carpetas del proyecto: dónde vive el frontend, dónde las rutas del backend, dónde el script SQL. Ayuda a ubicarse antes de tocar el código.' }
+        ], 4);
+        renderChoice('choice-documentacion', 'choice-documentacion-msg', [
+            '// suma 1 al contador i',
+            '// Se valida también en el backend porque el usuario puede desactivar JavaScript en el navegador',
+            '// esto es una función',
+            '// no tocar'
+        ], 1, 5);
+
+        // Estación 3: manual de usuario
+        renderReveal('reveal-manual', [
+            { titulo: '👤 Público objetivo', texto: 'El usuario final: una persona que NO programa. El manual no menciona endpoints, dependencias ni SQL; habla de pantallas, botones y pasos.' },
+            { titulo: '🪜 Pasos con capturas', texto: 'Cada función principal se explica con pasos numerados y capturas de pantalla: "1. Haz clic en Nueva reserva. 2. Elige la fecha…".' },
+            { titulo: '❓ Preguntas frecuentes', texto: 'Problemas comunes con su solución: "¿Olvidaste tu contraseña?", "¿Por qué la hora aparece en gris?". Reducen las solicitudes de soporte.' },
+            { titulo: '🖥️ Requisitos de uso', texto: 'Lo mínimo para usar la aplicación: navegador actualizado, conexión a internet, cuenta registrada. Nada de instalar Node.js ni importar bases de datos.' }
+        ], 4);
+        renderChoice('choice-manual', 'choice-manual-msg', [
+            'Ejecute npm install para instalar las dependencias del proyecto',
+            'La carpeta /src/rutas contiene los endpoints del backend',
+            'Haz clic en el botón verde "Confirmar reserva" y verás el mensaje "Reserva creada"',
+            'Importe el archivo db/agendaya.sql en MySQL 8'
+        ], 2, 5);
+
+        // Estación 4: despliegue
+        renderReveal('reveal-despliegue', [
+            { titulo: '🔐 Variables de entorno', texto: 'Contraseñas, llaves y URLs sensibles viven en un archivo .env (ignorado por git) y, en producción, en el panel del hosting. Nunca en el código.' },
+            { titulo: '🌐 GitHub Pages', texto: 'Publica gratis el frontend estático (HTML, CSS, JS) desde el propio repositorio. Perfecto para la parte visible de tu proyecto integrador.' },
+            { titulo: '⚙️ Render y Railway', texto: 'Alojan el backend conectado a tu repositorio y ofrecen bases de datos gestionadas (PostgreSQL, MySQL) con planes gratuitos para estudiantes.' },
+            { titulo: '✅ Checklist de publicación', texto: 'Antes de entregar: sin secretos en el repo, variables configuradas, base de datos creada, frontend apuntando a la URL real y pruebas repetidas sobre la URL pública.' }
+        ], 4);
+        renderChoice('choice-despliegue', 'choice-despliegue-msg', [
+            'En una variable de entorno configurada en el panel del hosting',
+            'Escrita directamente en el código del backend',
+            'En el README, para que nadie la pierda',
+            'En un comentario del archivo HTML principal'
+        ], 0, 5);
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS — Actividades
+         ============================================= -->
+    <script>
+        // ---- Gamificación de Actividades: puntos e insignias ----
+        let actividadesPuntos = 0;
+        const actividadesPuntosEl = document.getElementById('actividades-puntos');
+        const progresoActividades = { orden1: false, clasif1: false, orden2: false, clasif2: false };
+
+        function sumarPuntosActividad(n) {
+            actividadesPuntos += n;
+            actividadesPuntosEl.textContent = actividadesPuntos;
+        }
+
+        function revisarInsignias() {
+            if (progresoActividades.orden1 && progresoActividades.clasif1) {
+                const b = document.getElementById('insignia-tester');
+                b.textContent = '🧪 Insignia Tester: ¡desbloqueada!';
+                b.className = 'text-sm bg-green-100 border border-green-400 text-green-800 font-semibold px-3 py-1 rounded-full';
+            }
+            if (progresoActividades.orden2 && progresoActividades.clasif2) {
+                const b = document.getElementById('insignia-publicador');
+                b.textContent = '🚀 Insignia Publicador: ¡desbloqueada!';
+                b.className = 'text-sm bg-green-100 border border-green-400 text-green-800 font-semibold px-3 py-1 rounded-full';
+            }
+        }
+
+        // Helper: juego de ordenar pasos. El estudiante hace clic en el paso que
+        // cree que sigue; si acierta, el paso pasa a la zona ordenada.
+        function renderOrden(origenId, destinoId, msgId, pasos, claveProgreso, puntosPorAcierto) {
+            const origen = document.getElementById(origenId);
+            const destino = document.getElementById(destinoId);
+            const msg = document.getElementById(msgId);
+            let siguiente = 0;
+            let errores = 0;
+
+            // Mezcla determinística simple para que nunca salga en orden correcto
+            const mezclados = pasos.map((p, i) => ({ texto: p, orden: i }));
+            for (let i = mezclados.length - 1; i > 0; i--) {
+                const j = (i * 7 + 3) % (i + 1);
+                [mezclados[i], mezclados[j]] = [mezclados[j], mezclados[i]];
+            }
+            if (mezclados[0].orden === 0) [mezclados[0], mezclados[mezclados.length - 1]] = [mezclados[mezclados.length - 1], mezclados[0]];
+
+            mezclados.forEach(item => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'step-chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white text-left';
+                chip.textContent = item.texto;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('step-ok')) return;
+                    if (item.orden === siguiente) {
+                        siguiente++;
+                        this.classList.remove('step-error');
+                        this.classList.add('step-ok');
+                        const fijo = document.createElement('span');
+                        fijo.className = 'text-sm bg-green-100 border border-green-400 text-green-800 rounded-lg p-2';
+                        fijo.textContent = `${siguiente}. ${item.texto}`;
+                        destino.appendChild(fijo);
+                        this.remove();
+                        sumarPuntosActividad(puntosPorAcierto);
+                        if (siguiente === pasos.length) {
+                            progresoActividades[claveProgreso] = true;
+                            msg.textContent = errores === 0
+                                ? `🏆 ¡Orden perfecto sin errores! +${puntosPorAcierto * pasos.length} puntos en total.`
+                                : `✅ ¡Secuencia completada! Tuviste ${errores} intento(s) fallido(s): repásala una vez más.`;
+                            msg.className = 'text-sm font-semibold mb-4 text-green-700';
+                            revisarInsignias();
+                        } else {
+                            msg.textContent = `✅ ¡Bien! +${puntosPorAcierto} pts. ¿Cuál sigue?`;
+                            msg.className = 'text-sm font-semibold mb-4 text-green-700';
+                        }
+                    } else {
+                        errores++;
+                        this.classList.add('step-error');
+                        msg.textContent = '❌ Ese paso no va todavía. Piensa qué necesitas tener listo antes.';
+                        msg.className = 'text-sm font-semibold mb-4 text-red-600';
+                        setTimeout(() => this.classList.remove('step-error'), 800);
+                    }
+                });
+                origen.appendChild(chip);
+            });
+        }
+
+        // Helper: juego de clasificación con N categorías
+        function renderClasifica(chipsId, botonClass, msgId, items, claveProgreso, puntosPorAcierto) {
+            const container = document.getElementById(chipsId);
+            const msg = document.getElementById(msgId);
+            let seleccion = null;
+            let correctos = 0;
+
+            items.forEach((item, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip border-2 border-slate-300 rounded-lg p-2 text-sm bg-white';
+                chip.textContent = item.texto;
+                chip.dataset.tipo = item.tipo;
+                chip.addEventListener('click', function() {
+                    if (this.classList.contains('chip-done-correct')) return;
+                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-selected'));
+                    this.classList.remove('chip-done-wrong');
+                    this.classList.add('chip-selected');
+                    seleccion = this;
+                });
+                container.appendChild(chip);
+            });
+
+            document.querySelectorAll('.' + botonClass).forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!seleccion) {
+                        msg.textContent = '👆 Primero haz clic en un elemento de la lista y luego en su categoría.';
+                        msg.className = 'text-sm mt-3 font-semibold text-slate-600';
+                        return;
+                    }
+                    if (seleccion.dataset.tipo === btn.dataset.tipo) {
+                        seleccion.classList.remove('chip-selected', 'chip-done-wrong');
+                        seleccion.classList.add('chip-done-correct');
+                        correctos++;
+                        sumarPuntosActividad(puntosPorAcierto);
+                        if (correctos === items.length) {
+                            progresoActividades[claveProgreso] = true;
+                            msg.textContent = '🏆 ¡Clasificaste todos los elementos correctamente!';
+                            msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                            revisarInsignias();
+                        } else {
+                            msg.textContent = `✅ ¡Correcto! +${puntosPorAcierto} pts (${correctos}/${items.length}).`;
+                            msg.className = 'text-sm mt-3 font-semibold text-green-700';
+                        }
+                        seleccion = null;
+                    } else {
+                        seleccion.classList.remove('chip-selected');
+                        seleccion.classList.add('chip-done-wrong');
+                        msg.textContent = '❌ Esa categoría no corresponde. Vuelve a seleccionar el elemento e inténtalo de nuevo.';
+                        msg.className = 'text-sm mt-3 font-semibold text-red-600';
+                        seleccion = null;
+                    }
+                });
+            });
+        }
+
+        // --- Actividad 1, Parte A: ordenar las partes de un caso de prueba ---
+        renderOrden('orden-caso-origen', 'orden-caso-destino', 'orden-caso-msg', [
+            'ID del caso (ej: CP-01)',
+            'Escenario que se va a probar',
+            'Pasos para reproducirlo',
+            'Resultado esperado',
+            'Resultado obtenido al ejecutar',
+            'Veredicto: pasa o falla'
+        ], 'orden1', 3);
+
+        // --- Actividad 1, Parte B: clasificar hallazgos (pasa / falla) ---
+        renderClasifica('hallazgos-chips', 'hallazgo-btn', 'hallazgos-msg', [
+            { texto: 'Esperado: mensaje de éxito al reservar · Obtenido: mensaje de éxito y reserva en el listado', tipo: 'pasa' },
+            { texto: 'Esperado: rechazar correo "ana@" · Obtenido: la reserva se guardó con ese correo', tipo: 'falla' },
+            { texto: 'Esperado: al eliminar, el registro desaparece del listado · Obtenido: sigue apareciendo tras recargar', tipo: 'falla' },
+            { texto: 'Esperado: campos vacíos muestran "Este campo es obligatorio" · Obtenido: aparece exactamente ese mensaje', tipo: 'pasa' },
+            { texto: 'Esperado: al editar el precio se actualiza en la base de datos · Obtenido: la base de datos conserva el precio viejo', tipo: 'falla' },
+            { texto: 'Esperado: la sesión se cierra al hacer clic en "Salir" · Obtenido: vuelve a la pantalla de inicio de sesión', tipo: 'pasa' }
+        ], 'clasif1', 4);
+
+        // --- Actividad 2, Parte A: ordenar los pasos del despliegue ---
+        renderOrden('orden-deploy-origen', 'orden-deploy-destino', 'orden-deploy-msg', [
+            'Sacar las contraseñas del código y pasarlas a un archivo .env ignorado por git',
+            'Verificar que package.json declare todas las dependencias',
+            'Subir la última versión del código al repositorio',
+            'Crear la base de datos gestionada y el servicio en Render o Railway',
+            'Configurar las variables de entorno en el panel del hosting',
+            'Repetir los casos de prueba sobre la URL pública y agregar el enlace al README'
+        ], 'orden2', 3);
+
+        // --- Actividad 2, Parte B: ¿README, manual de usuario o ninguno? ---
+        renderClasifica('docs-chips', 'docs-btn', 'docs-msg', [
+            { texto: 'Comandos para clonar el repositorio e instalar dependencias', tipo: 'readme' },
+            { texto: 'Pasos con capturas para que el cliente registre su primera reserva', tipo: 'manual' },
+            { texto: 'La contraseña real de la base de datos de producción', tipo: 'ninguno' },
+            { texto: 'Estructura de carpetas del proyecto (/public, /src/rutas, /db)', tipo: 'readme' },
+            { texto: 'Sección de preguntas frecuentes: "¿Qué hago si olvidé mi contraseña?"', tipo: 'manual' },
+            { texto: 'Versiones de Node.js y MySQL necesarias para ejecutar el proyecto', tipo: 'readme' },
+            { texto: 'Explicación de qué significa cada botón de la pantalla principal', tipo: 'manual' },
+            { texto: 'El archivo .env con las llaves privadas del equipo', tipo: 'ninguno' }
+        ], 'clasif2', 4);
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: ☁️ Conceptos fundamentales de seguridad web</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        .zoom-image-wrap {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .zoom-image-wrap img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .zoom-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 2;
+            background: rgba(22, 101, 52, 0.92);
+            color: #fff;
+            border: 0;
+            border-radius: 9999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .zoom-btn:hover { background: rgba(21, 128, 61, 0.98); transform: translateY(-1px); }
+        .zoom-btn:focus { outline: 2px solid #86efac; outline-offset: 2px; }
+        .zoom-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+        }
+        .zoom-modal.active { display: flex; }
+        .zoom-modal-content {
+            position: relative;
+            width: min(96vw, 1100px);
+            max-height: 92vh;
+            overflow: auto;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        }
+        .zoom-modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            border: 0;
+            border-radius: 9999px;
+            background: #14532d;
+            color: white;
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .zoom-modal-close:hover { background: #166534; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 Reemplaza el texto entre los comentarios [INICIO CONTENIDO] y [FIN CONTENIDO]
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">☁️ Conceptos fundamentales de seguridad web</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La seguridad de la información dejó de ser una preocupación exclusiva de los departamentos de sistemas para convertirse en una responsabilidad transversal de todo profesional que participa en el ciclo de vida del software. Comprender qué se protege, de qué se protege y cómo se mide el riesgo es el primer paso ineludible para cualquier desarrollador que aspire a construir software confiable.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el contexto actual, las aplicaciones web continúan siendo uno de los vectores de ataque más explotados, y el panorama de ciberseguridad en Colombia ha cobrado una relevancia crítica en los últimos años. Por eso, desde el inicio del curso es estratégico que el estudiante del Técnico Profesional en Programación Web incorpore criterios de seguridad en las primeras etapas del desarrollo, en lugar de tratarlos como un añadido posterior al sistema ya construido.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Esta OVA constituye el punto de partida conceptual sobre el cual se edificarán las competencias técnicas más específicas del curso. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 Agrega o elimina <li> según los objetivos del OVA
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Identificar los componentes de la triada CIA (confidencialidad, integridad y disponibilidad) como pilares fundamentales de la seguridad de la información.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <span>Diferenciar con precisión los conceptos de riesgo, amenaza y vulnerabilidad, estableciendo la relación que existe entre ellos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔧</span>
+                        <span>Reconocer los distintos perfiles de atacantes que conforman el panorama actual de amenazas en el desarrollo de aplicaciones web.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📦</span>
+                        <span>Comprender la lógica del ciclo de gestión de riesgos como un proceso continuo, aplicable de forma transversal en las unidades posteriores del curso.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 Usa acordeones para organizar los subtemas.
+                 Copia el bloque de acordeón las veces que necesites.
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🛡️ 1. La tríada CIA: confidencialidad, integridad y disponibilidad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">El modelo CIA es el marco conceptual más utilizado para definir los objetivos fundamentales de la seguridad de la información. Toda medida de seguridad en una aplicación web puede entenderse como un esfuerzo por proteger uno o varios de estos tres pilares.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-2xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/cia-triada.png" data-zoom-alt="La tríada CIA de la seguridad de la información">🔍 Ampliar</button>
+                                        <img src="img/cia-triada.png" alt="La tríada CIA de la seguridad de la información" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: La tríada CIA aplicada al desarrollo web.</figcaption>
+                                </figure>
+
+                                <div class="grid gap-4 md:grid-cols-3">
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Confidencialidad</h3>
+                                        <p class="text-sm">Garantiza que la información solo sea accesible para personas autorizadas. En web se implementa con hash de contraseñas, control de acceso por roles y uso de HTTPS.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Integridad</h3>
+                                        <p class="text-sm">Asegura que los datos no sean modificados de forma no autorizada. Se protege con validaciones, firmas digitales, checksums y registros de auditoría.</p>
+                                    </div>
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Disponibilidad</h3>
+                                        <p class="text-sm">Garantiza que los sistemas e información estén accesibles cuando se necesiten. Se apoya en redundancia, balanceo de carga, backups y protección contra DDoS.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">⚖️</span> Estos tres pilares frecuentemente entran en <strong>tensión entre sí</strong>: por ejemplo, añadir múltiples capas de verificación para reforzar la confidencialidad puede afectar negativamente la disponibilidad si el proceso de autenticación se vuelve demasiado lento o complejo. Diseñar un sistema seguro requiere encontrar un equilibrio adecuado entre los tres objetivos según el contexto de la aplicación. <span class="text-xl">🎯</span></p>
+                                </div>
+
+                                <p class="mt-6 mb-3 font-semibold text-slate-800">🔑 Ejemplo práctico: la confidencialidad de la tríada CIA aplicada en código real (Node.js), mediante el almacenamiento seguro de contraseñas con hash (en lugar de texto plano):</p>
+                                <pre class="bg-slate-100 p-4 rounded text-sm overflow-auto whitespace-pre font-mono"><code class="language-javascript">const bcrypt = require('bcrypt');
+
+// Al registrar un usuario:
+async function registrarUsuario(email, passwordPlano) {
+    const passwordHash = await bcrypt.hash(passwordPlano, 12); // 12 = costo (salt rounds)
+
+    // Guardar passwordHash en la base de datos, nunca passwordPlano
+    await pool.query(
+        'INSERT INTO usuarios (email, password) VALUES (?, ?)',
+        [email, passwordHash]
+    );
+}
+
+// Al iniciar sesión, verificar sin descifrar el hash:
+async function verificarLogin(email, passwordPlano) {
+    const hashGuardado = await obtenerHashDesdeBD(email);
+    const esValido = await bcrypt.compare(passwordPlano, hashGuardado);
+    return esValido ? 'Acceso concedido' : 'Credenciales incorrectas';
+}</code></pre>
+                                <div class="mt-2 text-xs text-slate-600">Código 1. Implementación de hash seguro de contraseñas con <code>bcrypt</code> en Node.js, garantizando la confidencialidad de los datos de autenticación.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>⚠️ 2. Riesgo, amenaza y vulnerabilidad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">Uno de los errores más frecuentes en seguridad informática es confundir riesgo, amenaza y vulnerabilidad. Aunque están relacionados, cada concepto cumple una función distinta dentro del análisis de seguridad.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/riesgo-amenaza-vulnerabilidad.png" data-zoom-alt="Relación entre amenaza, vulnerabilidad y riesgo">🔍 Ampliar</button>
+                                        <img src="img/riesgo-amenaza-vulnerabilidad.png" alt="Relación entre amenaza, vulnerabilidad y riesgo" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Relación entre amenaza, vulnerabilidad y riesgo.</figcaption>
+                                </figure>
+
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Amenaza</h3>
+                                        <p class="text-sm">Es cualquier circunstancia o evento con potencial de causar daño a un sistema de información, ya sea de forma intencional o accidental.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Vulnerabilidad</h3>
+                                        <p class="text-sm">Es una debilidad o fallo presente en el diseño, la implementación o la configuración de un sistema que puede ser explotado por una amenaza.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-1">Riesgo</h3>
+                                        <p class="text-sm">Es la combinación entre la probabilidad de que una amenaza explote una vulnerabilidad y el impacto que ese evento tendría sobre la organización.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">📍</span> Una organización con recursos limitados —como suele ser el caso de las pequeñas y medianas empresas de la región de Córdoba— no puede mitigar todas las vulnerabilidades existentes simultáneamente. La estimación cuidadosa del <strong>riesgo</strong> permite enfocar el esfuerzo y la inversión disponible donde la combinación de probabilidad e impacto sea mayor. <span class="text-xl">🎯</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>👤 3. Perfiles de atacantes en ciberseguridad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">No todos los atacantes tienen el mismo nivel de sofisticación ni las mismas motivaciones. Comprender el perfil más probable ayuda a dimensionar correctamente las medidas de protección que una aplicación debe implementar.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/perfiles-atacantes.png" data-zoom-alt="Perfiles de atacantes en ciberseguridad">🔍 Ampliar</button>
+                                        <img src="img/perfiles-atacantes.png" alt="Perfiles de atacantes en ciberseguridad" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Perfiles de atacantes según conocimiento técnico y motivación.</figcaption>
+                                </figure>
+
+                                <ul class="grid gap-4 md:grid-cols-2">
+                                    <li class="p-4 bg-green-50 border border-green-200 rounded-lg"><strong>Script kiddie:</strong> usa herramientas creadas por terceros sin comprender del todo su funcionamiento.</li>
+                                    <li class="p-4 bg-green-50 border border-green-200 rounded-lg"><strong>Ciberdelincuente:</strong> busca beneficios económicos mediante fraude, robo de credenciales o filtración de información.</li>
+                                    <li class="p-4 bg-green-50 border border-green-200 rounded-lg"><strong>Hacktivista:</strong> actúa por motivación ideológica o social, buscando visibilidad o protesta.</li>
+                                    <li class="p-4 bg-green-50 border border-green-200 rounded-lg"><strong>APT:</strong> grupo avanzado y persistente, usualmente con recursos altos y objetivos estratégicos de largo plazo.</li>
+                                </ul>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🏪</span> Una pequeña tienda en línea de Montería, por ejemplo, difícilmente será objetivo de un grupo APT, pero sí resulta un blanco atractivo para <strong>ciberdelincuentes</strong> motivados económicamente que buscan robar datos de tarjetas de pago o credenciales reutilizables en otros servicios. <span class="text-xl">💳</span></p>
+                                </div>
+                                <p class="mt-4 text-sm">El espectro de atacantes determina el nivel de inversión en seguridad que cada organización debe considerar razonable, según el valor de los activos que protege.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🔁 4. El ciclo de gestión de riesgos de seguridad</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">La gestión de riesgos no es un evento único, sino un proceso continuo que permite identificar nuevos riesgos a medida que la aplicación evoluciona y verificar que las medidas implementadas siguen siendo efectivas.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-2xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/ciclo-riesgos.png" data-zoom-alt="Ciclo de gestión de riesgos de seguridad">🔍 Ampliar</button>
+                                        <img src="img/ciclo-riesgos.png" alt="Ciclo de gestión de riesgos de seguridad" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Identificar, evaluar, mitigar, monitorear y revisar.</figcaption>
+                                </figure>
+
+                                <div class="grid gap-4 md:grid-cols-5 text-sm">
+                                    <div class="p-3 bg-white border border-slate-200 rounded-lg"><strong>1. Identificar</strong><br>Activos, amenazas y riesgos relevantes.</div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-lg"><strong>2. Evaluar</strong><br>Probabilidad e impacto de cada riesgo.</div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-lg"><strong>3. Mitigar</strong><br>Controles técnicos y organizativos.</div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-lg"><strong>4. Monitorear</strong><br>Seguimiento continuo del entorno.</div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-lg"><strong>5. Revisar</strong><br>Retroalimentación periódica del proceso.</div>
+                                </div>
+
+                                <div class="mt-6 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                                    <p class="text-green-800"><span class="text-xl">🔄</span> Adoptar este ciclo como <strong>práctica habitual</strong> —en lugar de tratarlo como un ejercicio aislado al inicio del proyecto— permite a un equipo identificar oportunamente nuevas vulnerabilidades introducidas por actualizaciones de dependencias, cambios en la infraestructura o nuevas funcionalidades, manteniendo un nivel de seguridad consistente durante toda la vida útil de la aplicación. <span class="text-xl">🛡️</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>✅ 5. Buenas prácticas y priorización de riesgos</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">Aplicar correctamente estos conceptos desde las primeras etapas del desarrollo reduce la superficie de ataque y los costos asociados a corregir vulnerabilidades en producción. 💰 Según estudios del <strong>Instituto Ponemon</strong>, el costo de remediación en producción puede ser hasta <strong>100 veces mayor</strong> que durante la fase de diseño.</p>
+
+                                <figure class="my-6">
+                                    <div class="zoom-image-wrap max-w-3xl mx-auto">
+                                        <button type="button" class="zoom-btn" data-zoom-image="img/matriz-riesgos.png" data-zoom-alt="Matriz de probabilidad e impacto">🔍 Ampliar</button>
+                                        <img src="img/matriz-riesgos.png" alt="Matriz de probabilidad e impacto" class="w-full rounded-lg border border-green-200 shadow-sm">
+                                    </div>
+                                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figura: Matriz de priorización de riesgos según probabilidad e impacto.</figcaption>
+                                </figure>
+
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Buenas prácticas</h3>
+                                        <ul class="list-disc pl-5 space-y-2 text-sm">
+                                            <li>Clasificar la información según su nivel de confidencialidad.</li>
+                                            <li>Documentar amenazas relevantes mediante modelado de amenazas.</li>
+                                            <li>Mantener inventario actualizado de dependencias y librerías.</li>
+                                            <li>Priorizar vulnerabilidades según el nivel de riesgo.</li>
+                                            <li>Fomentar una cultura de seguridad compartida en el equipo.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h3 class="font-bold text-green-800 mb-2">Priorización</h3>
+                                        <p class="text-sm mb-3">Los riesgos en la celda superior derecha de la matriz deben atenderse de forma inmediata, mientras que los de baja probabilidad y bajo impacto pueden aceptarse o monitorearse con menor urgencia.</p>
+                                        <p class="text-sm">La matriz ayuda a enfocar recursos donde realmente importa y a tomar decisiones de seguridad basadas en evidencia y contexto.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Actividad 1: Análisis de la Tríada CIA en un Caso Real</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Investiga un incidente de seguridad reportado en medios colombianos o internacionales durante los últimos dos años, por ejemplo una filtración de datos de una empresa colombiana. Analiza el caso e identifica: qué componente(s) de la tríada CIA fue comprometido, qué vulnerabilidad específica fue explotada, cuál fue el impacto medido o estimado y qué medida de mitigación habría podido prevenir el incidente.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> informe de una página con los hallazgos y las fuentes consultadas.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">🔎 Enfoque:</span> relacionar el caso con confidencialidad, integridad y disponibilidad.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Actividad 2: Taller de Identificación de Vulnerabilidades (Grupal)</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            En grupos de 3 estudiantes, analicen el código fuente de una pequeña aplicación web proporcionada por el docente, específicamente un formulario de registro de usuarios en Node.js. Identifiquen al menos 3 vulnerabilidades relacionadas con los conceptos vistos en esta guía, como ausencia de cifrado de contraseñas, falta de HTTPS o exposición de información sensible en mensajes de error.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800 mb-2">
+                                <span class="font-bold">📝 Producto esperado:</span> matriz o informe corto donde para cada vulnerabilidad se indique qué componente de la tríada CIA se ve comprometido y se proponga una medida de mitigación concreta.
+                            </p>
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">👥 Modalidad:</span> trabajo colaborativo en equipos de 3 estudiantes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 El quiz se genera dinámicamente con JavaScript.
+                 Define las preguntas en el script al final del archivo.
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✔️ Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Cuestionario de autoevaluación para verificar la comprensión de la tríada CIA, la diferencia entre riesgo, amenaza y vulnerabilidad, los perfiles de atacantes y la gestión cíclica de riesgos.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📎 Anexos</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Material complementario asociado a los conceptos desarrollados en esta unidad.</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — ANEXOS] -->
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">🛡️ Triada CIA explicada</h3>
+                            <p class="text-slate-600 mb-2">Anexo de apoyo para reforzar el concepto de confidencialidad, integridad y disponibilidad como pilares de la seguridad de la información.</p>
+                            <a href="https://www.cloudflare.com/learning/security/what-is-information-security/" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-triada.png" alt="QR Triada CIA explicada" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">⚠️ Conceptos de riesgo y amenaza OWASP</h3>
+                            <p class="text-slate-600 mb-2">Material complementario para diferenciar riesgo, amenaza y vulnerabilidad dentro del análisis de seguridad de aplicaciones web.</p>
+                            <a href="https://owasp.org/www-community/Threat_Modeling" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-owasp.png" alt="QR Conceptos de riesgo y amenaza OWASP" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-green-700 mb-2">📘 Glosario de ciberseguridad</h3>
+                            <p class="text-slate-600 mb-2">Referencia breve de términos clave utilizados a lo largo de la unidad para consolidar el vocabulario técnico esencial.</p>
+                            <a href="https://www.incibe.es/empresas/materiales/glosario-de-terminos-de-ciberseguridad-una-guia-de-aproximacion-para-el" target="_blank" class="underline text-slate-700 hover:text-green-700 text-sm">Abrir anexo</a>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center p-2" style="width:2.5cm;height:2.5cm;">
+                                <img src="img/qr-anexo-glosario.png" alt="QR Glosario de ciberseguridad" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — ANEXOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 Agrega referencias en formato APA.
+                 Copia el bloque <div> las veces que necesites.
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Cabezas Granado, L. M., &amp; González Lozano, F. J. (2021). <i>Curso de PHP 8 y MySQL 8</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia. https://anayamultimedia.es/libro/manuales-imprescindibles/curso-de-php-8-y-mysql-8-luis-miguel-cabezas-granado-9788441543720/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Centro Cibernético Policial de Colombia. (2024). <i>Informe de tendencias de ciberseguridad 2024</i>. Ministerio de Defensa Nacional. https://www.policia.gov.co/ciberseguridad
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            IBM Security. (2024). <i>Cost of a Data Breach Report 2024</i>. IBM Corporation. https://www.ibm.com/reports/data-breach<br>
+                            OWASP Foundation. (2021). <i>OWASP Top Ten 2021</i>. https://owasp.org/www-project-top-ten/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Rubiales Gómez, M. (2021). <i>Curso de desarrollo Web. HTML, CSS y JavaScript. Edición 2021</i> (1.ª ed.). Difusora Larousse - Anaya Multimedia. https://www.anayamultimedia.es/libro/manuales-imprescindibles/curso-de-desarrollo-web-html-css-y-javascript-edicion-2021-mario-rubiales-gomez-9788441544147/
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Stallings, W., &amp; Brown, L. (2018). <i>Computer Security: Principles and Practice</i> (4th ed.). Pearson. https://www.pearson.com/en-us/subject-catalog/p/computer-security-principles-and-practice/P200000003493/9780137502875
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="zoom-modal" class="zoom-modal" aria-hidden="true">
+        <div class="zoom-modal-content">
+            <button type="button" class="zoom-modal-close" id="zoom-modal-close" aria-label="Cerrar imagen ampliada">×</button>
+            <img id="zoom-modal-image" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Define aquí las preguntas de evaluación
+         Edita el array `quizData` con tus preguntas.
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué componente de la tríada CIA garantiza que la información solo sea accesible para personas autorizadas?",
+                options: ["Confidencialidad", "Integridad", "Disponibilidad", "Riesgo"],
+                correct: 0
+            },
+            {
+                question: "Una tienda en línea de Montería almacena las contraseñas de sus clientes en texto plano en la base de datos. ¿Qué componente de la tríada CIA está en riesgo de forma directa?",
+                options: ["Disponibilidad", "Confidencialidad", "Integridad", "Balanceo de carga"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál opción describe mejor la diferencia entre un script kiddie y un grupo APT?",
+                options: ["El script kiddie tiene más recursos y persistencia que un APT", "Ambos tienen el mismo nivel de sofisticación", "El APT suele tener más recursos, persistencia y objetivos estratégicos", "Ninguno representa una amenaza real"],
+                correct: 2
+            },
+            {
+                question: "¿Por qué la gestión de riesgos de seguridad debe ser un proceso cíclico y continuo?",
+                options: ["Porque las amenazas, vulnerabilidades y el entorno cambian constantemente", "Porque solo se aplica al inicio del proyecto", "Porque reemplaza la programación de la aplicación", "Porque elimina por completo todos los riesgos"],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+
+        // Zoom de imágenes del contenido
+        const zoomModal = document.getElementById('zoom-modal');
+        const zoomModalImage = document.getElementById('zoom-modal-image');
+        const zoomModalClose = document.getElementById('zoom-modal-close');
+
+        function closeZoomModal() {
+            zoomModal.classList.remove('active');
+            zoomModal.setAttribute('aria-hidden', 'true');
+            zoomModalImage.src = '';
+            zoomModalImage.alt = '';
+        }
+
+        document.querySelectorAll('.zoom-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                zoomModalImage.src = button.dataset.zoomImage;
+                zoomModalImage.alt = button.dataset.zoomAlt || 'Imagen ampliada';
+                zoomModal.classList.add('active');
+                zoomModal.setAttribute('aria-hidden', 'false');
+            });
+        });
+
+        zoomModalClose.addEventListener('click', closeZoomModal);
+        zoomModal.addEventListener('click', event => {
+            if (event.target === zoomModal) closeZoomModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && zoomModal.classList.contains('active')) closeZoomModal();
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         Agrega aquí el JavaScript de tus elementos interactivos
+         ============================================= -->
+    <script>
+        // Agrega aquí el código JavaScript de los elementos interactivos
+        // de la sección de Contenido y Actividades.
+        // Ejemplos: calculadoras, simuladores, drag & drop, etc.
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
