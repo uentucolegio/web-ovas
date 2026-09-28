@@ -7,8 +7,6 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 > en cada push a `main`. No lo edites a mano: los cambios se perderían en la
 > siguiente actualización.
 
-> No se incluyen estas unidades: `tecnico/semestre-3/unidad-3`, `tecnologo/semestre-2/unidad-3`.
-
 > Cuando dos OVAs comparten el mismo título, se agrega entre paréntesis el
 > nombre de su carpeta para poder distinguirlos. Eso ocurre porque varios OVAs
 > quedaron con el `<title>` de otro al copiar la plantilla: la corrección de
@@ -278,7 +276,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ### Semestre 3
 
-#### Innovación y emprendimiento digital  ·  6 OVAs
+#### Innovación y emprendimiento digital  ·  7 OVAs
 
 **Unidad 1**
 
@@ -291,6 +289,10 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Gestión ágil de proyectos con Scrum](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/innovacion-emprendimiento-digital/unidad-2/gestion-agil-proyectos-scrum/)
 - [Lean Startup y Lean Canvas](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/innovacion-emprendimiento-digital/unidad-2/lean-startup-lean-canvas/)
 - [Marketing digital y branding](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/innovacion-emprendimiento-digital/unidad-2/marketing-digital-branding/)
+
+**Unidad 3**
+
+- [Validación y presentación pitch elevator del MVP](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/innovacion-emprendimiento-digital/unidad-3/validacion-pitch-elevator-mvp/)
 
 #### Programación Web II – Backend  ·  6 OVAs
 
@@ -306,7 +308,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Protección de la API: CORS, rate limiting, consultas parametrizadas y manejo seguro de errores](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-2/proteccion-api/)
 - [Validación y sanitización de datos en APIs](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-2/validacion-sanitizacion-apis/)
 
-#### Proyecto Web  ·  6 OVAs
+#### Proyecto Web  ·  9 OVAs
 
 **Unidad 1**
 
@@ -320,7 +322,13 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [JavaScript, validación de formularios y consumo simple de APIs](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/proyecto-web/unidad-2/javascript-validacion-formularios-consumo-apis/)
 - [Maquetación HTML5, CSS, Flexbox, Grid y diseño responsivo](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/proyecto-web/unidad-2/maquetacion-html5-css-flexbox-grid-responsivo/)
 
-#### Seguridad en Aplicaciones Web  ·  9 OVAs
+**Unidad 3**
+
+- [Integración Frontend-Backend y Autenticación](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/proyecto-web/unidad-3/integracion-frontend-backend-autenticacion/)
+- [Modelo de Datos, CRUD y API Backend](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/proyecto-web/unidad-3/modelo-datos-crud-api-backend/)
+- [Pruebas, Documentación y Despliegue](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/proyecto-web/unidad-3/pruebas-documentacion-despliegue/)
+
+#### Seguridad en Aplicaciones Web  ·  14 OVAs
 
 **Unidad 1**
 
@@ -337,7 +345,15 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Prevención de Inyección SQL y NoSQL](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-2/prevencion-inyeccion-sql-nosql/)
 - [Validación y Sanitización de Datos](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-2/validacion-sanitizacion-datos/)
 
-#### Servicios de computación en la nube  ·  6 OVAs
+**Unidad 3**
+
+- [☁️ Seguridad en la nube (IaaS, PaaS, SaaS)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-3/seguridad-nube-iaas-paas-saas/)
+- [📊 Monitoreo, auditoría y registro de eventos](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-3/monitoreo-auditoria-registro-eventos/)
+- [🔒 HTTPS/TLS y certificados digitales](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-3/https-tls-certificados-digitales/)
+- [🚑 Respuesta a incidentes y planes de recuperación](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-3/respuesta-incidentes-planes-recuperacion/)
+- [🛡️ Configuración segura de servidores web](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/seguridad-aplicaciones-web/unidad-3/configuracion-segura-servidores-web/)
+
+#### Servicios de computación en la nube  ·  9 OVAs
 
 **Unidad 1**
 
@@ -350,6 +366,12 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Bases de datos y redes en la nube](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-2/bases-de-datos-y-redes/)
 - [Identidad, accesos y seguridad en la nube](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-2/identidad-accesos-y-seguridad/)
 - [Servicios de cómputo y almacenamiento en la nube](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-2/servicios-de-computo-y-almacenamiento/)
+
+**Unidad 3**
+
+- [Arquitectura y despliegue en la nube](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-3/arquitectura-y-despliegue/)
+- [Integración con bases de datos y exposición segura](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-3/integracion-bd-y-exposicion-segura/)
+- [Monitoreo, escalado y control de costos](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-3/monitoreo-escalado-y-costos/)
 
 ## Tecnólogo
 
@@ -510,7 +532,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Permisos, usuarios, grupos, chmod, procesos y servicios en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-3/)
 - [Redireccionamiento, tuberías y filtros básicos en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-2/)
 
-#### Estadística  ·  6 OVAs
+#### Estadística  ·  9 OVAs
 
 **Unidad 1**
 
@@ -524,7 +546,13 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Experimentos Aleatorios, Eventos y Espacio Muestral](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/estadistica/unidad-2/experimentos-aleatorios/)
 - [Probabilidad Condicional e Independencia](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/estadistica/unidad-2/probabilidad-condicional/)
 
-#### Inglés 1  ·  8 OVAs
+**Unidad 3**
+
+- [Intervalos de Confianza](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/estadistica/unidad-3/intervalos-de-confianza/)
+- [Muestreo y Estimación Puntual](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/estadistica/unidad-3/muestreo-estimacion/)
+- [Pruebas de Hipótesis](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/estadistica/unidad-3/pruebas-de-hipotesis/)
+
+#### Inglés 1  ·  12 OVAs
 
 **Unidad 1**
 
@@ -539,6 +567,13 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Reading Simple Technical Instructions](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-2/reading-simple-technical-instructions/)
 - [Study Habits and Autonomous Learning Vocabulary](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-2/study-habits-autonomous-learning-vocabulary/)
 - [The Simple Present Tense](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-2/simple-present-tense/)
+
+**Unidad 3**
+
+- [Common Software and Programming Vocabulary](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-3/software-programming-vocabulary/)
+- [Describing Apps and Websites](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-3/describing-apps-and-websites/)
+- [Imperatives and Instructions](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-3/imperatives-and-instructions/)
+- [Reading Strategies for Technical Documentation](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-3/reading-technical-documentation/)
 
 #### Programación orientada a objetos  ·  8 OVAs
 
@@ -574,4 +609,4 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ---
 
-**247 OVAs enlazados.**
+**266 OVAs enlazados.**
