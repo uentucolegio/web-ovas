@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OVA: Programación Estructurada: Modularidad y Patrones Algorítmicos</title>
+  <link rel="stylesheet" href="tailwind.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .sidebar-link { transition: all .3s ease; border-left: 4px solid transparent; }
+    .sidebar-link.active, .sidebar-link:hover { background:#e6f4ea; color:#166534; border-left-color:#22c55e; }
+    .content-pane { display:none; animation:fadeIn .5s ease-in-out; }
+    .content-pane.active { display:block; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(20px)} to {opacity:1; transform:translateY(0)} }
+    .quiz-option:hover { background:#f0fdf4; }
+    .quiz-option.selected { background:#dcfce7; border-color:#22c55e; }
+    .image-container { position:relative; overflow:hidden; max-width:50%; margin:0 auto; }
+    .image-container img { width:100%; height:auto; }
+    .zoom-btn { position:absolute; top:10px; right:10px; background:rgba(34,197,94,.95); color:#fff; border:none; border-radius:8px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; opacity:0; transition:opacity .3s, transform .3s; z-index:10; box-shadow:0 4px 8px rgba(0,0,0,.2); }
+    @media (max-width: 768px) { .image-container { max-width:80%; } .zoom-btn { opacity:.9; width:44px; height:44px; font-size:22px; } }
+    .image-container:hover .zoom-btn { opacity:1; transform:scale(1.05); }
+    .zoom-btn:hover { background:rgba(34,197,94,1); transform:scale(1.15)!important; }
+    .image-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:1000; justify-content:center; align-items:center; opacity:0; transition:opacity .3s; }
+    .image-modal.active { display:flex; opacity:1; }
+    .modal-content { max-width:95%; max-height:95%; position:relative; }
+    .modal-content img { max-width:100%; max-height:95vh; border:4px solid #fff; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.7); }
+    .close-modal { position:absolute; top:-15px; right:-15px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; box-shadow:0 4px 8px rgba(0,0,0,.3); }
+    .close-modal:hover { background:#dc2626; transform:scale(1.1); }
+    .highlight { background:linear-gradient(180deg, transparent 60%, #fef08a 60%); font-weight:600; padding:0 2px; }
+ 
+  /* ====== Tooltips (estilos globales) ====oop== */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  font-weight: bold;
+  color: #006633; /* Verde oscuro */
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 280px;
+  background-color: #006633; /* Verde oscuro */
+  color: #ffffff;            /* Texto blanco */
+  text-align: left;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: normal;
+  position: absolute;
+  z-index: 30;      /* sube la capa por si hay otros elementos encima */
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none; /* evita interferir con el hover */
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+/* Bocina redonda (toggle TTS) */
+.tts-fab{
+  width:64px; height:64px; border-radius:9999px;
+  background:#10b981; color:#fff; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; line-height:1;
+  box-shadow:0 8px 18px rgba(16,185,129,.35);
+  transition:transform .15s ease, background .2s ease;
+}
+.tts-fab:hover{ transform:translateY(-1px); }
+.tts-fab.muted{ background:#9ca3af; }   /* gris cuando está desactivada */
+
+/* ====== Estilos adicionales para el cuestionario ====== */
+.quiz-option { transition: all 0.3s ease; }
+.quiz-option.bg-green-100 { background-color: #d1fae5 !important; }
+.quiz-option.border-green-500 { border-color: #10b981 !important; }
+.quiz-option.bg-red-100 { background-color: #fee2e2 !important; }
+.quiz-option.border-red-500 { border-color: #ef4444 !important; }
+
+  </style>
+</head>
+<body class="bg-slate-50">
+
+  <div class="flex h-screen">
+  <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col md:sticky md:top-0 md:h-screen md:overflow-y-auto border-r">
+
+    <div class="p-4">
+      <div style="width:150px;height:150px" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500">
+        <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+      </div>
+    </div>
+<nav class="mt-6 flex-1" role="navigation" aria-label="Secciones del OVA">
+  <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="introduccion" aria-label="Introducción">
+    <span class="mr-3 text-xl">🚀</span> Introducción
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="objetivos" aria-label="Objetivos">
+    <span class="mr-3 text-xl">🎯</span> Objetivos
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="contenido" aria-label="Contenido">
+    <span class="mr-3 text-xl">📚</span> Contenido
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="actividades" aria-label="Actividades">
+    <span class="mr-3 text-xl">✍️</span> Actividades
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="evaluacion" aria-label="Evaluación">
+    <span class="mr-3 text-xl">✔️</span> Evaluación
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="recursos" aria-label="Recursos">
+    <span class="mr-3 text-xl">📖</span> Recursos
+  </a>
+  <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+     data-target="bibliografia" aria-label="Bibliografía">
+    <span class="mr-3 text-xl">📚</span> Bibliografía
+  </a>
+</nav>
+
+   <!-- Bocina fija dentro del aside, arriba del borde inferior y a la derecha -->
+<div class="aside-tts border-t border-emerald-100">
+  <button id="menu-tts-toggle"
+          type="button"
+          aria-pressed="false"
+          class="tts-fab muted"
+          title="Voz desactivada"
+          aria-label="Voz desactivada">
+    🔇
+  </button>
+</div>
+
+
+
+    
+  </aside>
+<main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50 max-h-screen overflow-y-auto">
+
+    <div class="md:hidden mb-6 flex flex-col items-center">
+      <div style="width:100px;height:100px" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg mb-2">
+        <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+      </div>
+      <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+        <option value="introduccion">🚀 Introducción</option>
+        <option value="objetivos">🎯 Objetivos</option>
+        <option value="contenido">📚 Contenido</option>
+        <option value="actividades">✍️ Actividades</option>
+        <option value="evaluacion">✔️ Evaluación</option>
+        <option value="recursos">📖 Recursos</option>
+        <option value="bibliografia">📚 Bibliografía</option>
+      </select>
+    </div>
+
+   <!-- Intro -->
+        <section id="introduccion" class="content-pane active">
+<!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="introduccion">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+          
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-emerald-800 flex items-center">
+            📚 Programación Estructurada: Modularidad y Patrones Algorítmicos
+          </h1>
+
+            <div class="mt-6 space-y-6">
+              <div class="bg-white rounded-xl p-6 shadow-md border-l-4 border-emerald-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  La programación estructurada se fundamenta en la creación de <strong class="text-emerald-700">algoritmos organizados y modulares</strong> que permitan solucionar problemas de manera clara, eficiente y reutilizable. En este contexto, la <span class="highlight">modularidad</span> constituye un principio central: consiste en dividir un problema grande en subproblemas más pequeños llamados <strong class="text-emerald-700">módulos, subprocesos o funciones</strong>, facilitando la comprensión y mantención del algoritmo.
+                </p>
+              </div>
+
+              <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 shadow-md border-2 border-emerald-200">
+                <div class="flex items-start space-x-4">
+                  <div class="text-4xl flex-shrink-0">🎯</div>
+                  <div>
+                    <h3 class="font-bold text-emerald-900 text-xl mb-3">Patrones Algorítmicos Recurrentes</h3>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      Existen ciertos patrones algorítmicos recurrentes en la resolución de problemas informáticos que todo programador debe dominar. Entre los más relevantes se encuentran:
+                    </p>
+                    <ul class="mt-4 space-y-2 ml-4">
+                      <li class="flex items-start">
+                        <span class="text-emerald-600 mr-3 font-bold">•</span>
+                        <span class="text-slate-700"><strong>Acumulación</strong></span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="text-emerald-600 mr-3 font-bold">•</span>
+                        <span class="text-slate-700"><strong>Contador</strong></span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="text-emerald-600 mr-3 font-bold">•</span>
+                        <span class="text-slate-700"><strong>Máximo–Mínimo</strong></span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="text-emerald-600 mr-3 font-bold">•</span>
+                        <span class="text-slate-700"><strong>Búsqueda</strong></span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="text-emerald-600 mr-3 font-bold">•</span>
+                        <span class="text-slate-700"><strong>Menú de opciones</strong></span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg p-5 shadow-md border-2 border-blue-200 hover:border-blue-400 transition-all">
+                  <div class="text-3xl mb-3 text-center">🔧</div>
+                  <h4 class="font-bold text-blue-900 text-center mb-2">Plantillas Cognitivas</h4>
+                  <p class="text-sm text-slate-700 text-center">Los patrones actúan como plantillas que guían al programador en la construcción de soluciones complejas</p>
+                </div>
+                <div class="bg-white rounded-lg p-5 shadow-md border-2 border-purple-200 hover:border-purple-400 transition-all">
+                  <div class="text-3xl mb-3 text-center">✨</div>
+                  <h4 class="font-bold text-purple-900 text-center mb-2">Beneficios de Módulos</h4>
+                  <p class="text-sm text-slate-700 text-center">Incrementan legibilidad, reducen errores y facilitan la depuración del código</p>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-6 border-2 border-blue-300">
+                <div class="flex items-start space-x-3">
+                  <span class="text-3xl flex-shrink-0">💡</span>
+                  <div>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      Como afirma <strong class="text-blue-700">Trejos Buriticá (2023)</strong>, estos patrones <span class="highlight">"actúan como plantillas cognitivas que guían al programador en la construcción de soluciones complejas a partir de estructuras simples"</span>. Asimismo, <strong class="text-blue-700">Programiz (2024)</strong> resalta que el uso de módulos <span class="highlight">incrementa la legibilidad, reduce errores y facilita la depuración del código</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+          <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+            <div class="flex items-start">
+              <span class="text-2xl mr-3">💡</span>
+              <p class="text-amber-900">
+                Navega por el menú para explorar el <strong>objetivo</strong>, el <strong>contenido</strong>, las <strong>actividades</strong>, la <strong>evaluación</strong> y los <strong>recursos</strong>.
+              </p>
+            </div>
+          </div>
+        </section>
+
+   <!-- Objetivo -->
+        <section id="objetivos" class="content-pane">
+<!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="objetivos">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+          
+          <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Objetivo</h2>
+          <ul class="space-y-4">
+            <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+              <span class="text-emerald-700 mr-3 text-2xl">🎯</span>
+              <span class="leading-relaxed text-lg text-slate-700">Analizar, comprender y aplicar la <strong class="text-emerald-700">modularidad</strong> y los <strong class="text-emerald-700">patrones algorítmicos</strong> más usados en programación, tales como <strong class="text-emerald-700">acumulación, conteo, búsqueda, máximo–mínimo</strong> y <strong class="text-emerald-700">menús interactivos</strong>.</span>
+            </li>
+          </ul>
+        </section>
+    
+    <!-- Contenido -->
+    <section id="contenido" class="content-pane">
+      <div class="space-y-6">
+        <!-- TTS para acordeón de CONTENIDO -->
+        <div class="flex justify-end">
+          <div class="space-y-1">
+            <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+                 data-mode="accordion" data-container="#contenido">
+              <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+                <span class="mr-1">▶️</span> Leer
+              </button>
+              <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏸️</span> Pausar
+              </button>
+              <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏹️</span> Detener
+              </button>
+              <div class="flex items-center ml-2">
+                <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+                <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+              </div>
+            </div>
+            <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+              <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+              <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+            </div>
+          </div>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6">Contenido</h2>
+
+        <!-- Acordeón 1: Naturaleza y propósito de la modularidad -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-emerald-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-emerald-50 transition-colors font-bold text-xl text-emerald-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-emerald-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">1</span>
+              Naturaleza y propósito de la modularidad
+            </span>
+            <span class="text-emerald-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-emerald-100">
+            <!-- Contenido del acordeón 1 -->
+            <div class="space-y-6">
+              <!-- Texto explicativo principal -->
+              <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border-l-4 border-emerald-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  🔧 La modularidad es un <strong class="text-emerald-700">principio fundamental del diseño algorítmico y de la programación estructurada</strong>. Consiste en dividir un problema complejo en componentes más pequeños, independientes y coherentes, llamados <span class="highlight">módulos, subprocesos, funciones o procedimientos</span>. Cada módulo representa una unidad de trabajo con un propósito específico, lo que permite organizar la solución de manera <strong class="text-emerald-700">lógica, jerárquica y escalable</strong>.
+                </p>
+              </div>
+
+              <!-- Figura 1: Espacio para imagen de modularidad -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-emerald-200 hover:border-emerald-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/img1.png" 
+                     alt="Concepto de modularidad" 
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 font-medium border-t border-emerald-200">
+                  📊 <strong>Figura 1.</strong> Concepto de modularidad en programación
+                </figcaption>
+              </figure>
+
+              <!-- Perspectiva del desarrollo -->
+              <div class="bg-white rounded-lg p-6 border-2 border-emerald-200">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  Desde la perspectiva del desarrollo de software, la modularidad responde a la necesidad de <strong class="text-emerald-700">gestionar la complejidad inherente de los sistemas informáticos</strong>. <strong class="text-emerald-700">Joyanes Aguilar (2021)</strong> señala que un programa modular <span class="highlight">"favorece la claridad y la mantenibilidad, al permitir que cada parte del algoritmo esté orientada a una tarea precisa y bien definida"</span>. Esta idea refleja el principio de <strong>responsabilidad única</strong>, según el cual cada módulo debe encargarse de una función particular, evitando confusiones y redundancias.
+                </p>
+              </div>
+
+              <!-- Resumen de características -->
+              <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border-2 border-emerald-300">
+                <h4 class="font-bold text-emerald-900 text-xl mb-4">Características esenciales</h4>
+                <p class="text-slate-700 mb-3">Un algoritmo modular posee propiedades fundamentales que lo hacen efectivo:</p>
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="font-semibold text-emerald-700">• Independencia funcional</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="font-semibold text-emerald-700">• Reutilización</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="font-semibold text-emerald-700">• Legibilidad</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="font-semibold text-emerald-700">• Mantenibilidad</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <p class="font-semibold text-emerald-700">• Abstracción</p>
+                  </div>
+                </div>
+                <p class="text-slate-700 mt-4 text-sm italic">Ver ejemplos detallados en el Acordeón 2: <strong>Características esenciales de la modularidad (con ejemplos)</strong></p>
+              </div>
+
+              <!-- Figura 2: Espacio para imagen de características -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-emerald-200 hover:border-emerald-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/img2.png" 
+                     alt="Características de la modularidad" 
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 font-medium border-t border-emerald-200">
+                  📊 <strong>Figura 2.</strong> Características esenciales de la modularidad
+                </figcaption>
+              </figure>
+
+              <!-- Cita sobre características -->
+              <div class="bg-white rounded-lg p-6 border-2 border-emerald-200">
+                <div class="flex items-start space-x-3">
+                  <span class="text-3xl flex-shrink-0">💡</span>
+                  <div>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      <strong class="text-emerald-700">Programiz (2024)</strong> resalta que este principio reduce la carga cognitiva del programador, ya que <span class="highlight">"divide el proceso de razonamiento en unidades pequeñas más fáciles de verificar, probar y depurar"</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resumen de propósitos -->
+              <div class="bg-gradient-to-r from-teal-50 to-emerald-50 rounded-lg p-6 border-2 border-emerald-300">
+                <h4 class="font-bold text-emerald-900 text-xl mb-4">Propósito de la modularidad</h4>
+                <p class="text-slate-700 mb-4">La modularidad cumple múltiples propósitos dentro del ciclo de desarrollo:</p>
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div class="bg-white rounded-lg p-3 border-l-4 border-teal-500">
+                    <p class="text-slate-700"><span class="font-bold text-teal-700">1.</span> Facilitar la comprensión</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border-l-4 border-teal-500">
+                    <p class="text-slate-700"><span class="font-bold text-teal-700">2.</span> Optimizar verificación</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border-l-4 border-teal-500">
+                    <p class="text-slate-700"><span class="font-bold text-teal-700">3.</span> Trabajo colaborativo</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border-l-4 border-teal-500">
+                    <p class="text-slate-700"><span class="font-bold text-teal-700">4.</span> Escalabilidad del sistema</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border-l-4 border-teal-500">
+                    <p class="text-slate-700"><span class="font-bold text-teal-700">5.</span> Reducir repetición</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border-l-4 border-teal-500">
+                    <p class="text-slate-700"><span class="font-bold text-teal-700">6.</span> Abstracción algorítmica</p>
+                  </div>
+                </div>
+                <p class="text-slate-700 mt-4 text-sm italic">Ver ejemplos detallados en el Acordeón 3: <strong>Propósito de la modularidad (con ejemplos)</strong></p>
+              </div>
+
+              <!-- Cita de experto -->
+              <div class="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg p-6 border-2 border-emerald-300">
+                <div class="flex items-start space-x-3">
+                  <span class="text-3xl flex-shrink-0">💡</span>
+                  <div>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      <strong class="text-emerald-700">Trejos Buriticá (2023)</strong> destaca que <span class="highlight">"la modularidad fortalece el pensamiento computacional al permitir que el programador organice su razonamiento en bloques funcionales"</span>, lo que facilita la transición desde el análisis del problema hasta la implementación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Figura 3: Espacio para imagen de beneficios -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-emerald-200 hover:border-emerald-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/img3.png" 
+                     alt="Beneficios de la modularidad" 
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 font-medium border-t border-emerald-200">
+                  📊 <strong>Figura 3.</strong> Beneficios de aplicar modularidad
+                </figcaption>
+              </figure>
+
+              <!-- Síntesis final -->
+              <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border-l-4 border-emerald-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  En síntesis, la modularidad no es solo una técnica de diseño, sino un <strong class="text-emerald-700">enfoque metodológico</strong> que garantiza claridad, eficiencia, escalabilidad y profesionalización en la construcción de algoritmos y programas.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 2: Características esenciales de la modularidad (con ejemplos) -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-blue-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-blue-50 transition-colors font-bold text-xl text-blue-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">2</span>
+              Características esenciales de la modularidad (con ejemplos)
+            </span>
+            <span class="text-blue-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-blue-100">
+            <!-- Contenido del acordeón 2 -->
+            <div class="space-y-6">
+              
+              <!-- 1. Independencia funcional -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">1. Independencia funcional</h4>
+                <p class="text-slate-700 mb-3">Cada módulo debe realizar una tarea sin depender de la lógica interna de otros módulos.</p>
+                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700 mb-2">Un sistema que calcula el promedio de notas puede tener estos módulos:</p>
+                  <ul class="space-y-1 ml-4">
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">LeerDatos()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">CalcularPromedio()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">MostrarResultado()</code></span>
+                    </li>
+                  </ul>
+                  <p class="text-slate-700 mt-2 italic">Cada uno realiza una función independiente.</p>
+                </div>
+              </div>
+
+              <!-- 2. Reutilización -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">2. Reutilización</h4>
+                <p class="text-slate-700 mb-3">Un módulo bien diseñado puede aplicarse en diferentes algoritmos sin ser reescrito.</p>
+                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700 mb-2">Un módulo llamado <code class="bg-white px-2 py-1 rounded font-mono text-sm">CalcularMaximo(lista)</code> puede ser utilizado:</p>
+                  <ul class="space-y-1 ml-4">
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700">En un algoritmo de estadísticas</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700">Para encontrar la mayor nota</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700">Para seleccionar el salario más alto</span>
+                    </li>
+                  </ul>
+                  <p class="text-slate-700 mt-2 italic">El código se escribe una sola vez y se usa múltiples veces.</p>
+                </div>
+              </div>
+
+              <!-- 3. Legibilidad -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">3. Legibilidad</h4>
+                <p class="text-slate-700 mb-3">Los módulos permiten que el algoritmo se entienda por partes.</p>
+                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo sin modularidad:</p>
+                  <p class="text-slate-700 mb-3">Un pseudocódigo de 60 líneas para gestionar un menú.</p>
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo modularizado:</p>
+                  <ul class="space-y-1 ml-4">
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">MostrarMenu()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">OpcionSumar()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">OpcionRestar()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-blue-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">OpcionSalir()</code></span>
+                    </li>
+                  </ul>
+                  <p class="text-slate-700 mt-2 italic">Cada módulo tiene pocas líneas y es más fácil de leer.</p>
+                </div>
+              </div>
+
+              <!-- Figura 4: Espacio para imagen de ejemplos -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-blue-200 hover:border-blue-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Figura4_Ejemplos.png"
+                     alt="Ejemplos de características de modularidad"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-blue-50 px-4 py-3 text-center text-sm text-blue-800 font-medium border-t border-blue-200">
+                  📊 <strong>Figura 4.</strong> Ejemplos prácticos de características de la modularidad
+                </figcaption>
+              </figure>
+
+              <!-- 4. Mantenibilidad -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">4. Mantenibilidad</h4>
+                <p class="text-slate-700 mb-3">Los errores se encuentran y corrigen más rápido, pues afectan solo a un módulo.</p>
+                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700">Si un módulo llamado <code class="bg-white px-2 py-1 rounded font-mono text-sm">CalcularPromedio()</code> tiene un error, no es necesario revisar todo el programa, solo ese bloque.</p>
+                </div>
+              </div>
+
+              <!-- 5. Abstracción -->
+              <div class="bg-white rounded-lg p-6 border-2 border-blue-300 shadow-md">
+                <h4 class="font-bold text-blue-900 text-xl mb-4">5. Abstracción</h4>
+                <p class="text-slate-700 mb-3">Permite al programador concentrarse en "qué hace el módulo" y no en "cómo lo hace".</p>
+                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700">Un módulo <code class="bg-white px-2 py-1 rounded font-mono text-sm">OrdenarLista(lista)</code> puede usarse sin conocer su algoritmo interno (burbuja, inserción, quicksort).</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 3: Propósito de la modularidad (con ejemplos) -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-purple-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-purple-50 transition-colors font-bold text-xl text-purple-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">3</span>
+              Propósito de la modularidad (con ejemplos)
+            </span>
+            <span class="text-purple-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-purple-100">
+            <!-- Contenido del acordeón 3 -->
+            <div class="space-y-6">
+
+              <!-- 1. Facilitar la comprensión -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">1. Facilitar la comprensión del algoritmo</h4>
+                <p class="text-slate-700 mb-3">Dividir en partes pequeñas reduce la complejidad.</p>
+                <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700 mb-2">Un programa de inventario puede dividirse en:</p>
+                  <ul class="space-y-1 ml-4">
+                    <li class="flex items-start">
+                      <span class="text-purple-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">AgregarProducto()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-purple-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">BuscarProducto()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-purple-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">EliminarProducto()</code></span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="text-purple-600 mr-2">•</span>
+                      <span class="text-slate-700"><code class="bg-white px-2 py-1 rounded font-mono text-sm">MostrarInventario()</code></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 2. Optimizar verificación -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">2. Optimizar la verificación y pruebas</h4>
+                <p class="text-slate-700 mb-3">Se pueden probar módulos individuales antes de integrarlos.</p>
+                <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700">Antes de probar todo el sistema, se puede realizar una prueba de escritorio solo al módulo <code class="bg-white px-2 py-1 rounded font-mono text-sm">CalcularTotal()</code> para verificar que suma bien.</p>
+                </div>
+              </div>
+
+              <!-- 3. Trabajo colaborativo -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">3. Permitir trabajo colaborativo</h4>
+                <p class="text-slate-700 mb-3">Distintos programadores pueden trabajar simultáneamente.</p>
+                <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700">Un estudiante trabaja en <code class="bg-white px-2 py-1 rounded font-mono text-sm">MenuPrincipal()</code> y otro en <code class="bg-white px-2 py-1 rounded font-mono text-sm">BuscarProducto()</code> sin interferir.</p>
+                </div>
+              </div>
+
+              <!-- Figura 5: Espacio para imagen de propósitos -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-purple-200 hover:border-purple-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Figura5_Propositos.png"
+                     alt="Propósitos de la modularidad"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-purple-50 px-4 py-3 text-center text-sm text-purple-800 font-medium border-t border-purple-200">
+                  📊 <strong>Figura 5.</strong> Propósitos prácticos de la modularidad
+                </figcaption>
+              </figure>
+
+              <!-- 4. Escalabilidad -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">4. Favorecer la escalabilidad</h4>
+                <p class="text-slate-700 mb-3">Agregar nuevas funciones es sencillo.</p>
+                <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700">Si al menú de una calculadora se le agrega la opción "Calcular Potencia", solo se crea un módulo nuevo <code class="bg-white px-2 py-1 rounded font-mono text-sm">OpcionPotencia()</code> sin modificar los demás.</p>
+                </div>
+              </div>
+
+              <!-- 5. Reducir repetición -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">5. Reducir la repetición de código</h4>
+                <p class="text-slate-700 mb-3">Evita tener múltiples bloques con la misma lógica.</p>
+                <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700 mb-2">Si varias partes del programa requieren validar un número, se crea un módulo:</p>
+                  <div class="bg-slate-900 rounded-lg p-4 mt-3">
+                    <pre class="text-emerald-400 font-mono text-xs leading-relaxed"><code>Funcion ValidarNumero(n)
+    Si n es numérico Entonces
+        Retornar Verdadero
+    SiNo
+        Retornar Falso
+    FinSi
+FinFuncion</code></pre>
+                  </div>
+                  <p class="text-slate-700 mt-2 italic">Luego cualquier módulo puede usarlo.</p>
+                </div>
+              </div>
+
+              <!-- 6. Abstracción algorítmica -->
+              <div class="bg-white rounded-lg p-6 border-2 border-purple-300 shadow-md">
+                <h4 class="font-bold text-purple-900 text-xl mb-4">6. Potenciar la abstracción algorítmica</h4>
+                <p class="text-slate-700 mb-3">Se puede diseñar primero a alto nivel (top–down), luego los detalles.</p>
+                <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <p class="text-slate-700 font-semibold mb-2">Ejemplo:</p>
+                  <p class="text-slate-700 mb-2">Algoritmo general:</p>
+                  <ol class="list-decimal list-inside space-y-1 ml-4">
+                    <li class="text-slate-700">Llamar <code class="bg-white px-2 py-1 rounded font-mono text-sm">LeerDatos()</code></li>
+                    <li class="text-slate-700">Llamar <code class="bg-white px-2 py-1 rounded font-mono text-sm">ProcesarDatos()</code></li>
+                    <li class="text-slate-700">Llamar <code class="bg-white px-2 py-1 rounded font-mono text-sm">GenerarInforme()</code></li>
+                  </ol>
+                  <p class="text-slate-700 mt-2 italic">Más adelante se desarrolla cada módulo, pero el programador ya entiende la estructura completa.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 4: Modularidad aplicada a patrones algorítmicos -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-orange-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-orange-50 transition-colors font-bold text-xl text-orange-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-orange-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">4</span>
+              Modularidad aplicada a patrones algorítmicos
+            </span>
+            <span class="text-orange-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-orange-100">
+            <!-- Contenido del acordeón 4 -->
+            <div class="space-y-6">
+
+              <!-- Ejemplo 1: Patrón Acumulación -->
+              <div class="bg-white rounded-lg p-6 border-2 border-orange-300 shadow-md">
+                <h4 class="font-bold text-orange-900 text-xl mb-4">Ejemplo 1: Patrón Acumulación como módulo</h4>
+                <p class="text-slate-700 mb-3">Este módulo puede llamarse desde un menú para sumar valores ingresados por el usuario.</p>
+                <div class="bg-slate-900 rounded-lg p-4">
+                  <pre class="text-emerald-400 font-mono text-sm leading-relaxed"><code>SubProceso CalcularSuma()
+    suma ← 0
+    Para i ← 1 Hasta 5 Hacer
+        Leer numero
+        suma ← suma + numero
+    FinPara
+    Escribir "La suma es:", suma
+FinSubProceso</code></pre>
+                </div>
+              </div>
+
+              <!-- Figura 6: Espacio para imagen de acumulación -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-orange-200 hover:border-orange-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Figura6_Acumulacion.png"
+                     alt="Patrón de acumulación modularizado"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-orange-50 px-4 py-3 text-center text-sm text-orange-800 font-medium border-t border-orange-200">
+                  📊 <strong>Figura 6.</strong> Patrón de acumulación modularizado
+                </figcaption>
+              </figure>
+
+              <!-- Ejemplo 2: Patrón Máximo-Mínimo -->
+              <div class="bg-white rounded-lg p-6 border-2 border-orange-300 shadow-md">
+                <h4 class="font-bold text-orange-900 text-xl mb-4">Ejemplo 2: Patrón Máximo–Mínimo modularizado</h4>
+                <p class="text-slate-700 mb-3">Módulo independiente que determina el valor máximo y mínimo de una serie de números.</p>
+                <div class="bg-slate-900 rounded-lg p-4">
+                  <pre class="text-emerald-400 font-mono text-sm leading-relaxed"><code>SubProceso DeterminarMaxMin()
+    Leer num
+    max ← num
+    min ← num
+    
+    Para i ← 2 Hasta 5 Hacer
+        Leer num
+        Si num > max Entonces max ← num
+        Si num < min Entonces min ← num
+    FinPara
+    
+    Escribir "Máximo:", max
+    Escribir "Mínimo:", min
+FinSubProceso</code></pre>
+                </div>
+              </div>
+
+              <!-- Figura 7: Espacio para imagen de máximo-mínimo -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-orange-200 hover:border-orange-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Figura7_MaxMin.png"
+                     alt="Patrón máximo-mínimo modularizado"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-orange-50 px-4 py-3 text-center text-sm text-orange-800 font-medium border-t border-orange-200">
+                  📊 <strong>Figura 7.</strong> Patrón máximo-mínimo modularizado
+                </figcaption>
+              </figure>
+
+              <!-- Ejemplo 3: Búsqueda -->
+              <div class="bg-white rounded-lg p-6 border-2 border-orange-300 shadow-md">
+                <h4 class="font-bold text-orange-900 text-xl mb-4">Ejemplo 3: Búsqueda modularizada</h4>
+                <p class="text-slate-700 mb-3">Módulo que busca un elemento específico dentro de una lista.</p>
+                <div class="bg-slate-900 rounded-lg p-4">
+                  <pre class="text-emerald-400 font-mono text-sm leading-relaxed"><code>SubProceso BuscarElemento(lista, buscado)
+    encontrado ← Falso
+    
+    Para i ← 1 Hasta longitud(lista) Hacer
+        Si lista[i] = buscado Entonces
+            encontrado ← Verdadero
+        FinSi
+    FinPara
+    
+    Si encontrado Entonces
+        Escribir "Elemento encontrado."
+    SiNo
+        Escribir "Elemento NO está en la lista."
+    FinSi
+FinSubProceso</code></pre>
+                </div>
+              </div>
+
+              <!-- Ejemplo 4: Menú -->
+              <div class="bg-white rounded-lg p-6 border-2 border-orange-300 shadow-md">
+                <h4 class="font-bold text-orange-900 text-xl mb-4">Ejemplo 4: Menú como módulo principal</h4>
+                <p class="text-slate-700 mb-3">Un módulo que muestra opciones al usuario, facilitando la navegación del programa.</p>
+                <div class="bg-slate-900 rounded-lg p-4">
+                  <pre class="text-emerald-400 font-mono text-sm leading-relaxed"><code>SubProceso MostrarMenu()
+    Escribir "1. Calcular Suma"
+    Escribir "2. Determinar Máximo y Mínimo"
+    Escribir "3. Buscar un Elemento"
+    Escribir "4. Salir"
+FinSubProceso</code></pre>
+                </div>
+              </div>
+
+              <!-- Figura 8: Espacio para imagen de menú -->
+              <figure class="image-container rounded-xl overflow-hidden shadow-lg border-2 border-orange-200 hover:border-orange-400 transition-all duration-300">
+                <button class="zoom-btn" onclick="openImageModal(this.nextElementSibling.src)" title="Ampliar imagen">🔍</button>
+                <img src="img/Figura8_Menu.png"
+                     alt="Patrón de menú modularizado"
+                     class="w-full h-auto object-contain bg-white"
+                     loading="lazy">
+                <figcaption class="bg-orange-50 px-4 py-3 text-center text-sm text-orange-800 font-medium border-t border-orange-200">
+                  📊 <strong>Figura 8.</strong> Patrón de menú modularizado
+                </figcaption>
+              </figure>
+
+              <!-- Conclusión de ejemplos -->
+              <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-6 border-l-4 border-orange-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  La aplicación de la modularidad a los patrones algorítmicos más comunes —como <strong class="text-orange-700">acumulación, máximo–mínimo, búsqueda y menús</strong>— demuestra cómo la división del problema en unidades funcionales independientes facilita la comprensión, reutilización y mantenimiento de los algoritmos. Cada ejemplo presentado evidencia que <span class="highlight">encapsular la lógica en módulos permite resolver tareas específicas de manera organizada</span>, reduciendo la complejidad del programa y mejorando su escalabilidad.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- Acordeón 5: Conclusión y síntesis -->
+        <details class="bg-white rounded-xl shadow-md border-2 border-cyan-200 overflow-hidden mb-4">
+          <summary class="cursor-pointer p-6 hover:bg-cyan-50 transition-colors font-bold text-xl text-cyan-800 flex items-center justify-between">
+            <span class="flex items-center">
+              <span class="bg-cyan-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">5</span>
+              Conclusión y síntesis
+            </span>
+            <span class="text-cyan-600 text-2xl">▼</span>
+          </summary>
+          <div class="p-6 border-t-2 border-cyan-100">
+            <!-- Contenido del acordeón 5 -->
+            <div class="space-y-6">
+              <!-- Introducción -->
+              <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg p-6 border-l-4 border-cyan-500">
+                <p class="text-lg leading-relaxed text-slate-700">
+                  La modularidad no es solo una técnica de diseño, sino un <strong class="text-cyan-700">enfoque metodológico</strong> que garantiza claridad, eficiencia, escalabilidad y profesionalización en la construcción de algoritmos y programas.
+                </p>
+              </div>
+
+              <!-- Resumen de beneficios -->
+              <div class="bg-white rounded-lg p-6 border-2 border-cyan-300 shadow-md">
+                <h4 class="font-bold text-cyan-900 text-xl mb-4">Beneficios clave de la modularidad:</h4>
+                <ul class="space-y-3">
+                  <li class="flex items-start">
+                    <span class="text-cyan-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700"><strong>Claridad</strong>: Algoritmos más fáciles de entender y analizar</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-cyan-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700"><strong>Reutilización</strong>: Módulos que se pueden usar en múltiples contextos</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-cyan-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700"><strong>Mantenibilidad</strong>: Errores localizados y fáciles de corregir</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-cyan-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700"><strong>Escalabilidad</strong>: Sistemas que crecen sin afectar partes estables</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-cyan-600 mr-3 font-bold">✓</span>
+                    <span class="text-slate-700"><strong>Colaboración</strong>: Equipos que trabajan en paralelo sin conflictos</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Impacto en patrones algorítmicos -->
+              <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-6 border-l-4 border-teal-500">
+                <h4 class="font-bold text-cyan-900 text-xl mb-3">Modularidad y patrones algorítmicos</h4>
+                <p class="text-lg leading-relaxed text-slate-700">
+                  La aplicación de la modularidad a los patrones algorítmicos más comunes (acumulación, máximo-mínimo, búsqueda y menús) demuestra cómo la división del problema en unidades funcionales independientes facilita resolver tareas específicas de manera organizada, reduciendo la complejidad del programa y mejorando su escalabilidad. Al separar cada patrón en subprocesos autónomos, el programador obtiene soluciones más claras, probables y adaptables a distintos contextos.
+                </p>
+              </div>
+
+              <!-- Conclusión final -->
+              <div class="bg-gradient-to-r from-cyan-100 to-teal-100 rounded-lg p-6 border-2 border-cyan-300">
+                <div class="flex items-start space-x-3">
+                  <span class="text-4xl flex-shrink-0">✅</span>
+                  <div>
+                    <h4 class="font-bold text-cyan-900 text-xl mb-3">Reflexión final</h4>
+                    <p class="text-lg leading-relaxed text-slate-700">
+                      En síntesis, la modularidad es el cimiento de la programación estructurada. Su aplicación sistemática garantiza que los algoritmos sean no solo funcionales, sino también <strong class="text-cyan-700">mantenibles, escalables y profesionales</strong>. Todo programador debe dominar este principio para construir soluciones de calidad que perduren en el tiempo y se adapten a los cambios del negocio.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Actividades -->
+    <section id="actividades" class="content-pane">
+      <!-- TTS sección: Introducción -->
+        <div class="flex justify-end">
+          <div class="space-y-1">
+            <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+                 data-target="introduccion">
+              <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+                <span class="mr-1">▶️</span> Leer
+              </button>
+              <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏸️</span> Pausar
+              </button>
+              <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+                <span class="mr-1">⏹️</span> Detener
+              </button>
+              <div class="flex items-center ml-2">
+                <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+                <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+              </div>
+            </div>
+            <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+              <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+              <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+            </div>
+          </div>
+        </div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6">🎯 Actividades</h2>
+
+      <!-- Actividad Principal -->
+      <article class="bg-gradient-to-br from-emerald-50 to-teal-50 border-l-4 border-emerald-600 rounded-lg shadow-lg p-8 mb-8">
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-emerald-800 mb-2">Actividad: Sistema de Gestión de Notas</h3>
+          <p class="text-emerald-700 font-semibold text-lg">Aplicación práctica de modularidad y patrones algorítmicos</p>
+        </div>
+
+        <!-- Enunciado del problema -->
+        <div class="bg-white rounded-lg p-6 mb-6 border-l-4 border-blue-500 shadow-sm">
+          <h4 class="text-xl font-bold text-blue-800 mb-3">📋 Enunciado del problema</h4>
+          <p class="text-slate-700 leading-relaxed mb-4">
+            Una institución educativa necesita un <strong>sistema básico de gestión de notas</strong> que permita trabajar con los resultados académicos de un grupo de estudiantes.
+          </p>
+          <p class="text-slate-700 leading-relaxed mb-4">
+            El sistema debe funcionar mediante un <strong>menú de opciones</strong> y permitir al usuario realizar las siguientes operaciones:
+          </p>
+          <ul class="space-y-2 ml-6">
+            <li class="flex items-start">
+              <span class="text-emerald-600 mr-2 font-bold">1.</span>
+              <span class="text-slate-700">Ingresar las notas de los estudiantes.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-600 mr-2 font-bold">2.</span>
+              <span class="text-slate-700">Calcular el promedio general de las notas <span class="font-semibold text-emerald-700">(patrón acumulador)</span>.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-600 mr-2 font-bold">3.</span>
+              <span class="text-slate-700">Determinar la nota más alta y la más baja <span class="font-semibold text-emerald-700">(patrón máximo–mínimo)</span>.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-600 mr-2 font-bold">4.</span>
+              <span class="text-slate-700">Contar cuántos estudiantes aprobaron (nota ≥ 3.0) <span class="font-semibold text-emerald-700">(patrón contador)</span>.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-600 mr-2 font-bold">5.</span>
+              <span class="text-slate-700">Buscar si una nota específica existe dentro del grupo <span class="font-semibold text-emerald-700">(patrón búsqueda)</span>.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-600 mr-2 font-bold">6.</span>
+              <span class="text-slate-700">Salir del programa.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Requisitos obligatorios -->
+        <div class="bg-white rounded-lg p-6 mb-6 border-l-4 border-purple-500 shadow-sm">
+          <h4 class="text-xl font-bold text-purple-800 mb-3">✅ Requisitos obligatorios</h4>
+          <p class="text-slate-700 leading-relaxed mb-4">
+            El algoritmo debe cumplir con los siguientes criterios:
+          </p>
+          
+          <div class="space-y-4">
+            <!-- Modularidad -->
+            <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
+              <p class="font-semibold text-purple-900 mb-2">📦 Implementar modularidad</p>
+              <p class="text-slate-700 mb-2">Utilizando al menos los siguientes módulos:</p>
+              <ul class="space-y-1 ml-6">
+                <li class="text-slate-700">• <code class="bg-white px-2 py-1 rounded font-mono text-sm">MostrarMenu()</code></li>
+                <li class="text-slate-700">• <code class="bg-white px-2 py-1 rounded font-mono text-sm">LeerNotas()</code></li>
+                <li class="text-slate-700">• <code class="bg-white px-2 py-1 rounded font-mono text-sm">CalcularPromedio()</code></li>
+                <li class="text-slate-700">• <code class="bg-white px-2 py-1 rounded font-mono text-sm">DeterminarMaxMin()</code></li>
+                <li class="text-slate-700">• <code class="bg-white px-2 py-1 rounded font-mono text-sm">ContarAprobados()</code></li>
+                <li class="text-slate-700">• <code class="bg-white px-2 py-1 rounded font-mono text-sm">BuscarNota()</code></li>
+              </ul>
+            </div>
+
+            <!-- Características de módulos -->
+            <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+              <p class="font-semibold text-blue-900 mb-2">🎯 Características de módulos</p>
+              <p class="text-slate-700">Cada módulo debe tener una <strong>tarea específica y bien definida</strong>.</p>
+            </div>
+
+            <!-- Menú repetitivo -->
+            <div class="bg-teal-50 rounded-lg p-4 border-l-4 border-teal-400">
+              <p class="font-semibold text-teal-900 mb-2">🔄 Menú repetitivo</p>
+              <p class="text-slate-700">El menú debe repetirse hasta que el usuario seleccione la opción <strong>Salir</strong>.</p>
+            </div>
+
+            <!-- Representación -->
+            <div class="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
+              <p class="font-semibold text-orange-900 mb-2">📝 Representación del algoritmo</p>
+              <p class="text-slate-700 mb-1">• <strong>Pseudocódigo</strong> (obligatorio)</p>
+              <p class="text-slate-700">• <strong>Diagrama de flujo</strong> (opcional, pero recomendado)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orientaciones para el desarrollo -->
+        <div class="bg-white rounded-lg p-6 mb-6 border-l-4 border-amber-500 shadow-sm">
+          <h4 class="text-xl font-bold text-amber-800 mb-3">💡 Orientaciones para el desarrollo</h4>
+          <div class="space-y-3">
+            <div class="flex items-start">
+              <span class="text-amber-600 mr-3 text-xl flex-shrink-0">✓</span>
+              <p class="text-slate-700">Inicialice correctamente todas las variables.</p>
+            </div>
+            <div class="flex items-start">
+              <span class="text-amber-600 mr-3 text-xl flex-shrink-0">✓</span>
+              <p class="text-slate-700">Use nombres de variables claros y coherentes.</p>
+            </div>
+            <div class="flex items-start">
+              <span class="text-amber-600 mr-3 text-xl flex-shrink-0">✓</span>
+              <p class="text-slate-700">Aplique estructuras condicionales y repetitivas según corresponda.</p>
+            </div>
+            <div class="flex items-start">
+              <span class="text-amber-600 mr-3 text-xl flex-shrink-0">✓</span>
+              <p class="text-slate-700">Realice una prueba de escritorio sobre al menos uno de los módulos.</p>
+            </div>
+            <div class="flex items-start">
+              <span class="text-amber-600 mr-3 text-xl flex-shrink-0">✓</span>
+              <p class="text-slate-700">Asegúrese de que el algoritmo sea legible y esté bien organizado.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nota importante -->
+        <div class="bg-gradient-to-r from-emerald-100 to-teal-100 p-5 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          <h4 class="font-semibold text-emerald-900 mb-2">📌 Nota importante</h4>
+          <p class="text-slate-700">Esta actividad integra todos los conceptos vistos en el OVA: <strong>modularidad, patrones algorítmicos (acumulador, máximo-mínimo, contador, búsqueda)</strong> y <strong>estructuras de control</strong>. Demuestra tu comprensión aplicando estas técnicas de forma organizada y eficiente.</p>
+        </div>
+      </article>
+
+
+</section>  <!-- ← cierre de la sección ACTIVIDADES -->
+
+
+    <!-- Evaluación (quiz) -->
+    <section id="evaluacion" class="content-pane">
+      <!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="evaluacion">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Cuestionario de Repaso</h2>
+      <p class="text-slate-600 mb-6">Temática: Modularidad y Patrones Algorítmicos</p>
+      
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div id="quiz-container" class="space-y-6">
+          <!-- Pregunta 1 -->
+          <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-5 border-l-4 border-emerald-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-emerald-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+              <div class="flex-1">
+                <p class="font-bold text-emerald-900 text-lg">(Comprensión) ¿Qué es la modularidad en un algoritmo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Técnica para aumentar la velocidad del computador.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Técnica que divide un algoritmo en partes independientes.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Método para reducir el número de variables.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-emerald-400 cursor-pointer transition-colors">
+                <input type="radio" name="q1" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Proceso para convertir un pseudocódigo en código máquina.</span>
+              </label>
+            </div>
+            <p class="text-xs text-emerald-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 2 -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-5 border-l-4 border-blue-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+              <div class="flex-1">
+                <p class="font-bold text-blue-900 text-lg">(Conceptual) ¿Cuál es la característica principal de un acumulador?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Disminuye su valor en cada iteración.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Mantiene siempre un valor fijo.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Se incrementa sumando valores progresivamente.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors">
+                <input type="radio" name="q2" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Actúa como condición de salida.</span>
+              </label>
+            </div>
+            <p class="text-xs text-blue-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: C</p>
+          </div>
+
+          <!-- Pregunta 3 -->
+          <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-5 border-l-4 border-purple-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+              <div class="flex-1">
+                <p class="font-bold text-purple-900 text-lg">(Aplicación) ¿Qué condición corresponde al patrón máximo–mínimo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. valor = acumulador</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. valor > maximo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. evento = contador</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors">
+                <input type="radio" name="q3" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. posicion ← posicion + 1</span>
+              </label>
+            </div>
+            <p class="text-xs text-purple-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 4 -->
+          <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-5 border-l-4 border-orange-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">4</span>
+              <div class="flex-1">
+                <p class="font-bold text-orange-900 text-lg">(Comprensión) ¿Qué elemento distingue a un contador?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Se inicializa en 100.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Cuenta eventos aumentando de uno en uno.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Reemplaza la búsqueda.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-orange-400 cursor-pointer transition-colors">
+                <input type="radio" name="q4" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Solo se usa con valores negativos.</span>
+              </label>
+            </div>
+            <p class="text-xs text-orange-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 5 -->
+          <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-5 border-l-4 border-red-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">5</span>
+              <div class="flex-1">
+                <p class="font-bold text-red-900 text-lg">(Análisis) ¿Qué significa que la búsqueda no encuentre un elemento?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. El algoritmo falló.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Siempre debe encontrarse.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. La variable bandera indica ausencia.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-red-400 cursor-pointer transition-colors">
+                <input type="radio" name="q5" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Se ejecutó un ciclo infinito.</span>
+              </label>
+            </div>
+            <p class="text-xs text-red-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: C</p>
+          </div>
+
+          <!-- Pregunta 6 -->
+          <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg p-5 border-l-4 border-cyan-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-cyan-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">6</span>
+              <div class="flex-1">
+                <p class="font-bold text-cyan-900 text-lg">(Aplicación práctica) En un menú, la opción de salida se implementa mediante:</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Un ciclo infinito.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Una condición del tipo "opción = salir".</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Un acumulador.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-cyan-400 cursor-pointer transition-colors">
+                <input type="radio" name="q6" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Un módulo de búsqueda.</span>
+              </label>
+            </div>
+            <p class="text-xs text-cyan-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 7 -->
+          <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-5 border-l-4 border-green-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">7</span>
+              <div class="flex-1">
+                <p class="font-bold text-green-900 text-lg">(Análisis de errores) Si el módulo de máximo–mínimo arroja valores incorrectos, ¿qué puede estar ocurriendo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Falta de inicialización adecuada.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Exceso de módulos.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. No existen ciclos en el algoritmo.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-colors">
+                <input type="radio" name="q7" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. El menú está mal diseñado.</span>
+              </label>
+            </div>
+            <p class="text-xs text-green-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: A</p>
+          </div>
+
+          <!-- Pregunta 8 -->
+          <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-5 border-l-4 border-indigo-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">8</span>
+              <div class="flex-1">
+                <p class="font-bold text-indigo-900 text-lg">(Conceptual) ¿Cuál de los siguientes elementos es indispensable en un módulo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Que sea el más extenso del algoritmo.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Tener una tarea específica y bien definida.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Generar múltiples salidas simultáneas.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-colors">
+                <input type="radio" name="q8" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Incluir al menos tres estructuras repetitivas.</span>
+              </label>
+            </div>
+            <p class="text-xs text-indigo-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: B</p>
+          </div>
+
+          <!-- Pregunta 9 -->
+          <div class="bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg p-5 border-l-4 border-rose-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-rose-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">9</span>
+              <div class="flex-1">
+                <p class="font-bold text-rose-900 text-lg">(Aplicación) ¿Qué patrón se usa para identificar cuántos valores cumplen cierta condición?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Acumulación</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Máximo–mínimo</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Contador</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-rose-400 cursor-pointer transition-colors">
+                <input type="radio" name="q9" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Búsqueda lineal</span>
+              </label>
+            </div>
+            <p class="text-xs text-rose-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: C</p>
+          </div>
+
+          <!-- Pregunta 10 -->
+          <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg p-5 border-l-4 border-slate-500">
+            <div class="flex items-start space-x-3 mb-3">
+              <span class="bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">10</span>
+              <div class="flex-1">
+                <p class="font-bold text-slate-900 text-lg">(Razonamiento) ¿Por qué la modularidad facilita la depuración del algoritmo?</p>
+              </div>
+            </div>
+            <div class="space-y-2 ml-11">
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="A" class="quiz-answer mr-3"> <span class="text-slate-700">A. Porque permite ejecutar todos los módulos al mismo tiempo.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="B" class="quiz-answer mr-3"> <span class="text-slate-700">B. Porque los errores se aíslan dentro de módulos específicos.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="C" class="quiz-answer mr-3"> <span class="text-slate-700">C. Porque elimina la necesidad de realizar pruebas.</span>
+              </label>
+              <label class="flex items-center p-2 bg-white rounded border-2 border-gray-200 hover:border-slate-400 cursor-pointer transition-colors">
+                <input type="radio" name="q10" value="D" class="quiz-answer mr-3"> <span class="text-slate-700">D. Porque reduce automáticamente el número de variables.</span>
+              </label>
+            </div>
+            <p class="text-xs text-slate-700 mt-3 ml-11 font-semibold answer-reveal hidden">Respuesta correcta: B</p>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="mt-8 flex gap-3 flex-wrap">
+          <button id="quiz-submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded transition-colors shadow-md">
+            ✓ Enviar Respuestas
+          </button>
+          <button id="quiz-reset" class="bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded transition-colors shadow-md">
+            ↻ Reiniciar
+          </button>
+        </div>
+
+        <!-- Resultado -->
+        <div id="quiz-result" class="mt-6 p-4 rounded-lg hidden">
+          <div id="result-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recursos (3 tarjetas como la imagen) -->
+    <section id="recursos" class="content-pane">
+      <!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="recursos">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6">Recursos</h2>
+      <ul class="grid lg:grid-cols-3 gap-5">
+        <!-- Card 1 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">Lógica de programación</h3>
+              <span class="badge">Libro</span>
+            </div>
+            <p class="text-sm text-slate-700"><strong>Trejos Buriticá, O. I.</strong> (2023). <em>Lógica de programación</em>. Ediciones de la U.</p>
+            <a href="https://www.edicionesdelau.com/" target="_blank" class="inline-block mt-3 text-emerald-700 underline">Ver recurso</a>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <img src="img/qr-code 1.png" alt="QR Lógica de programación" class="w-20 h-20 object-contain">
+          </div>
+        </li>
+        <!-- Card 2 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">Solucionario en pseudocódigo</h3>
+              <span class="badge">Libro</span>
+            </div>
+            <p class="text-sm text-slate-700"><strong>Trejos Buriticá, O. I.</strong> (2021). <em>Lógica de programación: solucionario en pseudocódigo. Ejercicios resueltos</em>. Ediciones de la U.</p>
+            <a href="https://www.edicionesdelau.com/" target="_blank" class="inline-block mt-3 text-emerald-700 underline">Ver recurso</a>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <img src="img/qr-code 2.png" alt="QR Solucionario en pseudocódigo" class="w-20 h-20 object-contain">
+          </div>
+        </li>
+        <!-- Card 3 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-lg text-green-800 mb-2 pr-2">Programación basada en PSeInt</h3>
+                <span class="badge">Libro</span>
+            </div>
+                  <p class="text-slate-600 mb-4">Celi V., P. (2023).<i>Fundamentos de programación basados en PSeInt.</i> (1.ª ed.) [PDF]. ITQ.</p>
+                  <a href="https://itq.edu.ec/wp-content/uploads/2023/04/2023-04-19_fundamentos_de_programacion_basados_en_pseint.pdf" target="_blank" class="text-green-700 hover:text-green-900 underline block mb-4">Ver recurso</a>          </div>
+          <div class="mt-4 flex justify-end">
+                   <img src="img/qr-code 3.png" alt="QR Code" class="w-16 h-16">
+          </div>
+        </li>
+        <!-- Card 4 -->
+        <li class="bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">Fundamentos de programación</h3>
+              <span class="badge">Libro</span>
+            </div>
+            <p class="text-sm text-slate-700"><strong>García Santillán, I.</strong> (Ed.). (2014). <em>Fundamentos de programación usando PSeInt</em>. Unidad de Producción y Difusión Científica y Académica.</p>
+            <a href="#" class="inline-block mt-3 text-emerald-700 underline">Ver recurso</a>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <img src="img/qr-code 4.png" alt="QR Fundamentos de programación" class="w-20 h-20 object-contain">
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Bibliografía -->
+    <section id="bibliografia" class="content-pane">
+      <!-- TTS sección: Introducción -->
+<div class="flex justify-end">
+  <div class="space-y-1">
+    <div class="speech-controls p-2 bg-emerald-100 rounded-lg flex items-center flex-wrap gap-2 text-sm"
+         data-target="bibliografia">
+      <button class="play-btn bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1 px-3 rounded-full flex items-center">
+        <span class="mr-1">▶️</span> Leer
+      </button>
+      <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏸️</span> Pausar
+      </button>
+      <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-full flex items-center" disabled>
+        <span class="mr-1">⏹️</span> Detener
+      </button>
+      <div class="flex items-center ml-2">
+        <label class="text-xs text-emerald-800 mr-2">Velocidad:</label>
+        <input type="range" class="speech-rate w-24" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+    <div class="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 text-right max-w-xl w-full ml-auto">
+      <strong>💡 Atajos:</strong> <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Espacio</kbd> reproducir/pausar ·
+      <kbd class="bg-white px-2 py-0.5 rounded border text-[10px]">Tab</kbd> detener
+    </div>
+  </div>
+</div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-800 mb-4">Bibliografía</h2>
+      <ul class="space-y-3">
+        <li class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          Joyanes Aguilar, L. (2021). <em>Fundamentos de programación: algoritmos, estructuras de datos y objetos</em>. McGraw-Hill.
+        </li>
+        <li class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          Trejos Buriticá, O. I. (2023). <em>Lógica de programación</em>. Ediciones de la U.
+        </li>
+        <li class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+          Programiz. (2024). <em>Pseudocode – Writing Structured Algorithms</em>. Recuperado de <a href="https://www.programiz.com" target="_blank" class="text-emerald-700 underline hover:text-emerald-900">https://www.programiz.com</a>
+        </li>
+      </ul>
+      <footer class="mt-10 pt-6 border-t text-center text-slate-600">
+        <p class="font-medium">Unicórdoba, calidad, innovación e inclusión para la transformación del territorio.</p>
+        <a class="text-emerald-700 underline" href="https://www.unicordoba.edu.co" target="_blank">www.unicordoba.edu.co</a>
+      </footer>
+    </section>
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+  </main>
+</div>
+
+<!-- Image modal -->
+<div id="imgModal" class="image-modal">
+  <img id="imgModalSrc" src="" alt="Vista ampliada" class="max-w-[92vw] max-h-[92vh] border-4 border-white rounded shadow-2xl"/>
+</div>
+
+<script>
+/* === Navegación + voz SOLO al hacer clic === */
+(() => {
+  const panes = document.querySelectorAll('.content-pane');
+  const links = document.querySelectorAll('.sidebar-link');
+  const mobileNav = document.getElementById('mobile-nav');
+
+  function go(id){
+    panes.forEach(p=>p.classList.remove('active'));
+    document.getElementById(id)?.classList.add('active');
+    links.forEach(a=>{
+      const active = a.dataset.target===id;
+      a.classList.toggle('active', active);
+      a.setAttribute('aria-current', active ? 'page' : 'false');
+    });
+    if(mobileNav) mobileNav.value=id;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ===== TTS (toggle con bocina) =====
+  const synth = window.speechSynthesis;
+  let voices = [];
+  function loadVoices(){ voices = synth.getVoices(); }
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+
+  let menuTtsEnabled = JSON.parse(localStorage.getItem('menuTtsEnabled') || 'false');
+  const ttsBtn = document.getElementById('menu-tts-toggle');
+
+  function updateTtsBtn(){
+    if(!ttsBtn) return;
+    ttsBtn.classList.toggle('muted', !menuTtsEnabled);
+    ttsBtn.setAttribute('aria-pressed', menuTtsEnabled ? 'true' : 'false');
+    ttsBtn.setAttribute('aria-label', menuTtsEnabled ? 'Voz activada' : 'Voz desactivada');
+    ttsBtn.title = menuTtsEnabled ? 'Voz activada' : 'Voz desactivada';
+    ttsBtn.textContent = menuTtsEnabled ? '🔊' : '🔇';
+  }
+  updateTtsBtn();
+
+  ttsBtn?.addEventListener('click', () => {
+    menuTtsEnabled = !menuTtsEnabled;
+    localStorage.setItem('menuTtsEnabled', JSON.stringify(menuTtsEnabled));
+    if(!menuTtsEnabled) synth.cancel();
+    updateTtsBtn();
+  });
+
+  function speakMenu(text){
+    if(!menuTtsEnabled || !text) return;
+    try{
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = voices.find(v => /es/i.test(v.lang)) || null;
+      if (v) u.voice = v, u.lang = v.lang; else u.lang = 'es-ES';
+      u.rate = 1.0;
+      synth.speak(u);
+    }catch(e){}
+  }
+
+  // ===== Un SOLO listener: navega + lee (si está activado) =====
+  links.forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = a.dataset.target;
+      if (id) go(id);
+
+      // Toma aria-label para no leer el emoji
+      const label = a.getAttribute('aria-label') || a.textContent.replace(/\s+/g,' ').trim();
+      speakMenu(label);
+    });
+  });
+
+  // Mobile select
+  mobileNav?.addEventListener('change', e => {
+    go(e.target.value);
+    // También lee en móvil si está activado
+    const opt = e.target.selectedOptions[0];
+    const label = (opt?.textContent || '').replace(/\s+/g,' ').trim();
+    speakMenu(label);
+  });
+})();
+</script>
+
+
+
+  
+<script>
+// Activities check (very lightweight rubric)
+
+// ====== Verificador de Actividades (S1: cine, S2: efectivo) ======
+document.getElementById('check-acts')?.addEventListener('click', () => {
+  let correct = 0, total = 0;
+
+  // Helper: evalúa si el texto contiene TODAS las palabras clave (al menos una variante por grupo)
+  const hasAll = (txt, keywords) => {
+    txt = txt.toLowerCase();
+    return keywords.every(group =>
+      group.some(k => txt.includes(k))
+    );
+  };
+
+  // -------- Situación 1 (Cine) --------
+  // Entradas
+  total++;
+  if (hasAll(document.querySelector('.a1.entrada')?.value || '', [
+      ['edad'], ['precio', 'preciobase'] ])) correct++;
+
+  // Restricciones
+  total++;
+  if (hasAll(document.querySelector('.a1.restricciones')?.value || '', [
+      ['edad','>=','mayor','igual','0'], ['precio','preciobase','>','mayor','0'] ])) correct++;
+
+  // Condición
+  total++;
+  if (hasAll(document.querySelector('.a1.condicion')?.value || '', [
+      ['edad','<','menor','12'] ])) correct++;
+
+  // Proceso
+  total++;
+  if (hasAll(document.querySelector('.a1.proceso')?.value || '', [
+      ['si','if'], ['edad','<','menor','12'], ['precio','preciobase','*','0.8','20%'] ])) correct++;
+
+  // Salidas
+  total++;
+  if (hasAll(document.querySelector('.a1.salidas')?.value || '', [
+      ['total','pagar','valor'] ])) correct++;
+
+
+
+  // -------- Situación 2 (Tienda) --------
+  // Entradas
+  total++;
+  if (hasAll(document.querySelector('.a2.entrada')?.value || '', [
+      ['subtotal'], ['medio','pago','mediopago'] ])) correct++;
+
+  // Restricciones
+  total++;
+  if (hasAll(document.querySelector('.a2.restricciones')?.value || '', [
+      ['subtotal','>','mayor','0'] ])) correct++;
+
+  // Condición
+  total++;
+  if (hasAll(document.querySelector('.a2.condicion')?.value || '', [
+      ['medio','pago','mediopago'], ['efectivo','"efectivo"','=='] ])) correct++;
+
+  // Proceso
+  total++;
+  if (hasAll(document.querySelector('.a2.proceso')?.value || '', [
+      ['si','if'], ['efectivo'], ['subtotal','*','0.9','10%'] ])) correct++;
+
+  // Salidas
+  total++;
+  if (hasAll(document.querySelector('.a2.salidas')?.value || '', [
+      ['total','pagar'], ['descuento'] ])) correct++;
+
+  // Resultado
+  const res = document.getElementById('acts-result');
+  res.textContent = `Respuestas correctas: ${correct} de ${total}.`;
+  res.className = 'mt-3 font-semibold ' + (correct/total >= 0.7 ? 'text-emerald-700' : 'text-red-700');
+  window.scrollTo({ top: res.offsetTop - 80, behavior: 'smooth' });
+});
+
+// Validación de la actividad de pseudocódigo
+document.getElementById('validar-actividad')?.addEventListener('click', function() {
+  const codigo = document.getElementById('codigo-actividad').value.toLowerCase().trim();
+  const resultado = document.getElementById('resultado-actividad');
+  
+  // Palabras clave que debe contener la solución correcta
+  const palabrasClave = [
+    'proceso',
+    'promedio_grupo',
+    'definir',
+    'nota',
+    'suma',
+    'promedio',
+    'contador',
+    'mientras',
+    'leer',
+    'escribir',
+    'finmientras',
+    'finproceso'
+  ];
+  
+  let palabrasEncontradas = 0;
+  palabrasClave.forEach(palabra => {
+    if (codigo.includes(palabra)) palabrasEncontradas++;
+  });
+  
+  const porcentaje = Math.round((palabrasEncontradas / palabrasClave.length) * 100);
+  
+  if (porcentaje >= 90) {
+    resultado.textContent = '✅ ¡Excelente! Tu solución es correcta.';
+    resultado.className = 'mt-3 text-lg font-semibold text-green-700';
+  } else if (porcentaje >= 70) {
+    resultado.textContent = '⚠️ Tu solución está incompleta. Revisa las palabras clave del algoritmo.';
+    resultado.className = 'mt-3 text-lg font-semibold text-yellow-700';
+  } else {
+    resultado.textContent = '❌ Tu solución necesita mejoras. Asegúrate de incluir todas las estructuras necesarias.';
+    resultado.className = 'mt-3 text-lg font-semibold text-red-700';
+  }
+});
+
+// Quiz sobre bucles, contadores, acumuladores y centinelas
+document.addEventListener('DOMContentLoaded', function() {
+const quizData = [
+  {q:'<strong>1. Ciclo con contador.</strong> Observa el siguiente fragmento de código e indica la salida esperada:',code:'Proceso ContadorBasico\n   Definir i Como Entero;\n   i = 1;\n   Mientras i <= 3 Hacer\n      Escribir "Iteración ", i;\n      i = i + 1;\n   FinMientras\nFinProceso',opts:['A. Iteración 1, Iteración 2, Iteración 3','B. Iteración 0, Iteración 1, Iteración 2','C. Iteración 1, Iteración 2, Iteración 3, Iteración 4','D. Iteración 2, Iteración 3, Iteración 4'],a:0},
+  {q:'<strong>2. Acumulador.</strong> Analiza el siguiente código. ¿Qué valor se mostrará al final del programa?',code:'Proceso SumaNumeros\n   Definir i, suma Como Entero;\n   suma = 0;\n   Para i = 1 Hasta 4 Con Paso 1 Hacer\n      suma = suma + i;\n   FinPara\n   Escribir "Resultado final: ", suma;\nFinProceso',opts:['A. 6','B. 10','C. 4','D. 15'],a:1},
+  {q:'<strong>3. Ciclo con centinela.</strong> Observa el siguiente código. Si el usuario ingresa: <strong>5, 3, 2, -1</strong>, ¿cuál será el resultado final?',code:'Proceso SumaCentinela\n   Definir num, total Como Entero;\n   total = 0;\n   Escribir "Ingrese un número (-1 para terminar): ";\n   Leer num;\n   Mientras num <> -1 Hacer\n      total = total + num;\n      Leer num;\n   FinMientras\n   Escribir "Total: ", total;\nFinProceso',opts:['A. 8','B. 9','C. 10','D. 11'],a:2},
+  {q:'<strong>4. Ciclo con rango y paso.</strong> Analiza el siguiente fragmento. ¿Qué valores se imprimirán?',code:'Proceso RangoYpaso\n   Definir i Como Entero\n   Para i = 2 Hasta 10 Con Paso 3 Hacer\n      Escribir i\n   FinPara\nFinProceso',opts:['A. 2, 3, 4, 5, 6, 7, 8, 9, 10','B. 2, 5, 8','C. 2, 5, 8, 11','D. 3, 6, 9'],a:1},
+  {q:'<strong>5. Ciclo anidado.</strong> Observa el siguiente código. ¿Cuántas líneas imprimirá este programa?',code:'Proceso TablasMultiplicar\n   Definir i, j Como Entero\n   Para i = 1 Hasta 2 Con Paso 1 Hacer\n      Para j = 1 Hasta 3 Con Paso 1 Hacer\n         Escribir i, " x ", j, " = ", i*j\n      FinPara\n   FinPara\nFinProceso',opts:['A. 3','B. 5','C. 6','D. 9'],a:2}
+];
+const quiz=document.getElementById('quiz');
+if(quiz){
+  quizData.forEach((it,i)=>{
+    const w=document.createElement('div');w.className='mb-5 p-4 bg-white rounded-lg shadow-sm border border-slate-200';
+    w.innerHTML=`<p class='font-semibold mb-3 text-lg'>${it.q}</p>`;
+    if(it.code){
+      const ta=document.createElement('textarea');
+      ta.rows=8;
+      ta.className='w-full p-3 mb-3 border-2 border-slate-300 rounded-lg bg-slate-50 font-mono text-sm text-slate-800';
+      ta.value=it.code;
+      ta.readOnly=true;
+      w.appendChild(ta);
+    }
+    it.opts.forEach(op=>{
+      const d=document.createElement('div');
+      d.className='quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer mb-2 hover:bg-slate-50 transition-colors';
+      d.textContent=op;
+      d.onclick=()=>{w.querySelectorAll('.quiz-option').forEach(x=>x.classList.remove('selected','bg-emerald-50'));d.classList.add('selected','bg-emerald-50');};
+      w.appendChild(d);
+    });
+    quiz.appendChild(w);
+  });
+  document.getElementById('quiz-submit').onclick=()=>{
+    let score=0;
+    [...quiz.children].forEach((b,i)=>{
+      const sel=b.querySelector('.quiz-option.selected');
+      const correct=quizData[i].opts[quizData[i].a];
+      b.querySelectorAll('.quiz-option').forEach(o=>{
+        if(o.textContent===correct){o.classList.remove('bg-emerald-50');o.classList.add('bg-green-100','border-green-500');}
+        else if(o.classList.contains('selected')){o.classList.remove('bg-emerald-50');o.classList.add('bg-red-100','border-red-500');}
+        o.style.pointerEvents='none';
+      });
+      if(sel&&sel.textContent===correct)score++;
+    });
+    const out=document.getElementById('quiz-result');
+    out.innerHTML=`<strong>Puntaje:</strong> ${score}/${quizData.length} (${Math.round(score/quizData.length*100)}%)`;
+    out.className='mt-3 text-lg font-bold '+(score/quizData.length>=0.7?'text-emerald-700':'text-red-700');
+  };
+}
+});
+
+// ===== Cuestionario de Repaso Interactivo =====
+document.addEventListener('DOMContentLoaded', function() {
+  const correctAnswers = {
+    q1: 'A', q2: 'B', q3: 'B', q4: 'B', q5: 'B',
+    q6: 'C', q7: 'C', q8: 'C', q9: 'B', q10: 'A'
+  };
+
+  const submitBtn = document.getElementById('quiz-submit');
+  const resetBtn = document.getElementById('quiz-reset');
+  const resultDiv = document.getElementById('quiz-result');
+  const resultContent = document.getElementById('result-content');
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', function() {
+      let correct = 0;
+      let total = 10;
+      const answers = {};
+
+      // Mostrar todas las respuestas correctas
+      document.querySelectorAll('.answer-reveal').forEach(el => {
+        el.classList.remove('hidden');
+      });
+
+      // Recopilar respuestas
+      for (let i = 1; i <= 10; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+          answers[`q${i}`] = selected.value;
+          if (selected.value === correctAnswers[`q${i}`]) {
+            correct++;
+          }
+        }
+      }
+
+      // Calcular porcentaje
+      const percentage = Math.round((correct / total) * 100);
+
+      // Mostrar resultado
+      let resultHTML = `
+        <div class="text-center">
+          <h3 class="text-2xl font-bold mb-3">Resultado Final</h3>
+          <div class="text-4xl font-bold mb-2 ${percentage >= 70 ? 'text-emerald-600' : 'text-red-600'}">
+            ${correct}/${total}
+          </div>
+          <p class="text-xl font-semibold mb-4 ${percentage >= 70 ? 'text-emerald-700' : 'text-red-700'}">
+            ${percentage}%
+          </p>
+      `;
+
+      if (percentage >= 90) {
+        resultHTML += `<p class="text-lg text-emerald-700 font-semibold">🎉 ¡Excelente! Dominas perfectamente los conceptos.</p>`;
+      } else if (percentage >= 80) {
+        resultHTML += `<p class="text-lg text-emerald-700 font-semibold">✅ ¡Muy bien! Tienes un buen dominio de los temas.</p>`;
+      } else if (percentage >= 70) {
+        resultHTML += `<p class="text-lg text-blue-700 font-semibold">👍 Bien. Considera revisar los temas con menor puntuación.</p>`;
+      } else if (percentage >= 50) {
+        resultHTML += `<p class="text-lg text-yellow-700 font-semibold">⚠️ Necesitas estudiar más. Revisa los conceptos clave.</p>`;
+      } else {
+        resultHTML += `<p class="text-lg text-red-700 font-semibold">❌ Necesitas reforzar tus conocimientos. Repasa el material.</p>`;
+      }
+
+      resultHTML += `</div>`;
+
+      resultContent.innerHTML = resultHTML;
+      resultDiv.classList.remove('hidden');
+      resultDiv.classList.add('bg-gradient-to-r', 'from-slate-50', 'to-gray-50', 'border-2', 'border-slate-300');
+
+      // Desplazar al resultado
+      setTimeout(() => {
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      // Limpiar todas las respuestas
+      document.querySelectorAll('.quiz-answer').forEach(input => {
+        input.checked = false;
+      });
+
+      // Ocultar todas las respuestas correctas
+      document.querySelectorAll('.answer-reveal').forEach(el => {
+        el.classList.add('hidden');
+      });
+
+      // Ocultar resultado
+      resultDiv.classList.add('hidden');
+      resultContent.innerHTML = '';
+
+      // Desplazar al inicio del cuestionario
+      document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+});
+
+// ===== Función para abrir modal de zoom =====
+function openImageModal(src) {
+  const modal = document.getElementById('imgModal');
+  const modalImg = document.getElementById('imgModalSrc');
+  if (modal && modalImg) {
+    modalImg.src = src;
+    modal.classList.add('active');
+  }
+}
+
+// ===== Zoom de imágenes al hacer clic =====
+const modal=document.getElementById('imgModal');
+const modalImg=document.getElementById('imgModalSrc');
+document.querySelectorAll('figure img').forEach(img=>{
+  img.classList.add('cursor-zoom-in');
+  img.addEventListener('click',()=>{ modal.classList.add('active'); modalImg.src=img.src; });
+});
+modal?.addEventListener('click',()=>modal.classList.remove('active'));
+</script>
+
+<script>
+// ==== TTS genérico (para .speech-controls con data-target) ====
+document.addEventListener('DOMContentLoaded', function () {
+  const synth = window.speechSynthesis;
+  let voices = [], preferred = null;
+
+  function loadVoices(){
+    voices = synth.getVoices();
+    preferred = voices.find(v => v.name.includes('Paulina'))
+             || voices.find(v => (v.lang||'').toLowerCase().startsWith('es'))
+             || voices[0] || null;
+  }
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+
+  document.querySelectorAll('.speech-controls[data-target]').forEach(controls => {
+    const targetId = controls.dataset.target;
+    const section  = document.getElementById(targetId);
+    if (!section) return;
+
+    const playBtn  = controls.querySelector('.play-btn');
+    const pauseBtn = controls.querySelector('.pause-btn');
+    const stopBtn  = controls.querySelector('.stop-btn');
+    const rateCtrl = controls.querySelector('.speech-rate');
+
+    let currentUtterance = null, isPaused = false;
+
+    function getTextFromSection(sec){
+      const nodes = sec.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,figcaption,pre');
+      if (!nodes.length) return (sec.textContent||'').trim();
+      let text = '';
+      nodes.forEach(el=>{
+        const t=(el.textContent||'').trim();
+        if (!t) return;
+        text += (/^H[1-6]$/.test(el.tagName) ? t + '. . . ' : t + ' ');
+      });
+      return text.trim();
+    }
+    function setButtons(playing){
+      playBtn.disabled  = playing && !isPaused;
+      pauseBtn.disabled = !playing;
+      stopBtn.disabled  = !playing;
+    }
+    function stop(){
+      if (synth.speaking || synth.pending) synth.cancel();
+      currentUtterance=null; isPaused=false; setButtons(false);
+    }
+    function play(){
+      if (currentUtterance && isPaused && synth.speaking){
+        synth.resume(); isPaused=false; setButtons(true); return;
+      }
+      stop();
+      const text=getTextFromSection(section);
+      if (!text) return;
+      const utt=new SpeechSynthesisUtterance(text);
+      utt.lang  =(preferred && preferred.lang) || 'es-ES';
+      utt.voice = preferred || null;
+      utt.rate  = parseFloat(rateCtrl?.value || '1');
+      utt.onend   = ()=>{ currentUtterance=null; setButtons(false); };
+      utt.onerror = ()=>{ currentUtterance=null; setButtons(false); };
+      currentUtterance=utt; synth.speak(utt); isPaused=false; setButtons(true);
+    }
+    function pause(){
+      if (currentUtterance && !isPaused && synth.speaking){
+        synth.pause(); isPaused=true; playBtn.disabled=false;
+      }
+    }
+
+    playBtn?.addEventListener('click',  play);
+    pauseBtn?.addEventListener('click', pause);
+    stopBtn?.addEventListener('click',  stop);
+    rateCtrl?.addEventListener('change', ()=>{ if (currentUtterance && !isPaused && synth.speaking){ stop(); setTimeout(play,80);} });
+
+    // Atajos: solo cuando la sección está visible
+    document.addEventListener('keydown', (e)=>{
+      const activePane = document.querySelector('.content-pane.active');
+      if (!activePane || activePane.id !== targetId) return;
+      if (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+      if (e.code==='Space'){ e.preventDefault(); (currentUtterance && !isPaused && synth.speaking) ? pause() : play(); }
+      if (e.code==='Tab' && !e.shiftKey){ stop(); }
+    });
+  });
+});
+</script>
+
+  <script>
+// ==== TTS para acordeón (lee solo el <details> abierto en #contenido) ====
+document.addEventListener('DOMContentLoaded', () => {
+  const synth = window.speechSynthesis;
+  let voices=[], preferred=null;
+  function loadVoices(){
+    voices = synth.getVoices();
+    preferred = voices.find(v=>v.name.includes('Paulina'))
+             || voices.find(v=>(v.lang||'').toLowerCase().startsWith('es'))
+             || voices[0] || null;
+  }
+  loadVoices();
+  if (synth.onvoiceschanged!==undefined) synth.onvoiceschanged=loadVoices;
+
+  const ctrl = document.querySelector('.speech-controls[data-mode="accordion"][data-container="#contenido"]');
+  if (!ctrl) return;
+  const container = document.querySelector('#contenido');
+
+  const playBtn  = ctrl.querySelector('.play-btn');
+  const pauseBtn = ctrl.querySelector('.pause-btn');
+  const stopBtn  = ctrl.querySelector('.stop-btn');
+  const rateCtrl = ctrl.querySelector('.speech-rate');
+
+  let currentUtterance=null, isPaused=false;
+
+  function getActiveDetails(){ return container.querySelector('details[open]') || container.querySelector('details'); }
+  function getDetailsText(det){
+    if (!det) return '';
+    const parts=[];
+    const sum=det.querySelector(':scope > summary');
+    if (sum){ const t=(sum.textContent||'').trim(); if (t) parts.push(t + '. . . '); }
+    const bodyNodes = det.querySelectorAll(':scope > :not(summary)');
+    if (bodyNodes.length){
+      bodyNodes.forEach(n=>{
+        n.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,figcaption,pre').forEach(el=>{
+          const t=(el.textContent||'').trim(); if (t) parts.push(t + ' ');
+        });
+        if (!n.querySelector('h1,h2,h3,h4,h5,h6,p,li,figcaption,pre')){
+          const t=(n.textContent||'').trim(); if (t) parts.push(t + ' ');
+        }
+      });
+    }else{
+      const t=(det.textContent||'').trim(); if (t) parts.push(t);
+    }
+    return parts.join('').trim();
+  }
+  function setButtons(playing){
+    playBtn.disabled  = playing && !isPaused;
+    pauseBtn.disabled = !playing;
+    stopBtn.disabled  = !playing;
+  }
+  function stop(){
+    if (synth.speaking || synth.pending) synth.cancel();
+    currentUtterance=null; isPaused=false; setButtons(false);
+  }
+  function play(){
+    if (currentUtterance && isPaused && synth.speaking){ synth.resume(); isPaused=false; setButtons(true); return; }
+    stop();
+    const det=getActiveDetails(); const text=getDetailsText(det);
+    if (!text) return;
+    const utt=new SpeechSynthesisUtterance(text);
+    utt.lang  =(preferred && preferred.lang) || 'es-ES';
+    utt.voice = preferred || null;
+    utt.rate  = parseFloat(rateCtrl?.value || '1');
+    utt.onend   = ()=>{ currentUtterance=null; setButtons(false); };
+    utt.onerror = ()=>{ currentUtterance=null; setButtons(false); };
+    currentUtterance=utt; synth.speak(utt); isPaused=false; setButtons(true);
+  }
+  function pause(){
+    if (currentUtterance && !isPaused && synth.speaking){ synth.pause(); isPaused=true; playBtn.disabled=false; }
+  }
+
+  playBtn.addEventListener('click',  play);
+  pauseBtn.addEventListener('click', pause);
+  stopBtn.addEventListener('click',  stop);
+  rateCtrl?.addEventListener('change', ()=>{ if (currentUtterance && !isPaused && synth.speaking){ stop(); setTimeout(play,80);} });
+
+  // Si se abre otro acordeón, corta la lectura
+  container.querySelectorAll('details').forEach(d=>{
+    d.addEventListener('toggle', ()=>{ if (d.open) stop(); });
+  });
+
+  // Atajos cuando "contenido" esté visible
+  document.addEventListener('keydown', (e)=>{
+    const activePane=document.querySelector('.content-pane.active');
+    if (!activePane || activePane.id!=='contenido') return;
+    if (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+    if (e.code==='Space'){ e.preventDefault(); (currentUtterance && !isPaused && synth.speaking) ? pause() : play(); }
+    if (e.code==='Tab' && !e.shiftKey){ stop(); }
+    if (e.code==='Escape'){ stop(); }
+  });
+});
+
+// ===== Funciones para verificar respuestas de análisis =====
+const expectedAnswers = {
+  1: "La prueba de escritorio permite verificar que la lógica condicional del algoritmo funciona correctamente antes de programarlo, asegurando que las salidas generadas corresponden a los distintos valores de entrada y que el flujo de decisiones se ejecuta según lo esperado.",
+  2: "Los casos borde son importantes porque permiten evaluar situaciones límite, como valores extremos o justo en el umbral de una condición. Estos casos revelan si el algoritmo responde adecuadamente cuando se encuentra en puntos críticos donde ocurre el cambio de comportamiento lógico.",
+  3: "Sí, la condición cubre todos los escenarios posibles. El algoritmo evalúa si num es mayor que 10; si no lo es, automáticamente cae en el caso \"menor o igual que 10\", lo que cubre todos los números reales posibles que el usuario pueda ingresar como entrada válida.",
+  4: "Podrían presentarse errores como el mal planteamiento de la condición, salidas incorrectas, interpretación equivocada de casos borde o incluso la omisión de escenarios relevantes. Esto causaría fallos en tiempo de ejecución o comportamientos inesperados en el programa final.",
+  5: "La tabla mostraría un error en la etapa de lectura, ya que el algoritmo está diseñado para recibir únicamente números. No podría evaluarse la condición num > 10, y el proceso se detendría sin completar la ruta lógica del condicional, destacando la ausencia de validación de datos en el diseño original."
+};
+
+function toggleHint(questionNum) {
+  const hint = document.getElementById(`q${questionNum}-hint`);
+  hint.classList.toggle('hidden');
+}
+
+function verifyAnswer(questionNum) {
+  const userAnswer = document.getElementById(`q${questionNum}-answer`).value.trim().toLowerCase();
+  const expectedAnswer = expectedAnswers[questionNum].toLowerCase();
+  const resultDiv = document.getElementById(`q${questionNum}-result`);
+  
+  // Calcular similitud simple (buscar palabras clave comunes)
+  const userWords = userAnswer.split(/\s+/);
+  const expectedWords = expectedAnswer.split(/\s+/);
+  
+  let matchedWords = 0;
+  userWords.forEach(word => {
+    if (expectedWords.some(expWord => expWord.includes(word) || word.includes(expWord))) {
+      matchedWords++;
+    }
+  });
+  
+  const similarity = (matchedWords / Math.max(userWords.length, expectedWords.length)) * 100;
+  
+  resultDiv.classList.remove('hidden');
+  
+  if (similarity >= 70) {
+    resultDiv.innerHTML = '✅ <strong>¡Excelente!</strong> Tu respuesta es muy similar a la esperada.';
+    resultDiv.className = 'mt-3 text-sm font-semibold text-green-700';
+  } else if (similarity >= 50) {
+    resultDiv.innerHTML = '👍 <strong>Bien.</strong> Tu respuesta contiene elementos correctos, pero considera revisar la respuesta esperada.';
+    resultDiv.className = 'mt-3 text-sm font-semibold text-blue-700';
+  } else if (similarity >= 30) {
+    resultDiv.innerHTML = '⚠️ <strong>Parcial.</strong> Tu respuesta tiene algunos conceptos correctos, pero necesita mejoras.';
+    resultDiv.className = 'mt-3 text-sm font-semibold text-yellow-700';
+  } else {
+    resultDiv.innerHTML = '❌ <strong>Necesita revisión.</strong> Haz clic en "Ver respuesta" para consultar la respuesta esperada.';
+    resultDiv.className = 'mt-3 text-sm font-semibold text-red-700';
+  }
+}
+</script>
+  
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
