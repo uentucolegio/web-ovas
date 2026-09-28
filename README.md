@@ -20,12 +20,23 @@ Los OVAs se organizan en una jerarquía fija de 5 niveles:
 │                   └── img/
 ├── tecnologo/
 ├── _template/            ← plantilla oficial para nuevos OVAs
+├── ENLACES-OVAS.md      ← enlace público de cada OVA, por programa y curso
 ├── context.md           ← reglas detalladas para el agente de IA
 ├── CONTRIBUTING.md      ← cómo agregar un OVA (reglas obligatorias)
 ├── scripts/
 │   └── validar-ova.mjs  ← validador automático de reglas
 └── .github/             ← validación en cada PR + plantilla de PR + CODEOWNERS
 ```
+
+---
+
+## 🔗 Ver los OVAs publicados
+
+Todos los OVAs están publicados en <https://uentucolegio.github.io/web-ovas/>.
+
+**[`ENLACES-OVAS.md`](ENLACES-OVAS.md)** lista el enlace directo de cada uno, organizado por programa, semestre, curso y unidad. Es el archivo para compartir con docentes y estudiantes.
+
+> Se genera a mano, así que puede quedar desactualizado cuando entren OVAs nuevos.
 
 ---
 
