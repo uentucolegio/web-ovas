@@ -3,13 +3,16 @@
 Todos los OVAs están publicados en GitHub Pages sobre <https://uentucolegio.github.io/web-ovas/>.
 Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada.
 
-> No se incluyen la **unidad 3 del semestre 3 del técnico** ni la **unidad 3 del
-> semestre 2 del tecnólogo**.
->
-> Cuando dos OVAs comparten el mismo título, se agrega entre paréntesis el nombre
-> de su carpeta para poder distinguirlos. Eso ocurre porque varios OVAs quedaron
-> con el `<title>` de otro al copiar la plantilla: es un error de contenido que
-> conviene corregir en el OVA, no en este listado.
+> ⚙️ **Este archivo se genera solo.** Lo actualiza `scripts/generar-enlaces.mjs`
+> en cada push a `main`. No lo edites a mano: los cambios se perderían en la
+> siguiente actualización.
+
+> No se incluyen estas unidades: `tecnico/semestre-3/unidad-3`, `tecnologo/semestre-2/unidad-3`.
+
+> Cuando dos OVAs comparten el mismo título, se agrega entre paréntesis el
+> nombre de su carpeta para poder distinguirlos. Eso ocurre porque varios OVAs
+> quedaron con el `<title>` de otro al copiar la plantilla: la corrección de
+> fondo va en el `<title>` del OVA, no en este listado.
 
 ## Técnico
 
@@ -173,8 +176,8 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 **Unidad 2**
 
 - [Diseno de interfaces](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-1/)
-- [Guía de Wireframes y Prototipos UX/UI (di-und-2-3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-3/)
 - [Guía de estilos (di-und-2-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-2/)
+- [Guía de Wireframes y Prototipos UX/UI (di-und-2-3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-3/)
 
 **Unidad 3**
 
@@ -185,8 +188,8 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 2**
 
-- [Guía de Wireframes y Prototipos UX/UI (tema-3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-3/)
 - [Guía de estilos (tema-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-2/)
+- [Guía de Wireframes y Prototipos UX/UI (tema-3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-3/)
 - [Uso de medios audiovisuales en presentaciones (tema-1)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-1/)
 
 **Unidad 3**
@@ -338,9 +341,9 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 1**
 
+- [¿Qué es la nube? Conceptos y modelos de servicio](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-1/que-es-la-nube/)
 - [Cómo se estructura una app en la nube](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-1/estructura-de-una-app-en-la-nube/)
 - [Tipos de nube, regiones y disponibilidad](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-1/tipos-de-nube-regiones-y-disponibilidad/)
-- [¿Qué es la nube? Conceptos y modelos de servicio](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/servicios-computacion-nube/unidad-1/que-es-la-nube/)
 
 **Unidad 2**
 
@@ -351,6 +354,26 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 ## Tecnólogo
 
 ### Semestre 1
+
+#### Álgebra Lineal  ·  9 OVAs
+
+**Unidad 1**
+
+- [Álgebra Lineal para Desarrolladores](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-1/algebra-lineal-desarrolladores/)
+- [Operaciones con Vectores y Matrices](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-1/operaciones-vectores-matrices/)
+- [Vectores y Matrices en el Desarrollo de Software](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-1/vectores-matrices/)
+
+**Unidad 2**
+
+- [Matrices inversas y determinantes](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-2/matrices-inversas-determinantes/)
+- [Metodo de Gauss y Gauss Jordan](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-2/gauss-gauss-jordan/)
+- [Sistemas de ecuaciones lineales](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-2/sistemas-ecuaciones-lineales/)
+
+**Unidad 3**
+
+- [Descomposiciones y aplicaciones del álgebra lineal](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-3/descomposiciones-aplicaciones/)
+- [Estructura espectral de matrices](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-3/estructura-espectral-matrices/)
+- [Transformaciones lineales y su representación matricial](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-3/transformaciones-lineales/)
 
 #### Aprendizaje autónomo  ·  12 OVAs
 
@@ -454,26 +477,6 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Programación Estructurada: Modularidad y Patrones Algorítmicos](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/introduccion-logica-programacion/unidad-3/programacion-estructurada-modularidad/)
 - [Pruebas de Escritorio: Validación de Algoritmos](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/introduccion-logica-programacion/unidad-3/pruebas-de-escritorio/)
 - [Representación Algorítmica: Diagramas de Flujo y Pseudocódigo](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/introduccion-logica-programacion/unidad-3/diagramas-flujo-pseudocodigo/)
-
-#### Álgebra Lineal  ·  9 OVAs
-
-**Unidad 1**
-
-- [Operaciones con Vectores y Matrices](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-1/operaciones-vectores-matrices/)
-- [Vectores y Matrices en el Desarrollo de Software](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-1/vectores-matrices/)
-- [Álgebra Lineal para Desarrolladores](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-1/algebra-lineal-desarrolladores/)
-
-**Unidad 2**
-
-- [Matrices inversas y determinantes](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-2/matrices-inversas-determinantes/)
-- [Metodo de Gauss y Gauss Jordan](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-2/gauss-gauss-jordan/)
-- [Sistemas de ecuaciones lineales](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-2/sistemas-ecuaciones-lineales/)
-
-**Unidad 3**
-
-- [Descomposiciones y aplicaciones del álgebra lineal](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-3/descomposiciones-aplicaciones/)
-- [Estructura espectral de matrices](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-3/estructura-espectral-matrices/)
-- [Transformaciones lineales y su representación matricial](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/algebra-lineal/unidad-3/transformaciones-lineales/)
 
 ### Semestre 2
 
