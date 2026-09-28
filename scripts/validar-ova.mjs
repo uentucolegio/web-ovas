@@ -81,17 +81,41 @@ function leerJsLocales(dir) {
  * Devuelve el trozo de HTML de una sección: desde su id="<sec>" hasta donde
  * empieza la siguiente sección (o el final). Sirve para revisar el diseño de
  * una sección concreta (ej: que Objetivos sea una lista y no tarjetas).
+ *
+ * Se descarta el <footer> del fragmento. Muchos OVAs repiten el pie de página
+ * dentro de cada sección, y ese footer lleva "text-center" por diseño: si se
+ * dejara dentro, la regla E9 acusaría de "objetivos centrados" a OVAs cuyos
+ * objetivos están perfectamente alineados a la izquierda.
  */
 function contenidoSeccion(html, sec) {
   const m = new RegExp(`id=["']${sec}["']`).exec(html);
   if (!m) return '';
   const rest = html.slice(m.index + 5);
   const next = /id=["'](introduccion|objetivos|contenido|actividades|evaluacion|recursos|bibliografia)["']/.exec(rest);
-  return next ? html.slice(m.index, m.index + 5 + next.index) : html.slice(m.index);
+  const frag = next ? html.slice(m.index, m.index + 5 + next.index) : html.slice(m.index);
+  return frag.replace(/<footer[\s\S]*?<\/footer>/gi, '');
 }
 
 /** Texto plano de un fragmento HTML (sin etiquetas, espacios colapsados). */
 const aTexto = (frag) => frag.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+/**
+ * Texto de una sección, incluyendo el de los archivos locales que embeba con
+ * <iframe src="…">. Varios OVAs cargan así su bibliografía o sus recursos: sin
+ * esto la sección parece vacía aunque tenga todo su contenido en otro archivo.
+ */
+function textoDeSeccion(dir, frag) {
+  let texto = aTexto(frag);
+  for (const m of frag.matchAll(/<iframe[^>]+src=["']([^"']+)["']/gi)) {
+    const ref = m[1].split('#')[0].split('?')[0].trim();
+    if (!ref || /^[a-z]+:/i.test(ref) || ref.startsWith('//')) continue; // externo
+    const archivo = join(dir, ref.replace(/^\.\//, '').split('/').join(sep));
+    try {
+      if (existsSync(archivo)) texto += ' ' + aTexto(readFileSync(archivo, 'utf8'));
+    } catch { /* ignora */ }
+  }
+  return texto;
+}
 
 // --- Validación -----------------------------------------------------------
 const ovas = encontrarOvas(ROOT);
@@ -322,7 +346,9 @@ for (const dir of ovas) {
       'Deja los recursos como lista: <ul class="space-y-4"> con un <li> por recurso, tal como en _template/index.html.');
 
   // E11) Bibliografía con entradas reales (no vacía).
-  const bibTexto = aTexto(secBiblio).replace(/^.*?Bibliograf[íi]a/i, '').trim();
+  // Cuenta también el contenido que la sección embeba con <iframe> desde un
+  // archivo local del propio OVA.
+  const bibTexto = textoDeSeccion(dir, secBiblio).replace(/^.*?Bibliograf[íi]a/i, '').trim();
   if (secBiblio && bibTexto.length < 40)
     err(rel,
       'La sección Bibliografía está vacía o casi vacía.',
