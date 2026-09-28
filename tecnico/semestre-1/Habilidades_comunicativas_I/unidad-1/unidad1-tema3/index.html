@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Recurso Educativo Digital (RED)</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Verdes y Blancos Institucionales -->
+    <!-- Application Structure Plan: Se diseña un Objeto Virtual de Aprendizaje (OVA) con una disposición de dos columnas. Un menú lateral fijo a la izquierda permite la navegación entre las secciones pedagógicas (Introducción, Objetivos, etc.). El área de contenido principal a la derecha se actualiza dinámicamente con JavaScript para mostrar la sección seleccionada. Esta estructura es ideal para un aprendizaje guiado y organizado, permitiendo al usuario explorar el contenido de forma secuencial o no lineal. -->
+    <!-- Visualization & Content Choices: 1. Navegación -> Menú lateral con estado activo (HTML/JS) y ahora con iconos para mejorar la usabilidad. Justificación: Estructura clásica y efectiva para un OVA. 2. Fundamentos Teóricos -> Contenido textual con tarjetas destacadas con iconos. Justificación: Facilita la lectura y resalta conceptos clave. 3. Actividades Prácticas -> Cuestionario interactivo. Justificación: Fomenta la participación activa. 4. Evaluación -> Quiz de opción múltiple con retroalimentación. Justificación: Permite la autoevaluación del aprendizaje. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534; /* green-800 */
+            border-left-color: #22c55e; /* green-500 */
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover {
+            background-color: #f0fdf4; /* green-50 */
+        }
+        .quiz-option.selected {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .type-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .type-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+
+        /* Estilos para el sidebar estático */
+        .sticky-sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 10;
+        }
+        
+        /* Scrollbar personalizado para el sidebar */
+        .sticky-sidebar::-webkit-scrollbar {
+        width: 6px;
+        }
+        
+        .sticky-sidebar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        }
+        
+        .sticky-sidebar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+        }
+        
+        .sticky-sidebar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col sticky-sidebar">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades Prácticas</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Revisión y corrección de textos</h2>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En el mundo tecnológico, donde cada línea de código, informe técnico o propuesta de proyecto puede marcar la diferencia, escribir de forma efectiva es una habilidad clave. 
+                    No se trata solo de plasmar ideas, sino de revisarlas y perfeccionarlas para asegurar que transmitan con claridad, coherencia y precisión lo que realmente quieres comunicar.
+                    <br> <br>
+                    A medida que recorras las cinco etapas de revisión, irás incorporando estrategias prácticas y herramientas que te permitirán transformar cualquier texto en un producto bien estructurado, 
+                    claro y profesional. Piensa en cada corrección como una optimización que acerca tus ideas a su mejor versión. 
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        💡 Recuerda: Aquí no solo aprenderás a escribir: aprenderás a pulir tus mensajes hasta que brillen con la misma precisión que buscas en la tecnología que creas o gestionas.
+
+                    </p>
+                </div>
+            </div>
+            <!-- Fin Introducción -->
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Mejorar la capacidad de identificar y corregir errores ortográficos, gramaticales, de puntuación y de estilo para mejorar la calidad de textos escritos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Reconocer y clasificar los diferentes tipos de errores presentes en un texto (ortográficos, gramaticales, de puntuación y de estilo).</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Organizar el contenido escrito siguiendo una estructura clara y lógica (introducción, desarrollo y conclusión).</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span>Mejorar la claridad, precisión y fluidez del texto mediante la corrección de estilo.</span>
+                    </li>
+                </ul>
+            </div>
+            <!-- Fin Objetivos -->
+
+            <!-- Fundamentos Teóricos -->
+            <div id="contenido" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Identificación y corrección de textos</h2>
+                <div class="w-full max-w-8xl mx-auto">
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <div class="space-y-8 text-slate-700 leading-relaxed">
+                            <div>
+                                <p class="mb-4">
+                                    La identificación y corrección de textos consiste en un proceso de revisión minuciosa del contenido escrito para mejorar su calidad y claridad. 
+                                    <br>
+                                    Este proceso abarca varios niveles:
+                                </p>
+
+                                <p><strong>Identificación:</strong> consiste en detectar errores ortográficos, gramaticales, de puntuación, cohesión, coherencia, redundancias, incoherencias, y problemas de estilo o precisión en el texto.</p>
+                                <br>
+                                <p><strong>Corrección:</strong> implica corregir dichos errores observados. Esto incluye revisar la ortografía (acentos, signos de puntuación, mayúsculas), la gramática (concordancia de sujeto y verbo, uso correcto de pronombres y adjetivos), y el estilo (claridad, coherencia, organización del texto, tono adecuado). También se verifica que la información sea precisa, las fuentes estén bien citadas y se eliminan partes innecesarias o repetitivas.</p>
+                            <div class="mt-8 mb-6 p-4 bg-white border border-green-300 rounded-lg shadow-sm flex flex-col items-center relative">
+                                <h3 class="text-xl font-bold text-green-700 mb-4">Mejora de la calidad del texto</h3>
+                                <br>
+                                <div class="w-full h-32 sm:h-48 md:h-64 xl:h-80 bg-white rounded flex items-center justify-center relative overflow-hidden">
+                                    <!-- Puedes cambiar la ruta de la imagen según corresponda -->
+                                    <img src="img/1.png" alt="Mejora de la calidad del texto" class="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 object-contain rounded-xl shadow-md border-2 border-green-200 bg-white transition-transform duration-300 ease-in-out hover:scale-110 sm:hover:scale-125 md:hover:scale-150 hover:shadow-xl hover:z-[9999] cursor-pointer relative" loading="lazy" />
+                                </div>
+                                
+                                <br>
+
+                                <div class="my-6 p-5 bg-green-50 border-l-4 border-green-500 rounded-lg shadow flex items-start">
+                                    <span class="text-green-600 text-3xl mr-4">⭐</span>
+                                    <div>
+                                        <p class="text-green-900 font-semibold text-lg mb-1">¡Importante!</p>
+                                        <p class="text-green-800">
+                                            La corrección puede estar organizada en etapas, como la <span class="font-bold">corrección ortográfica</span>, la <span class="font-bold">corrección gramatical</span> y la <span class="font-bold">corrección de estilo</span>, y suele realizarse de manera gradual para garantizar la máxima calidad del texto.
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                            </div>
+
+
+                            <div>
+                                <h3 class="text-xl font-bold text-green-700 mb-2">Etapas de la corrección de textos </h3>
+                                <p class="mb-4">
+                                    En las etapas esenciales del proceso de corrección de textos, desde la revisión inicial hasta la entrega final. 
+                                    Se detallan los aspectos clave que se deben considerar en cada fase para garantizar la calidad, precisión y claridad del texto. El objetivo es proporcionar una guía práctica para correctores de estilo, editores y cualquier persona involucrada en la producción de contenido escrito.
+                                </p>
+
+                                <div class="space-y-10">
+                                    <!-- Etapa 1 -->
+                                    <div class="relative bg-gradient-to-r from-green-25 via-green-50 to-white border-l-8 border-green-500 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                                        <div class="absolute -left-6 -top-6 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">1</div>
+                                        <h4 class="text-2xl font-extrabold text-green-800 mb-2 flex items-center gap-2">
+                                            <span>Revisión global</span>
+                                            <span class="text-base font-semibold text-green-600">(contenido y coherencia)</span>
+                                        </h4>
+                                        <div class="mb-3">
+                                            <span class="inline-block bg-green-200 text-green-900 font-semibold px-3 py-1 rounded-full mb-1">¿Qué revisar?</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>¿El texto cumple su propósito? <span class="text-slate-500 italic">(informar, argumentar, narrar, etc.)</span></li>
+                                                <li>¿Se entiende la idea principal?</li>
+                                                <li>¿El texto tiene coherencia y unidad temática?</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full mb-1">Estrategias</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li><span class="font-bold text-green-700">Leer en voz alta</span> <span class="text-green-400">🔊</span></li>
+                                                <li>Subrayar las ideas principales de cada párrafo <span class="text-yellow-400">🖍️</span></li>
+                                                <li>Hacerse preguntas como: <span class="italic">¿Este texto tiene sentido? ¿Responde a lo que se me pidió?</span> <span class="text-blue-400">❓</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- Etapa 2 -->
+                                    <div class="relative bg-gradient-to-r from-green-25 via-white to-green-50 border-l-8 border-green-400 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                                        <div class="absolute -left-6 -top-6 bg-green-400 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">2</div>
+                                        <h4 class="text-2xl font-extrabold text-green-800 mb-2 flex items-center gap-2">
+                                            <span>Revisión de la estructura</span>
+                                            <span class="text-base font-semibold text-green-600">(organización)</span>
+                                        </h4>
+                                        <div class="mb-3">
+                                            <span class="inline-block bg-green-200 text-green-900 font-semibold px-3 py-1 rounded-full mb-1">¿Qué revisar?</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>¿Hay una <span class="font-bold">introducción clara</span>, un <span class="font-bold">desarrollo ordenado</span> y una <span class="font-bold">conclusión pertinente</span>?</li>
+                                                <li>¿Cada párrafo desarrolla una idea específica?</li>
+                                                <li>¿Las ideas están conectadas lógicamente?</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full mb-1">Estrategias</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>Hacer un esquema del texto <span class="text-purple-400">🗺️</span> (tipo mapa mental o llaves).</li>
+                                                <li>Revisar conectores y frases de transición <span class="text-pink-400">🔗</span> <span class="text-slate-500">(por ejemplo: además, por lo tanto, sin embargo…)</span>.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- Etapa 3 -->
+                                    <div class="relative bg-gradient-to-r from-green-25 via-white to-green-25 border-l-8 border-green-300 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                                        <div class="absolute -left-6 -top-6 bg-green-300 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">3</div>
+                                        <h4 class="text-2xl font-extrabold text-green-800 mb-2 flex items-center gap-2">
+                                            <span>Revisión de estilo</span>
+                                            <span class="text-base font-semibold text-green-600">(claridad y redacción)</span>
+                                        </h4>
+                                        <div class="mb-3">
+                                            <span class="inline-block bg-green-200 text-green-900 font-semibold px-3 py-1 rounded-full mb-1">¿Qué revisar?</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>¿Las frases son claras y directas?</li>
+                                                <li>¿Se evitan repeticiones y palabras innecesarias?</li>
+                                                <li>¿El lenguaje es adecuado para el lector?</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full mb-1">Estrategias</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>Eliminar palabras repetidas o vagas <span class="text-red-400">✂️</span></li>
+                                                <li>Reemplazar verbos genéricos (“hacer”, “decir”) por otros más precisos <span class="text-blue-400">🔄</span></li>
+                                                <li>Cambiar frases largas por oraciones más simples <span class="text-green-400">📝</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- Etapa 4 -->
+                                    <div class="relative bg-gradient-to-r from-green-25 via-green-50 to-white border-l-8 border-green-200 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                                        <div class="absolute -left-6 -top-6 bg-green-200 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">4</div>
+                                        <h4 class="text-2xl font-extrabold text-green-800 mb-2 flex items-center gap-2">
+                                            <span>Revisión gramatical y ortográfica</span>
+                                        </h4>
+                                        <div class="mb-3">
+                                            <span class="inline-block bg-green-200 text-green-900 font-semibold px-3 py-1 rounded-full mb-1">¿Qué revisar?</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>¿Hay errores de ortografía o puntuación?</li>
+                                                <li>¿Los tiempos verbales son correctos?</li>
+                                                <li>¿Hay concordancia entre sujeto y verbo?</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full mb-1">Estrategias</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>Usar correctores digitales como Word o LanguageTool <span class="text-blue-400">💻</span></li>
+                                                <li>Leer el texto al revés (palabra por palabra) para identificar errores <span class="text-yellow-400">🔄</span></li>
+                                                <li>Revisar con una lista de verificación de reglas gramaticales básicas <span class="text-green-400">✅</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- Etapa 5 -->
+                                    <div class="relative bg-gradient-to-r from-green-25 via-white to-green-50 border-l-8 border-green-600 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                                        <div class="absolute -left-6 -top-6 bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">5</div>
+                                        <h4 class="text-2xl font-extrabold text-green-800 mb-2 flex items-center gap-2">
+                                            <span>Revisión externa y retroalimentación</span>
+                                        </h4>
+                                        <div class="mb-3">
+                                            <span class="inline-block bg-green-200 text-green-900 font-semibold px-3 py-1 rounded-full mb-1">¿Qué revisar?</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>¿Alguien más entiende bien el texto?</li>
+                                                <li>¿Hay sugerencias o cambios que mejoren el texto?</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full mb-1">Estrategias</span>
+                                            <ul class="list-disc list-inside ml-6 text-slate-700 mt-1 space-y-1">
+                                                <li>Pedir a un compañero que lea el texto y dé su opinión <span class="text-pink-400">👥</span></li>
+                                                <li>Usar una rúbrica o guía de evaluación para calificar el texto de manera objetiva <span class="text-purple-400">📋</span></li>
+                                                <li>Comparar con textos modelo o ejemplos bien escritos <span class="text-blue-400">📚</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                            
+                             <!-- Seccion 2 -->
+
+                            <div>
+                                <h3 class="text-xl font-bold text-green-700 mb-2">Tipos de errores más comunes en textos </h3>
+                                <p class="mb-4">
+                                    La escritura efectiva es esencial para la comunicación clara y precisa. Sin embargo, incluso los escritores más experimentados pueden cometer errores. Estos errores pueden clasificarse en varias categorías, cada una con sus propias características y soluciones.
+                                </p>
+                                <br>
+                                <div class="flex flex-col items-center gap-8 mb-8">
+                                    <!-- Imagen central representativa de errores comunes -->
+                                    <div class="flex justify-center">
+                                        <img src="img/2.png" alt="Errores comunes en textos" class="w-96 h-96 object-contain rounded-xl shadow-md border-2 border-green-200 bg-white transition-transform duration-300 ease-in-out hover:scale-150 hover:shadow-xl cursor-pointer">
+                                    </div>
+                                    <!-- Notas de tipos de errores alrededor de la imagen -->
+                                    <div class="w-full">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <!-- Ortográficos -->
+                                            <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-3 shadow type-card cursor-pointer hover:bg-yellow-100 transition-colors duration-200" onclick="showOrtograficosModal()">
+                                                <div>
+                                                    <h5 class="font-bold text-yellow-700 mb-1 flex items-center gap-2">
+                                                        <span class="text-lg">🔤</span> Ortográficos
+                                                    </h5>
+                                                    <ul class="list-disc list-inside text-slate-700 text-xs pl-2">
+                                                        <li>Acentos</li>
+                                                        <li>Mayúsculas</li>
+                                                        <li>Confusiones b/v, c/s/z</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <!-- Gramaticales -->
+                                            <div class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-3 shadow type-card cursor-pointer hover:bg-blue-100 transition-colors duration-200" onclick="showGramaticalesModal()">
+                                                <div>
+                                                    <h5 class="font-bold text-blue-700 mb-1 flex items-center gap-2">
+                                                        <span class="text-lg">📚</span> Gramaticales
+                                                    </h5>
+                                                    <ul class="list-disc list-inside text-slate-700 text-xs pl-2">
+                                                        <li>Uso de tiempos verbales</li>
+                                                        <li>Concordancia</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <!-- De puntuación -->
+                                            <div class="bg-pink-50 border-l-4 border-pink-400 rounded-lg p-3 shadow type-card cursor-pointer hover:bg-pink-100 transition-colors duration-200" onclick="showPuntuacionModal()">
+                                                <div>
+                                                    <h5 class="font-bold text-pink-700 mb-1 flex items-center gap-2">
+                                                        <span class="text-lg">✍️</span> De puntuación
+                                                    </h5>
+                                                    <ul class="list-disc list-inside text-slate-700 text-xs pl-2">
+                                                        <li>Comas</li>
+                                                        <li>Puntos</li>
+                                                        <li>Signos de interrogación</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <!-- De estilo -->
+                                            <div class="bg-purple-50 border-l-4 border-purple-400 rounded-lg p-3 shadow type-card cursor-pointer hover:bg-purple-100 transition-colors duration-200" onclick="showEstiloModal()">
+                                                <div>
+                                                    <h5 class="font-bold text-purple-700 mb-1 flex items-center gap-2">
+                                                        <span class="text-lg">🎨</span> De estilo
+                                                    </h5>
+                                                    <ul class="list-disc list-inside text-slate-700 text-xs pl-2">
+                                                        <li>Repeticiones</li>
+                                                        <li>Frases largas</li>
+                                                        <li>Lenguaje poco claro</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <!-- Sección interactiva y visual para errores de escritura -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 mb-8 overflow-hidden">
+
+                                <!-- Error Ortográfico -->
+                                <div class="relative bg-gradient-to-br from-yellow-100 via-white to-green-25 border-l-8 border-yellow-400 p-4 md:p-6 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 group overflow-hidden">
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-yellow-700 mb-2 flex items-center gap-2">
+                                        <span class="animate-pulse">🔤</span>
+                                        <span>Errores ortográficos</span>
+                                    </h4>
+                                    <p class="mb-3 text-slate-700">
+                                        <span class="font-bold text-yellow-600">¡Cuidado!</span> Los errores ortográficos pueden hacer que tu mensaje se entienda mal. <span class="text-2xl">😬</span>
+                                    </p>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Ortografía" class="w-10 h-10 object-contain drop-shadow-lg" loading="lazy">
+                                        <span class="inline-block bg-yellow-200 text-yellow-900 font-semibold px-3 py-1 rounded-full">Ejemplos:</span>
+                                    </div>
+                                    <ul class="list-none ml-2 text-slate-700 space-y-2 text-sm md:text-base pr-2">
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">´</span> <span class="break-words"><b>Acentos:</b> <span class="italic">camion</span> <span class="text-red-500">✗</span> → <span class="italic">camión</span> <span class="text-green-500">✓</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🔠</span> <span class="break-words"><b>Mayúsculas:</b> <span class="italic">españa</span> <span class="text-red-500">✗</span> → <span class="italic">España</span> <span class="text-green-500">✓</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🅱️</span> <span class="break-words"><b>b/v:</b> <span class="italic">baca</span> <span class="text-red-500">✗</span> / <span class="italic">vaca</span> <span class="text-green-500">✓</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🔄</span> <span class="break-words"><b>c/s/z:</b> <span class="italic">casa</span> vs. <span class="italic">caza</span></span></li>
+                                    </ul>
+                                    <div class="mt-4 flex justify-center">
+                                        <img src="img/a.png" alt="Letras" class="w-24 h-16 object-contain opacity-80 group-hover:scale-110 transition-transform duration-300" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <!-- Error Gramatical -->
+                                <div class="relative bg-gradient-to-br from-blue-100 via-white to-green-25 border-l-8 border-blue-400 p-4 md:p-6 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 group overflow-hidden">
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-blue-700 mb-2 flex items-center gap-2">
+                                        <span class="animate-pulse">📚</span>
+                                        <span>Errores gramaticales</span>
+                                    </h4>
+                                    <p class="mb-3 text-slate-700">
+                                        <span class="font-bold text-blue-600">¡Atención!</span> La gramática es como el esqueleto del idioma. Si falla, ¡todo se tambalea! <span class="text-2xl">🦴</span>
+                                    </p>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png" alt="Gramática" class="w-10 h-10 object-contain drop-shadow-lg" loading="lazy">
+                                        <span class="inline-block bg-blue-200 text-blue-900 font-semibold px-3 py-1 rounded-full">Ejemplos:</span>
+                                    </div>
+                                    <ul class="list-none ml-2 text-slate-700 space-y-2 text-sm md:text-base pr-2">
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">⏳</span> <span class="break-words"><b>Tiempos verbales:</b> <span class="italic">Ayer voy al cine</span> <span class="text-red-500">✗</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">👥</span> <span class="break-words"><b>Concordancia:</b> <span class="italic">los niño juega</span> <span class="text-red-500">✗</span> → <span class="italic">los niños juegan</span> <span class="text-green-500">✓</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🔗</span> <span class="break-words"><b>Pronombres/preposiciones:</b> <span class="italic">a mí me gusta a mí</span> <span class="text-red-500">✗</span></span></li>
+                                    </ul>
+                                    <div class="mt-4 flex justify-center">
+                                        <img src="img/b.png" alt="Libro" class="w-20 h-16 object-contain opacity-80 group-hover:scale-110 transition-transform duration-300" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <!-- Error de Puntuación -->
+                                <div class="relative bg-gradient-to-br from-pink-100 via-white to-green-25 border-l-8 border-pink-400 p-4 md:p-6 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 group overflow-hidden">
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-pink-700 mb-2 flex items-center gap-2">
+                                        <span class="animate-pulse">✍️</span>
+                                        <span>Errores de puntuación</span>
+                                    </h4>
+                                    <p class="mb-3 text-slate-700">
+                                        <span class="font-bold text-pink-600">¡Ojo!</span> La puntuación es como las señales de tránsito en el texto. Sin ellas, ¡choque seguro! <span class="text-2xl">🚦</span>
+                                    </p>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" alt="Puntuación" class="w-10 h-10 object-contain drop-shadow-lg" loading="lazy">
+                                        <span class="inline-block bg-pink-200 text-pink-900 font-semibold px-3 py-1 rounded-full">Ejemplos:</span>
+                                    </div>
+                                    <ul class="list-none ml-2 text-slate-700 space-y-2 text-sm md:text-base pr-2">
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">,</span> <span class="break-words"><b>Comas:</b> <span class="italic">vamos a comer niños</span> <span class="text-red-500">✗</span> / <span class="italic">Vamos a comer, niños</span> <span class="text-green-500">✓</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">.</span> <span class="break-words"><b>Puntos:</b> <span class="italic">me gusta leer me gusta escribir</span> <span class="text-red-500">✗</span> / <span class="italic">Me gusta leer. Me gusta escribir.</span> <span class="text-green-500">✓</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">¿¡</span> <span class="break-words"><b>Signos:</b> <span class="italic">como te llamas?</span> <span class="text-red-500">✗</span> / <span class="italic">¿Cómo te llamas?</span> <span class="text-green-500">✓</span></span></li>
+                                    </ul>
+                                    <div class="mt-4 flex justify-center">
+                                        <img src="img/c.png" alt="Signos" class="w-16 h-16 object-contain opacity-80 group-hover:scale-110 transition-transform duration-300" loading="lazy">
+                                    </div>
+                                </div>
+
+                                <!-- Error de Estilo -->
+                                <div class="relative bg-gradient-to-br from-purple-100 via-white to-green-25 border-l-8 border-purple-400 p-4 md:p-6 rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 group overflow-hidden">
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-purple-700 mb-2 flex items-center gap-2">
+                                        <span class="animate-pulse">🎨</span>
+                                        <span>Errores de estilo</span>
+                                    </h4>
+                                    <p class="mb-3 text-slate-700">
+                                        <span class="font-bold text-purple-600">¡Hazlo cool!</span> El estilo hace que tu texto sea fácil y divertido de leer. <span class="text-2xl">😎</span>
+                                    </p>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135797.png" alt="Estilo" class="w-10 h-10 object-contain drop-shadow-lg" loading="lazy">
+                                        <span class="inline-block bg-purple-200 text-purple-900 font-semibold px-3 py-1 rounded-full">Ejemplos:</span>
+                                    </div>
+                                    <ul class="list-none ml-2 text-slate-700 space-y-2 text-sm md:text-base pr-2">
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🔁</span> <span class="break-words"><b>Repeticiones:</b> <span class="italic">el perro es un perro muy perro</span> <span class="text-red-500">✗</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🧩</span> <span class="break-words"><b>Frases largas:</b> <span class="italic">cuando fui a la tienda porque tenía hambre y además quería ver a mi amigo que...</span> <span class="text-red-500">✗</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">💬</span> <span class="break-words"><b>Lenguaje poco claro:</b> <span class="italic">eso es así porque sí</span> <span class="text-red-500">✗</span></span></li>
+                                        <li class="flex items-start gap-2"><span class="text-lg mt-0.5">🔗</span> <span class="break-words"><b>Falta de coherencia:</b> ideas desordenadas o sin conexión.</span></li>
+                                    </ul>
+                                    <div class="mt-4 flex justify-center">
+                                        <img src="img/d.png" alt="Creatividad" class="w-20 h-16 object-contain opacity-80 group-hover:scale-110 transition-transform duration-300" loading="lazy">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Animación divertida al pasar el mouse -->
+                            <style>
+                                @media (hover: hover) {
+                                    .group:hover .animate-pulse {
+                                        animation: bounce 0.7s;
+                                    }
+                                }
+                                @keyframes bounce {
+                                    0%, 100% { transform: translateY(0);}
+                                    50% { transform: translateY(-10px);}
+                                }
+                                
+                                /* Mejoras para responsive design y evitar overflow */
+                                @media (max-width: 768px) {
+                                    .group {
+                                        word-wrap: break-word;
+                                        overflow-wrap: break-word;
+                                    }
+                                    .group li {
+                                        word-break: break-word;
+                                        hyphens: auto;
+                                    }
+                                    .group .italic {
+                                        word-break: break-all;
+                                    }
+                                }
+                                
+                                /* Asegurar que el contenido no se desborde */
+                                .group {
+                                    max-width: 100%;
+                                    box-sizing: border-box;
+                                }
+                                
+                                .group ul {
+                                    max-width: 100%;
+                                    overflow-wrap: break-word;
+                                }
+                                
+                                .group li {
+                                    max-width: 100%;
+                                    word-wrap: break-word;
+                                }
+                            </style>
+
+                            </div> 
+
+                                
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Fin Fundamentos Teóricos -->
+
+            <!-- Actividades Prácticas -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+                <div class="space-y-8">
+                    <!-- Ejercicio 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Pregunta 1</h3>
+                        <p class="mb-4"><span class="font-semibold">La identificación de errores en un texto se refiere principalmente a:</span></p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio1" value="a" class="activity-radio">
+                                <span>a) Reescribir el texto desde cero.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio1" value="b" class="activity-radio">
+                                <span>b) Detectar fallas ortográficas, gramaticales, de puntuación y de estilo.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio1" value="c" class="activity-radio">
+                                <span>c) Cambiar el tono del texto para hacerlo más formal.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio1" value="d" class="activity-radio">
+                                <span>d) Eliminar las conclusiones innecesarias.</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Ejercicio 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Pregunta 2</h3>
+                        <p class="mb-4"><span class="font-semibold">En la Etapa 2 de la corrección (estructura), ¿qué aspecto se revisa principalmente?</span></p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio2" value="a" class="activity-radio">
+                                <span>a) La claridad de las frases y la eliminación de repeticiones.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio2" value="b" class="activity-radio">
+                                <span>b) Que cada párrafo desarrolle una idea específica y exista un orden lógico. </span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio2" value="c" class="activity-radio">
+                                <span>c) Los errores de ortografía y concordancia gramatical.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio2" value="d" class="activity-radio">
+                                <span>d) La opinión de un lector externo sobre el texto.</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Ejercicio 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Pregunta 3</h3>
+                        <p class="mb-4"><span class="font-semibold">Un error como escribir "los niño juega" corresponde a:</span></p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio3" value="a" class="activity-radio">
+                                <span>a) Error ortográfico.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio3" value="b" class="activity-radio">
+                                <span>b) Error de estilo.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio3" value="c" class="activity-radio">
+                                <span>c) Error gramatical. </span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="ejercicio3" value="d" class="activity-radio">
+                                <span>d) Error de puntuación.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button id="check-activity-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Verificar Respuestas</button>
+                <div id="activity-result" class="mt-4 font-medium"></div>
+
+                <!-- Juego de Identificación de Errores -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6 mt-8">
+                    <h3 class="text-2xl font-bold text-green-700 mb-4 text-center">🎮  Identifica los errores</h3>
+                    <p class="text-gray-700 mb-6 text-center">Encuentra y clasifica los errores en las siguientes oraciones. Haz clic en las palabras incorrectas.</p>
+                    
+                    <!-- Controles del juego -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-6">
+                        <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <span class="text-sm font-medium text-gray-600">Puntuación: </span>
+                            <span id="game-score" class="text-lg font-bold text-green-600">0</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <span class="text-sm font-medium text-gray-600">Errores encontrados: </span>
+                            <span id="errors-found" class="text-lg font-bold text-blue-600">0</span>
+                            <span class="text-sm text-gray-500">/ <span id="total-errors">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Leyenda de tipos de errores -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                        <div class="bg-red-100 border border-red-300 rounded-lg p-2 text-center">
+                            <span class="text-red-700 font-medium">🔤 Ortográficos</span>
+                        </div>
+                        <div class="bg-blue-100 border border-blue-300 rounded-lg p-2 text-center">
+                            <span class="text-blue-700 font-medium">📚 Gramaticales</span>
+                        </div>
+                        <div class="bg-purple-100 border border-purple-300 rounded-lg p-2 text-center">
+                            <span class="text-purple-700 font-medium">✍️ Puntuación</span>
+                        </div>
+                    </div>
+
+                    <!-- Oraciones del juego -->
+                    <div id="game-sentences" class="space-y-4">
+                        <!-- Las oraciones se generarán dinámicamente -->
+                    </div>
+
+                    <!-- Botones de control -->
+                    <div class="flex flex-wrap justify-center gap-4 mt-6">
+                        <button id="start-game-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">
+                            🎮 Iniciar juego
+                        </button>
+                        <button id="next-sentence-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors hidden">
+                            ➡️ Siguiente
+                        </button>
+                        <button id="reset-game-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors">
+                            🔄 Reiniciar
+                        </button>
+                    </div>
+
+                    <!-- Resultado del juego -->
+                    <div id="game-feedback" class="mt-4 text-center hidden">
+                        <!-- Feedback dinámico -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar Evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para Profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento te recomendamos explorar los siguientes enlaces y documentos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Ordenar las Oraciones</h3>
+                            <a href="https://wordwall.net/es/resource/65550520/lectoescritura/reordenar-la-oraci%c3%b3n" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr1.png" alt="Solución ejercicio 1" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Juego de signos de interrogación y exclamación</h3>
+                            <a href="https://wordwall.net/es/resource/11557525/juego-de-signos-de-interrogaci%C3%B3n-y-exclamaci%C3%B3n" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr2.png" alt="Solución ejercicio 1" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                
+                </ul>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Gómez, R. (2015) <i>Manual de redacción y corrección de estilo.</i> Editorial UOC. <br>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Ministerio de Educación Nacional de Colombia. (2019). <i>Orientaciones pedagógicas para el fortalecimiento de las competencias comunicativas.</i> MEN. <br>
+                    </span>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                    <span class="block text-slate-700">
+                        Zayas, F. (2010). <i>Cómo escribir bien en secundaria.</i> Graó.<br>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Footer/Credits -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const contentPanes = document.querySelectorAll('.content-pane');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    function switchPane(targetId) {
+        contentPanes.forEach(pane => {
+            pane.classList.remove('active');
+        });
+        const targetPane = document.getElementById(targetId);
+        if (targetPane) {
+            targetPane.classList.add('active');
+        }
+
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.dataset.target === targetId) {
+                link.classList.add('active');
+            }
+        });
+        
+        if (mobileNav.value !== targetId) {
+            mobileNav.value = targetId;
+        }
+    }
+
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = e.currentTarget.dataset.target;
+            switchPane(targetId);
+        });
+    });
+
+    mobileNav.addEventListener('change', (e) => {
+        switchPane(e.target.value);
+    });
+
+    // --- Actividad Práctica ---
+    const activityData = [
+        { 
+            question: "Un video tutorial que muestra cómo resolver una ecuación.", 
+            options: ["Interactividad", "Finalidad Educativa", "Reusabilidad"], 
+            answer: "Finalidad Educativa" 
+        },
+        { 
+            question: "Un quiz en línea que da retroalimentación inmediata.", 
+            options: ["Interactividad", "Adaptabilidad", "Formato Digital"], 
+            answer: "Interactividad" 
+        },
+        { 
+            question: "Una simulación de un laboratorio de química que se puede usar en bachillerato y universidad.", 
+            options: ["Reusabilidad", "Accesibilidad", "Intencionalidad Educativa"], 
+            answer: "Reusabilidad" 
+        }
+    ];
+
+    const activityContainer = document.getElementById('activity-container');
+    if (activityContainer) {
+        activityData.forEach((item, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'p-4 border rounded-lg';
+            
+            let optionsHtml = item.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+            questionDiv.innerHTML = `
+                <p class="font-medium text-slate-700 mb-2">${index + 1}. ${item.question}</p>
+                <select class="activity-select w-full p-2 border rounded-md bg-white" data-answer="${item.answer}">
+                    <option value="">Selecciona una característica...</option>
+                    ${optionsHtml}
+                </select>
+            `;
+            activityContainer.appendChild(questionDiv);
+        });
+    }
+
+    const checkActivityBtn = document.getElementById('check-activity-btn');
+    if (checkActivityBtn) {
+        checkActivityBtn.addEventListener('click', () => {
+            const selects = document.querySelectorAll('.activity-select');
+            let correctAnswers = 0;
+            selects.forEach(select => {
+                if (select.value === select.dataset.answer) {
+                    correctAnswers++;
+                    select.classList.add('border-green-500');
+                    select.classList.remove('border-red-500');
+                } else {
+                    select.classList.add('border-red-500');
+                    select.classList.remove('border-green-500');
+                }
+            });
+            const resultDiv = document.getElementById('activity-result');
+            resultDiv.textContent = `Obtuviste ${correctAnswers} de ${activityData.length} respuestas correctas.`;
+            resultDiv.className = correctAnswers === activityData.length ? 'mt-4 font-medium text-green-700' : 'mt-4 font-medium text-red-700';
+        });
+    }
+
+    // --- Evaluación Quiz ---
+    const quizData = [
+        {
+            question: "¿Cuál de las siguientes NO es una etapa de la corrección de textos?",
+            options: ["Revisión de estilo", "Revisión gramatical y ortográfica", "Revisión global", "Revisión temática avanzada"],
+            answer: "Revisión temática avanzada"
+        },
+        {
+            question: "¿Qué estrategia es útil en la revisión global de un texto?",
+            options: ["Leer en voz alta y preguntarse si el texto tiene sentido", "Usar correctores digitales como Word o LanguageTool", "Pedir la opinión de un compañero", "Reemplazar verbos genéricos por otros más precisos"],
+            answer: "Leer en voz alta y preguntarse si el texto tiene sentido"
+        },
+        {
+            question: "Un error de puntuación sería:",
+            options: ["Escribir \"vaca\" en lugar de \"baca\"", "Usar \"los casas blancas\" en vez de \"las casas blancas\"", "Omitir la coma en una enumeración", "Repetir varias veces la misma palabra en un párrafo"],
+            answer: "Omitir la coma en una enumeración"
+        },
+        {
+            question: "Cuando en un texto se encuentran frases demasiado largas, repetitivas y poco claras, se trata de:",
+            options: ["Errores de estilo", "Errores ortográficos", "Errores de coherencia global", "Errores de puntuación"],
+            answer: "Errores de estilo"
+        },
+        {
+            question: "¿Qué se busca en la revisión externa y retroalimentación?",
+            options: ["Detectar errores ortográficos específicos", "Asegurar que otra persona comprenda el texto y pueda dar sugerencias", "Eliminar palabras innecesarias y redundantes", "Revisar la concordancia entre sujeto y verbo"],
+            answer: "Asegurar que otra persona comprenda el texto y pueda dar sugerencias"
+        }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    if(quizContainer) {
+        quizData.forEach((q, index) => {
+            const questionEl = document.createElement('div');
+            questionEl.className = 'mb-6';
+            questionEl.innerHTML = `<p class="font-semibold mb-2">${index + 1}. ${q.question}</p>`;
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'space-y-2';
+            
+            q.options.forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'quiz-option p-3 border-2 border-slate-200 rounded-lg cursor-pointer';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', () => {
+                    questionEl.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
+                    optionEl.classList.add('selected');
+                });
+                optionsContainer.appendChild(optionEl);
+            });
+            
+            questionEl.appendChild(optionsContainer);
+            quizContainer.appendChild(questionEl);
+        });
+    }
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    if(submitQuizBtn){
+        submitQuizBtn.addEventListener('click', () => {
+            let score = 0;
+            const questions = quizContainer.querySelectorAll('.mb-6');
+            const feedbacks = [
+                'Correcto: La revisión temática avanzada NO es una de las etapas de corrección de textos que se estudian.',
+                'Correcto: Leer en voz alta y preguntarse si el texto tiene sentido es una estrategia útil en la revisión global.',
+                'Correcto: Omitir la coma en una enumeración es un error de puntuación.',
+                'Correcto: Las frases demasiado largas, repetitivas y poco claras corresponden a errores de estilo.',
+                'Correcto: En la revisión externa se busca que otra persona comprenda el texto y pueda dar sugerencias.'
+            ];
+            const wrongFeedbacks = [
+                'Incorrecto. La revisión temática avanzada NO es una etapa de corrección de textos. Las etapas son: revisión global, estructura, estilo, gramatical/ortográfica y externa.',
+                'Incorrecto. La revisión global se enfoca en el contenido y coherencia general del texto, no en herramientas digitales.',
+                'Incorrecto. Escribir "vaca" en lugar de "baca" sería un error ortográfico, no de puntuación.',
+                'Incorrecto. Los errores ortográficos se refieren a la escritura correcta de palabras, no a la estructura de las frases.',
+                'Incorrecto. La revisión externa busca retroalimentación de otros, no solo detectar errores específicos.'
+            ];
+            questions.forEach((q, index) => {
+                const selectedOption = q.querySelector('.quiz-option.selected');
+                let feedbackDiv = q.querySelector('.quiz-feedback');
+                if (!feedbackDiv) {
+                    feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = 'quiz-feedback mt-2 text-sm';
+                    q.appendChild(feedbackDiv);
+                }
+                if (selectedOption && selectedOption.textContent === quizData[index].answer) {
+                    score++;
+                    feedbackDiv.innerHTML = `<span class='text-green-700 font-semibold'>✔️ ${feedbacks[index]}</span>`;
+                } else {
+                    feedbackDiv.innerHTML = `<span class='text-red-700 font-semibold'>❌ ${wrongFeedbacks[index]}</span>`;
+                }
+            });
+            const resultEl = document.getElementById('quiz-result');
+            resultEl.textContent = `Tu puntuación es: ${score} de ${quizData.length}.`;
+            if (score / quizData.length >= 0.7) {
+                resultEl.className = 'mt-4 text-lg font-bold text-green-700';
+            } else {
+                resultEl.className = 'mt-4 text-lg font-bold text-red-700';
+            }
+        });
+    }
+});
+</script>
+
+<script>
+    // JS para verificación de actividades
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkBtn = document.getElementById('check-activity-btn');
+        if (checkBtn) {
+            checkBtn.addEventListener('click', function() {
+                const respuestasCorrectas = [
+                    'b', // Pregunta 1: "Detectar fallas ortográficas, gramaticales, de puntuación y de estilo"
+                    'b', // Pregunta 2: "Que cada párrafo desarrolle una idea específica y exista un orden lógico"
+                    'c'  // Pregunta 3: "Error gramatical"
+                ];
+                
+                let correctas = 0;
+                let feedback = [];
+                
+                // Verificar cada ejercicio
+                respuestasCorrectas.forEach((respuestaCorrecta, idx) => {
+                    const ejercicioNum = idx + 1;
+                    const radioSeleccionado = document.querySelector(`input[name="ejercicio${ejercicioNum}"]:checked`);
+                    
+                    if (radioSeleccionado && radioSeleccionado.value === respuestaCorrecta) {
+                        correctas++;
+                        feedback.push(`Ejercicio ${ejercicioNum}: ✔️ Correcto`);
+                        // Marcar como correcto visualmente
+                        radioSeleccionado.closest('label').classList.add('text-green-700', 'font-semibold');
+                    } else {
+                        feedback.push(`Ejercicio ${ejercicioNum}: ❌ Incorrecto`);
+                        // Marcar como incorrecto visualmente si hay selección
+                        if (radioSeleccionado) {
+                            radioSeleccionado.closest('label').classList.add('text-red-700', 'font-semibold');
+                        }
+                    }
+                });
+                
+                const resultDiv = document.getElementById('activity-result');
+                resultDiv.innerHTML = `<strong>Respuestas correctas: ${correctas} de 3</strong><br>` + feedback.join('<br>');
+                resultDiv.className = correctas === 3 ? 'mt-4 font-medium text-green-700' : 'mt-4 font-medium text-red-700';
+            });
+        }
+    });
+    // JS simple para acordeón
+    document.querySelectorAll('.accordion-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const panel = document.querySelector(this.getAttribute('data-target'));
+            const isOpen = panel.classList.contains('block');
+            document.querySelectorAll('.accordion-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.accordion-panel').forEach(p => p.classList.remove('block'));
+            if (!isOpen) {
+                panel.classList.remove('hidden');
+                panel.classList.add('block');
+                // Scroll suave hacia el botón del acordeón para mostrar título y contenido
+                setTimeout(() => {
+                    this.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                }, 100);
+            }
+        });
+    });
+
+    // Juego de Identificación de Errores
+    const gameData = [
+        {
+            text: "El niño juegan en el parque con su hermana",
+            errors: [
+                { word: "juegan", type: "gramatical", correct: "juega", explanation: "Concordancia: 'El niño' es singular, pero 'juegan' es plural, debería ser 'juega'" }
+            ]
+        },
+        {
+            text: "Maria fue al supermercado, compro leche y regreso a casa",
+            errors: [
+                { word: "Maria", type: "ortografico", correct: "María", explanation: "Falta tilde en nombre propio" },
+                { word: "compro", type: "ortografico", correct: "compró", explanation: "Falta tilde en verbo en pasado" },
+                { word: "regreso", type: "ortografico", correct: "regresó", explanation: "Falta tilde en verbo en pasado" }
+            ]
+        },
+        {
+            text: "Los estudiantes estudian mucho para el examen pero no tienen tiempo",
+            errors: [
+                { word: "examen", type: "puntuacion", correct: "examen,", explanation: "Falta coma antes de 'pero'" }
+            ]
+        },
+        {
+            text: "Ayer fuimos al cine y vimos una pelicula muy buena",
+            errors: [
+                { word: "pelicula", type: "ortografico", correct: "película", explanation: "Falta tilde en palabra esdrújula" }
+            ]
+        },
+        {
+            text: "El profesor explico la leccion a los alumnos rapidamente",
+            errors: [
+                { word: "explico", type: "ortografico", correct: "explicó", explanation: "Falta tilde en verbo en pasado" },
+                { word: "leccion", type: "ortografico", correct: "lección", explanation: "Falta tilde en palabra aguda terminada en 'n'" },
+                { word: "rapidamente", type: "ortografico", correct: "rápidamente", explanation: "Falta tilde en adverbio terminado en -mente" }
+            ]
+        }
+    ];
+
+    let currentSentenceIndex = 0;
+    let gameScore = 0;
+    let errorsFound = 0;
+    let gameActive = false;
+
+    function initializeGame() {
+        const startBtn = document.getElementById('start-game-btn');
+        const nextBtn = document.getElementById('next-sentence-btn');
+        const resetBtn = document.getElementById('reset-game-btn');
+
+        if (startBtn) {
+            startBtn.addEventListener('click', startGame);
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', nextSentence);
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', resetGame);
+        }
+    }
+
+    function startGame() {
+        gameActive = true;
+        currentSentenceIndex = 0;
+        gameScore = 0;
+        errorsFound = 0;
+        updateGameStats();
+        showCurrentSentence();
+        
+        document.getElementById('start-game-btn').style.display = 'none';
+        document.getElementById('game-feedback').classList.add('hidden');
+    }
+
+    function showCurrentSentence() {
+        if (currentSentenceIndex >= gameData.length) {
+            endGame();
+            return;
+        }
+
+        const sentence = gameData[currentSentenceIndex];
+        const container = document.getElementById('game-sentences');
+        
+        // Actualizar contador de errores totales
+        document.getElementById('total-errors').textContent = sentence.errors.length;
+        errorsFound = 0;
+        updateGameStats();
+
+        // Crear elementos clicables para cada palabra
+        const words = sentence.text.split(' ');
+        let sentenceHTML = '<div class="bg-white rounded-lg p-4 shadow-sm border-2 border-gray-200">';
+        sentenceHTML += '<p class="text-lg leading-relaxed">';
+        
+        words.forEach((word, index) => {
+            const hasError = sentence.errors.some(error => word.includes(error.word));
+            const wordClass = hasError ? 'error-word cursor-pointer hover:bg-yellow-100 px-1 rounded transition-colors' : 'cursor-pointer hover:bg-gray-100 px-1 rounded transition-colors';
+            sentenceHTML += `<span class="${wordClass}" data-word="${word}" data-index="${index}">${word}</span> `;
+        });
+        
+        sentenceHTML += '</p></div>';
+        container.innerHTML = sentenceHTML;
+
+        // Agregar event listeners a las palabras
+        const wordElements = container.querySelectorAll('span[data-word]');
+        wordElements.forEach(element => {
+            element.addEventListener('click', () => checkWord(element));
+        });
+    }
+
+    function checkWord(element) {
+        if (!gameActive) return;
+
+        const word = element.dataset.word;
+        const sentence = gameData[currentSentenceIndex];
+        const error = sentence.errors.find(e => word.includes(e.word));
+
+        if (error) {
+            // Palabra correcta seleccionada
+            element.classList.remove('hover:bg-yellow-100');
+            element.classList.add('bg-green-200', 'border-2', 'border-green-400');
+            element.style.pointerEvents = 'none';
+            
+            gameScore += 10;
+            errorsFound++;
+            updateGameStats();
+            
+            showErrorFeedback(error, true);
+            
+            // Verificar si se encontraron todos los errores
+            if (errorsFound >= sentence.errors.length) {
+                setTimeout(() => {
+                    document.getElementById('next-sentence-btn').classList.remove('hidden');
+                }, 1000);
+            }
+        } else {
+            // Palabra incorrecta seleccionada
+            element.classList.add('bg-red-200', 'border-2', 'border-red-400');
+            setTimeout(() => {
+                element.classList.remove('bg-red-200', 'border-2', 'border-red-400');
+            }, 1000);
+            
+            gameScore = Math.max(0, gameScore - 5);
+            updateGameStats();
+            showErrorFeedback(null, false);
+        }
+    }
+
+    function showErrorFeedback(error, isCorrect) {
+        const feedback = document.getElementById('game-feedback');
+        feedback.classList.remove('hidden');
+        
+        if (isCorrect && error) {
+            feedback.innerHTML = `
+                <div class="bg-green-100 border border-green-400 rounded-lg p-3 mb-2">
+                    <p class="text-green-800 font-medium">¡Correcto! 🎉</p>
+                    <p class="text-sm text-green-700">
+                        <strong>Error ${getErrorTypeLabel(error.type)}:</strong> "${error.word}" → "${error.correct}"<br>
+                        <em>${error.explanation}</em>
+                    </p>
+                </div>
+            `;
+        } else {
+            feedback.innerHTML = `
+                <div class="bg-red-100 border border-red-400 rounded-lg p-3 mb-2">
+                    <p class="text-red-800 font-medium">Incorrecto ❌</p>
+                    <p class="text-sm text-red-700">Esta palabra no contiene errores. Intenta con otra.</p>
+                </div>
+            `;
+        }
+        
+        setTimeout(() => {
+            if (!isCorrect) {
+                feedback.classList.add('hidden');
+            }
+        }, 2000);
+    }
+
+    function getErrorTypeLabel(type) {
+        const labels = {
+            'ortografico': 'Ortográfico 🔤',
+            'gramatical': 'Gramatical 📚',
+            'puntuacion': 'de Puntuación ✍️'
+        };
+        return labels[type] || type;
+    }
+
+    function nextSentence() {
+        currentSentenceIndex++;
+        document.getElementById('next-sentence-btn').classList.add('hidden');
+        document.getElementById('game-feedback').classList.add('hidden');
+        showCurrentSentence();
+    }
+
+    function updateGameStats() {
+        document.getElementById('game-score').textContent = gameScore;
+        document.getElementById('errors-found').textContent = errorsFound;
+    }
+
+    function endGame() {
+        gameActive = false;
+        const container = document.getElementById('game-sentences');
+        const totalPossibleScore = gameData.reduce((sum, sentence) => sum + (sentence.errors.length * 10), 0);
+        const percentage = Math.round((gameScore / totalPossibleScore) * 100);
+        
+        let message = '';
+        let colorClass = '';
+        
+        if (percentage >= 90) {
+            message = '¡Excelente trabajo! 🏆';
+            colorClass = 'text-green-600';
+        } else if (percentage >= 70) {
+            message = '¡Buen trabajo! 👍';
+            colorClass = 'text-blue-600';
+        } else if (percentage >= 50) {
+            message = 'Puedes mejorar 📚';
+            colorClass = 'text-yellow-600';
+        } else {
+            message = 'Sigue practicando 💪';
+            colorClass = 'text-red-600';
+        }
+        
+        container.innerHTML = `
+            <div class="bg-white rounded-lg p-6 shadow-lg border-2 border-green-300 text-center">
+                <h4 class="text-2xl font-bold ${colorClass} mb-4">${message}</h4>
+                <p class="text-lg mb-2">Puntuación final: <span class="font-bold text-green-600">${gameScore}</span></p>
+                <p class="text-md text-gray-600">Porcentaje de aciertos: <span class="font-bold">${percentage}%</span></p>
+                <button onclick="resetGame()" class="mt-4 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">
+                    🔄 Jugar de Nuevo
+                </button>
+            </div>
+        `;
+    }
+
+    function resetGame() {
+        currentSentenceIndex = 0;
+        gameScore = 0;
+        errorsFound = 0;
+        gameActive = false;
+        
+        updateGameStats();
+        document.getElementById('total-errors').textContent = '0';
+        document.getElementById('game-sentences').innerHTML = '<p class="text-gray-500 text-center py-8">Haz clic en "Iniciar juego" para comenzar</p>';
+        document.getElementById('start-game-btn').style.display = 'inline-block';
+        document.getElementById('next-sentence-btn').classList.add('hidden');
+        document.getElementById('game-feedback').classList.add('hidden');
+    }
+
+    // Inicializar el juego cuando se carga la página
+    initializeGame();
+    resetGame();
+
+</script>
+
+<!-- Modal flotante para Ortográficos -->
+<div id="ortograficosModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+        <div class="bg-gradient-to-r from-yellow-300 to-yellow-500 text-white p-6 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="text-2xl">🔤</span>
+                    Errores Ortográficos
+                </h3>
+                <button onclick="closeOrtograficosModal()" class="text-white hover:text-gray-200 text-2xl font-bold transition-colors duration-200">
+                    ×
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 mb-4 leading-relaxed">
+                Los <strong>errores ortográficos</strong> son aquellos que afectan la escritura correcta de las palabras. Estos errores pueden cambiar completamente el significado de lo que queremos comunicar.
+            </p>
+            
+            <div class="space-y-4">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                        <span>´</span>
+                        Acentos
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>camion</em> <span class="text-red-500">✗</span> → <em>camion</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                        <span>🔠</span>
+                        Mayúsculas
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>españa</em> <span class="text-red-500">✗</span> → <em>España</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2">
+                        <span>🅱️</span>
+                        Confusiones b/v, c/s/z
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>baca</em> <span class="text-red-500">✗</span> / <em>vaca</em> <span class="text-green-500">✓</span><br>
+                        <em>casa</em> vs. <em>caza</em>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="closeOrtograficosModal()" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Funciones para el modal de Ortográficos
+    function showOrtograficosModal() {
+        const modal = document.getElementById('ortograficosModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modal.classList.remove('hidden');
+        
+        // Animación de entrada
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+    
+    function closeOrtograficosModal() {
+        const modal = document.getElementById('ortograficosModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        // Animación de salida
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    document.getElementById('ortograficosModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeOrtograficosModal();
+        }
+    });
+    
+    // Cerrar modal con la tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeOrtograficosModal();
+        }
+    });
+</script>
+
+<!-- Modal flotante para Gramaticales -->
+<div id="gramaticalesModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="modalContentGramaticales">
+        <div class="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-6 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="text-2xl">📚</span>
+                    Errores Gramaticales
+                </h3>
+                <button onclick="closeGramaticalesModal()" class="text-white hover:text-gray-200 text-2xl font-bold transition-colors duration-200">
+                    ×
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 mb-4 leading-relaxed">
+                Los <strong>errores gramaticales</strong> afectan la estructura y las reglas del idioma. Son como el esqueleto del texto: si fallan, ¡todo se tambalea!
+            </p>
+            
+            <div class="space-y-4">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                        <span>⏳</span>
+                        Tiempos verbales
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Ayer voy al cine</em> <span class="text-red-500">✗</span> → <em>Ayer fui al cine</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-green-800 mb-2 flex items-center gap-2">
+                        <span>👥</span>
+                        Concordancia
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Los niño juega</em> <span class="text-red-500">✗</span> → <em>Los niños juegan</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2">
+                        <span>🔗</span>
+                        Pronombres y preposiciones
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>A mí me gusta a mí</em> <span class="text-red-500">✗</span> → <em>A mí me gusta</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="closeGramaticalesModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal flotante para Puntuación -->
+<div id="puntuacionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="modalContentPuntuacion">
+        <div class="bg-gradient-to-r from-pink-400 to-pink-600 text-white p-6 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="text-2xl">✍️</span>
+                    Errores de Puntuación
+                </h3>
+                <button onclick="closePuntuacionModal()" class="text-white hover:text-gray-200 text-2xl font-bold transition-colors duration-200">
+                    ×
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 mb-4 leading-relaxed">
+                Los <strong>errores de puntuación</strong> son como las señales de tránsito en el texto. Sin ellas, ¡choque seguro! Afectan la claridad y el significado.
+            </p>
+            
+            <div class="space-y-4">
+                <div class="bg-pink-50 border-l-4 border-pink-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-pink-800 mb-2 flex items-center gap-2">
+                        <span>,</span>
+                        Comas
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Vamos a comer niños</em> <span class="text-red-500">✗</span> → <em>Vamos a comer, niños</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-orange-800 mb-2 flex items-center gap-2">
+                        <span>.</span>
+                        Puntos
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Me gusta leer me gusta escribir</em> <span class="text-red-500">✗</span> → <em>Me gusta leer. Me gusta escribir.</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                        <span>¿¡</span>
+                        Signos de interrogación
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Como te llamas?</em> <span class="text-red-500">✗</span> → <em>¿Cómo te llamas?</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="closePuntuacionModal()" class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal flotante para Estilo -->
+<div id="estiloModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="modalContentEstilo">
+        <div class="bg-gradient-to-r from-purple-400 to-purple-600 text-white p-6 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="text-2xl">🎨</span>
+                    Errores de Estilo
+                </h3>
+                <button onclick="closeEstiloModal()" class="text-white hover:text-gray-200 text-2xl font-bold transition-colors duration-200">
+                    ×
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 mb-4 leading-relaxed">
+                Los <strong>errores de estilo</strong> afectan la claridad, fluidez y atractivo del texto. ¡Haz que tu escritura sea fácil y divertida de leer!
+            </p>
+            
+            <div class="space-y-4">
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2">
+                        <span>🔁</span>
+                        Repeticiones
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>El perro es un perro muy perro</em> <span class="text-red-500">✗</span> → <em>El perro es un animal muy fiel</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+                
+                <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-indigo-800 mb-2 flex items-center gap-2">
+                        <span>🧩</span>
+                        Frases largas
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Cuando fui a la tienda porque tenía hambre y además quería ver a mi amigo que...</em> <span class="text-red-500">✗</span>
+                    </p>
+                </div>
+                
+                <div class="bg-teal-50 border-l-4 border-teal-400 p-4 rounded-lg">
+                    <h4 class="font-bold text-teal-800 mb-2 flex items-center gap-2">
+                        <span>💬</span>
+                        Lenguaje poco claro
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        <em>Eso es así porque sí</em> <span class="text-red-500">✗</span> → <em>Esto ocurre por las siguientes razones</em> <span class="text-green-500">✓</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="closeEstiloModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Funciones para el modal de Gramaticales
+    function showGramaticalesModal() {
+        const modal = document.getElementById('gramaticalesModal');
+        const modalContent = document.getElementById('modalContentGramaticales');
+        
+        modal.classList.remove('hidden');
+        
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+    
+    function closeGramaticalesModal() {
+        const modal = document.getElementById('gramaticalesModal');
+        const modalContent = document.getElementById('modalContentGramaticales');
+        
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+    
+    // Funciones para el modal de Puntuación
+    function showPuntuacionModal() {
+        const modal = document.getElementById('puntuacionModal');
+        const modalContent = document.getElementById('modalContentPuntuacion');
+        
+        modal.classList.remove('hidden');
+        
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+    
+    function closePuntuacionModal() {
+        const modal = document.getElementById('puntuacionModal');
+        const modalContent = document.getElementById('modalContentPuntuacion');
+        
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+    
+    // Funciones para el modal de Estilo
+    function showEstiloModal() {
+        const modal = document.getElementById('estiloModal');
+        const modalContent = document.getElementById('modalContentEstilo');
+        
+        modal.classList.remove('hidden');
+        
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+    
+    function closeEstiloModal() {
+        const modal = document.getElementById('estiloModal');
+        const modalContent = document.getElementById('modalContentEstilo');
+        
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+    
+    // Event listeners para cerrar modales al hacer clic fuera de ellos
+    document.getElementById('gramaticalesModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeGramaticalesModal();
+        }
+    });
+    
+    document.getElementById('puntuacionModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePuntuacionModal();
+        }
+    });
+    
+    document.getElementById('estiloModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEstiloModal();
+        }
+    });
+    
+    // Cerrar modales con la tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeOrtograficosModal();
+            closeGramaticalesModal();
+            closePuntuacionModal();
+            closeEstiloModal();
+        }
+    });
+</script>
+
+</body>
+</html>
