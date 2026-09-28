@@ -28,11 +28,10 @@ const PROGRAMAS = [['tecnico', 'Técnico'], ['tecnologo', 'Tecnólogo']];
 const IGNORAR = new Set(['_template', 'node_modules', 'scripts', '.git', '.github']);
 
 // --- Unidades que NO se publican en el listado ------------------------------
-// Edita esta lista cuando esas unidades estén listas para compartirse.
-const EXCLUIR = new Set([
-  'tecnico/semestre-3/unidad-3',
-  'tecnologo/semestre-2/unidad-3',
-]);
+// Vacía: hoy se listan todos los OVAs del repo.
+// Para ocultar una unidad, agrega su ruta con el formato
+// 'programa/semestre-N/unidad-N' (ej: 'tecnico/semestre-3/unidad-3').
+const EXCLUIR = new Set([]);
 
 // --- Nombre visible de cada carpeta de materia ------------------------------
 // Si una materia no está aquí, se muestra su slug con guiones cambiados por
