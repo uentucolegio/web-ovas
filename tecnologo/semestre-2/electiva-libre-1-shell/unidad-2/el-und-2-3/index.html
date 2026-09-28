@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Permisos, usuarios, grupos, chmod, procesos y servicios en Linux</title>
+    <meta name="description"
+        content="Aprende a gestionar permisos, usuarios y grupos con chmod, chown y chgrp, y a administrar procesos y servicios con ps, top, kill, systemctl y journalctl en Linux.">
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;"
+                    class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;"
+                    class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- ===================== INTRODUCCIÓN ===================== -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">
+                    Permisos, usuarios, grupos y procesos en Linux
+                </h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La administración de archivos y procesos desde la terminal es una competencia central en el
+                    desarrollo web profesional. En entornos reales, el despliegue de aplicaciones, la configuración de
+                    servidores, la automatización de tareas y la gestión de servicios ocurren en sistemas Linux remotos,
+                    donde el acceso gráfico es limitado o inexistente. Allí, un archivo como
+                    <code class="bg-slate-100 px-1 rounded">.env</code> con credenciales de base de datos o un servicio
+                    como <code class="bg-slate-100 px-1 rounded">nginx</code> dependen por completo de comandos escritos
+                    en consola.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Un desarrollador web que desconoce cómo funcionan los permisos, la propiedad de archivos, los
+                    usuarios y los procesos en Linux puede exponer credenciales, interrumpir servicios o impedir el
+                    correcto funcionamiento de una aplicación en producción. Los comandos
+                    <strong>chmod</strong>, <strong>chown</strong>, <strong>chgrp</strong>, <strong>useradd</strong>,
+                    <strong>groupadd</strong>, <strong>ps</strong>, <strong>kill</strong>,
+                    <strong>systemctl</strong> y <strong>journalctl</strong> son las herramientas con las que se opera
+                    con seguridad y precisión en esos escenarios.
+                </p>
+
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        🔐 <strong>¡Permisos con criterio! Cada archivo tiene un dueño, un grupo y unas reglas de
+                            acceso: entenderlas es la diferencia entre un despliegue seguro y una filtración de
+                            credenciales. 🐧💻🛡️</strong>
+                    </p>
+                </div>
+
+                <!-- Síntesis de voz -->
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4"
+                    data-target="introduccion">
+                    <button
+                        class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button
+                        class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button
+                        class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-introduccion" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-introduccion" min="0.5" max="2"
+                            step="0.1" value="1" class="w-24">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== OBJETIVOS ===================== -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔐</span>
+                        <span>
+                            Identificar y explicar la estructura de permisos de archivos y directorios en Linux
+                            (<strong>usuario</strong>, <strong>grupo</strong> y <strong>otros</strong>), tanto en
+                            notación simbólica <code class="bg-slate-100 px-1 rounded">rwx</code> como numérica.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">👥</span>
+                        <span>
+                            Usar comandos de gestión de usuarios y grupos
+                            (<code class="bg-slate-100 px-1 rounded">useradd</code>,
+                            <code class="bg-slate-100 px-1 rounded">groupadd</code>,
+                            <code class="bg-slate-100 px-1 rounded">usermod -aG</code>) para organizar el acceso a los
+                            recursos del sistema.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛠️</span>
+                        <span>
+                            Modificar permisos y propiedad de archivos y directorios usando
+                            <code class="bg-slate-100 px-1 rounded">chmod</code>,
+                            <code class="bg-slate-100 px-1 rounded">chown</code> y
+                            <code class="bg-slate-100 px-1 rounded">chgrp</code> en contextos de despliegue web.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">⚙️</span>
+                        <span>
+                            Consultar y gestionar procesos y servicios del sistema con herramientas como
+                            <code class="bg-slate-100 px-1 rounded">ps</code>,
+                            <code class="bg-slate-100 px-1 rounded">top</code>,
+                            <code class="bg-slate-100 px-1 rounded">kill</code>,
+                            <code class="bg-slate-100 px-1 rounded">systemctl</code> y
+                            <code class="bg-slate-100 px-1 rounded">journalctl</code>.
+                        </span>
+                    </li>
+                </ul>
+
+                <!-- Síntesis de voz -->
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4"
+                    data-target="objetivos">
+                    <button
+                        class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button
+                        class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button
+                        class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-objetivos" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-objetivos" min="0.5" max="2" step="0.1"
+                            value="1" class="w-24">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== CONTENIDO ===================== -->
+            <div id="contenido" class="content-pane">
+                <!-- Hero banner -->
+                <div class="ux-hero">
+                    <h2 style="display: flex; align-items: center; gap: 10px;">
+                        <div
+                            style="width: 45px; height: 45px; border-radius: 12px; background: #3E7036; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-user-shield" style="color: #fff; font-size: 22px;"></i>
+                        </div>
+                        Permisos, usuarios, grupos y procesos
+                    </h2>
+                    <p>Domina chmod, chown, chgrp, useradd, ps, kill, systemctl y journalctl: el control de acceso y la
+                        gestión de servicios en cualquier servidor Linux de producción.</p>
+                </div>
+
+                <!-- Progress dots -->
+                <div class="prog-dots" id="ux-prog">
+                    <div class="prog-dot done" title="Permisos rwx"></div>
+                    <div class="prog-dot" title="Usuarios y grupos"></div>
+                    <div class="prog-dot" title="chmod, chown y chgrp"></div>
+                    <div class="prog-dot" title="Procesos y servicios"></div>
+                    <span class="section-counter" id="ux-counter">Tema 1 de 4</span>
+                </div>
+
+                <!-- TABS de navegación -->
+                <div class="ux-tabs" role="tablist">
+                    <button class="ux-tab-btn active" onclick="showUxSection('permisos',0)" id="tab-permisos">
+                        <i class="fa-solid fa-lock ux-tab-icon" aria-hidden="true"></i>
+                        <span>Permisos: <code>rwx</code></span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('usuarios',1)" id="tab-usuarios">
+                        <i class="fa-solid fa-users ux-tab-icon" aria-hidden="true"></i>
+                        <span>Usuarios y grupos</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('permisos-chmod',2)" id="tab-permisos-chmod">
+                        <i class="fa-solid fa-sliders ux-tab-icon" aria-hidden="true"></i>
+                        <span>Cambiar: <code>chmod</code> y <code>chown</code></span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('procesos',3)" id="tab-procesos">
+                        <i class="fa-solid fa-gears ux-tab-icon" aria-hidden="true"></i>
+                        <span>Procesos y servicios</span>
+                    </button>
+                </div>
+
+                <!-- ===== SECCIÓN 1: PERMISOS EN LINUX ===== -->
+                <div class="ux-section active" id="sec-permisos">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#508C46;margin-bottom:16px;">🔐 Permisos en
+                        Linux: lectura, escritura y ejecución</h3>
+
+                    <div class="uber-analogy">
+                        <div class="uber-icon">🏢</div>
+                        <div>
+                            <strong style="color:#7A5C00;font-size:1rem;">Imagínalo así:</strong>
+                            <p style="margin:6px 0 0;color:#7A5C00;font-size:.9rem;">
+                                Cada archivo es una oficina con tres juegos de llaves: uno para el
+                                <em>propietario</em>, uno para su <em>equipo</em> (el grupo) y uno para
+                                <em>cualquier visitante</em> (otros). Cada juego abre tres puertas distintas: mirar
+                                (<code>r</code>), modificar (<code>w</code>) y entrar o ejecutar (<code>x</code>).
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            Linux asigna a cada archivo y directorio un conjunto de permisos que determinan qué acciones
+                            puede realizar cada usuario sobre él. Los permisos se dividen en tres categorías:
+                            <strong>usuario propietario</strong> (owner), <strong>grupo</strong> asociado y
+                            <strong>resto de usuarios</strong> (others). Para cada categoría se definen tres tipos de
+                            acceso: lectura (<code>r</code>), escritura (<code>w</code>) y ejecución (<code>x</code>).
+                        </p>
+                        <p style="font-size:.9rem;color:#374151;margin:0 0 8px;">
+                            El comando <code>ls -l</code> muestra los permisos en una cadena de diez caracteres: el
+                            primero indica el tipo de archivo (<code>d</code> para directorio, <code>-</code> para
+                            archivo regular) y los nueve siguientes representan los permisos en grupos de tres.
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> ls -l<br>
+                            drwxr-xr-x 5 deploy deploy 4096 jul 20 10:15 mi-proyecto-web<br>
+                            -rw-r--r-- 1 deploy deploy&nbsp; 256 jul 20 10:15 .env<br>
+                            -rwxr-xr-x 1 deploy deploy 1024 jul 20 10:15 server.js
+                        </div>
+                        <ul style="margin:12px 0 0;padding-left:20px;color:#374151;font-size:.9rem;line-height:1.7;">
+                            <li><code>mi-proyecto-web</code> es un directorio (<code>d</code>) con
+                                <code>rwxr-xr-x</code>: el propietario lee, escribe y entra; el grupo y otros solo leen
+                                y entran.</li>
+                            <li><code>.env</code> tiene <code>rw-r--r--</code>: solo el propietario puede escribir, pero
+                                <strong>todos pueden leerlo</strong> (un riesgo si contiene credenciales).</li>
+                            <li><code>server.js</code> es ejecutable (<code>rwxr-xr-x</code>), por lo que puede
+                                invocarse directamente como script.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Desglose interactivo de la cadena de permisos -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin-bottom:12px;">🔍 Desglose
+                        interactivo: haz clic en cada bloque de <code>-rw-r--r--</code></h4>
+                    <p style="font-size:.85rem;color:#4b5563;margin-bottom:16px;">
+                        Así se lee la cadena que devuelve <code>ls -l</code> para el archivo <code>.env</code>:
+                    </p>
+                    <div class="chmod-desglose">
+                        <div class="chmod-parte" id="pp-tipo" onclick="showPermInfo('tipo')">
+                            <span class="chmod-token">-</span>
+                            <span class="chmod-label">Tipo</span>
+                        </div>
+                        <div class="chmod-parte" id="pp-user" onclick="showPermInfo('user')">
+                            <span class="chmod-token">rw-</span>
+                            <span class="chmod-label">Usuario</span>
+                        </div>
+                        <div class="chmod-parte" id="pp-group" onclick="showPermInfo('group')">
+                            <span class="chmod-token">r--</span>
+                            <span class="chmod-label">Grupo</span>
+                        </div>
+                        <div class="chmod-parte" id="pp-other" onclick="showPermInfo('other')">
+                            <span class="chmod-token">r--</span>
+                            <span class="chmod-label">Otros</span>
+                        </div>
+                    </div>
+                    <div id="perm-info-panel" class="chmod-info-panel" style="display:none;"></div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">🔢 Notación numérica
+                        de permisos</h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">
+                        Cada tipo de acceso tiene un valor: <strong>lectura = 4</strong>,
+                        <strong>escritura = 2</strong>, <strong>ejecución = 1</strong>. La suma por categoría produce un
+                        número de tres dígitos (propietario, grupo, otros). Haz clic en cada fila para resaltarla:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>🔢 Número</th>
+                                    <th>🔤 Equivalente</th>
+                                    <th>📄 Uso típico en un proyecto web</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>755</code></td>
+                                    <td><code>rwxr-xr-x</code></td>
+                                    <td>Directorios públicos y scripts ejecutables (<code>public/</code>)</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>750</code></td>
+                                    <td><code>rwxr-x---</code></td>
+                                    <td>Código fuente accesible solo para el propietario y su equipo
+                                        (<code>src/</code>)</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>644</code></td>
+                                    <td><code>rw-r--r--</code></td>
+                                    <td>Archivos estáticos que el servidor debe leer (<code>index.html</code>)</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>640</code></td>
+                                    <td><code>rw-r-----</code></td>
+                                    <td>Logs legibles por el equipo, invisibles para el resto
+                                        (<code>logs/app.log</code>)</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>600</code></td>
+                                    <td><code>rw-------</code></td>
+                                    <td>Credenciales y variables sensibles (<code>.env</code>)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Calculadora interactiva de permisos -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">🧮 Calculadora de
+                        permisos</h4>
+                    <p style="font-size:.85rem;color:#4b5563;margin-bottom:12px;">
+                        Marca las casillas y observa cómo cambian el número y la cadena simbólica:
+                    </p>
+                    <div class="perm-calc">
+                        <div class="perm-calc-grid">
+                            <div class="perm-col perm-col-user">
+                                <h5>👤 Usuario</h5>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="u"
+                                        data-val="4" checked> Lectura <span class="perm-val">4</span></label>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="u"
+                                        data-val="2" checked> Escritura <span class="perm-val">2</span></label>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="u"
+                                        data-val="1" checked> Ejecución <span class="perm-val">1</span></label>
+                            </div>
+                            <div class="perm-col perm-col-group">
+                                <h5>👥 Grupo</h5>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="g"
+                                        data-val="4" checked> Lectura <span class="perm-val">4</span></label>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="g"
+                                        data-val="2"> Escritura <span class="perm-val">2</span></label>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="g"
+                                        data-val="1" checked> Ejecución <span class="perm-val">1</span></label>
+                            </div>
+                            <div class="perm-col perm-col-other">
+                                <h5>🌍 Otros</h5>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="o"
+                                        data-val="4" checked> Lectura <span class="perm-val">4</span></label>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="o"
+                                        data-val="2"> Escritura <span class="perm-val">2</span></label>
+                                <label class="perm-check"><input type="checkbox" class="perm-cb" data-cat="o"
+                                        data-val="1" checked> Ejecución <span class="perm-val">1</span></label>
+                            </div>
+                        </div>
+                        <div class="perm-result">
+                            <div class="perm-result-cmd">chmod <span id="perm-num">755</span> archivo</div>
+                            <div class="perm-result-str" id="perm-str">rwxr-xr-x</div>
+                            <p class="perm-result-msg" id="perm-msg"></p>
+                        </div>
+                    </div>
+
+                    <div class="ux-nota" style="margin-top:20px;">
+                        <span style="font-size:1.4rem;">📌</span>
+                        <span>En los <strong>directorios</strong>, el permiso <code>x</code> no significa “ejecutar”,
+                            sino <strong>poder entrar y atravesar</strong> la carpeta. Sin <code>x</code> en un
+                            directorio, no puedes acceder a los archivos que hay dentro aunque tengan permiso de
+                            lectura.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 2: USUARIOS Y GRUPOS ===== -->
+                <div class="ux-section" id="sec-usuarios">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#508C46;margin-bottom:16px;">👥 Usuarios y grupos
+                    </h3>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            Linux es un sistema <strong>multiusuario</strong>: varios usuarios pueden acceder al mismo
+                            sistema con identidades y privilegios distintos. Cada usuario tiene un identificador único
+                            (<strong>UID</strong>) y pertenece a un grupo principal, además de poder formar parte de
+                            grupos adicionales.
+                        </p>
+                        <p style="font-size:.9rem;color:#374151;margin:0;">
+                            Los grupos permiten administrar permisos de manera <strong>colectiva</strong>: al asignar
+                            permisos a un grupo, todos sus miembros heredan esos accesos sin necesidad de configurar
+                            cada usuario individualmente. Es la forma habitual de dar acceso a un equipo de desarrollo
+                            sobre la carpeta de un proyecto.
+                        </p>
+                    </div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin-bottom:12px;">⌨️ Comandos de
+                        gestión de usuarios y grupos</h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">Haz clic en cada fila para resaltarla:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>⌨️ Comando</th>
+                                    <th>📄 Qué hace</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>useradd</code></td>
+                                    <td>Crea un nuevo usuario en el sistema</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>passwd</code></td>
+                                    <td>Define o cambia la contraseña de un usuario</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>groupadd</code></td>
+                                    <td>Crea un nuevo grupo</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>usermod -aG</code></td>
+                                    <td>Agrega un usuario a un grupo <strong>sin borrar</strong> sus grupos actuales
+                                    </td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>groupdel</code></td>
+                                    <td>Elimina un grupo</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>groups</code> o <code>id</code></td>
+                                    <td>Muestra los grupos a los que pertenece un usuario</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ejemplo-aplicado" style="margin-top:20px;">
+                        <div class="ejemplo-header">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>Ejemplo aplicado — crear un usuario y un equipo de desarrollo</span>
+                        </div>
+                        <p style="margin:0 0 10px;font-size:.9rem;color:#374151;">
+                            Se crea el usuario <code>frontend-dev</code> con directorio home (<code>-m</code>),
+                            <code>/bin/bash</code> como shell (<code>-s</code>) y un comentario descriptivo
+                            (<code>-c</code>). Luego se crea el grupo <code>dev-team</code> y se agrega al usuario:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> sudo useradd -m -s /bin/bash -c "Desarrollador Frontend"
+                            frontend-dev<br>
+                            <span class="code-prompt">$</span> sudo passwd frontend-dev<br>
+                            <span class="code-prompt">$</span> sudo groupadd dev-team<br>
+                            <span class="code-prompt">$</span> sudo usermod -aG dev-team frontend-dev<br>
+                            <span class="code-prompt">$</span> groups frontend-dev<br>
+                            <span class="code-comment"># El grupo dev-team se usará después para asignar permisos</span><br>
+                            <span class="code-comment"># compartidos sobre los directorios del proyecto.</span>
+                        </div>
+                    </div>
+
+                    <!-- Comparador usuario interactivo vs usuario de servicio -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">⚖️ Usuario de persona
+                        vs. usuario de servicio</h4>
+                    <div class="comparador-grid">
+                        <div class="comparador-panel comparador-left">
+                            <div class="comparador-header comparador-header-left">
+                                <i class="fa-solid fa-user"></i>
+                                <span>Usuario interactivo</span>
+                            </div>
+                            <div class="comparador-body">
+                                <div class="code-block" style="margin:0 0 8px;">
+                                    <span class="code-prompt">$</span> sudo useradd -m -s /bin/bash frontend-dev
+                                </div>
+                                <div class="comparador-result comparador-util">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <p>Tiene carpeta personal y shell: una persona puede iniciar sesión, editar código y
+                                        ejecutar comandos. Pensado para miembros del equipo.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparador-vs">VS</div>
+                        <div class="comparador-panel comparador-right">
+                            <div class="comparador-header comparador-header-right">
+                                <i class="fa-solid fa-server"></i>
+                                <span>Usuario de servicio</span>
+                            </div>
+                            <div class="comparador-body">
+                                <div class="code-block" style="margin:0 0 8px;">
+                                    <span class="code-prompt">$</span> sudo useradd -r -s /usr/sbin/nologin -d
+                                    /var/lib/mi-app-web mi-app-user
+                                </div>
+                                <div class="comparador-result comparador-util">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <p><code>-r</code> crea una cuenta de sistema (UID bajo 1000),
+                                        <code>-s /usr/sbin/nologin</code> impide iniciar sesión y <code>-d</code> fija
+                                        su directorio. Reduce el impacto si el servicio se ve comprometido.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ux-nota" style="margin-top:20px;">
+                        <span style="font-size:1.4rem;">🖥️</span>
+                        <span>En producción, servicios como <strong>Nginx</strong>, <strong>Node.js</strong> o
+                            <strong>PostgreSQL</strong> se ejecutan bajo usuarios dedicados sin inicio de sesión
+                            interactivo. Nunca ejecutes una aplicación web como <code>root</code>.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 3: CHMOD, CHOWN Y CHGRP ===== -->
+                <div class="ux-section" id="sec-permisos-chmod">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#508C46;margin-bottom:16px;">🛠️ Cambiar permisos
+                        y propiedad: <code>chmod</code>, <code>chown</code> y <code>chgrp</code></h3>
+
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:1rem;color:#374151;margin:0 0 12px;">
+                            <code>chmod</code> (change mode) modifica los <strong>permisos de acceso</strong> de
+                            archivos y directorios. Admite notación numérica (por ejemplo, <code>755</code>) o simbólica
+                            (por ejemplo, <code>u+x</code>, <code>g-w</code>). La opción <code>-R</code> aplica los
+                            cambios de forma recursiva a un directorio y todo su contenido.
+                        </p>
+                        <p style="font-size:.9rem;color:#508C46;font-weight:600;margin:0 0 8px;">Sintaxis básica:</p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> chmod [opciones] permisos archivo_o_directorio
+                        </div>
+                        <p style="font-size:.9rem;color:#374151;margin:12px 0 8px;">Ajuste típico de permisos en un
+                            proyecto web:</p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> chmod 755 public/<br>
+                            <span class="code-prompt">$</span> chmod 644 public/index.html<br>
+                            <span class="code-prompt">$</span> chmod 600 .env<br>
+                            <span class="code-comment"># public/ navegable por todos, index.html legible por todos,</span><br>
+                            <span class="code-comment"># .env protegido contra lecturas no autorizadas.</span>
+                        </div>
+                    </div>
+
+                    <!-- Desglose interactivo chmod -R 750 src/ -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin-bottom:12px;">🔍 Desglose
+                        interactivo: haz clic en cada parte del comando</h4>
+                    <p style="font-size:.85rem;color:#4b5563;margin-bottom:16px;">
+                        Antes de cambiar permisos de forma recursiva, comprende todas las partes del comando:
+                    </p>
+                    <div class="chmod-desglose">
+                        <div class="chmod-parte" id="cp-chmod" onclick="showChmodInfo('chmod')">
+                            <span class="chmod-token">chmod</span>
+                            <span class="chmod-label">Comando</span>
+                        </div>
+                        <div class="chmod-parte" id="cp-r" onclick="showChmodInfo('r')">
+                            <span class="chmod-token">-R</span>
+                            <span class="chmod-label">Opción</span>
+                        </div>
+                        <div class="chmod-parte" id="cp-750" onclick="showChmodInfo('750')">
+                            <span class="chmod-token">750</span>
+                            <span class="chmod-label">Permisos</span>
+                        </div>
+                        <div class="chmod-parte" id="cp-dir" onclick="showChmodInfo('dir')">
+                            <span class="chmod-token">src/</span>
+                            <span class="chmod-label">Objetivo</span>
+                        </div>
+                    </div>
+                    <div id="chmod-info-panel" class="chmod-info-panel" style="display:none;"></div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">👑 Cambiar propietario
+                        y grupo: <code>chown</code> y <code>chgrp</code></h4>
+                    <div class="ux-card" style="margin-bottom:20px;">
+                        <p style="font-size:.95rem;color:#374151;margin:0 0 10px;">
+                            <code>chown</code> (change owner) modifica el usuario y/o el grupo propietario de un archivo
+                            o directorio; <code>chgrp</code> cambia únicamente el grupo.
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> chown [opciones] usuario:grupo archivo_o_directorio<br>
+                            <span class="code-prompt">$</span> sudo chown -R www-data:www-data /var/www/mi-proyecto-web<br>
+                            <span class="code-comment"># Asigna recursivamente el usuario y grupo www-data (habitual en</span><br>
+                            <span class="code-comment"># Nginx/Apache) para que el servidor pueda servir los archivos.</span>
+                        </div>
+                        <div class="code-block" style="margin-top:10px;">
+                            <span class="code-prompt">$</span> sudo chgrp -R dev-team ~/proyectos/mi-api-node<br>
+                            <span class="code-comment"># Solo cambia el grupo: el propietario se mantiene.</span>
+                        </div>
+                    </div>
+
+                    <!-- Niveles de riesgo -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">⚠️ Niveles de riesgo
+                        al asignar permisos</h4>
+                    <div class="riesgo-tabla">
+                        <div class="riesgo-item riesgo-safe"><code>chmod 600 .env</code> → Solo el propietario lee y
+                            escribe: lo correcto para credenciales</div>
+                        <div class="riesgo-item riesgo-medio"><code>chmod 644 index.html</code> → Legible por todos:
+                            adecuado para archivos públicos, nunca para secretos</div>
+                        <div class="riesgo-item riesgo-alto"><code>chmod -R 777 /var/www</code> → Escritura y ejecución
+                            para cualquiera: riesgo alto de manipulación</div>
+                        <div class="riesgo-item riesgo-critico"><i class="fa-solid fa-skull-crossbones"></i>
+                            <code>sudo chmod -R 777 /</code> → ⚠️ <strong>PELIGROSO:</strong> deja todo el sistema
+                            abierto e inutilizable
+                        </div>
+                    </div>
+
+                    <div class="alerta-riesgo" style="margin-top:20px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                        <div>
+                            <strong>⚠️ Errores comunes y cómo evitarlos:</strong>
+                            <ul style="margin:8px 0 0;padding-left:20px;line-height:1.7;">
+                                <li>Aplicar <code>777</code> a directorios completos “para que funcione”. Usa
+                                    <code>755</code> en directorios y <code>644</code> en archivos.</li>
+                                <li>Olvidar el permiso <code>x</code> en directorios: sin él no se puede atravesar la
+                                    ruta, aunque los archivos sean legibles.</li>
+                                <li>Usar <code>usermod -G</code> sin <code>-a</code>: reemplaza todos los grupos
+                                    suplementarios del usuario. Usa siempre <code>usermod -aG</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="ejemplo-aplicado" style="margin-top:20px;">
+                        <div class="ejemplo-header">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>Ejemplo integrado — permisos de un proyecto Node.js</span>
+                        </div>
+                        <p style="margin:0 0 10px;font-size:.9rem;color:#374151;">
+                            Estructura típica y permisos ajustados según la naturaleza de cada recurso:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> mkdir -p ~/proyectos/mi-api-node/{src,public,logs}<br>
+                            <span class="code-prompt">$</span> cd ~/proyectos/mi-api-node<br>
+                            <span class="code-prompt">$</span> touch .env logs/app.log<br>
+                            <span class="code-prompt">$</span> sudo chown -R $USER:dev-team .<br>
+                            <span class="code-prompt">$</span> chmod 750 src<br>
+                            <span class="code-prompt">$</span> chmod 755 public<br>
+                            <span class="code-prompt">$</span> chmod 640 logs/app.log<br>
+                            <span class="code-prompt">$</span> chmod 600 .env
+                        </div>
+                        <ul style="margin:12px 0 0;padding-left:20px;color:#374151;font-size:.88rem;line-height:1.7;">
+                            <li><code>src</code> (750): limitado al propietario y al equipo.</li>
+                            <li><code>public</code> (755): lectura y acceso general, escritura solo del propietario.
+                            </li>
+                            <li><code>logs/app.log</code> (640) y <code>.env</code> (600): restringidos.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Checklist -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">✅ Checklist antes de
+                        ejecutar <code>chmod -R</code> o <code>chown -R</code></h4>
+                    <p style="font-size:.85rem;color:#4b5563;margin-bottom:12px;">Marca cada verificación que hayas
+                        hecho:</p>
+                    <div class="checklist-container">
+                        <label class="checklist-item">
+                            <input type="checkbox" class="checklist-check"> <span>Confirmé mi ubicación con
+                                <code>pwd</code> y el contenido con <code>ls -l</code></span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="checklist-check"> <span>La ruta es del proyecto, no del
+                                sistema (nunca <code>/</code>, <code>/etc</code> ni <code>/usr</code>)</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="checklist-check"> <span>Sé qué usuario y grupo necesita el
+                                servicio (por ejemplo, <code>www-data</code>)</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="checklist-check"> <span>Los archivos con credenciales quedarán
+                                en <code>600</code>, no en <code>777</code></span>
+                        </label>
+                        <div id="checklist-score" class="checklist-score" style="display:none;"></div>
+                    </div>
+
+                    <div class="ux-nota" style="margin-top:20px;">
+                        <span style="font-size:1.4rem;">🛡️</span>
+                        <span><strong>Regla general de este curso:</strong> el permiso mínimo necesario. Empieza por lo
+                            más restrictivo y abre accesos solo cuando un error concreto lo justifique.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 4: PROCESOS Y SERVICIOS ===== -->
+                <div class="ux-section" id="sec-procesos">
+                    <h3 style="font-size:1.35rem;font-weight:700;color:#508C46;margin-bottom:16px;">⚙️ Procesos y
+                        servicios</h3>
+
+                    <div class="uber-analogy">
+                        <div class="uber-icon">🎛️</div>
+                        <div>
+                            <strong style="color:#7A5C00;font-size:1rem;">La clave conceptual:</strong>
+                            <p style="margin:6px 0 0;color:#7A5C00;font-size:.9rem;">
+                                Un <strong>proceso</strong> es una instancia en ejecución de un programa: un servidor
+                                web, una base de datos, un script en segundo plano. Un <strong>servicio</strong> es un
+                                proceso que el sistema mantiene funcionando de forma continua y persistente, incluso
+                                tras reiniciar el servidor.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin-bottom:12px;">🔎 Inspeccionar
+                        procesos</h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">Haz clic en cada fila para resaltarla:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>⌨️ Comando</th>
+                                    <th>📄 Qué muestra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>ps</code></td>
+                                    <td>Una instantánea de los procesos en ejecución</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>ps aux | grep node</code></td>
+                                    <td>Filtra los procesos relacionados con Node.js y muestra su PID</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>top</code> o <code>htop</code></td>
+                                    <td>Vista dinámica en tiempo real de CPU, memoria y recursos por proceso</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>kill</code></td>
+                                    <td>Envía señales a un proceso para terminarlo o cambiar su comportamiento</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ux-card" style="margin:20px 0;">
+                        <p style="font-size:.9rem;color:#374151;margin:0 0 8px;">
+                            Flujo habitual para localizar y revisar un proceso de una aplicación web:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> ps aux | grep node<br>
+                            deploy&nbsp;&nbsp; 4821&nbsp; 0.4&nbsp; 1.2 node server.js<br>
+                            <span class="code-prompt">$</span> top<br>
+                            <span class="code-comment"># El PID (4821) identifica al proceso: es el dato que</span><br>
+                            <span class="code-comment"># necesitarás para detenerlo con kill.</span>
+                        </div>
+                    </div>
+
+                    <!-- Comparador kill -15 vs kill -9 -->
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">⚖️ Detener procesos de
+                        forma segura</h4>
+                    <div class="comparador-grid">
+                        <div class="comparador-panel comparador-left">
+                            <div class="comparador-header comparador-header-left">
+                                <i class="fa-solid fa-hand"></i>
+                                <span>kill -15 (SIGTERM) — primero</span>
+                            </div>
+                            <div class="comparador-body">
+                                <div class="code-block" style="margin:0 0 8px;">
+                                    <span class="code-prompt">$</span> kill -15 4821
+                                </div>
+                                <div class="comparador-result comparador-util">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <p>Pide al proceso que termine de forma ordenada: cierra conexiones, guarda estado y
+                                        libera recursos. Es la opción por defecto y la recomendada.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparador-vs">VS</div>
+                        <div class="comparador-panel comparador-right">
+                            <div class="comparador-header comparador-header-right">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span>kill -9 (SIGKILL) — último recurso</span>
+                            </div>
+                            <div class="comparador-body">
+                                <div class="code-block" style="margin:0 0 8px;">
+                                    <span class="code-prompt">$</span> kill -9 4821
+                                </div>
+                                <div class="comparador-result comparador-insuficiente">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <p>Fuerza la terminación inmediata. El proceso no puede limpiar nada: puede dejar
+                                        archivos bloqueados o datos a medio escribir. Úsalo solo si no responde.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:1.1rem;font-weight:700;color:#508C46;margin:24px 0 12px;">🧩 Gestión de
+                        servicios con <code>systemd</code></h4>
+                    <p style="color:#4b5563;font-size:.9rem;margin-bottom:12px;">
+                        La mayoría de distribuciones modernas usan <strong>systemd</strong> como sistema de
+                        inicialización. El comando <code>systemctl</code> controla los servicios:
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="brief-table">
+                            <thead>
+                                <tr>
+                                    <th>⌨️ Comando</th>
+                                    <th>📄 Efecto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>systemctl status nginx</code></td>
+                                    <td>Consulta el estado actual del servicio y sus últimas líneas de log</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>sudo systemctl start nginx</code></td>
+                                    <td>Inicia el servicio en ese momento</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>sudo systemctl stop nginx</code></td>
+                                    <td>Detiene el servicio</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>sudo systemctl restart nginx</code></td>
+                                    <td>Reinicia el servicio, útil tras cambiar su configuración</td>
+                                </tr>
+                                <tr onclick="highlightRow(this)">
+                                    <td><code>sudo systemctl enable nginx</code></td>
+                                    <td>Hace que el servicio arranque automáticamente al iniciar el sistema</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ejemplo-aplicado" style="margin-top:20px;">
+                        <div class="ejemplo-header">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span>Consultar logs con <code>journalctl</code></span>
+                        </div>
+                        <p style="margin:0 0 10px;font-size:.9rem;color:#374151;">
+                            <code>journalctl</code> consulta los registros del sistema y de los servicios gestionados
+                            por systemd. Es la herramienta clave para diagnosticar por qué un servicio no arranca:
+                        </p>
+                        <div class="code-block">
+                            <span class="code-prompt">$</span> journalctl -u nginx -n 50<br>
+                            <span class="code-comment"># Últimas 50 líneas de log del servicio nginx.</span><br>
+                            <span class="code-prompt">$</span> journalctl -f -u mi-app-web<br>
+                            <span class="code-comment"># Sigue en tiempo real los logs de un servicio personalizado.</span>
+                        </div>
+                    </div>
+
+                    <div class="ux-nota" style="margin-top:20px;">
+                        <span style="font-size:1.4rem;">💡</span>
+                        <span><strong>Secuencia de diagnóstico recomendada:</strong>
+                            <code>systemctl status</code> para ver qué ocurre → <code>journalctl -u servicio</code> para
+                            leer el error concreto → corregir la configuración → <code>systemctl restart</code> para
+                            aplicar el cambio.</span>
+                    </div>
+                </div>
+
+                <!-- Botones de navegación -->
+                <div style="display:flex;justify-content:space-between;margin-top:28px;flex-wrap:wrap;gap:10px;">
+                    <button id="ux-prev" onclick="navigateUx(-1)"
+                        style="display:none;background:#E7F3E4;color:#508C46;border:none;border-radius:50px;padding:10px 22px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:all .2s;"
+                        onmouseover="this.style.background='#D3E9CE'" onmouseout="this.style.background='#E7F3E4'">←
+                        Anterior</button>
+                    <button id="ux-next" onclick="navigateUx(1)"
+                        style="margin-left:auto;background:#508C46;color:#fff;border:none;border-radius:50px;padding:10px 22px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:all .2s;"
+                        onmouseover="this.style.background='#3E7036'"
+                        onmouseout="this.style.background='#508C46'">Siguiente →</button>
+                </div>
+
+                <!-- Lógica JS del contenido -->
+                <script>
+                    (function () {
+                        const sections = ['permisos', 'usuarios', 'permisos-chmod', 'procesos'];
+                        let current = 0;
+
+                        window.showUxSection = function (id, idx) {
+                            sections.forEach(s => {
+                                document.getElementById('sec-' + s)?.classList.remove('active');
+                                document.getElementById('tab-' + s)?.classList.remove('active');
+                            });
+                            document.getElementById('sec-' + id)?.classList.add('active');
+                            document.getElementById('tab-' + id)?.classList.add('active');
+                            current = idx;
+                            updateNav();
+                        };
+
+                        window.navigateUx = function (dir) {
+                            let next = Math.min(Math.max(current + dir, 0), sections.length - 1);
+                            showUxSection(sections[next], next);
+                            document.getElementById('tab-' + sections[next])?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        };
+
+                        function updateNav() {
+                            const prev = document.getElementById('ux-prev');
+                            const next = document.getElementById('ux-next');
+                            const dots = document.querySelectorAll('#ux-prog .prog-dot');
+                            const counter = document.getElementById('ux-counter');
+                            if (prev) prev.style.display = current > 0 ? 'block' : 'none';
+                            if (next) next.textContent = current < sections.length - 1 ? 'Siguiente →' : '✅ Completado';
+                            if (counter) counter.textContent = 'Tema ' + (current + 1) + ' de ' + sections.length;
+                            dots.forEach((d, i) => d.classList.toggle('done', i <= current));
+                        }
+
+                        window.highlightRow = function (row) {
+                            const table = row.closest('table');
+                            if (!table) return;
+                            const rows = table.querySelectorAll('tbody tr');
+                            rows.forEach(r => r.querySelectorAll('td').forEach(td => td.style.background = ''));
+                            row.querySelectorAll('td').forEach(td => td.style.background = '#D3E9CE');
+                        };
+
+                        // ---- Desglose de la cadena de permisos ----
+                        const permData = {
+                            tipo: {
+                                title: '<code>-</code> — Tipo de elemento',
+                                color: '#6752A0',
+                                icon: '📄',
+                                desc: 'El <strong>primer carácter</strong> indica qué es el elemento: <code>-</code> archivo regular, <code>d</code> directorio, <code>l</code> enlace simbólico. No es un permiso, sino una etiqueta de tipo.',
+                                verify: 'ls -l'
+                            },
+                            user: {
+                                title: '<code>rw-</code> — Permisos del usuario propietario',
+                                color: '#508C46',
+                                icon: '👤',
+                                desc: 'Los <strong>caracteres 2 a 4</strong> corresponden al dueño del archivo. Aquí puede leer (<code>r</code>) y escribir (<code>w</code>), pero no ejecutar (el guion indica permiso ausente). Equivale al valor numérico <strong>6</strong>.',
+                                verify: 'ls -l .env'
+                            },
+                            group: {
+                                title: '<code>r--</code> — Permisos del grupo',
+                                color: '#08AFE6',
+                                icon: '👥',
+                                desc: 'Los <strong>caracteres 5 a 7</strong> aplican a todos los miembros del grupo asociado al archivo. Aquí solo pueden leer: valor numérico <strong>4</strong>. Es la vía para dar acceso a un equipo completo.',
+                                verify: 'groups usuario'
+                            },
+                            other: {
+                                title: '<code>r--</code> — Permisos de otros',
+                                color: '#E22F6B',
+                                icon: '🌍',
+                                desc: 'Los <strong>últimos tres caracteres</strong> aplican a cualquier otro usuario del sistema. En un archivo <code>.env</code> con credenciales esto es un riesgo: lo correcto sería <code>chmod 600 .env</code> para dejarlo en <code>rw-------</code>.',
+                                verify: 'chmod 600 .env && ls -l .env'
+                            }
+                        };
+
+                        window.showPermInfo = function (part) {
+                            renderInfo('perm-info-panel', 'pp-', part, permData);
+                        };
+
+                        // ---- Desglose de chmod -R 750 src/ ----
+                        const chmodData = {
+                            chmod: {
+                                title: '<code>chmod</code> — Cambiar modo de acceso',
+                                color: '#508C46',
+                                icon: '🛠️',
+                                desc: 'El comando <strong>chmod</strong> (change mode) modifica los permisos de lectura, escritura y ejecución. Solo pueden usarlo el propietario del archivo o un usuario con privilegios de administrador.',
+                                verify: 'man chmod'
+                            },
+                            r: {
+                                title: '<code>-R</code> — Recursivo',
+                                color: '#F89F32',
+                                icon: '🔄',
+                                desc: 'Aplica el cambio al directorio y a <em>todo</em> su contenido: subcarpetas y archivos. Es potente y peligroso: un <code>-R</code> sobre la ruta equivocada puede exponer o bloquear cientos de archivos de una sola vez.',
+                                verify: 'ls -lR src/'
+                            },
+                            '750': {
+                                title: '<code>750</code> — Permisos en notación numérica',
+                                color: '#08AFE6',
+                                icon: '🔢',
+                                desc: 'Se lee dígito a dígito: <strong>7</strong> (4+2+1) para el propietario, que lee, escribe y entra; <strong>5</strong> (4+1) para el grupo, que lee y entra; <strong>0</strong> para otros, sin ningún acceso. Equivale a <code>rwxr-x---</code>.',
+                                verify: 'stat -c "%a %n" src/'
+                            },
+                            dir: {
+                                title: '<code>src/</code> — Directorio objetivo',
+                                color: '#6752A0',
+                                icon: '📁',
+                                desc: 'Es el <strong>argumento</strong> sobre el que actúa el comando: la carpeta de código fuente del proyecto. Verifica la ruta con <code>pwd</code> antes de ejecutar; una ruta absoluta mal escrita puede alcanzar directorios del sistema.',
+                                verify: 'pwd && ls -l'
+                            }
+                        };
+
+                        window.showChmodInfo = function (part) {
+                            renderInfo('chmod-info-panel', 'cp-', part, chmodData);
+                        };
+
+                        function renderInfo(panelId, prefix, part, dataset) {
+                            const panel = document.getElementById(panelId);
+                            const data = dataset[part];
+                            if (!panel || !data) return;
+                            document.querySelectorAll('.chmod-parte').forEach(p => {
+                                if (p.id.startsWith(prefix)) p.classList.remove('chmod-active');
+                            });
+                            document.getElementById(prefix + part)?.classList.add('chmod-active');
+                            panel.style.display = 'block';
+                            panel.style.borderLeftColor = data.color;
+                            panel.innerHTML = `
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                    <span style="font-size:1.5rem;">${data.icon}</span>
+                                    <strong style="color:${data.color};font-size:1rem;">${data.title}</strong>
+                                </div>
+                                <p style="color:#374151;font-size:.9rem;margin:0 0 10px;">${data.desc}</p>
+                                <div style="font-size:.8rem;color:#6b7280;background:#f8fafc;border-radius:6px;padding:6px 10px;">
+                                    💡 <em>Para verificar:</em> <code>${data.verify}</code>
+                                </div>
+                            `;
+                        }
+
+                        // ---- Calculadora de permisos ----
+                        const permMsgs = {
+                            '600': 'Ideal para archivos con credenciales, como .env.',
+                            '640': 'Logs legibles por el equipo y ocultos para el resto.',
+                            '644': 'Archivos estáticos que el servidor web debe leer.',
+                            '750': 'Código fuente accesible solo para el propietario y su equipo.',
+                            '755': 'Directorios y scripts públicos: el estándar en despliegues web.',
+                            '777': '⚠️ Cualquiera puede escribir y ejecutar: evítalo en producción.',
+                            '000': 'Nadie puede hacer nada: el archivo queda inaccesible.'
+                        };
+
+                        function updatePermCalc() {
+                            const cats = ['u', 'g', 'o'];
+                            const letters = { 4: 'r', 2: 'w', 1: 'x' };
+                            let num = '', str = '';
+                            cats.forEach(cat => {
+                                let sum = 0, part = '';
+                                [4, 2, 1].forEach(v => {
+                                    const cb = document.querySelector(`.perm-cb[data-cat="${cat}"][data-val="${v}"]`);
+                                    if (cb && cb.checked) { sum += v; part += letters[v]; }
+                                    else { part += '-'; }
+                                });
+                                num += sum; str += part;
+                            });
+                            const numEl = document.getElementById('perm-num');
+                            const strEl = document.getElementById('perm-str');
+                            const msgEl = document.getElementById('perm-msg');
+                            if (numEl) numEl.textContent = num;
+                            if (strEl) strEl.textContent = str;
+                            if (msgEl) msgEl.textContent = permMsgs[num] || 'Combinación poco habitual: revisa si es la que realmente necesitas.';
+                        }
+
+                        document.querySelectorAll('.perm-cb').forEach(cb => cb.addEventListener('change', updatePermCalc));
+                        updatePermCalc();
+
+                        // ---- Checklist interactiva ----
+                        document.querySelectorAll('.checklist-check').forEach(cb => {
+                            cb.addEventListener('change', () => {
+                                const total = document.querySelectorAll('.checklist-check').length;
+                                const checked = document.querySelectorAll('.checklist-check:checked').length;
+                                const score = document.getElementById('checklist-score');
+                                if (score) {
+                                    score.style.display = 'block';
+                                    const pct = Math.round((checked / total) * 100);
+                                    let color = '#E22F6B', label = '❌ Aún no es seguro aplicar el cambio';
+                                    if (pct >= 100) { color = '#508C46'; label = '✅ Verificación completa, puedes proceder'; }
+                                    else if (pct >= 50) { color = '#F89F32'; label = '⚠️ Te faltan verificaciones'; }
+                                    score.style.color = color;
+                                    score.innerHTML = `${label} — ${checked}/${total} verificaciones realizadas`;
+                                }
+                            });
+                        });
+
+                        updateNav();
+                    })();
+                </script>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== ACTIVIDADES ===================== -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+
+                <!-- ===== ACTIVIDAD 1: PERMISOS, USUARIOS Y GRUPOS ===== -->
+                <div class="terminal-activity bg-white border-l-4 rounded-lg p-6 mb-8 relative overflow-hidden"
+                    style="border-left-color:#508C46;border-top:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+                    <div class="absolute -top-4 -right-4 p-4 opacity-10 pointer-events-none text-9xl"
+                        style="color:#508C46;"><i class="fa-solid fa-user-lock"></i></div>
+                    <h3 class="text-xl font-bold mb-2" style="color:#508C46;">Actividad 1. Configurar permisos, usuarios
+                        y grupos</h3>
+                    <p class="text-slate-600 mb-4">
+                        <strong>Caso propuesto:</strong> configura desde cero el entorno de
+                        <code>proyecto-web-practica</code>, crea el grupo <code>dev-equipo</code> y el usuario
+                        <code>dev-frontend</code>, y aplica los permisos adecuados para simular un despliegue real con
+                        <code>chgrp</code> y <code>chmod</code>.
+                    </p>
+
+                    <!-- Reto actual A1 -->
+                    <div id="a1-challenge" class="mb-4 p-4 rounded-xl"
+                        style="background:#E7F3E4;border:1px solid #B7D9AF;">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl" style="color:#508C46;"><i class="fa-solid fa-bullseye"></i></span>
+                            <span class="font-bold text-lg" style="color:#508C46;">Reto <span id="a1-num">1</span> de
+                                <span id="a1-total">12</span></span>
+                        </div>
+                        <p id="a1-text" class="font-medium" style="color:#3E7036;"></p>
+                        <p id="a1-hint" class="text-sm mt-1 italic" style="color:#508C46;"></p>
+                    </div>
+
+                    <!-- Terminal A1 -->
+                    <div class="terminal-window rounded-xl overflow-hidden border border-slate-700">
+                        <div class="terminal-titlebar bg-slate-800 px-4 py-2 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="text-slate-400 text-xs ml-3 font-mono">estudiante@linux:~</span>
+                        </div>
+                        <div id="a1-body"
+                            class="bg-slate-900 p-4 font-mono text-sm text-green-400 min-h-[220px] max-h-[350px] overflow-y-auto">
+                            <div class="term-line text-slate-400">Terminal Linux simulada 🐧 — Actividad 1: permisos,
+                                usuarios y grupos</div>
+                            <div class="term-line text-slate-400">Escribe el comando indicado en el reto.</div>
+                            <div class="term-line text-slate-400">─────────────────────────────────────────</div>
+                        </div>
+                        <div class="bg-slate-900 px-4 pb-4 flex items-center gap-2">
+                            <span class="text-green-400 font-mono text-sm font-bold"
+                                id="a1-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a1-input"
+                                class="flex-1 bg-transparent border-none outline-none text-green-300 font-mono text-sm caret-green-400"
+                                placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 items-center mt-4 border-t pt-4">
+                        <button id="a1-reset"
+                            class="bg-slate-200 text-slate-700 font-bold py-2.5 px-6 rounded-lg hover:bg-slate-300 transition-all active:scale-95">Reiniciar</button>
+                        <div
+                            class="flex-1 min-w-[200px] ml-auto bg-slate-100 rounded-full h-5 overflow-hidden flex items-center border border-slate-200">
+                            <div id="a1-progress"
+                                class="h-full w-0 transition-all duration-500 text-xs text-white font-bold flex items-center justify-center"
+                                style="background:#508C46;"></div>
+                        </div>
+                        <span id="a1-score" class="font-bold w-14 text-center" style="color:#508C46;">0/12</span>
+                    </div>
+                    <div id="a1-feedback"
+                        class="mt-4 text-center font-bold text-lg h-10 transition-all flex items-center justify-center rounded-lg">
+                    </div>
+                </div>
+
+                <!-- ===== ACTIVIDAD 2: GESTIÓN DE PROCESOS Y SERVICIOS ===== -->
+                <div class="terminal-activity bg-white border-l-4 rounded-lg p-6 mb-8 relative overflow-hidden"
+                    style="border-left-color:#08AFE6;border-top:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+                    <div class="absolute -top-4 -right-4 p-4 opacity-10 pointer-events-none text-9xl"
+                        style="color:#08AFE6;"><i class="fa-solid fa-gears"></i></div>
+                    <h3 class="text-xl font-bold mb-2" style="color:#08AFE6;">Actividad 2. Gestionar procesos y
+                        servicios</h3>
+                    <p class="text-slate-600 mb-4">
+                        <strong>Caso real:</strong> pon en marcha un servidor Node.js en segundo plano, localiza su
+                        proceso con <code>ps</code>, deténlo de forma controlada con <code>kill</code> y registra la
+                        aplicación como servicio de <code>systemd</code>, consultando sus logs con
+                        <code>journalctl</code>.
+                    </p>
+
+                    <!-- Reto actual A2 -->
+                    <div id="a2-challenge" class="mb-4 p-4 rounded-xl"
+                        style="background:#E3F5FD;border:1px solid #9ADCF5;">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl" style="color:#08AFE6;"><i class="fa-solid fa-bullseye"></i></span>
+                            <span class="font-bold text-lg" style="color:#08AFE6;">Reto <span id="a2-num">1</span> de
+                                <span id="a2-total">10</span></span>
+                        </div>
+                        <p id="a2-text" class="font-medium" style="color:#0679A6;"></p>
+                        <p id="a2-hint" class="text-sm mt-1 italic" style="color:#08AFE6;"></p>
+                    </div>
+
+                    <!-- Terminal A2 -->
+                    <div class="terminal-window rounded-xl overflow-hidden border border-slate-700">
+                        <div class="terminal-titlebar bg-slate-800 px-4 py-2 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="text-slate-400 text-xs ml-3 font-mono">estudiante@linux:~</span>
+                        </div>
+                        <div id="a2-body"
+                            class="bg-slate-900 p-4 font-mono text-sm text-green-400 min-h-[220px] max-h-[350px] overflow-y-auto">
+                            <div class="term-line text-slate-400">Terminal Linux simulada 🐧 — Actividad 2: procesos y
+                                servicios</div>
+                            <div class="term-line text-slate-400">Escribe el comando indicado en el reto.</div>
+                            <div class="term-line text-slate-400">─────────────────────────────────────────</div>
+                        </div>
+                        <div class="bg-slate-900 px-4 pb-4 flex items-center gap-2">
+                            <span class="text-green-400 font-mono text-sm font-bold"
+                                id="a2-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a2-input"
+                                class="flex-1 bg-transparent border-none outline-none text-green-300 font-mono text-sm caret-green-400"
+                                placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 items-center mt-4 border-t pt-4">
+                        <button id="a2-reset"
+                            class="bg-slate-200 text-slate-700 font-bold py-2.5 px-6 rounded-lg hover:bg-slate-300 transition-all active:scale-95">Reiniciar</button>
+                        <div
+                            class="flex-1 min-w-[200px] ml-auto bg-slate-100 rounded-full h-5 overflow-hidden flex items-center border border-slate-200">
+                            <div id="a2-progress"
+                                class="h-full w-0 transition-all duration-500 text-xs text-white font-bold flex items-center justify-center"
+                                style="background:#08AFE6;"></div>
+                        </div>
+                        <span id="a2-score" class="font-bold w-14 text-center" style="color:#08AFE6;">0/10</span>
+                    </div>
+                    <div id="a2-feedback"
+                        class="mt-4 text-center font-bold text-lg h-10 transition-all flex items-center justify-center rounded-lg">
+                    </div>
+                </div>
+
+                <!-- ===== ACTIVIDAD 3: DOCUMENTAR LA PRÁCTICA ===== -->
+                <div class="terminal-activity bg-white border-l-4 rounded-lg p-6 mb-8 relative overflow-hidden"
+                    style="border-left-color:#6752A0;border-top:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+                    <div class="absolute -top-4 -right-4 p-4 opacity-10 pointer-events-none text-9xl"
+                        style="color:#6752A0;"><i class="fa-solid fa-file-pen"></i></div>
+                    <h3 class="text-xl font-bold mb-2" style="color:#6752A0;">Actividad 3. Documentar la práctica</h3>
+                    <p class="text-slate-600 mb-4">
+                        <strong>Entregable:</strong> crea un archivo <code>README-practica.md</code> dentro de
+                        <code>proyecto-web-practica</code> donde documentes los pasos, los comandos y tus conclusiones
+                        sobre permisos, usuarios y procesos. Marca cada apartado a medida que lo completes.
+                    </p>
+                    <div class="checklist-container">
+                        <label class="checklist-item">
+                            <input type="checkbox" class="doc-check"> <span>Estructura del proyecto y comandos usados
+                                para crearla</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="doc-check"> <span>Salida de <code>ls -l</code> antes y después
+                                de aplicar los permisos</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="doc-check"> <span>Justificación de cada permiso elegido
+                                (750, 755, 640, 600)</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="doc-check"> <span>PID del proceso de <code>server.js</code> y
+                                señal usada para detenerlo</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="doc-check"> <span>Contenido del archivo
+                                <code>mi-app-web.service</code> y qué hace cada línea</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="doc-check"> <span>Comandos de <code>systemctl</code> y
+                                <code>journalctl</code> que usarías para operarlo</span>
+                        </label>
+                        <div id="doc-score" class="checklist-score" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <script>
+                    (function () {
+                        document.querySelectorAll('.doc-check').forEach(cb => {
+                            cb.addEventListener('change', () => {
+                                const total = document.querySelectorAll('.doc-check').length;
+                                const checked = document.querySelectorAll('.doc-check:checked').length;
+                                const score = document.getElementById('doc-score');
+                                if (!score) return;
+                                score.style.display = 'block';
+                                const pct = Math.round((checked / total) * 100);
+                                let color = '#E22F6B', label = '❌ Documentación incompleta';
+                                if (pct >= 100) { color = '#508C46'; label = '✅ Informe completo: listo para entregar'; }
+                                else if (pct >= 50) { color = '#F89F32'; label = '⚠️ Vas por buen camino, faltan apartados'; }
+                                score.style.color = color;
+                                score.innerHTML = `${label} — ${checked}/${total} apartados documentados`;
+                            });
+                        });
+                    })();
+                </script>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== EVALUACIÓN ===================== -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación. Preguntas de selección
+                    múltiple (marca la respuesta correcta)</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre permisos,
+                        <code>chmod</code>, <code>chown</code>, usuarios, grupos, procesos y servicios. Selecciona la
+                        respuesta correcta para cada pregunta.
+                    </p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn"
+                        class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar
+                        evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== RECURSOS ===================== -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para reforzar la gestión de permisos, usuarios y procesos
+                    en Linux, te recomendamos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Procesos en linux</h3>
+                            <p class="text-slate-600 text-sm mt-1">Video explicativo sobre qué es un proceso en Linux y
+                                cómo inspeccionarlo y controlarlo desde la terminal.</p>
+                            <a href="https://www.youtube.com/watch?v=L4nve-5tuco" target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/procesos.png" alt="Procesos en linux"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Cómo usar ps, kill y nice</h3>
+                            <p class="text-slate-600 text-sm mt-1">Tutorial de DigitalOcean para administrar procesos en
+                                Linux: listarlos con ps, terminarlos con kill y ajustar su prioridad con nice.</p>
+                            <a href="https://www.digitalocean.com/community/tutorials/how-to-use-ps-kill-and-nice-to-manage-processes-in-linux-es"
+                                target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/ps_kill.png" alt="Cómo usar ps, kill y nice"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 3 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Ejercicios resueltos con chown, chgrp y chmod</h3>
+                            <p class="text-slate-600 text-sm mt-1">Colección de ejercicios prácticos con solución para
+                                afianzar el cambio de propietario, grupo y permisos de archivos y directorios.</p>
+                            <a href="https://parzibyte.me/blog/posts/ejercicios-chown-chgrp-chmod-en-linux/"
+                                target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/chmod.png" alt="Ejercicios resueltos con chown, chgrp y chmod"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== BIBLIOGRAFÍA ===================== -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Arsys. (s. f.). <i>Comandos chmod y chown en Linux: gestión de permisos y propietarios</i>.
+                            <a href="https://www.arsys.es/blog/comandos-chmod-chown" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">arsys.es</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            DigitalOcean. (s. f.). <i>How to use ps, kill, and nice to manage processes in Linux</i>.
+                            <a href="https://www.digitalocean.com/community/tutorials/how-to-use-ps-kill-and-nice-to-manage-processes-in-linux"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">digitalocean.com</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Santi GF. (s. f.). <i>Usuarios y grupos en Linux</i>.
+                            <a href="https://santi-gf.github.io/usuarios-grupos/" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">santi-gf.github.io</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Taller de Hacking – Universidad de Chile. (s. f.). <i>Permisos en Linux</i>.
+                            <a href="https://tallerdehacking.dcc.uchile.cl/docs/pwning/permisos-linux/" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">tallerdehacking.dcc.uchile.cl</a>
+                        </span>
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div><!-- /bibliografia -->
+        </main>
+    </div>
+
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/speech.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/accordion.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+
+</html>
