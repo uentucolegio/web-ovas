@@ -52,7 +52,6 @@ const NOMBRES = {
     'backend': 'Programación Web I – Backend',
     'base-de-datos': 'Base de datos',
     'diseno-interfaces-usuario-frontend': 'Diseño de interfaces de usuario – Frontend',
-    'diseno-de-interfaces-de-usuario': 'Diseño de interfaces de usuario – Frontend (segunda carpeta)',
   },
   'tecnico/semestre-3': {
     'servicios-computacion-nube': 'Servicios de computación en la nube',

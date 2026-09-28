@@ -175,25 +175,12 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 - [Diseno de interfaces](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-1/)
 - [Guía de estilos (di-und-2-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-2/)
-- [Guía de Wireframes y Prototipos UX/UI (di-und-2-3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-3/)
+- [Guía de Wireframes y Prototipos UX/UI](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-2/di-und-2-3/)
 
 **Unidad 3**
 
 - [Guía de estilos (di-und-3-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-3/di-und-3-2/)
 - [Uso de medios audiovisuales en presentaciones (di-und-3-1)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-3/di-und-3-1/)
-
-#### Diseño de interfaces de usuario – Frontend (segunda carpeta)  ·  5 OVAs
-
-**Unidad 2**
-
-- [Guía de estilos (tema-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-2/)
-- [Guía de Wireframes y Prototipos UX/UI (tema-3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-3/)
-- [Uso de medios audiovisuales en presentaciones (tema-1)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-2/tema-1/)
-
-**Unidad 3**
-
-- [Guía de estilos (tema-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-3/tema-2/)
-- [Uso de medios audiovisuales en presentaciones (tema-1)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-de-interfaces-de-usuario/unidad-3/tema-1/)
 
 #### Estadística y probabilidad  ·  9 OVAs
 
@@ -609,4 +596,4 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ---
 
-**266 OVAs enlazados.**
+**261 OVAs enlazados.**
