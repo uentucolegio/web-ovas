@@ -198,7 +198,13 @@ const contenido = L.join('\n');
 const modoCheck = process.argv.includes('--check');
 const anterior = existsSync(SALIDA) ? readFileSync(SALIDA, 'utf8') : null;
 
-if (anterior === contenido) {
+// Se comparan los saltos de línea normalizados. En Windows, con
+// core.autocrlf=true, el archivo se descarga con CRLF mientras que aquí se
+// escribe con LF: sin esto, el generador creería que está desactualizado
+// siempre y reescribiría el archivo aunque el contenido fuera idéntico.
+const sinCR = (t) => (t === null ? null : t.replace(/\r\n/g, '\n'));
+
+if (sinCR(anterior) === contenido) {
   console.log(`✅ ENLACES-OVAS.md ya está al día (${total} OVAs).`);
   process.exit(0);
 }
