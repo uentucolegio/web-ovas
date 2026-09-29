@@ -104,6 +104,53 @@ function tituloDe(dir) {
   }
 }
 
+// --- Orden dentro de cada unidad -------------------------------------------
+// Alfabético no es el orden pedagógico: "Adverbs of Frequency" quedaba antes
+// que "Daily Routine Vocabulary" aunque se vea después. scripts/orden-ovas.json
+// fija el orden real de las unidades que lo necesitan.
+const ORDEN = (() => {
+  const f = join(ROOT, 'scripts', 'orden-ovas.json');
+  if (!existsSync(f)) return {};
+  try {
+    // Se quita el BOM: si alguien edita el archivo en Windows con Bloc de notas,
+    // queda guardado con BOM y JSON.parse lo rechaza. Sin esto, el orden volvería
+    // al alfabético sin que nadie lo note.
+    const d = JSON.parse(readFileSync(f, 'utf8').replace(/^﻿/, ''));
+    delete d._lee_esto;
+    return d;
+  } catch (e) {
+    console.error(`⚠️  No se pudo leer orden-ovas.json (${e.message}). Se usa orden alfabético.`);
+    return {};
+  }
+})();
+
+const avisos = [];
+
+/** Ordena los OVAs de una unidad: primero los que fija orden-ovas.json, luego
+ *  el resto en orden alfabético. */
+function ordenarUnidad(items, rutaUnidad) {
+  const alfabetico = (a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es');
+  const deseado = ORDEN[rutaUnidad];
+  if (!deseado) return [...items].sort(alfabetico);
+
+  const porSlug = new Map(items.map((o) => [o.ova, o]));
+  const ordenados = [];
+
+  for (const slug of deseado) {
+    if (porSlug.has(slug)) {
+      ordenados.push(porSlug.get(slug));
+      porSlug.delete(slug);
+    } else {
+      avisos.push(`${rutaUnidad}: "${slug}" está en orden-ovas.json pero esa carpeta no existe`);
+    }
+  }
+  for (const sobrante of [...porSlug.values()].sort(alfabetico)) {
+    avisos.push(`${rutaUnidad}: "${sobrante.ova}" no está en orden-ovas.json, va al final`);
+    ordenados.push(sobrante);
+  }
+  return ordenados;
+}
+
 const ovas = [];
 for (const [prog] of PROGRAMAS) {
   const base = join(ROOT, prog);
@@ -181,8 +228,10 @@ for (const [prog, etiquetaPrograma] of PROGRAMAS) {
 
       for (const uni of [...new Set(delCurso.map((o) => o.unidad))].sort()) {
         L.push(`**${uni.replace('unidad-', 'Unidad ')}**`, '');
-        const items = delCurso.filter((o) => o.unidad === uni)
-          .sort((a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es'));
+        const items = ordenarUnidad(
+          delCurso.filter((o) => o.unidad === uni),
+          `${prog}/${sem}/${slug}/${uni}`,
+        );
         for (const o of items) L.push(`- [${o.etiqueta}](${o.url})`);
         L.push('');
       }
@@ -202,6 +251,13 @@ const anterior = existsSync(SALIDA) ? readFileSync(SALIDA, 'utf8') : null;
 // escribe con LF: sin esto, el generador creería que está desactualizado
 // siempre y reescribiría el archivo aunque el contenido fuera idéntico.
 const sinCR = (t) => (t === null ? null : t.replace(/\r\n/g, '\n'));
+
+// Desajustes entre orden-ovas.json y las carpetas que existen de verdad.
+if (avisos.length) {
+  console.warn(`\n⚠️  ${avisos.length} aviso(s) sobre el orden de los OVAs:`);
+  for (const a of avisos) console.warn(`   · ${a}`);
+  console.warn('   Revisa scripts/orden-ovas.json.\n');
+}
 
 if (sinCR(anterior) === contenido) {
   console.log(`✅ ENLACES-OVAS.md ya está al día (${total} OVAs).`);
