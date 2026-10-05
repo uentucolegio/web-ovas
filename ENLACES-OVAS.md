@@ -69,8 +69,8 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 2**
 
-- [Presentaciones efectivas en público (unidad2-tema2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/habilidades-comunicativas-1/unidad-2/unidad2-tema2/)
 - [Técnicas de oratoria y expresión oral (unidad2-tema1)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/habilidades-comunicativas-1/unidad-2/unidad2-tema1/)
+- [Presentaciones efectivas en público (unidad2-tema2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/habilidades-comunicativas-1/unidad-2/unidad2-tema2/)
 - [Uso de medios audiovisuales en presentaciones (unidad2-tema3)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/habilidades-comunicativas-1/unidad-2/unidad2-tema3/)
 
 **Unidad 3**
@@ -122,7 +122,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 - [Eventos y Funciones en JavaScript (proyecto-final)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/introduccion-programacion-web/unidad-3/proyecto-final/)
 
-#### Matemática Básica  ·  9 OVAs
+#### Matemática Básica  ·  10 OVAs
 
 **Unidad 1**
 
@@ -134,6 +134,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 - [Diagramas de Venn (diagramas-de-venn)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/diagramas-de-venn/)
 - [Operaciones con Conjuntos y Relaciones](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/operaciones-conjuntos-relaciones/)
+- [Principios de Lógica Proposicional](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/proposiciones-logicas/)
 - [Tablas de Verdad](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/tablas-de-verdad/)
 
 **Unidad 3**
@@ -179,8 +180,8 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 3**
 
-- [Guía de estilos (di-und-3-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-3/di-und-3-2/)
 - [Uso de medios audiovisuales en presentaciones (di-und-3-1)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-3/di-und-3-1/)
+- [Guía de estilos (di-und-3-2)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-2/diseno-interfaces-usuario-frontend/unidad-3/di-und-3-2/)
 
 #### Estadística y probabilidad  ·  9 OVAs
 
@@ -389,23 +390,23 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 **Unidad 1**
 
 - [Concepto de Aprendizaje Autónomo](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-1/tema-1/)
-- [Gestión de recursos para el aprendizaje](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-1/tema-4/)
 - [Metacognición y autorregulación del aprendizaje](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-1/tema-2/)
 - [Planificación del aprendizaje](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-1/tema-3/)
+- [Gestión de recursos para el aprendizaje](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-1/tema-4/)
 
 **Unidad 2**
 
-- [Aprendizaje autónomo](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-2/)
-- [Introducción a la autoevaluación y mejora continua](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-4/)
-- [Introducción a la evaluación del progreso en el aprendizaje](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-3/)
 - [Introducción al Pensamiento Crítico](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-1/)
+- [Aprendizaje autónomo](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-2/)
+- [Introducción a la evaluación del progreso en el aprendizaje](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-3/)
+- [Introducción a la autoevaluación y mejora continua](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-2/tema-4/)
 
 **Unidad 3**
 
-- [Estrategias de aprendizaje continuo](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-3/tema-4/)
-- [Introducción a la evaluación de la fiabilidad de las fuentes de información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-3/tema-3/)
 - [Introducción a las Fuentes de Información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-3/tema-1/)
 - [Introducción. Herramientas digitales para la autoformación](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-3/tema-2/)
+- [Introducción a la evaluación de la fiabilidad de las fuentes de información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-3/tema-3/)
+- [Estrategias de aprendizaje continuo](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-1/aprendizaje-autonomo/unidad-3/tema-4/)
 
 #### Arquitectura de sistemas de información  ·  9 OVAs
 
@@ -500,24 +501,24 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 2**
 
+- [Tablas, tuplas, atributos y dominios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-1/)
 - [Claves primarias y foráneas](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-2/)
 - [Integridad referencial](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-3/)
 - [Primera, segunda y tercera forma normal](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-4/)
-- [Tablas, tuplas, atributos y dominios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-1/)
 
 #### Electiva libre 1  ·  6 OVAs
 
 **Unidad 1**
 
+- [Uso de medios audiovisuales en presentaciones (el-und-1-1)](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-1/el-und-1-1/)
 - [Comandos de navegación — pwd, ls, cd, tree](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-1/el-und-1-2/)
 - [Man, --help, documentación técnica y uso responsable de IA](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-1/el-und-1-3/)
-- [Uso de medios audiovisuales en presentaciones (el-und-1-1)](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-1/el-und-1-1/)
 
 **Unidad 2**
 
 - [Creación, copia, movimiento y eliminación de archivos en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-1/)
-- [Permisos, usuarios, grupos, chmod, procesos y servicios en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-3/)
 - [Redireccionamiento, tuberías y filtros básicos en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-2/)
+- [Permisos, usuarios, grupos, chmod, procesos y servicios en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-3/)
 
 #### Estadística  ·  9 OVAs
 
@@ -582,18 +583,18 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 1**
 
-- [Definición del Problema, Objetivos y Alcance](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-3/)
 - [Sistemas de información y rol del analista](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-1/)
-- [Técnicas de Levantamiento de Información (tema-2)](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-2/)
-- [Técnicas de Levantamiento de Información (tema-4)](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-4/)
+- [Stakeholders, Usuarios y Necesidades](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-4/)
+- [Técnicas de Levantamiento de Información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-2/)
+- [Definición del Problema, Objetivos y Alcance](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-3/)
 
 **Unidad 2**
 
-- [Casos de Uso UML](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-3/)
-- [Historias de Usuario y Criterios de Aceptación](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-2/)
-- [Priorización y Gestión de Cambios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-4/)
 - [Requerimientos de Software](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-1/)
+- [Historias de Usuario y Criterios de Aceptación](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-2/)
+- [Casos de Uso UML](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-3/)
+- [Priorización y Gestión de Cambios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-4/)
 
 ---
 
-**261 OVAs enlazados.**
+**262 OVAs enlazados.**
