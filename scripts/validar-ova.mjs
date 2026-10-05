@@ -181,11 +181,27 @@ for (const dir of ovas) {
       'Falta el plugin de accesibilidad (lectura por voz, contraste, tamaño de letra…), que es obligatorio.',
       'Agrega justo antes de </body> esta línea: <script src="https://elens.ecodestudio.dev/elens.js"></script>.');
 
-  // 5) Créditos CINTIA / Universidad de Córdoba en el footer
-  if (!/CINTIA/i.test(html) || !/Universidad de C[óo]rdoba/i.test(html))
+  // 5) Créditos CINTIA / Universidad de Córdoba: tienen que estar UNA sola vez.
+  // No basta con buscar "CINTIA" suelto: el alt del logo ya dice "Logo CINTIA",
+  // así que OVAs sin el crédito pasaban la revisión. Y cuando el bloque se pega
+  // dentro de cada sección, el estudiante lo ve repetido hasta 7 veces al bajar.
+  // Se normalizan los espacios porque la frase viene partida en varias líneas,
+  // y se acepta &oacute; porque algunos OVAs escriben la ó como entidad HTML.
+  const creditos = (html.replace(/\s+/g, ' ')
+    .match(/Centro de Innovaci(?:ó|o|&oacute;)n en TIC[^<]*CINTIA/gi) || []).length;
+
+  if (creditos === 0)
     err(rel,
       'Falta el pie de página (footer) con los créditos de CINTIA y la Universidad de Córdoba.',
       'Copia el bloque <footer> de créditos desde _template/index.html (debe mencionar "CINTIA" y "Universidad de Córdoba") y pégalo al final del contenido, antes de cerrar la página.');
+  else if (creditos > 1)
+    err(rel,
+      `El pie de página con los créditos de CINTIA está repetido ${creditos} veces. Debe aparecer una sola vez, al final del OVA.`,
+      'Deja únicamente el último bloque de créditos (el del final del documento) y borra los demás. Suele pasar al copiar el bloque dentro de cada <section>.');
+  else if (!/Universidad de C[óo]rdoba/i.test(html))
+    err(rel,
+      'El pie de página menciona a CINTIA pero le falta "Universidad de Córdoba".',
+      'Agrega la línea <p class="text-slate-500 text-sm">Universidad de Córdoba</p> dentro del bloque de créditos.');
 
   // 6) Las 7 secciones estándar
   for (const s of SECCIONES) {
