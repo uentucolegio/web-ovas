@@ -584,9 +584,9 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 **Unidad 1**
 
 - [Sistemas de información y rol del analista](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-1/)
-- [Stakeholders, Usuarios y Necesidades](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-4/)
-- [Técnicas de Levantamiento de Información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-2/)
-- [Definición del Problema, Objetivos y Alcance](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-3/)
+- [Stakeholders, Usuarios y Necesidades](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-2/)
+- [Técnicas de Levantamiento de Información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-3/)
+- [Definición del Problema, Objetivos y Alcance](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-4/)
 
 **Unidad 2**
 
