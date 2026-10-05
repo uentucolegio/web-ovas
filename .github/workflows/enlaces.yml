@@ -1,0 +1,63 @@
+name: Actualizar enlaces de los OVAs
+
+# Cada vez que entra un OVA nuevo a main, regenera ENLACES-OVAS.md y lo
+# commitea si cambió. Así el listado que se comparte con docentes y
+# estudiantes nunca queda viejo.
+#
+# En los Pull Request no commitea nada: solo avisa si el archivo quedaría
+# desactualizado, para que el cambio se vea antes de fusionar.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tecnico/**/index.html'
+      - 'tecnologo/**/index.html'
+      - 'scripts/generar-enlaces.mjs'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'tecnico/**/index.html'
+      - 'tecnologo/**/index.html'
+      - 'scripts/generar-enlaces.mjs'
+  workflow_dispatch:
+
+jobs:
+  enlaces:
+    name: Regenerar ENLACES-OVAS.md
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # En un PR no se puede commitear a la rama de quien lo abrió, así que
+      # solo se avisa. El listado real se actualiza al fusionar a main.
+      - name: Avisar si el listado quedaría desactualizado (solo PR)
+        if: github.event_name == 'pull_request'
+        run: node scripts/generar-enlaces.mjs --check
+        continue-on-error: true
+
+      - name: Regenerar el listado
+        if: github.event_name != 'pull_request'
+        run: node scripts/generar-enlaces.mjs
+
+      - name: Commitear si cambió
+        if: github.event_name != 'pull_request'
+        run: |
+          if git diff --quiet -- ENLACES-OVAS.md; then
+            echo "Sin cambios: el listado ya estaba al día."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ENLACES-OVAS.md
+          git commit -m "Actualiza ENLACES-OVAS.md con los OVAs nuevos"
+          git push

@@ -1,2 +1,4 @@
-# sistema_informacion_rol_analista
-Stakeholders, usuarios y necesidades
+# Problemas, objetivos y alcance del sistema
+
+
+

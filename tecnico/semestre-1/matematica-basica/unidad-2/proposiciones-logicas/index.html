@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Principios de Lógica Proposicional</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .content-pane {
+            display: none;
+        }
+        .content-pane.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sidebar-link.active {
+            background-color: #dcfce7; /* green-100 */
+            color: #166534; /* green-800 */
+            border-left: 4px solid #22c55e; /* green-500 */
+            font-weight: 600;
+        }
+        .sidebar-link:hover {
+            background-color: #f0fdf4; /* green-50 */
+        }
+        .accordion-btn.open span {
+            transform: rotate(45deg);
+        }
+        .image-container {
+            position: relative;
+        }
+        .expand-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .image-container:hover .expand-btn {
+            opacity: 1;
+        }
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+        }
+        .image-modal.show {
+            display: flex;
+        }
+        .modal-content {
+            position: relative;
+            margin: auto;
+            display: block;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+        .modal-content img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .speech-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="https://placehold.co/100x100/FFFFFF/22c55e?text=OVA" alt="Logo OVA" class="w-5/6 h-5/6 object-contain rounded-full" loading="lazy">
+                </div>
+                 <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- Introducción -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Principios de Lógica Proposicional</h2>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    <span class="text-2xl">🤔</span> <strong>¿Alguna vez te has preguntado cómo una computadora "piensa" o toma decisiones?</strong> La respuesta está en la lógica.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En esta unidad aprenderás a trabajar con <span class="font-bold text-green-800">proposiciones lógicas</span> (frases que pueden ser verdaderas o falsas) y con <span class="font-bold text-green-800">conectores lógicos</span>, que son las herramientas que unen esas ideas. A través de ejemplos cercanos a la programación, descubrirás cómo esta forma de pensar te ayudará a <span class="underline decoration-green-500">crear mejores condiciones en tus programas</span>, tomar decisiones más precisas en tu código y comenzar a pensar como un desarrollador web. 🚀
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        La lógica proposicional es la base para construir razonamientos complejos y tomar decisiones correctas, no solo en la programación, sino en muchas áreas de la tecnología y la vida diaria. ✨
+                    </p>
+                </div>
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="introduccion">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center"><span class="mr-1">▶️</span> Leer</button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏸️</span> Pausar</button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏹️</span> Detener</button>
+                </div>
+            </div>
+
+            <!-- Objetivos -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">🧠</span><span><strong>Comprender</strong> los principios fundamentales de la lógica proposicional para representar condiciones de forma clara y precisa.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">📝</span><span><strong>Aplicar</strong> los conectores lógicos para modelar y analizar situaciones que se presentan en sistemas computacionales.</span></li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">💻</span><span><strong>Utilizar</strong> la lógica proposicional para la toma de decisiones en el contexto de la programación web y el desarrollo de software.</span></li>
+                </ul>
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="objetivos">
+                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center"><span class="mr-1">▶️</span> Leer</button>
+                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏸️</span> Pausar</button>
+                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏹️</span> Detener</button>
+                </div>
+            </div>
+
+            <!-- Contenido -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2" data-target="#panel-definiciones">
+                            ¿Qué es la Lógica Proposicional?<span class="ml-2 transition-transform duration-300">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-definiciones" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-4 text-slate-700 leading-relaxed">
+                            <p>La lógica proposicional es una herramienta que nos ayuda a razonar con claridad. Se basa en la idea de una <strong>proposición</strong>.</p>
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                <h4 class="font-bold text-green-800">Proposición 💡</h4>
+                                <p>Es una oración que puede ser <strong>verdadera o falsa</strong>, pero no ambas al mismo tiempo.</p>
+                                <ul class="list-disc list-inside mt-2">
+                                    <li><strong>Ejemplo:</strong> “El caballo está en el establo” es una proposición, porque podemos comprobar si es cierto o no.</li>
+                                    <li><strong>Contraejemplo:</strong> “¡Cierra la puerta!” no es una proposición, porque es una orden y no puede ser verdadera o falsa.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-start p-4 bg-green-100 border border-green-300 rounded-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-conectores">
+                            Conectores Lógicos<span class="ml-2 transition-transform duration-300">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-conectores" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                         <div class="text-slate-700 leading-relaxed space-y-6">
+                            <p>Un <strong>conector lógico</strong> es una palabra o símbolo que usamos para <strong>unir ideas o afirmaciones</strong> y entender cómo se relacionan entre sí. Es como un puente que conecta dos pensamientos para formar razonamientos más complejos.</p>
+                            <h3 class="text-xl font-bold text-green-700 mb-2">Principales Conectores Lógicos</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm text-left border border-green-300 rounded-lg">
+                                    <thead class="bg-green-100">
+                                        <tr>
+                                            <th class="py-2 px-4 border-b border-green-300">Conector</th>
+                                            <th class="py-2 px-4 border-b border-green-300">Cómo se lee</th>
+                                            <th class="py-2 px-4 border-b border-green-300">Significado</th>
+                                            <th class="py-2 px-4 border-b border-green-300">Ejemplo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="py-2 px-4 border-b border-green-100 font-mono">P Ʌ Q</td><td class="py-2 px-4 border-b border-green-100">y</td><td class="py-2 px-4 border-b border-green-100">Solo es verdadero si ambas son verdaderas.</td><td class="py-2 px-4 border-b border-green-100">Es ganadero <strong>y</strong> tiene vacas.</td></tr>
+                                        <tr><td class="py-2 px-4 border-b border-green-100 font-mono">P V Q</td><td class="py-2 px-4 border-b border-green-100">o</td><td class="py-2 px-4 border-b border-green-100">Es verdadero si al menos una es verdadera.</td><td class="py-2 px-4 border-b border-green-100">Tiene vacas <strong>o</strong> cerdos.</td></tr>
+                                        <tr><td class="py-2 px-4 border-b border-green-100 font-mono">~ P</td><td class="py-2 px-4 border-b border-green-100">no</td><td class="py-2 px-4 border-b border-green-100">Es lo contrario de P.</td><td class="py-2 px-4 border-b border-green-100"><strong>No</strong> cultiva maíz.</td></tr>
+                                        <tr><td class="py-2 px-4 border-b border-green-100 font-mono">P → Q</td><td class="py-2 px-4 border-b border-green-100">Si... entonces...</td><td class="py-2 px-4 border-b border-green-100">"Si P, entonces Q".</td><td class="py-2 px-4 border-b border-green-100"><strong>Si</strong> llueve, <strong>entonces</strong> hay barro.</td></tr>
+                                        <tr><td class="py-2 px-4 border-b border-green-100 font-mono">P ↔ Q</td><td class="py-2 px-4 border-b border-green-100">Si y sólo si</td><td class="py-2 px-4 border-b border-green-100">P es verdadero si y sólo si Q es verdadero.</td><td class="py-2 px-4 border-b border-green-100">Hay leche fresca <strong>si y solo si</strong> se ordeñaron las vacas.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg mt-6">
+                                <h4 class="font-bold text-green-800">Ejemplo Práctico 👨‍🌾</h4>
+                                <p class="mt-2">Imagina que un agricultor dice: “<strong>Si</strong> hay sol, <strong>entonces</strong> riego las plantas”.</p>
+                                <p>Aquí, está usando el conector <strong>“Si... entonces...”</strong>. Espera que se cumpla una condición (“que haya sol”) para realizar una acción (“regar las plantas”).</p>
+                                <p class="mt-2">Si definimos:</p>
+                                <ul class="list-disc list-inside ml-4"><li>P = “hay sol”</li><li>Q = “riego las plantas”</li></ul>
+                                <p class="mt-2">La afirmación se representa simbólicamente como: <span class="font-mono bg-green-100 px-2 py-1 rounded">P → Q</span>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividades Prácticas -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+                <p class="text-slate-700 mb-6">Convierte las siguientes situaciones del mundo de la programación a su forma simbólica. Usa 'p' para la primera proposición y 'q' para la segunda.</p>
+                <div class="space-y-8">
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Ejercicio 1. Botón de Compra</h3>
+                        <p class="mb-2"><span class="font-semibold">Situación:</span> En una página web, un botón solo se activa si el usuario <strong>inicia sesión</strong> (p) <strong>y</strong> <strong>acepta los términos de uso</strong> (q).</p>
+                        <p class="mb-2"><span class="font-semibold">Expresión Lógica:</span></p>
+                        <div class="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded flex items-center">
+                            <input type="text" data-answer="p Ʌ q" class="activity-input w-full p-2 border-2 rounded-md bg-white transition-colors" placeholder="Escribe la expresión aquí (ej: p → q)">
+                        </div>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Ejercicio 2. Acceso a Contenido Premium</h3>
+                        <p class="mb-2"><span class="font-semibold">Situación:</span> En una app educativa, un estudiante puede acceder al material premium <strong>si inicia sesión</strong> (p) <strong>o</strong> <strong>tiene una clave de invitación</strong> (q).</p>
+                        <p class="mb-2"><span class="font-semibold">Expresión Lógica:</span></p>
+                        <div class="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded flex items-center">
+                            <input type="text" data-answer="p V q" class="activity-input w-full p-2 border-2 rounded-md bg-white transition-colors" placeholder="Escribe la expresión aquí (ej: p Ʌ q)">
+                        </div>
+                    </div>
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Ejercicio 3. Robot de Patrullaje</h3>
+                        <p class="mb-2"><span class="font-semibold">Situación:</span> Un robot sólo puede salir a patrullar <strong>si tiene batería</strong> (p) <strong>y está actualizado</strong> (q).</p>
+                        <p class="mb-2"><span class="font-semibold">Expresión Lógica:</span></p>
+                        <div class="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded flex items-center">
+                            <input type="text" data-answer="p Ʌ q" class="activity-input w-full p-2 border-2 rounded-md bg-white transition-colors" placeholder="Escribe la expresión aquí (ej: p V q)">
+                        </div>
+                    </div>
+                </div>
+                <button id="check-activity-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Verificar respuestas</button>
+                <div id="activity-result" class="mt-4 font-medium"></div>
+            </div>
+
+            <!-- Evaluación -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container" class="space-y-6">
+                        <div class="quiz-question"><p class="font-semibold text-slate-800">1. La oración "La vaca es blanca", ¿es una proposición?</p><div class="mt-2 space-y-2"><label class="flex items-center"><input type="radio" name="q1" value="correct" class="mr-2"> Sí, porque puede ser verdadera o falsa.</label><label class="flex items-center"><input type="radio" name="q1" value="incorrect" class="mr-2"> No, porque es una opinión.</label></div></div>
+                        <div class="quiz-question"><p class="font-semibold text-slate-800">2. La oración "¿Dónde está el ganado?", ¿es una proposición?</p><div class="mt-2 space-y-2"><label class="flex items-center"><input type="radio" name="q2" value="incorrect" class="mr-2"> Sí, porque se puede responder.</label><label class="flex items-center"><input type="radio" name="q2" value="correct" class="mr-2"> No, porque es una pregunta y no afirma nada.</label></div></div>
+                        <div class="quiz-question"><p class="font-semibold text-slate-800">3. ¿Cuál es la forma simbólica de "Una app no deja avanzar si <strong>no</strong> hay conexión a internet"? (p = hay conexión a internet)</p><div class="mt-2 space-y-2"><label class="flex items-center"><input type="radio" name="q3" value="correct" class="mr-2 font-mono">~ p</label><label class="flex items-center"><input type="radio" name="q3" value="incorrect" class="mr-2 font-mono">p → q</label><label class="flex items-center"><input type="radio" name="q3" value="incorrect" class="mr-2 font-mono">p V q</label></div></div>
+                    </div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Recursos -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento sobre lógica proposicional, te recomendamos explorar los siguientes simuladores interactivos:</p>
+                <ul class="space-y-4">
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Simulador de Circuitos Lógicos</h3><p class="text-slate-600 text-sm">Practica con compuertas lógicas como AND, OR y NOT.</p><a href="https://logic.ly/demo/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr1.png" alt="QR para simulador de circuitos" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div><h3 class="font-bold text-green-700">Simulador de Lógica en Polypad</h3><p class="text-slate-600 text-sm">Practica la toma de decisiones con compuertas lógicas en un entorno de juegos.</p><a href="https://polypad.amplify.com/p#logic" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a></div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0"><div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;"><img src="img/qr2.png" alt="QR para simulador Polypad" class="max-w-full max-h-full object-contain" loading="lazy"></div></div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Bibliografía -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Baldor, A. (2004). <i>Álgebra</i>. Grupo Editorial Patria.</span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Alonso, R. (2006). <i>Matemática Discreta para Informática</i>. McGraw-Hill.</span></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500"><span class="block text-slate-700">Portal educativo EduRed: <a href="https://www.edured.edu.do" class="text-green-700 underline break-all" target="_blank">https://www.edured.edu.do</a>.</span></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Navigation ---
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const mobileNav = document.getElementById('mobile-nav');
+        const contentPanes = document.querySelectorAll('.content-pane');
+
+        function switchPane(targetId) {
+            // Stop any ongoing speech
+            window.speechSynthesis.cancel();
+
+            contentPanes.forEach(pane => {
+                pane.classList.remove('active');
+            });
+            const activePane = document.getElementById(targetId);
+            if (activePane) {
+                activePane.classList.add('active');
+            }
+
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.target === targetId) {
+                    link.classList.add('active');
+                }
+            });
+            
+            if (mobileNav.value !== targetId) {
+                 mobileNav.value = targetId;
+            }
+        }
+
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchPane(link.dataset.target);
+            });
+        });
+
+        mobileNav.addEventListener('change', () => {
+            switchPane(mobileNav.value);
+        });
+
+        // --- Accordion ---
+        const accordionBtns = document.querySelectorAll('.accordion-btn');
+        accordionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetPanel = document.querySelector(btn.dataset.target);
+                const isOpen = btn.classList.contains('open');
+
+                // Optional: close all others
+                accordionBtns.forEach(otherBtn => {
+                    if (otherBtn !== btn) {
+                        document.querySelector(otherBtn.dataset.target).classList.add('hidden');
+                        otherBtn.classList.remove('open');
+                        otherBtn.querySelector('span').textContent = '➕';
+                    }
+                });
+                
+                if (targetPanel) {
+                    targetPanel.classList.toggle('hidden');
+                    btn.classList.toggle('open');
+                    btn.querySelector('span').textContent = isOpen ? '➕' : '➖';
+                }
+            });
+        });
+
+        // --- Speech Synthesis ---
+        const speechControls = document.querySelectorAll('.speech-controls');
+        let currentUtterance = null;
+
+        speechControls.forEach(control => {
+            const playBtn = control.querySelector('.play-btn');
+            const pauseBtn = control.querySelector('.pause-btn');
+            const stopBtn = control.querySelector('.stop-btn');
+            const targetId = control.dataset.target;
+            const contentElement = document.getElementById(targetId);
+
+            function updateControlsState(isSpeaking, isPaused) {
+                playBtn.disabled = isSpeaking && !isPaused;
+                pauseBtn.disabled = !isSpeaking || isPaused;
+                stopBtn.disabled = !isSpeaking && !isPaused;
+            }
+
+            playBtn.addEventListener('click', () => {
+                if (!contentElement) return;
+
+                if (window.speechSynthesis.paused && currentUtterance) {
+                    window.speechSynthesis.resume();
+                } else {
+                    window.speechSynthesis.cancel(); // Stop any other speech
+                    const textToRead = contentElement.innerText;
+                    currentUtterance = new SpeechSynthesisUtterance(textToRead);
+                    currentUtterance.lang = 'es-ES';
+
+                    currentUtterance.onstart = () => updateControlsState(true, false);
+                    currentUtterance.onpause = () => updateControlsState(true, true);
+                    currentUtterance.onresume = () => updateControlsState(true, false);
+                    currentUtterance.onend = () => updateControlsState(false, false);
+                    currentUtterance.onerror = () => updateControlsState(false, false);
+
+                    window.speechSynthesis.speak(currentUtterance);
+                }
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.pause();
+                }
+            });
+
+            stopBtn.addEventListener('click', () => {
+                window.speechSynthesis.cancel();
+            });
+        });
+        
+        // --- Activities ---
+        const checkActivityBtn = document.getElementById('check-activity-btn');
+        const activityInputs = document.querySelectorAll('.activity-input');
+        const activityResult = document.getElementById('activity-result');
+        
+        checkActivityBtn.addEventListener('click', () => {
+            let correctCount = 0;
+            activityInputs.forEach(input => {
+                const userAnswer = input.value.trim().replace(/\s/g, '').toLowerCase();
+                const correctAnswer = input.dataset.answer.trim().replace(/\s/g, '').toLowerCase();
+
+                input.classList.remove('border-green-500', 'border-red-500');
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('border-green-500');
+                    correctCount++;
+                } else {
+                    input.classList.add('border-red-500');
+                }
+            });
+
+            activityResult.classList.remove('text-green-700', 'text-red-700');
+            if(correctCount === activityInputs.length){
+                activityResult.textContent = `¡Excelente! Todas las ${correctCount} respuestas son correctas.`;
+                activityResult.classList.add('text-green-700');
+            } else {
+                activityResult.textContent = `Tienes ${correctCount} de ${activityInputs.length} respuestas correctas. ¡Sigue intentando!`;
+                activityResult.classList.add('text-red-700');
+            }
+        });
+
+
+        // --- Quiz ---
+        const submitQuizBtn = document.getElementById('submit-quiz-btn');
+        const quizResult = document.getElementById('quiz-result');
+        const quizQuestions = document.querySelectorAll('.quiz-question');
+
+        submitQuizBtn.addEventListener('click', () => {
+            let score = 0;
+            quizQuestions.forEach(question => {
+                const selected = question.querySelector('input[type="radio"]:checked');
+                // Reset styles
+                question.querySelectorAll('label').forEach(label => label.classList.remove('text-green-700', 'text-red-700', 'font-bold'));
+
+                if (selected) {
+                    if (selected.value === 'correct') {
+                        score++;
+                        selected.parentElement.classList.add('text-green-700', 'font-bold');
+                    } else {
+                        selected.parentElement.classList.add('text-red-700');
+                        // Highlight the correct one
+                        const correct = question.querySelector('input[value="correct"]');
+                        if (correct) {
+                            correct.parentElement.classList.add('text-green-700', 'font-bold');
+                        }
+                    }
+                }
+            });
+
+            quizResult.classList.remove('text-green-700', 'text-red-700');
+            if(score === quizQuestions.length){
+                quizResult.textContent = `¡Felicidades! Obtuviste ${score} de ${quizQuestions.length} respuestas correctas.`;
+                quizResult.classList.add('text-green-700');
+            } else {
+                quizResult.textContent = `Tu puntuación es ${score} de ${quizQuestions.length}. Repasa el contenido y vuelve a intentarlo.`;
+                 quizResult.classList.add('text-red-700');
+            }
+        });
+    });
+    </script>
+
+<!-- Plugin de accesibilidad -->
+<script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
