@@ -1,2 +1,1 @@
-# sistema_informacion_rol_analista
-Stakeholders, usuarios y necesidades
+# Stakeholders, usuarios y necesidades

@@ -122,7 +122,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 - [Eventos y Funciones en JavaScript (proyecto-final)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/introduccion-programacion-web/unidad-3/proyecto-final/)
 
-#### Matemática Básica  ·  9 OVAs
+#### Matemática Básica  ·  10 OVAs
 
 **Unidad 1**
 
@@ -134,6 +134,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 - [Diagramas de Venn (diagramas-de-venn)](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/diagramas-de-venn/)
 - [Operaciones con Conjuntos y Relaciones](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/operaciones-conjuntos-relaciones/)
+- [Principios de Lógica Proposicional](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/proposiciones-logicas/)
 - [Tablas de Verdad](https://uentucolegio.github.io/web-ovas/tecnico/semestre-1/matematica-basica/unidad-2/tablas-de-verdad/)
 
 **Unidad 3**
@@ -582,10 +583,10 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 1**
 
-- [Definición del Problema, Objetivos y Alcance](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-3/)
 - [Sistemas de información y rol del analista](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-1/)
-- [Técnicas de Levantamiento de Información (tema-2)](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-2/)
-- [Técnicas de Levantamiento de Información (tema-4)](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-4/)
+- [Stakeholders, Usuarios y Necesidades](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-4/)
+- [Técnicas de Levantamiento de Información](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-2/)
+- [Definición del Problema, Objetivos y Alcance](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-1/tema-3/)
 
 **Unidad 2**
 
@@ -596,4 +597,4 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ---
 
-**261 OVAs enlazados.**
+**262 OVAs enlazados.**
