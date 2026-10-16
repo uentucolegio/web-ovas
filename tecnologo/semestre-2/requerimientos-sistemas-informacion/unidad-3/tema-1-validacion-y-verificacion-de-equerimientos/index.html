@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Validación y Verificación de Requerimientos</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR ESTRUCTURA
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+
+        /* ESTILOS PERSONALIZADOS OVA DE GAMIFICACIÓN Y RECURSOS */
+        .xp-badge {
+            animation: bounce 0.6s ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .custom-card-shadow {
+            box-shadow: 0 4px 15px -3px rgba(34, 197, 94, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR DESKTOP — NO MODIFICAR
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm font-semibold text-slate-700">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">🚀 Validación y Verificación de Requerimientos: El Arte de Construir el Software Correcto</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    ¡Hola! 👋 Imagina esta escena: trabajas durante semanas en una genial aplicación móvil para pedir comida a domicilio. Diseñas pantallas hermosas, la base de datos es rápida y la app se ejecuta sin un solo error de código. ¡Es una obra maestra técnica! 🍕📱 Sin embargo, cuando la lanzas en las tiendas de apps, descubres que los usuarios querían hacer pedidos grupales dividiendo la cuenta entre amigos, ¡pero tu app solo permite pedidos individuales!
+                </p>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    ¿Qué salió mal? 🤯 Tu código funcionaba perfectamente, pero resolvía el problema equivocado. Un requerimiento puede estar escrito sin errores sintácticos y aun así describir algo que nadie necesita. Por el contrario, una gran necesidad real puede perderse por culpa de una redacción ambigua o contradictoria.
+                </p>
+
+                <div class="my-6 bg-white p-4 sm:p-6 rounded-xl border border-green-200 shadow-sm flex flex-col items-center">
+                    <h3 class="text-lg font-bold text-green-800 mb-3 text-center">🔍 El Puente del Éxito en Software</h3>
+                    <img src="img/Figura 1 Revisión - verificación y validación.png" alt="Revisión, verificación y validación de requerimientos" class="rounded-lg max-w-full h-auto shadow-md mb-3 hover:scale-[1.01] transition-transform">
+                    <p class="text-xs text-slate-500 italic text-center">Figura 1. Revisión, verificación y validación de requerimientos. Fuente: Elaboración para este material con IA (2026).</p>
+                </div>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Por eso, la Ingeniería de Requisitos divide la calidad en dos súper poderes clave: la <strong>Verificación</strong> (revisar la calidad interna de lo que escribimos) y la <strong>Validación</strong> (confirmar frente al usuario que resolvemos su problema real). ¡Aprender a diferenciarlas y aplicarlas te ahorrará cientos de horas de trabajo y salvará tus proyectos! 💪✨
+                </p>
+
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800 font-medium">
+                        <span class="text-xl">✨</span> <strong>¡Tu misión en este OVA:</strong> Te convertirás en un Analista de Requisitos estrella. Desarrollarás el "ojo clínico" para detectar ambigüedades, liderar talleres con usuarios y construir matrices de trazabilidad imbatibles. ¡Vamos a despegar! <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">🎯 Objetivos de Aprendizaje</h2>
+                <p class="text-slate-600 mb-6">Al completar esta guía interactiva, serás capaz de dominar las siguientes competencias clave en el desarrollo de software:</p>
+
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-500 hover:shadow-md transition-shadow">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <div>
+                            <span class="font-bold text-green-900 block mb-1">Diferenciación Conceptual</span>
+                            <span class="text-slate-700">Diferenciar la verificación y la validación de requerimientos mediante ejemplos reales de sistemas de información.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-500 hover:shadow-md transition-shadow">
+                        <span class="text-green-700 mr-3 text-2xl">💡</span>
+                        <div>
+                            <span class="font-bold text-green-900 block mb-1">Diagnóstico de Calidad</span>
+                            <span class="text-slate-700">Aplicar criterios de calidad profesional para identificar ambigüedades, omisiones, contradicciones y requisitos no verificables.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-500 hover:shadow-md transition-shadow">
+                        <span class="text-green-700 mr-3 text-2xl">🤝</span>
+                        <div>
+                            <span class="font-bold text-green-900 block mb-1">Simulación de Validación</span>
+                            <span class="text-slate-700">Planear y realizar sesiones de validación con usuarios simulados, registrando observaciones, acuerdos y cambios formalmente.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm border-l-4 border-green-500 hover:shadow-md transition-shadow">
+                        <span class="text-green-700 mr-3 text-2xl">🔗</span>
+                        <div>
+                            <span class="font-bold text-green-900 block mb-1">Trazabilidad Integral</span>
+                            <span class="text-slate-700">Relacionar de forma directa los requerimientos con sus criterios de aceptación y casos de prueba correspondientes.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                
+                <!-- BARRA LOCAL DE GAMIFICACIÓN DE CONTENIDO -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-green-800 to-emerald-700 rounded-xl text-white shadow-md">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🎮</span>
+                            <div>
+                                <h3 class="font-bold text-lg">Misión: Certificación en Ingeniería de Requisitos</h3>
+                                <p class="text-xs text-green-100">Interactúa con los acordeones, resuelve las trivias y acumula XP</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-lg border border-white/20">
+                            <span class="text-yellow-300 text-xl font-bold" id="xp-count">⚡ 0 XP</span>
+                            <span class="text-xs font-semibold bg-green-500 px-2 py-1 rounded text-white" id="xp-rank">Novato</span>
+                        </div>
+                    </div>
+                    <!-- Barra de progreso -->
+                    <div class="w-full bg-green-950/60 rounded-full h-2.5 mt-3">
+                        <div id="xp-bar" class="bg-gradient-to-r from-yellow-400 to-green-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- ACORDEÓN 1 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg font-bold text-green-800 text-lg accordion-btn mb-2 text-left hover:bg-green-200 transition-colors" data-target="#panel-subtema-1">
+                            <span>3.1 Validación y Verificación de Requerimientos (V&V) ⚖️</span>
+                            <span class="ml-2">➖</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel bg-white border border-t-0 border-green-300 rounded-b-lg p-4 sm:p-6 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Para construir software de alta calidad, debemos responder dos preguntas fundamentales. ¡No son lo mismo aunque suenen parecidas! 🔍🤝
+                                </p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                                    <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg shadow-sm">
+                                        <h4 class="font-bold text-emerald-800 text-lg mb-2">🔍 3.1.2 Verificación</h4>
+                                        <p class="text-sm text-slate-700"><strong>¿El requerimiento está bien especificado?</strong></p>
+                                        <p class="text-xs text-slate-600 mt-2">Revisa la calidad interna del documento: sintaxis, coherencia, ausencia de vaguedades y factibilidad de prueba técnica.</p>
+                                        <span class="inline-block mt-3 bg-emerald-200 text-emerald-900 text-xs font-bold px-2.5 py-1 rounded">Revisión Técnica</span>
+                                    </div>
+                                    <div class="p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r-lg shadow-sm">
+                                        <h4 class="font-bold text-teal-800 text-lg mb-2">🤝 3.1.3 Validación</h4>
+                                        <p class="text-sm text-slate-700"><strong>¿Es el requerimiento correcto para la necesidad real?</strong></p>
+                                        <p class="text-xs text-slate-600 mt-2">Contrasta la especificación con los usuarios reales y dueños del proceso para garantizar que resuelva el problema verdadero.</p>
+                                        <span class="inline-block mt-3 bg-teal-200 text-teal-900 text-xs font-bold px-2.5 py-1 rounded">Confirmación con Usuario</span>
+                                    </div>
+                                </div>
+
+                                <div class="my-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                                    <img src="img/Figura 2 Preguntas centrales.png" alt="Preguntas centrales de Verificación y Validación" class="mx-auto rounded-lg shadow-md max-w-full h-auto mb-2">
+                                    <p class="text-xs text-slate-500 italic">Figura 2. Preguntas centrales de la verificación y la validación. Fuente: IA (2026).</p>
+                                </div>
+
+                                <!-- Tabla comparativa -->
+                                <h4 class="font-bold text-green-800 text-md mt-6 mb-3">📊 Cuadro Comparativo de Aspectos Clave</h4>
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="w-full text-sm text-left text-slate-700 border border-slate-200 rounded-lg shadow-sm">
+                                        <thead class="bg-green-700 text-white font-bold">
+                                            <tr>
+                                                <th class="p-3">Aspecto</th>
+                                                <th class="p-3">Verificación 🔍</th>
+                                                <th class="p-3">Validación 🤝</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-900">Pregunta principal</td>
+                                                <td class="p-3">¿El requerimiento está bien especificado?</td>
+                                                <td class="p-3">¿El requerimiento corresponde a la necesidad real?</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-900">Participantes</td>
+                                                <td class="p-3">Analista, equipo de desarrollo, QA / Pruebas y Calidad</td>
+                                                <td class="p-3">Usuarios finales, líderes de negocio, analista y equipo técnico</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-900">Objeto de revisión</td>
+                                                <td class="p-3">Documento SRS, modelos de dominio, reglas y trazabilidad</td>
+                                                <td class="p-3">Necesidades reales, escenarios de uso, resultados y restricciones</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-900">Técnicas frecuentes</td>
+                                                <td class="p-3">Listas de chequeo, revisión por pares, inspección formal</td>
+                                                <td class="p-3">Talleres con usuarios, entrevistas, escenarios y prototipos</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-green-900">Resultado típico</td>
+                                                <td class="p-3">Defectos documentales y de redacción corregidos</td>
+                                                <td class="p-3">Acuerdos formales, cambios en el alcance o aprobación final</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- DATO IMPACTANTE DE LA INDUSTRIA -->
+                                <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg my-6">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-xl">📊</span>
+                                        <h5 class="font-bold text-amber-900 text-sm">Dato de la Industria (CHAOS Report & Ley de Boehm)</h5>
+                                    </div>
+                                    <p class="text-xs text-slate-700 leading-relaxed">
+                                        ¿Sabías que reparar un error de requerimientos detectado durante la producción cuesta hasta <strong>100 veces más</strong> que corregirlo durante las fases de Verificación y Validación iniciales? El 47% de los fracasos de proyectos tecnológicos se deben a requisitos mal definidos. ¡V&V es la mejor inversión de tiempo! 💡
+                                    </p>
+                                </div>
+
+                                <!-- GAME 1 -->
+                                <div class="mt-6 p-5 bg-gradient-to-br from-emerald-50 to-green-100 border border-green-300 rounded-xl">
+                                    <h4 class="font-bold text-green-900 text-md mb-2 flex items-center gap-2">
+                                        <span>🕵️ Mini-Juego 1: Detective de Preguntas V&V</span>
+                                        <span class="text-xs bg-green-600 text-white font-normal px-2 py-0.5 rounded-full">+50 XP por acierto</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-600 mb-4">Clasifica cada situación de proyecto haciendo click en la categoría correcta:</p>
+
+                                    <div class="space-y-3" id="vv-game-container">
+                                        <div class="p-3 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2" id="vv-q1">
+                                            <span class="text-xs font-medium text-slate-800">1. ¿La pantalla de pago incluye todos los campos exigidos por la norma de seguridad ISO?</span>
+                                            <div class="flex gap-2">
+                                                <button onclick="checkVV('q1', 'verificacion')" class="px-3 py-1 bg-emerald-600 text-white text-xs rounded hover:bg-emerald-700 transition-colors">🔍 Verificación</button>
+                                                <button onclick="checkVV('q1', 'validacion')" class="px-3 py-1 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 transition-colors">🤝 Validación</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2" id="vv-q2">
+                                            <span class="text-xs font-medium text-slate-800">2. El cliente prueba un boceto de interfaz y confirma si el botón de reporte responde a su flujo diario.</span>
+                                            <div class="flex gap-2">
+                                                <button onclick="checkVV('q2', 'verificacion')" class="px-3 py-1 bg-emerald-600 text-white text-xs rounded hover:bg-emerald-700 transition-colors">🔍 Verificación</button>
+                                                <button onclick="checkVV('q2', 'validacion')" class="px-3 py-1 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 transition-colors">🤝 Validación</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="vv-game-feedback" class="mt-3 text-xs font-bold text-green-800 hidden"></div>
+                                </div>
+
+                                <!-- RECURSO EXTERNO CARD 1 -->
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: Introducción a la Verificación y Validación de Software
+                                     Buscar: "Verificacion y validacion de requerimientos ingenieria de software youtube"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Fundamentos de Verificación vs Validación en Software</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"Verificacion y validacion de requerimientos ingenieria de software"</em></p>
+                                    <a href="#" target="_blank" rel="noopener" tabindex="-1" aria-disabled="true" class="inline-flex items-center gap-2 bg-green-600 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed pointer-events-none">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💡 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg font-bold text-green-800 text-lg accordion-btn mb-2 text-left hover:bg-green-200 transition-colors" data-target="#panel-subtema-2">
+                            <span>3.2 Criterios de Calidad de un Requerimiento 💎</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 sm:p-6 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Un requerimiento listo para producción debe ser claro para todo el equipo (desarrolladores, diseñadores, testers y usuarios). Para asegurarlo, la norma <strong>ISO/IEC/IEEE 29148</strong> define 8 criterios clave de calidad. 📜
+                                </p>
+
+                                <div class="my-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                                    <img src="img/Figura 4 Criterios principales.png" alt="Criterios principales de calidad de un requerimiento" class="mx-auto rounded-lg shadow-md max-w-full h-auto mb-2">
+                                    <p class="text-xs text-slate-500 italic">Figura 4. Criterios principales de calidad de un requerimiento. Fuente: Elaboración propia (2026).</p>
+                                </div>
+
+                                <!-- GRILLA INTERACTIVA DE CRITERIOS -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-6">
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">1. Necesario 📌</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Responde a un objetivo real? Defecto: Pedir una función que ningún usuario utiliza.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">2. Claro y Sin Ambigüedad 🎯</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Tiene una sola interpretación? Defecto: Usar "El sistema será rápido".</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">3. Completo 🧩</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Incluye condiciones, datos y reglas? Defecto: Omitir qué pasa si el pago falla.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">4. Consistente ⚖️</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Coincide con otros requisitos? Defecto: Un requisito permite editar y otro lo prohíbe.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">5. Factible 🛠️</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Puede lograrse con las restricciones? Defecto: Exigir consultar una API externa sin acceso.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">6. Verificable 🧪</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Se puede diseñar una prueba objetiva? Defecto: "La interfaz será muy agradable".</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">7. Trazable 🔗</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Se relaciona con su origen y pruebas? Defecto: No tener ID ni vínculo con una necesidad.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-l-4 border-green-500 rounded shadow-sm hover:shadow transition-shadow">
+                                        <h5 class="font-bold text-green-800 text-sm">8. Priorizado 🥇</h5>
+                                        <p class="text-xs text-slate-600 mt-1">¿Su importancia está acordada? Defecto: Marcar todo como obligatorio sin análisis.</p>
+                                    </div>
+                                </div>
+
+                                <!-- CASO ANTES Y DESPUÉS -->
+                                <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-xl my-6">
+                                    <h4 class="font-bold text-emerald-400 text-md mb-3 flex items-center gap-2">
+                                        <span>⚡ Ejemplo de Transformación de Requerimiento</span>
+                                    </h4>
+                                    <div class="space-y-3 text-xs">
+                                        <div class="p-3 bg-red-950/60 border border-red-500/50 rounded">
+                                            <span class="font-bold text-red-400 block mb-1">❌ Requerimiento Débil:</span>
+                                            <p class="text-red-200">"El sistema debe mostrar rápidamente el estado del certificado."</p>
+                                            <p class="text-slate-400 mt-1"><em>Defectos:</em> "rápidamente" es ambiguo, no indica actor, datos visibles ni métrica de rendimiento.</p>
+                                        </div>
+                                        <div class="p-3 bg-green-950/60 border border-green-500/50 rounded">
+                                            <span class="font-bold text-green-400 block mb-1">✅ Requerimiento Mejorado & Verificable:</span>
+                                            <p class="text-green-100">"Cuando un estudiante autenticado consulte una solicitud propia, el sistema mostrará el número de radicado, el tipo de certificado, la fecha, el estado vigente y la última observación pública en máximo dos segundos para el 95 % de las consultas bajo la carga definida para pruebas."</p>
+                                            <p class="text-emerald-300 mt-1"><em>Virtud:</em> Precisa actor, condición, datos explícitos, métrica exacta y ámbito de prueba.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- GAME 2 -->
+                                <div class="p-5 bg-gradient-to-br from-emerald-50 to-green-100 border border-green-300 rounded-xl my-6">
+                                    <h4 class="font-bold text-green-900 text-md mb-2 flex items-center gap-2">
+                                        <span>🛠️ Mini-Juego 2: Taller de Reparación de Requisitos</span>
+                                        <span class="text-xs bg-green-600 text-white font-normal px-2 py-0.5 rounded-full">+100 XP</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-600 mb-3">Identifica cuál es el criterio que falla en esta frase ambigua: <em>"El panel de control debe cargar de forma ultra fácil para los docentes."</em></p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                                        <button onclick="checkGame2(this, false)" class="p-2 bg-white border border-slate-300 rounded hover:bg-green-100 text-slate-700">Trazabilidad</button>
+                                        <button onclick="checkGame2(this, true)" class="p-2 bg-white border border-slate-300 rounded hover:bg-green-100 text-slate-700 font-semibold">Claro y sin ambigüedad / Verificable</button>
+                                        <button onclick="checkGame2(this, false)" class="p-2 bg-white border border-slate-300 rounded hover:bg-green-100 text-slate-700">Factibilidad técnica</button>
+                                    </div>
+                                    <div id="game2-feedback" class="mt-3 text-xs font-bold text-green-800 hidden"></div>
+                                </div>
+
+                                  <!-- RECURSO-EXTERNO id="recurso-ext-2"
+                                      Tema: Criterios de calidad para especificar requerimientos
+                                      Buscar: "Criterios de calidad de requerimientos IEEE 29148 ejemplos"
+                                  -->
+                                <div id="recurso-ext-2" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Criterios de Calidad según IEEE 29148 en la Práctica</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"Criterios de calidad de requerimientos IEEE 29148 ejemplos"</em></p>
+                                    <a href="#" target="_blank" rel="noopener" tabindex="-1" aria-disabled="true" class="inline-flex items-center gap-2 bg-green-600 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed pointer-events-none">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💡 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">"Encontré un recurso para el recurso-ext-2 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg font-bold text-green-800 text-lg accordion-btn mb-2 text-left hover:bg-green-200 transition-colors" data-target="#panel-subtema-3">
+                            <span>3.3 Técnicas de Verificación 📋</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 sm:p-6 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Existen distintas formas de verificar los documentos de requerimientos según el nivel de rigurosidad y el riesgo del proyecto. 🧐
+                                </p>
+
+                                <div class="my-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                                    <img src="img/figura 5 tecnicas de verificacion.png" alt="Técnicas de verificación según rigurosidad" class="mx-auto rounded-lg shadow-md max-w-full h-auto mb-2">
+                                    <p class="text-xs text-slate-500 italic">Figura 5. Técnicas de verificación según el nivel de rigurosidad. Fuente: Elaboración propia (2026).</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6 text-xs">
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <h5 class="font-bold text-green-800 text-sm mb-1">3.3.1 Revisión Individual con Lista de Chequeo</h5>
+                                        <p class="text-slate-600">El analista revisa su propio documento usando una guía predefinida para eliminar palabras vagas y datos faltantes antes de publicarlo.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <h5 class="font-bold text-green-800 text-sm mb-1">3.3.2 Revisión por Pares (Peer Review)</h5>
+                                        <p class="text-slate-600">Un compañero de equipo examina la especificación desde otra perspectiva para descubrir supuestos o sesgos del autor original.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <h5 class="font-bold text-green-800 text-sm mb-1">3.3.3 Recorrido Estructurado (Walkthrough)</h5>
+                                        <p class="text-slate-600">El autor expone el requerimiento paso a paso ante desarrolladores y testers para evaluar flujos, reglas y excepciones.</p>
+                                    </div>
+                                    <div class="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                        <h5 class="font-bold text-green-800 text-sm mb-1">3.3.4 Inspección Formal</h5>
+                                        <p class="text-slate-600">El método más riguroso. Incluye roles definidos (moderador, lector, inspector), lista oficial de hallazgos y verificación de correcciones.</p>
+                                    </div>
+                                </div>
+
+                                <!-- TABLA DE DEFECTOS Y CORRECCIONES -->
+                                <h4 class="font-bold text-green-800 text-md mb-3">🛠️ Matriz de Diagnóstico y Corrección de Defectos</h4>
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="w-full text-xs text-left text-slate-700 border border-slate-200 rounded-lg">
+                                        <thead class="bg-slate-800 text-white font-bold">
+                                            <tr>
+                                                <th class="p-2.5">Defecto Encontrado</th>
+                                                <th class="p-2.5">Efecto Posible</th>
+                                                <th class="p-2.5">Acción de Corrección</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-red-700">Uso de "rápido", "adecuado", "fácil"</td>
+                                                <td class="p-2.5">No se puede construir una prueba objetiva en QA.</td>
+                                                <td class="p-2.5 text-green-800 font-medium">Definir medida exacta, condición y umbral de tiempo.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-red-700">Regla de negocio incompleta</td>
+                                                <td class="p-2.5">El sistema producirá comportamientos erráticos o impredecibles.</td>
+                                                <td class="p-2.5 text-green-800 font-medium">Precisar condiciones, excepciones y resultados esperados.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-red-700">Dos requerimientos contradictorios</td>
+                                                <td class="p-2.5">El equipo técnico no sabrá cuál regla programar.</td>
+                                                <td class="p-2.5 text-green-800 font-medium">Consultar la fuente autorizada y registrar la decisión final.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-red-700">Requerimiento sin origen (huérfano)</td>
+                                                <td class="p-2.5">No se justifica su desarrollo ni el costo de mantenerlo.</td>
+                                                <td class="p-2.5 text-green-800 font-medium">Vincularlo formalmente con la necesidad, actor u objetivo.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- GAME 3 -->
+                                <div class="p-5 bg-gradient-to-br from-emerald-50 to-green-100 border border-green-300 rounded-xl my-6">
+                                    <h4 class="font-bold text-green-900 text-md mb-2 flex items-center gap-2">
+                                        <span>📋 Mini-Juego 3: Inspección de Checklist en Vivo</span>
+                                        <span class="text-xs bg-green-600 text-white font-normal px-2 py-0.5 rounded-full">+100 XP</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-600 mb-3">Marca los elementos verificados para habilitar el sello de calidad:</p>
+                                    <div class="space-y-2 text-xs">
+                                        <label class="flex items-center gap-2 bg-white p-2 rounded border border-slate-200 cursor-pointer">
+                                            <input type="checkbox" onchange="updateChecklistGame()" class="chk-item">
+                                            <span>Tiene identificador único (ID) y número de versión.</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 bg-white p-2 rounded border border-slate-200 cursor-pointer">
+                                            <input type="checkbox" onchange="updateChecklistGame()" class="chk-item">
+                                            <span>Evita adjetivos vagos ("rápido", "amigable").</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 bg-white p-2 rounded border border-slate-200 cursor-pointer">
+                                            <input type="checkbox" onchange="updateChecklistGame()" class="chk-item">
+                                            <span>Define el resultado esperado ante errores de entrada.</span>
+                                        </label>
+                                    </div>
+                                    <button id="btn-certify" disabled onclick="certifyReq()" class="mt-4 w-full py-2 bg-gray-400 text-white text-xs font-bold rounded cursor-not-allowed transition-colors">Aprobación de Inspección Pendiente</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg font-bold text-green-800 text-lg accordion-btn mb-2 text-left hover:bg-green-200 transition-colors" data-target="#panel-subtema-4">
+                            <span>3.4 Técnicas de Validación con Usuarios 🗣️</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 sm:p-6 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">
+                                    Validar no es solo enviar un correo preguntando "¿estás de acuerdo?". Implica interactuar activamente con el usuario para simular la realidad del trabajo. 🤝💡
+                                </p>
+
+                                <div class="my-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                                    <img src="img/figura 6 tecnicas practicas.png" alt="Técnicas prácticas para validar requerimientos" class="mx-auto rounded-lg shadow-md max-w-full h-auto mb-2">
+                                    <p class="text-xs text-slate-500 italic">Figura 6. Técnicas prácticas para validar requerimientos con usuarios. Fuente: IA (2026).</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-6 text-xs">
+                                    <div class="p-3 bg-white border-t-4 border-green-600 rounded shadow-sm">
+                                        <h5 class="font-bold text-green-800 mb-1">3.4.1 Taller de Validación 👥</h5>
+                                        <p class="text-slate-600">Reúne a usuarios finales y desarrolladores para construir consensos sobre el alcance sin que una sola persona imponga las reglas.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-t-4 border-green-600 rounded shadow-sm">
+                                        <h5 class="font-bold text-green-800 mb-1">3.4.2 Entrevista de Confirmación 🎙️</h5>
+                                        <p class="text-slate-600">Permite indagar en detalle procesos complejos o confidenciales con expertos del dominio.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-t-4 border-green-600 rounded shadow-sm">
+                                        <h5 class="font-bold text-green-800 mb-1">3.4.3 Escenarios y Casos de Uso 🎬</h5>
+                                        <p class="text-slate-600">Recorre situaciones completas desde el inicio hasta el fin, evaluando flujos normales, alternos y excepciones.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-t-4 border-green-600 rounded shadow-sm">
+                                        <h5 class="font-bold text-green-800 mb-1">3.4.4 Prototipos de Baja Fidelidad 🎨</h5>
+                                        <p class="text-slate-600">Bocetos en papel o wireframes para dialogar sobre el orden de las tareas y la información visible.</p>
+                                    </div>
+                                    <div class="p-3 bg-white border-t-4 border-green-600 rounded shadow-sm md:col-span-2">
+                                        <h5 class="font-bold text-green-800 mb-1">3.4.5 Derivación de Pruebas Prematuras 🧪</h5>
+                                        <p class="text-slate-600">Si cuesta escribir un caso de prueba para un requerimiento, significa que falta información o validación de reglas de negocio.</p>
+                                    </div>
+                                </div>
+
+                                <!-- PREGUNTAS CLAVE POR MOMENTO -->
+                                <h4 class="font-bold text-green-800 text-md mb-3">❓ Guía de Preguntas Útiles durante la Validación</h4>
+                                <div class="space-y-2 text-xs">
+                                    <div class="p-2.5 bg-green-50 border-l-4 border-green-500 rounded flex justify-between">
+                                        <span class="font-bold text-green-900">Antes de la tarea:</span>
+                                        <span class="text-slate-700">"¿Qué debe haber ocurrido antes y qué información previa necesita para iniciar?"</span>
+                                    </div>
+                                    <div class="p-2.5 bg-green-50 border-l-4 border-green-500 rounded flex justify-between">
+                                        <span class="font-bold text-green-900">Durante la tarea:</span>
+                                        <span class="text-slate-700">"¿Qué decisiones toma el usuario en este paso y qué reglas aplica?"</span>
+                                    </div>
+                                    <div class="p-2.5 bg-green-50 border-l-4 border-green-500 rounded flex justify-between">
+                                        <span class="font-bold text-green-900">Resultado esperado:</span>
+                                        <span class="text-slate-700">"¿Qué comprobación o documento le confirma que el proceso terminó con éxito?"</span>
+                                    </div>
+                                    <div class="p-2.5 bg-green-50 border-l-4 border-green-500 rounded flex justify-between">
+                                        <span class="font-bold text-green-900">Situación alterna / error:</span>
+                                        <span class="text-slate-700">"¿Qué ocurre si la solicitud pertenece a otra persona o el sistema no responde?"</span>
+                                    </div>
+                                </div>
+
+                                <!-- GAME 4 -->
+                                <div class="p-5 bg-gradient-to-br from-emerald-50 to-green-100 border border-green-300 rounded-xl my-6">
+                                    <h4 class="font-bold text-green-900 text-md mb-2 flex items-center gap-2">
+                                        <span>🗣️ Mini-Juego 4: Juego de Rol con la Jefa de Admisiones</span>
+                                        <span class="text-xs bg-green-600 text-white font-normal px-2 py-0.5 rounded-full">+100 XP</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-600 mb-3">La Jefa de Admisiones dice: <em>"A veces los estudiantes ingresan códigos de solicitud equivocados o de otros compañeros"</em>. ¿Cuál es la mejor pregunta de validación?</p>
+                                    <div class="space-y-2 text-xs">
+                                        <button onclick="checkRoleplay(false, this)" class="w-full text-left p-2 bg-white border border-slate-300 rounded hover:bg-red-50">A. "Le diremos al equipo que no permita ingresar códigos de otros."</button>
+                                        <button onclick="checkRoleplay(true, this)" class="w-full text-left p-2 bg-white border border-slate-300 rounded hover:bg-green-100 font-semibold text-green-900">B. "¿Qué mensaje exacto debe ver el estudiante y qué registro de seguridad debemos guardar si intenta acceder a un radicado ajeno?"</button>
+                                    </div>
+                                    <div id="roleplay-feedback" class="mt-3 text-xs font-bold text-green-800 hidden"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 5 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg font-bold text-green-800 text-lg accordion-btn mb-2 text-left hover:bg-green-200 transition-colors" data-target="#panel-subtema-5">
+                            <span>3.5 Procedimiento Integrado & 3.6 Caso Práctico REQ-07 ⚙️</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 sm:p-6 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">
+                                    La Verificación y la Validación se ejecutan de forma iterativa en un circuito continuo de calidad. 🔄
+                                </p>
+
+                                <div class="my-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                                    <img src="img/figura 7 ruta integrada.png" alt="Ruta integrada de revisión y trazabilidad" class="mx-auto rounded-lg shadow-md max-w-full h-auto mb-2">
+                                    <p class="text-xs text-slate-500 italic">Figura 7. Ruta integrada de revisión y trazabilidad. Fuente: IA (2026).</p>
+                                </div>
+
+                                <!-- 7 PASOS INTEGRADOS -->
+                                <ol class="list-decimal list-inside space-y-2 text-xs bg-green-50 p-4 rounded-lg border border-green-200 font-medium text-slate-700">
+                                    <li><strong>Preparación:</strong> Definir alcance, versión del documento y evidencias.</li>
+                                    <li><strong>Verificación interna:</strong> Revisar sintaxis, completitud y factibilidad.</li>
+                                    <li><strong>Corrección inicial:</strong> Eliminar defectos de redacción antes de llamar al cliente.</li>
+                                    <li><strong>Validación con usuarios:</strong> Presentar escenarios, prototipos y reglas.</li>
+                                    <li><strong>Registro de decisiones:</strong> Clasificar observaciones (Aceptado, Rechazado, Pendiente).</li>
+                                    <li><strong>Actualización y trazabilidad:</strong> Modificar los requerimientos y sus pruebas asociadas.</li>
+                                    <li><strong>Confirmación de cierre:</strong> Comprobar correcciones y obtener la firma de aprobación.</li>
+                                </ol>
+
+                                <!-- CASO PRÁCTICO REQ-07 -->
+                                <div class="mt-6 p-4 bg-white border-2 border-green-500 rounded-xl shadow-md">
+                                    <h4 class="font-bold text-green-800 text-md mb-2">📌 Caso Práctico Resuelto: Solicitud de Certificados (REQ-07)</h4>
+                                    
+                                    <div class="space-y-3 text-xs">
+                                        <div class="p-2.5 bg-red-50 border border-red-200 rounded">
+                                            <span class="font-bold text-red-700 block">1. Requerimiento Inicial (Débil):</span>
+                                            <p class="text-slate-700">REQ-07. El sistema permitirá consultar fácilmente el estado de los certificados y notificará cualquier novedad.</p>
+                                        </div>
+
+                                        <div class="p-2.5 bg-yellow-50 border border-yellow-200 rounded">
+                                            <span class="font-bold text-yellow-800 block">2. Hallazgos de Verificación:</span>
+                                            <p class="text-slate-700">"Fácilmente" no es medible; no especifica quién puede consultar; omite reglas de privacidad y datos visibles.</p>
+                                        </div>
+
+                                        <div class="p-2.5 bg-blue-50 border border-blue-200 rounded">
+                                            <span class="font-bold text-blue-800 block">3. Requerimiento Validado (Final):</span>
+                                            <p class="text-slate-800 font-medium">REQ-07. Cuando un estudiante autenticado consulte una solicitud asociada a su identificación, el sistema mostrará número de radicado, tipo de certificado, fecha de solicitud, estado vigente y última observación pública. Si el radicado no pertenece al estudiante, el sistema no mostrará información y registrará el intento de consulta.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="my-4 text-center">
+                                        <img src="img/figura 8 trazabilidad del caso.png" alt="Trazabilidad del caso de solicitud de certificados" class="mx-auto rounded shadow max-w-full h-auto mb-1">
+                                        <p class="text-xs text-slate-500 italic">Figura 8. Trazabilidad del caso de solicitud de certificados. Fuente: IA (2026).</p>
+                                    </div>
+                                </div>
+
+                                <!-- GAME 5 -->
+                                <div class="p-5 bg-gradient-to-br from-emerald-50 to-green-100 border border-green-300 rounded-xl my-6">
+                                    <h4 class="font-bold text-green-900 text-md mb-2 flex items-center gap-2">
+                                        <span>🔗 Mini-Juego 5: Conector de Trazabilidad Total</span>
+                                        <span class="text-xs bg-green-600 text-white font-normal px-2 py-0.5 rounded-full">+100 XP</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-600 mb-3">Haz click en la pareja que corresponda para vincular el Requerimiento con su Criterio de Aceptación:</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                        <button onclick="checkTrace(this, true)" class="p-2.5 bg-white border border-green-400 rounded text-left hover:bg-green-100">REQ-07 (Certificados) ➔ El estudiante solo consulta solicitudes asociadas a su ID propia.</button>
+                                        <button onclick="checkTrace(this, false)" class="p-2.5 bg-white border border-slate-300 rounded text-left hover:bg-red-50">REQ-07 (Certificados) ➔ El sistema debe ser bonito y colorido.</button>
+                                    </div>
+                                    <div id="trace-feedback" class="mt-3 text-xs font-bold text-green-800 hidden"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">✍️ Misiones y Desafíos Prácticos</h2>
+                <p class="text-slate-600 mb-6">Pondrás a prueba tu habilidad de analista con dos actividades prácticas interactivas. ¡Completa los productos esperados!</p>
+                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <h3 class="font-bold text-green-800">🎮 Progreso de misiones</h3>
+                        <span id="activity-xp-count" class="font-bold text-green-800">⭐ 0/100 XP</span>
+                    </div>
+                    <div class="w-full bg-green-200 rounded-full h-2.5"><div id="activity-xp-bar" class="bg-green-600 h-2.5 rounded-full transition-all duration-500" style="width:0%"></div></div>
+                    <p id="activity-achievement" class="hidden mt-3 p-2 bg-green-100 border border-green-300 rounded text-green-800 font-semibold" role="status">🏅 Insignia desbloqueada: Analista V&V</p>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- ACTIVIDAD 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold text-green-700">🏥 Actividad 1: Clínica de Requerimientos</h3>
+                            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Misión Individual / Equipo</span>
+                        </div>
+                        <p class="mb-4 text-slate-700 leading-relaxed text-sm">
+                            <strong>Situación:</strong> Has recibido una lista de requerimientos redactados para una nueva plataforma educativa. Algunos contienen graves ambigüedades, datos omitidos o resultados imposibles de probar en QA.
+                        </p>
+
+                        <!-- SIMULADOR INTERACTIVO CLINICA -->
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4">
+                            <h4 class="font-bold text-slate-800 text-sm mb-2">📋 Caso de Diagnóstico Rápido:</h4>
+                            <div class="p-3 bg-white border border-red-300 rounded text-xs mb-3">
+                                <span class="font-bold text-red-600 block">Requerimiento A-01:</span>
+                                <em>"La plataforma educativa enviará notificaciones super rápidas a los alumnos cuando se publique una tarea importante."</em>
+                            </div>
+                            
+                            <div class="space-y-2 text-xs">
+                                <label class="block font-semibold text-slate-700">Selecciona el defecto principal:</label>
+                                <select id="clinic-defect" class="w-full p-2 border rounded bg-white">
+                                    <option value="">-- Seleccionar defecto --</option>
+                                    <option value="ambiguedad">Términos ambiguos ("super rápidas", "importante") sin métricas</option>
+                                    <option value="inconsistencia">Contradicción con la base de datos</option>
+                                    <option value="factibilidad">Falta de servidor de correo</option>
+                                </select>
+                                <button onclick="evalClinic()" class="mt-2 px-4 py-2 bg-green-600 text-white font-bold text-xs rounded hover:bg-green-700 transition-colors">Diagnosticar Requisito</button>
+                            </div>
+                            <div id="clinic-result" class="mt-3 text-xs font-bold text-green-800 hidden"></div>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-xs text-green-900 leading-relaxed">
+                                <span class="font-bold text-sm block mb-1">📝 Producto Esperado de la Actividad:</span>
+                                Matriz estructurada con: Requerimiento Original ➔ Defecto Detectado ➔ Efecto en Pruebas ➔ Pregunta de Validación ➔ Versión Corregida ➔ Criterio de Aceptación.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ACTIVIDAD 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold text-green-700">📑 Actividad 2: Sesión de Validación Simulada y Generador de Acta</h3>
+                            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Simulación de Rol (25 Min)</span>
+                        </div>
+                        <p class="mb-4 text-slate-700 leading-relaxed text-sm">
+                            <strong>Situación:</strong> Asumirás el rol de Analista en una reunión de 25 minutos con el equipo (Estudiante, Auxiliar de Admisiones, Desarrollador y QA). Recorrerán el módulo de consulta de certificados.
+                        </p>
+
+                        <!-- GENERADOR INTERACTIVO DE ACTA SIMULADA -->
+                        <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-lg mb-4">
+                            <h4 class="font-bold text-emerald-900 text-sm mb-2">✍️ Asistente Digital para Acta de Validación</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <label class="block font-medium text-slate-700 mb-1">Nombre del Proyecto:</label>
+                                    <input type="text" id="acta-proyecto" value="Módulo de Certificados CINTIA" class="w-full p-2 border rounded bg-white">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-slate-700 mb-1">Resultado de la Sesión:</label>
+                                    <select id="acta-resultado" class="w-full p-2 border rounded bg-white">
+                                        <option value="Aprobado con Ajustes">Aprobado con Ajustes (Recomendado)</option>
+                                        <option value="Aprobado Totalmente">Aprobado Totalmente</option>
+                                        <option value="Requiere nueva sesión">Requiere nueva sesión</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="generarActa()" class="mt-3 px-4 py-2 bg-emerald-700 text-white font-bold text-xs rounded hover:bg-emerald-800 transition-colors">Generar Borrador de Acta de Validación</button>
+                            
+                            <div id="acta-preview" class="mt-4 p-3 bg-white border border-emerald-400 rounded text-xs hidden">
+                                <h5 class="font-bold text-emerald-800 mb-1">📄 Acta de Validación Generada:</h5>
+                                <pre id="acta-text" class="whitespace-pre-wrap text-slate-700 bg-slate-50 p-2 rounded border border-slate-200 text-[11px]"></pre>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-xs text-green-900 leading-relaxed">
+                                <span class="font-bold text-sm block mb-1">📝 Producto Esperado de la Actividad:</span>
+                                Acta de validación firmada en formato digital, requerimientos corregidos y matriz de trazabilidad Requisito ➔ Criterio ➔ Caso de Prueba.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">✔️ Evaluación de Conocimientos</h2>
+                <p class="text-slate-600 mb-6 text-sm">Demuestra tu dominio en Verificación y Validación de Requerimientos. Responde las 5 preguntas de nivel progresivo.</p>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-colors shadow-md w-full sm:w-auto">Finalizar Evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📖 Recursos para Profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Explora los siguientes estándares y artículos de referencia para ampliar tus conocimientos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Norma ISO/IEC/IEEE 29148: Ingeniería de Requisitos</h3>
+                            <p class="text-slate-600 mb-2 text-sm">Estándar internacional sobre procesos del ciclo de vida y especificación de requisitos en sistemas de software.</p>
+                            <a href="https://www.iso.org/standard/72089.html" target="_blank" class="underline text-slate-700 hover:text-green-700 font-medium text-sm">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/QR_Ingeniería de Requerimientos.png" alt="QR Norma ISO/IEC/IEEE 29148" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Guía Práctica de Validación de Requisitos</h3>
+                            <p class="text-slate-600 mb-2 text-sm">Artículo especializado sobre la conducción de talleres con usuarios y pruebas de aceptación.</p>
+                            <a href="https://www.scrum.org" target="_blank" class="underline text-slate-700 hover:text-green-700 font-medium text-sm">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/QR_Introducción a la Validación.png" alt="QR Guía de Validación" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Revista Académica IEEE Software</h3>
+                            <p class="text-slate-600 mb-2 text-sm">Publicaciones sobre la prevención de errores en las etapas tempranas del desarrollo de software.</p>
+                            <a href="https://www.computer.org/csdl/magazine/so" target="_blank" class="underline text-slate-700 hover:text-green-700 font-medium text-sm">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/QR_Revista académica.png" alt="QR Revista Académica" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">📚 Bibliografía de Referencia</h2>
+                <div class="space-y-4">
+
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                        <span class="block text-slate-800 text-sm">
+                            Organización Internacional de Normalización. (2018). <i>ISO/IEC/IEEE 29148:2018. Ingeniería de sistemas y software: Procesos del ciclo de vida e ingeniería de requisitos</i>. ISO.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                        <span class="block text-slate-800 text-sm">
+                            Pressman, R. S., & Maxim, B. R. (2021). <i>Ingeniería del software: Un enfoque práctico</i> (9.ª ed.). McGraw-Hill.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                        <span class="block text-slate-800 text-sm">
+                            Sommerville, I. (2016). <i>Ingeniería de software</i> (10.ª ed.). Pearson.
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS BASE DE NAVEGACIÓN Y ACCIONES
+         ============================================= -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+    </script>
+
+    <!-- =============================================
+         SISTEMA DE XP Y JUEGOS INTERACTIVOS (GAMIFICACIÓN)
+         ============================================= -->
+    <script>
+        let currentXP = 0;
+        let activityXP = 0;
+        const completedActivityMissions = new Set();
+        function addActivityXP(missionId, amount) {
+            if (completedActivityMissions.has(missionId)) return;
+            completedActivityMissions.add(missionId);
+            activityXP = Math.min(100, activityXP + amount);
+            document.getElementById('activity-xp-count').textContent = `⭐ ${activityXP}/100 XP`;
+            document.getElementById('activity-xp-bar').style.width = `${activityXP}%`;
+            if (activityXP === 100) document.getElementById('activity-achievement').classList.remove('hidden');
+        }
+
+        function addXP(amount) {
+            currentXP += amount;
+            if (currentXP > 500) currentXP = 500;
+            document.getElementById('xp-count').textContent = `⚡ ${currentXP} XP`;
+            const pct = Math.round((currentXP / 500) * 100);
+            document.getElementById('xp-bar').style.width = `${pct}%`;
+            
+            const rankEl = document.getElementById('xp-rank');
+            if (currentXP >= 400) rankEl.textContent = "Master Analista 🏆";
+            else if (currentXP >= 250) rankEl.textContent = "Inspector Avanzado ⭐";
+            else if (currentXP >= 100) rankEl.textContent = "Practicante V&V 🛠️";
+        }
+
+        // Game 1: Detective V&V
+        function checkVV(qId, type) {
+            const fb = document.getElementById('vv-game-feedback');
+            fb.classList.remove('hidden');
+            if ((qId === 'q1' && type === 'verificacion') || (qId === 'q2' && type === 'validacion')) {
+                fb.textContent = "¡Excelente deducción! 🎉 Ha clasificado correctamente el enfoque.";
+                fb.className = "mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-300";
+                addXP(50);
+            } else {
+                fb.textContent = "¡Casi! Inténtalo de nuevo 💪 Recuerda: Verificación = documento/norma, Validación = usuario real.";
+                fb.className = "mt-3 text-xs font-bold text-amber-700 bg-amber-50 p-2 rounded border border-amber-300";
+            }
+        }
+
+        // Game 2: Reparación
+        function checkGame2(btn, isCorrect) {
+            const fb = document.getElementById('game2-feedback');
+            fb.classList.remove('hidden');
+            if (isCorrect) {
+                fb.textContent = "¡Correcto! ⭐ 'Ultra fácil' es un adjetivo ambiguo no verificable.";
+                fb.className = "mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-300";
+                addXP(100);
+            } else {
+                fb.textContent = "¡Inténtalo otra vez! Piensa si un desarrollador sabría cómo probar 'ultra fácil'.";
+                fb.className = "mt-3 text-xs font-bold text-amber-700 bg-amber-50 p-2 rounded border border-amber-300";
+            }
+        }
+
+        // Game 3: Checklist
+        function updateChecklistGame() {
+            const checkedCount = document.querySelectorAll('.chk-item:checked').length;
+            const btn = document.getElementById('btn-certify');
+            if (checkedCount === 3) {
+                btn.disabled = false;
+                btn.className = "mt-4 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded cursor-pointer transition-colors shadow";
+                btn.textContent = "¡Certificar Calidad del Requisito! 🎖️";
+            }
+        }
+        function certifyReq() {
+            alert("¡Felicitaciones! 🎉 Has certificado la calidad técnica del requerimiento.");
+            addXP(100);
+        }
+
+        // Game 4: Roleplay
+        function checkRoleplay(isCorrect, btn) {
+            const fb = document.getElementById('roleplay-feedback');
+            fb.classList.remove('hidden');
+            if (isCorrect) {
+                fb.textContent = "¡Brillante elección! 🎯 Indagas sobre el mensaje de cara al alumno y el registro de seguridad.";
+                fb.className = "mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-300";
+                addXP(100);
+            } else {
+                fb.textContent = "Ojo: El analista no debe imponer respuestas técnicas sin profundizar en la necesidad del proceso.";
+                fb.className = "mt-3 text-xs font-bold text-amber-700 bg-amber-50 p-2 rounded border border-amber-300";
+            }
+        }
+
+        // Game 5: Trazabilidad
+        function checkTrace(btn, isCorrect) {
+            const fb = document.getElementById('trace-feedback');
+            fb.classList.remove('hidden');
+            if (isCorrect) {
+                fb.textContent = "¡Conexión Perfecta! 🔗 El requerimiento se vincula directamente a su regla de privacidad.";
+                fb.className = "mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-300";
+                addXP(100);
+            } else {
+                fb.textContent = "No coincide. El aspecto estético no forma parte del criterio de aceptación de REQ-07.";
+                fb.className = "mt-3 text-xs font-bold text-amber-700 bg-amber-50 p-2 rounded border border-amber-300";
+            }
+        }
+
+        // Actividad 1 Clinic
+        function evalClinic() {
+            const val = document.getElementById('clinic-defect').value;
+            const res = document.getElementById('clinic-result');
+            res.classList.remove('hidden');
+            if (val === 'ambiguedad') {
+                res.textContent = "¡Excelente diagnóstico! 🎉 'Super rápidas' e 'importante' carecen de umbral medible y criterio objetivo.";
+                res.className = "mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-300";
+                addActivityXP('diagnostico', 50);
+            } else {
+                res.textContent = "Revisa de nuevo la redacción: el problema principal está en las palabras subjetivas usadas.";
+                res.className = "mt-3 text-xs font-bold text-amber-700 bg-amber-50 p-2 rounded border border-amber-300";
+            }
+        }
+
+        // Actividad 2 Generator
+        function generarActa() {
+            const proy = document.getElementById('acta-proyecto').value;
+            const res = document.getElementById('acta-resultado').value;
+            const preview = document.getElementById('acta-preview');
+            const txt = document.getElementById('acta-text');
+            
+            txt.textContent = `ACTA DE VALIDACIÓN DE REQUERIMIENTOS
+---------------------------------------------------
+Sistema: ${proy}
+Fecha: ${new Date().toLocaleDateString()}
+Estado de Sesión: ${res}
+
+Acuerdos Registrados:
+- Se acuerda incluir radicado, tipo, fecha, estado y observación pública.
+- Intentos de consulta a radicados ajenos quedarán registrados en log de auditoría.
+- Se aprueba el prototipo de interfaz presentado.
+
+Participantes: Analista, Jefa Admisiones, Dev Leader, QA Lead.`;
+            preview.classList.remove('hidden');
+            addActivityXP('acta', 50);
+        }
+    </script>
+
+    <!-- =============================================
+         QUIZ EVALUACIÓN (PREGUNTAS PROGRESIVAS)
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "Nivel 1 (Recordatorio): ¿Cuál es la pregunta central que responde la VERIFICACIÓN de un requerimiento?",
+                options: [
+                    "¿El requerimiento está redactado e identificado de forma técnica correcta?",
+                    "¿El cliente tiene presupuesto suficiente para pagar la función?",
+                    "¿El software le gusta a los usuarios finales?",
+                    "¿El sistema fue desplegado en la nube pública?"
+                ],
+                correct: 0
+            },
+            {
+                question: "Nivel 2 (Diferenciación): El equipo realiza un taller con la jefa de admisiones presentando wireframes para confirmar el flujo de trabajo. ¿Qué actividad ejecutan?",
+                options: [
+                    "Verificación técnica interna",
+                    "Validación con usuarios e interesados",
+                    "Prueba de carga y rendimiento",
+                    "Revisión estática de código fuente"
+                ],
+                correct: 1
+            },
+            {
+                question: "Nivel 3 (Diagnóstico): Evalúa el requerimiento: 'El módulo de inscripciones debe cargar velozmente para evitar quejas'. ¿Qué criterio de calidad incumple?",
+                options: [
+                    "Factibilidad técnica",
+                    "Trazabilidad",
+                    "Claro y sin ambigüedad / Verificable",
+                    "Priorización de alcance"
+                ],
+                correct: 2
+            },
+            {
+                question: "Nivel 4 (Caso Práctico REQ-07): En la consulta de certificados, si se omite especificar qué ocurre cuando se consulta un radicado ajeno, ¿qué defecto de calidad se comete?",
+                options: [
+                    "Requerimiento Incompleto (omisión de excepción)",
+                    "Requerimiento Duplicado",
+                    "Requerimiento no necesario",
+                    "Requerimiento no trazable"
+                ],
+                correct: 0
+            },
+            {
+                question: "Nivel 5 (Procedimiento Integrado): Durante la inspección se halla un requerimiento contradictorio. ¿Cuál es el procedimiento correcto según la norma V&V?",
+                options: [
+                    "El desarrollador elige la regla que sea más fácil de programar.",
+                    "El analista consulta la fuente autorizada del proceso, acuerda la corrección y actualiza la trazabilidad.",
+                    "Se elimina el requerimiento del documento sin notificar al cliente.",
+                    "Se deja la ambigüedad para resolverla durante las pruebas unitarias."
+                ],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6', 'p-4', 'bg-slate-50', 'rounded-lg', 'border', 'border-slate-200');
+            div.innerHTML = `
+                <p class="font-bold text-slate-800 mb-3 text-sm">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option bg-white border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors text-xs text-slate-700"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-bold text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `¡Evaluación completada! Obtuviste ${score} de ${quizData.length} respuestas correctas (${pct}%).`;
+            result.className = `mt-4 text-base font-bold p-3 rounded-lg text-center ${pct >= 60 ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-700 border border-red-300'}`;
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
