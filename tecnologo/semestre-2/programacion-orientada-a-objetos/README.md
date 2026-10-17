@@ -16,6 +16,13 @@ OVAs del programa Tecnólogo, semestre 2. Las explicaciones, ejemplos y activida
 - [Polimorfismo e interfaces básicas](unidad-2/polimorfismo-interfaces-basicas/index.html)
 - [Sobrecarga y sobreescritura de métodos](unidad-2/sobrecarga-sobreescritura-metodos/index.html)
 
+## Unidad 3
+
+- [Principios SOLID](unidad-3/principios-solid/index.html)
+- [Errores y validación de datos](unidad-3/errores-validacion-datos/index.html)
+- [Pruebas unitarias en Java](unidad-3/pruebas-unitarias-java/index.html)
+- [Documentación y entrega del proyecto](unidad-3/documentacion-entrega-proyecto/index.html)
+
 Cada carpeta contiene `index.html`, su propio `tailwind.css` y las imágenes locales de logo y recursos.
 
 Para agregar materiales, respeta `unidad-N/nombre-del-ova/` y las reglas de [CONTRIBUTING.md](../../../CONTRIBUTING.md) y [context.md](../../../context.md).
