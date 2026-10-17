@@ -563,7 +563,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Imperatives and Instructions](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-3/imperatives-and-instructions/)
 - [Reading Strategies for Technical Documentation](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/ingles-i/unidad-3/reading-technical-documentation/)
 
-#### Programación orientada a objetos  ·  8 OVAs
+#### Programación orientada a objetos  ·  12 OVAs
 
 **Unidad 1**
 
@@ -578,6 +578,13 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Herencia y reutilización de código](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-2/herencia-reutilizacion-codigo/)
 - [Polimorfismo e interfaces básicas](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-2/polimorfismo-interfaces-basicas/)
 - [Sobrecarga y sobreescritura de métodos](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-2/sobrecarga-sobreescritura-metodos/)
+
+**Unidad 3**
+
+- [Manejo de errores y validación de datos](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-3/errores-validacion-datos/)
+- [Pruebas unitarias introductorias](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-3/pruebas-unitarias-java/)
+- [Principios SOLID introductorios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-3/principios-solid/)
+- [Documentación y entrega del proyecto](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-3/documentacion-entrega-proyecto/)
 
 #### Requerimientos de sistemas de información  ·  8 OVAs
 
@@ -597,4 +604,4 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ---
 
-**262 OVAs enlazados.**
+**266 OVAs enlazados.**
