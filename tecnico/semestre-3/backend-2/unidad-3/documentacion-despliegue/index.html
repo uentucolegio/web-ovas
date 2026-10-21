@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Documentación y Despliegue</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        .code-block .k { color: #7dd3fc; }
+        .code-block .s { color: #86efac; }
+        .code-block .c { color: #64748b; }
+        .terminal {
+            background-color: #0f172a;
+            color: #a7f3d0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 8rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .match-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .match-card:hover { transform: translateY(-2px); }
+        .match-card.picked {
+            border-color: #22c55e;
+            background-color: #dcfce7;
+        }
+        .match-card.done {
+            border-color: #16a34a;
+            background-color: #bbf7d0;
+            cursor: default;
+            opacity: 0.85;
+        }
+        .match-card.wrong {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+            animation: shake 0.4s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .flow-step { position: relative; }
+        .xp-pop {
+            animation: xpPop 0.6s ease;
+        }
+        @keyframes xpPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .sort-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .sort-item:hover { transform: translateY(-2px); }
+        .sort-item.buena { border-color: #16a34a !important; background-color: #dcfce7 !important; }
+        .sort-item.mala { border-color: #f59e0b !important; background-color: #fef3c7 !important; }
+        .readme-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .readme-item:hover { transform: translateY(-2px); }
+        .readme-item.ordenado {
+            border-color: #16a34a !important;
+            background-color: #dcfce7 !important;
+            cursor: default;
+        }
+        .readme-item.wrong {
+            border-color: #ef4444 !important;
+            background-color: #fee2e2 !important;
+            animation: shake 0.4s;
+        }
+        .fuga-line {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .fuga-line:hover { transform: translateX(4px); }
+        .fuga-line.secreto {
+            border-color: #ef4444 !important;
+            background-color: #fee2e2 !important;
+        }
+        .fuga-line.segura {
+            border-color: #f59e0b !important;
+            background-color: #fef3c7 !important;
+            animation: shake 0.4s;
+        }
+        .deploy-check { width: 1.25rem; height: 1.25rem; accent-color: #16a34a; cursor: pointer; }
+        .mision-check { width: 1.25rem; height: 1.25rem; accent-color: #16a34a; cursor: pointer; }
+        .doc-table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+        .doc-table th {
+            background-color: #166534;
+            color: #fff;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .doc-table td {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+        }
+        .doc-table tr:nth-child(even) { background-color: #f0fdf4; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Documentación y despliegue: que tu backend hable (y vuele) por ti 📦</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Tú conoces tu backend de memoria: sabes qué carpetas tiene, qué comandos lo levantan y qué variables necesita. El problema es que <strong>esa información solo existe en tu cabeza</strong> 🧠. Si mañana otra persona abre tu repositorio —un compañero, un docente o el tú del futuro— lo único que encontrará es código… y una gran pregunta: <em>¿y esto cómo se ejecuta?</em> 😅
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En este OVA vas a aprender a cerrar ese ciclo. Primero verás por qué la <strong>documentación es parte del desarrollo</strong> y no una tarea que se hace "si sobra tiempo". Después construirás la pieza estrella de todo repositorio: el <strong>archivo README</strong> 📖, con su descripción, instalación, configuración y ejecución. También aprenderás a crear la <strong>tabla de endpoints</strong> que le dice al mundo cómo consumir tu API sin leer tu código 🗺️.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Y el gran final: el <strong>despliegue</strong>. Mientras desarrollas, tu app vive cómoda en tu computador; pero una entrega técnica exige demostrar que funciona en <em>otro</em> entorno 🚀. Revisaremos dependencias, comandos de inicio y variables de entorno para que tu backend deje de depender de "mi compu" y pueda volar a producción (o a una simulación).
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar, tu proyecto no solo funcionará: <strong>cualquiera podrá instalarlo, ejecutarlo y desplegarlo</strong> usando únicamente lo que está en el repositorio. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Reconocer la documentación como una parte propia del proceso de desarrollo de un proyecto backend.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📖</span>
+                        <span>Elaborar un archivo README con la información esencial para comprender, instalar, configurar y ejecutar una aplicación.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🗺️</span>
+                        <span>Construir una tabla de documentación de endpoints que describa métodos, rutas, parámetros y respuestas de una API.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🚀</span>
+                        <span>Preparar y ejecutar el despliegue de un backend en un entorno de producción o simulación, verificando su correcto funcionamiento.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- Marcador de XP y progreso (contenido dentro de la sección) -->
+                    <div class="mb-6 bg-white border border-green-200 rounded-xl shadow-sm p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="font-bold text-green-800 text-lg">🎮 Tu misión: dejar el proyecto listo para el mundo</p>
+                                <p class="text-slate-600 text-sm">Completa los retos de cada acordeón para ganar XP e insignias.</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-green-700"><span id="xp-total">0</span> <span class="text-base font-semibold">XP</span> ⭐</p>
+                                <p class="text-xs text-slate-500"><span id="misiones-hechas">0</span> / 5 retos completados</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                            <div id="xp-barra" class="bg-green-500 h-3 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                        <div id="insignias" class="mt-3 flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <!-- ACORDEÓN 1 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>📁 La documentación como parte del proyecto</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Durante el desarrollo de un backend, el programador conoce su estructura, sus comandos y sus configuraciones. Sin embargo, <strong>esta información debe quedar registrada</strong> para que otras personas puedan utilizar el proyecto. Una estructura básica podría ser:</p>
+
+                                <div class="code-block mb-4">proyecto/
+├── src/
+│   ├── app.js          <span class="c">// define la aplicación y sus rutas</span>
+│   └── server.js       <span class="c">// pone el servidor a escuchar</span>
+├── package.json        <span class="c">// dependencias y comandos</span>
+├── .env                <span class="c">// valores del entorno (¡no se sube!)</span>
+└── README.md           <span class="c">// la carta de presentación del proyecto</span></div>
+
+                                <p class="mb-4">La <strong>organización del código</strong> permite comprender cómo está construido el sistema, mientras que la <strong>documentación</strong> explica cómo utilizarlo. Un proyecto correctamente documentado permite:</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">🧯 Reducir errores de instalación</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">🤝 Facilitar el trabajo colaborativo</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">🔧 Mejorar el mantenimiento</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">⚡ Acelerar la incorporación de otros desarrolladores</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg sm:col-span-2">📦 Facilitar futuras entregas o despliegues</div>
+                                </div>
+
+                                <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg mb-6">
+                                    <p class="text-green-800 font-semibold mb-1">🔑 La idea central</p>
+                                    <p class="text-slate-700 text-sm">La documentación <strong>no</strong> debe considerarse una tarea adicional que se realiza al final, sino <strong>una parte propia del desarrollo</strong>: se escribe y se actualiza mientras el proyecto crece.</p>
+                                </div>
+
+                                <!-- ELEMENTO INTERACTIVO: ¿documentar o no documentar? -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 1: ¿Buena o mala práctica? (+10 XP por acierto)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Haz clic en cada afirmación para clasificarla. ¡Las buenas prácticas documentales suman puntos!</p>
+
+                                    <div id="sort-list" class="space-y-2"></div>
+                                    <p id="reto1-msg" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Guardián del conocimiento" desbloqueada! La documentación ya es parte de tu flujo.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>📖 El archivo README: la carta de presentación</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">El archivo <strong>README</strong> suele ubicarse en la raíz del repositorio y ofrece una visión general del proyecto. En un backend debería permitir responder preguntas como:</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">❓ ¿Qué hace la aplicación?</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">🛠️ ¿Qué tecnologías utiliza?</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">📋 ¿Qué requisitos necesita?</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">⬇️ ¿Cómo se instala?</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">⚙️ ¿Cómo se configura?</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">▶️ ¿Cómo se ejecuta?</div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg sm:col-span-2">🌐 ¿Qué servicios ofrece?</div>
+                                </div>
+
+                                <p class="font-semibold text-green-800 mb-2">📝 Descripción del proyecto</p>
+                                <p class="mb-2 text-sm">La descripción debe explicar brevemente la finalidad del sistema:</p>
+                                <div class="p-4 bg-white border-l-4 border-green-500 shadow-sm rounded-r-lg mb-6">
+                                    <p class="text-slate-700 text-sm italic">"API REST para gestionar los productos de una tienda. Permite registrar, consultar, actualizar y eliminar productos."</p>
+                                </div>
+                                <p class="mb-6 text-sm">Este tipo de descripción permite comprender rápidamente el propósito del backend <strong>sin necesidad de revisar el código fuente</strong>.</p>
+
+                                <p class="font-semibold text-green-800 mb-2">⬇️ Instalación</p>
+                                <p class="mb-2 text-sm">El README también debe explicar qué pasos debe seguir una persona para preparar el proyecto. En una aplicación construida con Node.js, por ejemplo, podría indicarse:</p>
+                                <ol class="list-decimal list-inside mb-2 space-y-1 text-sm">
+                                    <li>Descargar o clonar el repositorio.</li>
+                                    <li>Ingresar al directorio del proyecto.</li>
+                                    <li>Instalar las dependencias.</li>
+                                </ol>
+                                <div class="code-block mb-2">npm install</div>
+                                <p class="mb-6 text-sm">⚠️ Las instrucciones deben corresponder con el funcionamiento <strong>real</strong> del proyecto. Una indicación incorrecta puede impedir que otra persona logre ejecutar la aplicación.</p>
+
+                                <p class="font-semibold text-green-800 mb-2">⚙️ Configuración</p>
+                                <p class="mb-2 text-sm">Muchos backends necesitan valores que cambian de acuerdo con el entorno donde se ejecutan. Por ejemplo:</p>
+                                <div class="code-block mb-2">PORT=3000
+DB_HOST=localhost
+DB_NAME=tienda</div>
+                                <p class="mb-2 text-sm">El README puede explicar cuáles variables se necesitan, <strong>pero no debe publicar información sensible</strong> como:</p>
+                                <div class="flex flex-wrap gap-2 mb-6">
+                                    <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full">🔑 contraseñas</span>
+                                    <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full">🎟️ tokens</span>
+                                    <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full">🗝️ claves privadas</span>
+                                    <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full">🗄️ credenciales reales de bases de datos</span>
+                                </div>
+
+                                <p class="font-semibold text-green-800 mb-2">▶️ Ejecución</p>
+                                <p class="mb-2 text-sm">Finalmente, debe indicarse el comando necesario para iniciar la aplicación. Por ejemplo:</p>
+                                <div class="code-block mb-4">npm start</div>
+                                <p class="mb-4">Una documentación adecuada debería permitir que otro desarrollador prepare y ejecute el sistema <strong>utilizando únicamente las instrucciones disponibles en el repositorio</strong> 🎯.</p>
+
+                                <!-- ELEMENTO INTERACTIVO: ordena el README -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 2: Arma el README perfecto (+10 XP por sección bien ubicada)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Las secciones de un README quedaron desordenadas 😵. Haz clic en ellas <strong>en el orden lógico</strong> en que deberían aparecer: primero lo que presenta el proyecto, luego lo que necesita, y al final cómo ponerlo a andar.</p>
+
+                                    <div id="readme-list" class="space-y-2"></div>
+                                    <p id="readme-feedback" class="mt-3 text-sm font-semibold"></p>
+                                    <p id="reto2-msg" class="mt-2 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Arquitecto del README" desbloqueada! Tu documentación cuenta una historia ordenada.</p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1" -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">🛠️ Herramienta</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Make a README — guía para escribir buenos README</p>
+                                    <p class="text-slate-600 text-sm mb-4">Guía práctica y directa con las secciones esenciales, ejemplos y consejos para que tu README realmente le sirva a quien lo lee.</p>
+                                    <a href="https://www.makeareadme.com/" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                                        <span>▶️</span> Abrir Make a README
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🗺️ Documentación de endpoints: el mapa de tu API</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Un backend normalmente ofrece distintas rutas para consultar, registrar, modificar o eliminar información. Por ejemplo:</p>
+
+                                <div class="code-block mb-4"><span class="k">app</span>.get(<span class="s">'/productos'</span>, obtenerProductos);
+<span class="k">app</span>.get(<span class="s">'/productos/:id'</span>, obtenerProducto);
+<span class="k">app</span>.post(<span class="s">'/productos'</span>, crearProducto);</div>
+
+                                <p class="mb-4">Aunque estas rutas pueden encontrarse leyendo el código, un usuario de la API <strong>no debería necesitar conocer su implementación interna</strong> para utilizarla. Por esta razón, resulta conveniente construir una <strong>tabla de endpoints</strong>:</p>
+
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>GET</td><td>/productos</td><td>Consultar la lista de productos</td></tr>
+                                            <tr><td>GET</td><td>/productos/:id</td><td>Consultar un producto por su identificador</td></tr>
+                                            <tr><td>POST</td><td>/productos</td><td>Registrar un nuevo producto</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <p class="mb-2 text-sm">Cuando una operación requiere información adicional, también debe documentarse. Por ejemplo, los datos de entrada de <code class="bg-slate-200 px-1 rounded">POST /productos</code>:</p>
+
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr><th>Campo</th><th>Tipo</th><th>Requerido</th><th>Descripción</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>nombre</td><td>string</td><td>Sí</td><td>Nombre del producto</td></tr>
+                                            <tr><td>precio</td><td>number</td><td>Sí</td><td>Precio del producto</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <p class="mb-2 text-sm">Y el cuerpo de una solicitud para crear un producto podría contener:</p>
+                                <div class="code-block mb-4">{
+  <span class="s">"nombre"</span>: <span class="s">"Teclado"</span>,
+  <span class="s">"precio"</span>: <span class="s">85000</span>
+}</div>
+
+                                <div class="p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg mb-6">
+                                    <p class="text-orange-800 font-semibold mb-1">⚠️ La regla de oro</p>
+                                    <p class="text-slate-700 text-sm">La documentación debe mantenerse <strong>sincronizada con el código</strong>. Si una ruta cambia, debe actualizarse también en la tabla. Una documentación desactualizada puede ocasionar errores al consumidor de la API.</p>
+                                </div>
+
+                                <!-- ELEMENTO INTERACTIVO: juego de parejas -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 3: Empareja cada endpoint con su descripción (+10 XP por pareja)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Haz clic en un endpoint (izquierda) y luego en su descripción (derecha). ¡Encuentra las 5 parejas!</p>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div id="match-codes" class="space-y-2"></div>
+                                        <div id="match-meanings" class="space-y-2"></div>
+                                    </div>
+                                    <p id="match-feedback" class="mt-3 text-sm font-semibold"></p>
+                                    <p id="reto3-msg" class="mt-2 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Cartógrafo de APIs" desbloqueada! Tu mapa de endpoints está completo.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🚀 Preparación para el despliegue</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Mientras se desarrolla una aplicación, normalmente se ejecuta en el computador del programador. Sin embargo, <strong>una entrega técnica requiere comprobar que puede funcionar también en otro entorno</strong>. De manera general, el proceso puede representarse así:</p>
+
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">💻 Desarrollo<br><span class="font-normal text-xs text-slate-500">en tu computador</span></div>
+                                    <div class="text-center text-green-600 font-bold">➡️</div>
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">🔍 Revisión<br><span class="font-normal text-xs text-slate-500">deps + comandos + env</span></div>
+                                    <div class="text-center text-green-600 font-bold">➡️</div>
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">🚀 Despliegue<br><span class="font-normal text-xs text-slate-500">producción o simulación</span></div>
+                                    <div class="text-center text-green-600 font-bold">➡️</div>
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">✅ Verificación<br><span class="font-normal text-xs text-slate-500">¿responde la API?</span></div>
+                                </div>
+
+                                <p class="font-semibold text-green-800 mb-2">📦 Dependencias</p>
+                                <p class="mb-4 text-sm">El proyecto debe tener correctamente registradas las bibliotecas necesarias para funcionar. En Node.js, esta información se administra normalmente desde el archivo <code class="bg-slate-200 px-1 rounded">package.json</code>.</p>
+
+                                <p class="font-semibold text-green-800 mb-2">⌨️ Comando de inicio</p>
+                                <p class="mb-2 text-sm">Debe existir una instrucción clara para iniciar el servidor. Por ejemplo:</p>
+                                <div class="code-block mb-4">"scripts": {
+  <span class="s">"start"</span>: <span class="s">"node src/server.js"</span>
+}</div>
+                                <p class="mb-4 text-sm">Esto permite que el entorno donde se despliega la aplicación pueda iniciar el backend mediante un comando conocido.</p>
+
+                                <p class="font-semibold text-green-800 mb-2">🌍 Variables de entorno</p>
+                                <p class="mb-2 text-sm">Los valores que pueden cambiar entre entornos deben evitar estar escritos directamente en el código. Por ejemplo:</p>
+                                <div class="code-block mb-4"><span class="k">const</span> PORT = process.env.PORT || <span class="s">3000</span>;</div>
+                                <p class="mb-2 text-sm">De esta manera, la aplicación puede recibir el puerto desde el entorno donde se ejecuta y utilizar un valor predeterminado cuando sea necesario.</p>
+                                <p class="mb-2 text-sm">También deben revisarse:</p>
+                                <ul class="list-disc list-inside mb-4 space-y-1 text-sm">
+                                    <li>conexiones a bases de datos;</li>
+                                    <li>direcciones de servicios externos;</li>
+                                    <li>credenciales;</li>
+                                    <li>rutas de archivos;</li>
+                                    <li>configuraciones específicas del entorno local.</li>
+                                </ul>
+                                <p class="mb-4">🎯 El objetivo es <strong>evitar que el funcionamiento de la aplicación dependa exclusivamente del computador del desarrollador</strong>.</p>
+
+                                <!-- ELEMENTO INTERACTIVO: detecta la fuga -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 4: Detecta la fuga (+10 XP por secreto encontrado)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Un compañero quiere publicar este archivo de configuración en el repositorio 😱. Haz clic en las <strong>4 líneas que contienen secretos</strong> que nunca deberían subirse.</p>
+
+                                    <div id="fuga-list" class="space-y-2"></div>
+                                    <p id="fuga-feedback" class="mt-3 text-sm font-semibold"></p>
+                                    <p id="reto4-msg" class="mt-2 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Cazador de secretos" desbloqueada! Esos valores van en la configuración del servidor, nunca en el repositorio.</p>
+                                </div>
+
+                                <!-- ELEMENTO INTERACTIVO: simulador de despliegue -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 5: Checklist de despliegue (+15 XP)</p>
+                                    <p class="text-slate-600 text-sm mb-3">Marca <strong>solo</strong> lo que realmente debe revisarse antes de desplegar (ojo: hay dos trampas 🪤) y luego pulsa <strong>Desplegar</strong>.</p>
+
+                                    <div class="space-y-2 mb-4">
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="1"><span>Las dependencias están registradas en <code class="bg-slate-200 px-1 rounded">package.json</code></span></label>
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="1"><span>Existe un comando de inicio (<code class="bg-slate-200 px-1 rounded">npm start</code>)</span></label>
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="0"><span>🪤 Subir la carpeta <code class="bg-slate-200 px-1 rounded">node_modules</code> al repositorio</span></label>
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="1"><span>El puerto se lee desde el entorno (<code class="bg-slate-200 px-1 rounded">process.env.PORT</code>)</span></label>
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="0"><span>🪤 Escribir las credenciales reales directamente en el código</span></label>
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="1"><span>El README explica instalación, configuración y ejecución</span></label>
+                                        <label class="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" class="deploy-check mt-0.5" data-ok="1"><span>Los endpoints fueron verificados y responden como documenta la tabla</span></label>
+                                    </div>
+
+                                    <div class="terminal mb-3" id="terminal-out">$ _</div>
+                                    <button id="btn-deploy" type="button" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">🚀 Desplegar</button>
+                                    <p id="reto5-msg" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Ingeniero de despliegue" desbloqueada! Tu backend vuela solo.</p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-2" -->
+                                <div id="recurso-ext-2" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📐 Metodología</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">The Twelve-Factor App — config en el entorno</p>
+                                    <p class="text-slate-600 text-sm mb-4">La metodología de referencia para construir aplicaciones desplegables. Su factor III explica por qué la configuración debe vivir en variables de entorno y no en el código.</p>
+                                    <a href="https://12factor.net/es/config" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                                        <span>▶️</span> Leer el factor III
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <p class="text-slate-600 mb-6">Tres misiones para dejar tu backend documentado y desplegado. Marca cada paso que completes: la barra de cada misión te muestra tu avance 📈.</p>
+                <div class="space-y-6">
+
+                    <!-- Misión 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-xl font-bold text-green-700">📖 Misión 1: Documentación del proyecto</h3>
+                            <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">Documentación</span>
+                        </div>
+                        <ol class="space-y-2 mb-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Crea un proyecto backend básico utilizando Node.js y Express.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Organiza el proyecto con una estructura de carpetas que incluya el código fuente, las rutas y los archivos de configuración.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Implementa al menos tres endpoints: <code class="bg-slate-200 px-1 rounded">GET /productos</code> (lista), <code class="bg-slate-200 px-1 rounded">GET /productos/:id</code> (por identificador) y <code class="bg-slate-200 px-1 rounded">POST /productos</code> (registrar).</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Crea un archivo <code class="bg-slate-200 px-1 rounded">README.md</code> en la raíz del proyecto.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Documenta en el README la descripción del proyecto, las tecnologías utilizadas, los requisitos, el procedimiento de instalación, la configuración y las instrucciones de ejecución.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Ejecuta el proyecto siguiendo las instrucciones documentadas y comprueba su funcionamiento.</span></li>
+                        </ol>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div class="mision-barra bg-green-500 h-3 rounded-full transition-all duration-500" data-mision="1" style="width:0%"></div>
+                        </div>
+                        <p class="mision-badge text-sm font-bold text-green-700 hidden" data-mision="1">🏅 ¡Misión cumplida! Tu proyecto ya se explica solo.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> proyecto backend básico y funcional, acompañado de un archivo README.md que contenga las instrucciones necesarias para comprender, instalar, configurar y ejecutar la aplicación.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Misión 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-xl font-bold text-green-700">🗺️ Misión 2: Construcción de la tabla de endpoints</h3>
+                            <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">Documentación de API</span>
+                        </div>
+                        <ol class="space-y-2 mb-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Identifica los tres endpoints implementados en la Misión 1.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Registra el método HTTP y la ruta correspondiente a cada endpoint.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Describe brevemente la función de cada operación.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Identifica los parámetros y datos de entrada requeridos.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Indica los códigos de estado HTTP y las respuestas esperadas.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Incorpora la tabla al archivo README.md.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Verifica que la documentación coincida con el comportamiento real de los endpoints.</span></li>
+                        </ol>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div class="mision-barra bg-green-500 h-3 rounded-full transition-all duration-500" data-mision="2" style="width:0%"></div>
+                        </div>
+                        <p class="mision-badge text-sm font-bold text-green-700 hidden" data-mision="2">🏅 ¡Misión cumplida! Tu API tiene su propio mapa.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> tabla de documentación de los tres endpoints, incorporada al archivo README.md, que incluya métodos HTTP, rutas, descripciones, parámetros, datos de entrada, códigos de estado y respuestas esperadas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Misión 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-xl font-bold text-green-700">🚀 Misión 3: Despliegue funcional</h3>
+                            <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">Despliegue</span>
+                        </div>
+                        <ol class="space-y-2 mb-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Revisa las dependencias y el comando de inicio del proyecto construido en la Misión 1.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Identifica y configura las variables de entorno necesarias.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Ejecuta o despliega el backend en un entorno de producción o simulación.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Comprueba que el servidor inicia y responde correctamente.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Realiza pruebas de funcionamiento sobre los tres endpoints implementados, verificando: la consulta del listado de productos (GET), la consulta de un producto específico (GET) y el registro de un nuevo producto (POST).</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Compara las respuestas obtenidas con los resultados documentados en la tabla de endpoints.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Registra evidencias de las solicitudes realizadas y las respuestas recibidas.</span></li>
+                        </ol>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div class="mision-barra bg-green-500 h-3 rounded-full transition-all duration-500" data-mision="3" style="width:0%"></div>
+                        </div>
+                        <p class="mision-badge text-sm font-bold text-green-700 hidden" data-mision="3">🏅 ¡Misión cumplida! Tu backend vive fuera de tu compu.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> proyecto backend funcional en un entorno de producción o simulación, acompañado de evidencias de ejecución y verificación de los tres endpoints, mediante capturas de pantalla o registros de solicitudes y respuestas.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Las preguntas suben de nivel: empiezan suave y terminan en modo experto 🧗. Selecciona la respuesta correcta para cada una.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS — estructura intocable
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Render – Despliegue de aplicaciones Node.js con Express</h3>
+                            <p class="text-slate-600 mb-2">Guía rápida oficial para desplegar una app Express en Render: conectar el repositorio, definir comandos de build y start, y obtener la URL pública.</p>
+                            <a href="https://docs.render.com/deploy-node-express-app" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Render despliegue Node.js Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Railway – Despliegue de aplicaciones Express</h3>
+                            <p class="text-slate-600 mb-2">Guía oficial de Railway para desplegar una app Express por plantilla, GitHub, CLI o Dockerfile, incluyendo variables de entorno y base de datos.</p>
+                            <a href="https://docs.railway.com/guides/express" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR Railway despliegue Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Render – Documentación sobre servicios web</h3>
+                            <p class="text-slate-600 mb-2">Referencia completa de los web services de Render: despliegue desde Git o imagen, vinculación de puertos (PORT), variables de entorno y dominios.</p>
+                            <a href="https://docs.render.com/web-services" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR Render servicios web" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            GitHub. (s. f.). <i>Acerca del archivo LÉAME del repositorio</i>. Documentación de GitHub.<br>
+                            <a href="https://docs.github.com/es/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes" class="text-green-700 underline break-all" target="_blank">https://docs.github.com/es/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            GitHub. (s. f.). <i>Procedimientos recomendados para repositorios</i>. Documentación de GitHub.<br>
+                            <a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/best-practices-for-repositories" class="text-green-700 underline break-all" target="_blank">https://docs.github.com/en/repositories/creating-and-managing-repositories/best-practices-for-repositories</a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación del OVA
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "🟢 Nivel 1 — ¿Dónde suele ubicarse el archivo README en un proyecto?",
+                options: [
+                    "Dentro de la carpeta src",
+                    "En la raíz del repositorio",
+                    "En el archivo package.json",
+                    "En el servidor de producción"
+                ],
+                correct: 1
+            },
+            {
+                question: "🟢 Nivel 2 — ¿Cuál es el propósito principal de la tabla de endpoints en la documentación de una API?",
+                options: [
+                    "Describir métodos, rutas, parámetros y respuestas para usar la API sin leer el código",
+                    "Guardar los datos de los usuarios de la aplicación",
+                    "Acelerar la ejecución de las rutas del servidor",
+                    "Reemplazar las pruebas de los endpoints"
+                ],
+                correct: 0
+            },
+            {
+                question: "🟡 Nivel 3 — ¿Qué información NO debería publicarse en el README de un repositorio?",
+                options: [
+                    "El comando para instalar las dependencias",
+                    "La descripción del proyecto",
+                    "Las contraseñas y credenciales reales de la base de datos",
+                    "La lista de tecnologías utilizadas"
+                ],
+                correct: 2
+            },
+            {
+                question: "🟡 Nivel 4 — Un desarrollador cambia la ruta /productos por /items, pero no actualiza la tabla de endpoints. ¿Qué riesgo genera?",
+                options: [
+                    "Ninguno: el código es lo único que importa",
+                    "La API deja de funcionar automáticamente",
+                    "Los consumidores de la API tendrán errores porque la documentación quedó desactualizada",
+                    "El repositorio se vuelve privado"
+                ],
+                correct: 2
+            },
+            {
+                question: "🔴 Nivel 5 — ¿Por qué se escribe `const PORT = process.env.PORT || 3000;` en lugar de `const PORT = 3000;` antes de desplegar?",
+                options: [
+                    "Porque process.env hace que el servidor inicie más rápido",
+                    "Para que el entorno de despliegue pueda asignar el puerto y exista un valor predeterminado en local",
+                    "Porque Express no permite puertos fijos",
+                    "Para que el README se vea más profesional"
+                ],
+                correct: 1
+            },
+            {
+                question: "🔴 Nivel 6 — Al preparar el despliegue, un backend solo funciona en el computador de su autor porque las credenciales y rutas están escritas a mano en el código. ¿Cuál es el problema de fondo?",
+                options: [
+                    "El servidor de producción es incompatible con Node.js",
+                    "Faltan imágenes en el README",
+                    "El package.json tiene demasiadas dependencias",
+                    "La aplicación depende del entorno local del desarrollador en lugar de usar configuración por entorno"
+                ],
+                correct: 3
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ===== Sistema de XP (solo dentro de la sección Contenido) =====
+        let ovaXP = 0;
+        const retosListos = new Set();
+
+        function addXP(puntos, retoId, insignia) {
+            ovaXP += puntos;
+            const xpEl = document.getElementById('xp-total');
+            xpEl.textContent = ovaXP;
+            xpEl.classList.remove('xp-pop');
+            void xpEl.offsetWidth;
+            xpEl.classList.add('xp-pop');
+            if (retoId && !retosListos.has(retoId)) {
+                retosListos.add(retoId);
+                document.getElementById('misiones-hechas').textContent = retosListos.size;
+                document.getElementById('xp-barra').style.width = (retosListos.size / 5 * 100) + '%';
+                if (insignia) {
+                    const badge = document.createElement('span');
+                    badge.className = 'bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full';
+                    badge.textContent = insignia;
+                    document.getElementById('insignias').appendChild(badge);
+                }
+            }
+        }
+
+        // ===== Reto 1: ¿Buena o mala práctica? =====
+        const sortData = [
+            { text: 'Escribir el README pensando en alguien que nunca vio el proyecto', buena: true },
+            { text: 'Documentar solo cuando el proyecto ya esté terminado', buena: false },
+            { text: 'Actualizar el README cuando cambia una ruta o un comando', buena: true },
+            { text: 'Guardar las instrucciones de instalación solo en tu memoria', buena: false },
+            { text: 'Registrar los comandos para instalar y ejecutar el proyecto', buena: true },
+            { text: 'Publicar las contraseñas reales en el README para no olvidarlas', buena: false }
+        ];
+        const sortList = document.getElementById('sort-list');
+        let sortCount = 0;
+
+        sortData.forEach((d) => {
+            const el = document.createElement('div');
+            el.className = 'sort-item p-3 bg-white border-2 border-slate-200 rounded-lg text-sm flex items-center justify-between gap-2';
+            el.innerHTML = `<span>${d.text}</span><span class="text-xs font-bold text-slate-400 whitespace-nowrap">¿buena o mala?</span>`;
+            el.dataset.buena = d.buena ? '1' : '0';
+            el.addEventListener('click', function() {
+                if (this.dataset.clasificado) return;
+                this.dataset.clasificado = '1';
+                const esBuena = this.dataset.buena === '1';
+                this.classList.add(esBuena ? 'buena' : 'mala');
+                const tag = this.querySelector('span:last-child');
+                tag.textContent = esBuena ? '✅ Buena práctica' : '⚠️ Mala práctica';
+                tag.className = 'text-xs font-bold whitespace-nowrap ' + (esBuena ? 'text-green-700' : 'text-orange-700');
+                addXP(10);
+                sortCount++;
+                if (sortCount === sortData.length) {
+                    document.getElementById('reto1-msg').classList.remove('hidden');
+                    addXP(0, 'reto1', '🏅 Guardián del conocimiento');
+                }
+            });
+            sortList.appendChild(el);
+        });
+
+        // ===== Reto 2: Ordena el README =====
+        const readmeOrden = [
+            'Descripción del proyecto',
+            'Tecnologías utilizadas',
+            'Requisitos',
+            'Instalación',
+            'Configuración',
+            'Ejecución',
+            'Tabla de endpoints'
+        ];
+        const readmeList = document.getElementById('readme-list');
+        const readmeMezcla = readmeOrden
+            .map((t, i) => ({ t, i }))
+            .sort(() => Math.random() - 0.5);
+        let readmePaso = 0, readmeErrores = 0;
+
+        readmeMezcla.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'readme-item p-3 bg-white border-2 border-slate-200 rounded-lg text-sm flex items-center justify-between gap-2';
+            el.innerHTML = `<span>${item.t}</span><span class="readme-pos text-xs font-bold text-slate-400 whitespace-nowrap">clic para ubicar</span>`;
+            el.dataset.orden = item.i;
+            el.addEventListener('click', function() {
+                if (this.classList.contains('ordenado')) return;
+                const fb = document.getElementById('readme-feedback');
+                if (parseInt(this.dataset.orden) === readmePaso) {
+                    this.classList.add('ordenado');
+                    const tag = this.querySelector('.readme-pos');
+                    tag.textContent = `Sección ${readmePaso + 1} ✅`;
+                    tag.className = 'readme-pos text-xs font-bold text-green-700 whitespace-nowrap';
+                    readmePaso++;
+                    addXP(10);
+                    if (readmePaso === readmeOrden.length) {
+                        document.getElementById('reto2-msg').classList.remove('hidden');
+                        fb.textContent = `🎉 README armado ${readmeErrores === 0 ? '¡y sin errores!' : `con ${readmeErrores} error(es) en el camino.`}`;
+                        fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                        addXP(0, 'reto2', '🏅 Arquitecto del README');
+                    } else {
+                        fb.textContent = `✅ Bien ubicada (${readmePaso}/${readmeOrden.length})`;
+                        fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                    }
+                } else {
+                    this.classList.add('wrong');
+                    readmeErrores++;
+                    fb.textContent = '❌ Esa sección va más adelante (o más atrás). Piensa en el recorrido de quien instala por primera vez.';
+                    fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                    const self = this;
+                    setTimeout(() => self.classList.remove('wrong'), 500);
+                }
+            });
+            readmeList.appendChild(el);
+        });
+
+        // ===== Reto 3: Empareja endpoints y descripciones =====
+        const matchData = [
+            { code: 'GET /productos', meaning: 'Consultar la lista completa de productos' },
+            { code: 'GET /productos/:id', meaning: 'Consultar un producto por su identificador' },
+            { code: 'POST /productos', meaning: 'Registrar un nuevo producto' },
+            { code: 'PUT /productos/:id', meaning: 'Actualizar los datos de un producto' },
+            { code: 'DELETE /productos/:id', meaning: 'Eliminar un producto' }
+        ];
+        const shuffledMeanings = [...matchData].sort(() => Math.random() - 0.5);
+        const codesCol = document.getElementById('match-codes');
+        const meanCol = document.getElementById('match-meanings');
+        let pickedCode = null, matchCount = 0;
+
+        matchData.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'match-card p-3 bg-white border-2 border-slate-200 rounded-lg text-center font-bold text-sm font-mono';
+            el.textContent = d.code;
+            el.dataset.code = d.code;
+            el.dataset.side = 'code';
+            codesCol.appendChild(el);
+        });
+        shuffledMeanings.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'match-card p-3 bg-white border-2 border-slate-200 rounded-lg text-center text-sm';
+            el.textContent = d.meaning;
+            el.dataset.code = d.code;
+            el.dataset.side = 'meaning';
+            meanCol.appendChild(el);
+        });
+
+        document.querySelectorAll('.match-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('done')) return;
+                const fb = document.getElementById('match-feedback');
+                if (this.dataset.side === 'code') {
+                    document.querySelectorAll('.match-card[data-side="code"]').forEach(c => c.classList.remove('picked'));
+                    this.classList.add('picked');
+                    pickedCode = this;
+                } else if (pickedCode) {
+                    if (this.dataset.code === pickedCode.dataset.code) {
+                        this.classList.add('done');
+                        pickedCode.classList.add('done');
+                        pickedCode.classList.remove('picked');
+                        pickedCode = null;
+                        matchCount++;
+                        addXP(10);
+                        fb.textContent = `✅ ¡Pareja encontrada! (${matchCount}/5)`;
+                        fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                        if (matchCount === 5) {
+                            document.getElementById('reto3-msg').classList.remove('hidden');
+                            addXP(0, 'reto3', '🏅 Cartógrafo de APIs');
+                        }
+                    } else {
+                        this.classList.add('wrong');
+                        pickedCode.classList.add('wrong');
+                        fb.textContent = '❌ No coinciden. ¡Inténtalo de nuevo!';
+                        fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                        const pc = pickedCode;
+                        pickedCode = null;
+                        setTimeout(() => {
+                            this.classList.remove('wrong');
+                            pc.classList.remove('wrong', 'picked');
+                        }, 500);
+                    }
+                }
+            });
+        });
+
+        // ===== Reto 4: Detecta la fuga =====
+        const fugaData = [
+            { linea: 'PORT=3000', secreto: false },
+            { linea: 'DB_PASSWORD=supersecreta123', secreto: true },
+            { linea: 'DB_HOST=localhost', secreto: false },
+            { linea: 'JWT_SECRET=x9f2mP8qLwZ', secreto: true },
+            { linea: 'DB_NAME=tienda', secreto: false },
+            { linea: 'API_TOKEN=sk_live_51H7abc', secreto: true },
+            { linea: 'NODE_ENV=production', secreto: false },
+            { linea: 'SMTP_PASS=correo!2024', secreto: true }
+        ];
+        const fugaList = document.getElementById('fuga-list');
+        const fugaTotal = fugaData.filter(f => f.secreto).length;
+        let fugaEncontrados = 0, fugaFallos = 0;
+
+        fugaData.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'fuga-line p-3 bg-white border-2 border-slate-200 rounded-lg text-sm font-mono flex items-center justify-between gap-2';
+            el.innerHTML = `<span>${d.linea}</span><span class="fuga-tag text-xs font-bold text-slate-400 whitespace-nowrap">¿secreto?</span>`;
+            el.dataset.secreto = d.secreto ? '1' : '0';
+            el.addEventListener('click', function() {
+                const fb = document.getElementById('fuga-feedback');
+                if (this.dataset.secreto === '1') {
+                    if (this.classList.contains('secreto')) return;
+                    this.classList.add('secreto');
+                    const tag = this.querySelector('.fuga-tag');
+                    tag.textContent = '🚨 ¡Secreto!';
+                    tag.className = 'fuga-tag text-xs font-bold text-red-700 whitespace-nowrap';
+                    fugaEncontrados++;
+                    addXP(10);
+                    fb.textContent = `🚨 ¡Detectaste uno! Van ${fugaEncontrados}/${fugaTotal}.`;
+                    fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                    if (fugaEncontrados === fugaTotal) {
+                        document.getElementById('reto4-msg').classList.remove('hidden');
+                        fb.textContent = `🎉 Encontraste los ${fugaTotal} secretos${fugaFallos === 0 ? ' sin falsos positivos' : ''}. Estos valores se configuran en el servidor, no en el repo.`;
+                        addXP(0, 'reto4', '🏅 Cazador de secretos');
+                    }
+                } else {
+                    if (this.classList.contains('segura')) return;
+                    this.classList.add('segura');
+                    fugaFallos++;
+                    fb.textContent = '😅 Esa línea es inofensiva: un nombre o número de configuración sí puede documentarse.';
+                    fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                    const self = this;
+                    setTimeout(() => self.classList.remove('segura'), 600);
+                }
+            });
+            fugaList.appendChild(el);
+        });
+
+        // ===== Reto 5: Checklist de despliegue =====
+        const terminal = document.getElementById('terminal-out');
+        let reto5done = false;
+        document.getElementById('btn-deploy').addEventListener('click', () => {
+            const checks = [...document.querySelectorAll('.deploy-check')];
+            const buenos = checks.filter(c => c.dataset.ok === '1');
+            const trampas = checks.filter(c => c.dataset.ok === '0');
+            const faltan = buenos.some(c => !c.checked);
+            const caido = trampas.some(c => c.checked);
+
+            terminal.innerHTML = '$ npm start\n\n';
+            let lineas;
+            if (faltan || caido) {
+                lineas = ['&gt; node src/server.js', ''];
+                if (faltan) {
+                    lineas.push('❌ Error: la verificación previa falló.');
+                    lineas.push('Faltan elementos esenciales: dependencias, comando de inicio,');
+                    lineas.push('variables de entorno, README o verificación de endpoints.');
+                }
+                if (caido) {
+                    lineas.push('⚠️ Alerta de seguridad: marcaste algo que no debe subirse.');
+                    lineas.push('node_modules se instala con "npm install" y los secretos');
+                    lineas.push('jamás se escriben en el código. Revisa las trampas 🪤.');
+                }
+                lineas.push('', '🔥 Despliegue abortado. Ajusta el checklist e inténtalo de nuevo.');
+            } else {
+                lineas = [
+                    '&gt; node src/server.js',
+                    '',
+                    '✔ Dependencias instaladas desde package.json',
+                    '✔ Puerto asignado desde el entorno: 10000',
+                    '✔ Servidor escuchando en https://mi-api.onrender.com',
+                    '',
+                    'GET  /productos      → 200 OK',
+                    'GET  /productos/1    → 200 OK',
+                    'POST /productos      → 201 Created',
+                    '',
+                    '🎉 Despliegue exitoso: la API responde igual que en local.'
+                ];
+            }
+            let i = 0;
+            const timer = setInterval(() => {
+                terminal.innerHTML += lineas[i] + '\n';
+                i++;
+                if (i >= lineas.length) clearInterval(timer);
+            }, 220);
+
+            if (!faltan && !caido && !reto5done) {
+                reto5done = true;
+                setTimeout(() => {
+                    document.getElementById('reto5-msg').classList.remove('hidden');
+                    addXP(15, 'reto5', '🏅 Ingeniero de despliegue');
+                }, lineas.length * 220 + 100);
+            }
+        });
+
+        // ===== Misiones de Actividades: checkboxes + barras =====
+        document.querySelectorAll('.mision-check[data-mision]').forEach(chk => {
+            chk.addEventListener('change', () => {
+                const m = chk.dataset.mision;
+                const checks = document.querySelectorAll(`.mision-check[data-mision="${m}"]`);
+                const hechos = [...checks].filter(c => c.checked).length;
+                const barra = document.querySelector(`.mision-barra[data-mision="${m}"]`);
+                const badge = document.querySelector(`.mision-badge[data-mision="${m}"]`);
+                barra.style.width = (hechos / checks.length * 100) + '%';
+                badge.classList.toggle('hidden', hechos < checks.length);
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
