@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Pruebas de la API</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           ============================================= */
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        .code-block .k { color: #7dd3fc; }
+        .code-block .s { color: #86efac; }
+        .code-block .c { color: #64748b; }
+        .terminal {
+            background-color: #0f172a;
+            color: #a7f3d0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 8rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .match-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .match-card:hover { transform: translateY(-2px); }
+        .match-card.picked {
+            border-color: #22c55e;
+            background-color: #dcfce7;
+        }
+        .match-card.done {
+            border-color: #16a34a;
+            background-color: #bbf7d0;
+            cursor: default;
+            opacity: 0.85;
+        }
+        .match-card.wrong {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+            animation: shake 0.4s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .flow-step { position: relative; }
+        .xp-pop {
+            animation: xpPop 0.6s ease;
+        }
+        @keyframes xpPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .resp-ok { color: #16a34a; }
+        .resp-err { color: #dc2626; }
+        .sort-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .sort-item:hover { transform: translateY(-2px); }
+        .sort-item.buena { border-color: #16a34a !important; background-color: #dcfce7 !important; }
+        .sort-item.mala { border-color: #f59e0b !important; background-color: #fef3c7 !important; }
+        .mision-check { width: 1.25rem; height: 1.25rem; accent-color: #16a34a; cursor: pointer; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Pruebas de la API: el detector de errores del backend 🕵️</h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Que tu API "funcione" no significa que esté libre de errores 😅. Una ruta puede responder perfecto cuando recibe datos válidos, pero explotar cuando falta un campo obligatorio; una consulta puede funcionar con registros en la base de datos y comportarse raro cuando no encuentra nada; y un cambio en una parte del proyecto puede romper algo que ayer funcionaba de maravilla.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Por eso probar es parte del trabajo diario de quien desarrolla backend. No se trata solo de encontrar bugs, sino de <strong>comprobar de forma organizada que el software hace lo que promete</strong>. En este OVA vas a aprender a probar endpoints de dos maneras: <strong>manualmente</strong>, enviando solicitudes tú mismo con herramientas como Postman 🖱️, y <strong>automatizadas</strong>, convirtiendo tus verificaciones en código que se repite solo con <code class="bg-slate-200 px-1 rounded">npm test</code> 🤖.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Usaremos como ejemplo una API de productos: <code class="bg-slate-200 px-1 rounded">GET /productos</code> para consultar y <code class="bg-slate-200 px-1 rounded">POST /productos</code> para crear. ¿El plan? Probar el camino feliz... y también provocar errores a propósito para ver cómo responde la API. 😈
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar, no dirás "creo que funciona": dirás <strong>"lo comprobé"</strong> — y tendrás las pruebas para respaldarlo. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span>Reconocer la importancia de las pruebas como parte del proceso de desarrollo de una API.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🖱️</span>
+                        <span>Ejecutar pruebas manuales sobre endpoints mediante herramientas especializadas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🗺️</span>
+                        <span>Diseñar casos de prueba que contemplen respuestas exitosas y situaciones de error.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🤖</span>
+                        <span>Implementar pruebas automatizadas básicas para verificar el comportamiento esperado de los endpoints de una API.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- Marcador de XP y progreso (contenido dentro de la sección) -->
+                    <div class="mb-6 bg-white border border-green-200 rounded-xl shadow-sm p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="font-bold text-green-800 text-lg">🎮 Tu misión: convertirte en QA de APIs</p>
+                                <p class="text-slate-600 text-sm">Completa los retos de cada acordeón para ganar XP e insignias.</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-green-700"><span id="xp-total">0</span> <span class="text-base font-semibold">XP</span> ⭐</p>
+                                <p class="text-xs text-slate-500"><span id="misiones-hechas">0</span> / 5 retos completados</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                            <div id="xp-barra" class="bg-green-500 h-3 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                        <div id="insignias" class="mt-3 flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <!-- ACORDEÓN 1 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🐛 La trampa del "en mi compu sí funciona"</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Probar una API no es verificar que una ruta responde: es <strong>comprobar comportamientos</strong>. Cuando envías <code class="bg-slate-200 px-1 rounded">POST /productos</code> con un nombre y un precio y todo sale bien, solo comprobaste <em>un</em> escenario. Quedan preguntas sin responder:</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">😶 ¿Y si no se envía el nombre?</div>
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">🔤 ¿Y si el precio llega como texto?</div>
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">🚩 ¿Devuelve el código HTTP correcto cuando hay error?</div>
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">💥 ¿Qué pasa si alguien modifica el controlador después?</div>
+                                </div>
+
+                                <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg mb-6">
+                                    <p class="text-green-800 font-semibold mb-1">🔑 La pieza clave: el caso de prueba</p>
+                                    <p class="text-slate-700 text-sm">Un <strong>caso de prueba</strong> es una situación específica que quieres comprobar. Cada uno define una <strong>entrada</strong> (los datos que envías) y un <strong>resultado esperado</strong> (lo que debería pasar). Así la prueba deja de ser improvisada y se vuelve un procedimiento verificable.</p>
+                                </div>
+
+                                <p class="mb-4">💡 <strong>Dato que motiva:</strong> en la industria, un error encontrado cuando el software ya está en producción puede costar muchas veces más caro que detectarlo mientras desarrollas. Probar temprano es literalmente ahorrar tiempo (y sustos) 💸.</p>
+
+                                <!-- ELEMENTO INTERACTIVO: reto "Predice el código" -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 1: Predice el código (+10 XP por acierto)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Para cada escenario, elige qué código HTTP debería responder una API bien diseñada.</p>
+
+                                    <div id="reto1-lista" class="space-y-4">
+                                        <div class="reto1-item p-3 bg-white border border-slate-200 rounded-lg" data-correct="0">
+                                            <p class="text-sm font-semibold text-slate-800 mb-2">📋 <code class="bg-slate-100 px-1 rounded">GET /productos</code> y hay 2 productos registrados</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="0">200</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="1">201</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="2">404</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="3">500</button>
+                                            </div>
+                                            <p class="reto1-feedback text-sm mt-2 font-semibold hidden"></p>
+                                        </div>
+                                        <div class="reto1-item p-3 bg-white border border-slate-200 rounded-lg" data-correct="2">
+                                            <p class="text-sm font-semibold text-slate-800 mb-2">🔍 <code class="bg-slate-100 px-1 rounded">GET /productos/999</code> y ese producto no existe</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="0">200</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="1">400</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="2">404</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="3">500</button>
+                                            </div>
+                                            <p class="reto1-feedback text-sm mt-2 font-semibold hidden"></p>
+                                        </div>
+                                        <div class="reto1-item p-3 bg-white border border-slate-200 rounded-lg" data-correct="3">
+                                            <p class="text-sm font-semibold text-slate-800 mb-2">😈 <code class="bg-slate-100 px-1 rounded">POST /productos</code> enviado sin el campo obligatorio <em>nombre</em></p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="0">200</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="1">201</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="2">404</button>
+                                                <button type="button" class="reto1-op px-3 py-1 border-2 border-slate-200 rounded-lg text-sm font-semibold" data-op="3">400</button>
+                                            </div>
+                                            <p class="reto1-feedback text-sm mt-2 font-semibold hidden"></p>
+                                        </div>
+                                    </div>
+                                    <p id="reto1-msg" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Reto completado! Ya piensas como un tester: no todo es el camino feliz.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 2 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🖱️ El laboratorio: pruebas manuales</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-4">En una prueba manual <strong>tú</strong> construyes la solicitud, la envías a la API y analizas la respuesta con tus propios ojos. Herramientas como <strong>Postman</strong> (o su alternativa web Hoppscotch) te dejan hacerlo sin programar una interfaz.</p>
+
+                                <p class="font-semibold text-green-800 mb-2">🔄 El flujo de una prueba manual:</p>
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">📝 Construir la solicitud<br><span class="font-normal text-xs text-slate-500">método + URL + headers + body</span></div>
+                                    <div class="text-center text-green-600 font-bold">➡️</div>
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">🚀 Enviarla a la API</div>
+                                    <div class="text-center text-green-600 font-bold">➡️</div>
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">📬 Recibir la respuesta<br><span class="font-normal text-xs text-slate-500">código + datos</span></div>
+                                    <div class="text-center text-green-600 font-bold">➡️</div>
+                                    <div class="flow-step flex-1 text-center p-3 bg-green-50 border border-green-300 rounded-lg font-semibold text-sm">🧐 Interpretar<br><span class="font-normal text-xs text-slate-500">¿era lo esperado?</span></div>
+                                </div>
+
+                                <!-- ELEMENTO INTERACTIVO: simulador de peticiones -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 2: Laboratorio de peticiones (+10 XP por objetivo)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Aquí tienes una <strong>API simulada de productos</strong>. Cumple los 3 objetivos de la misión:</p>
+
+                                    <ul class="text-sm mb-4 space-y-1">
+                                        <li id="obj-lista" class="flex items-center gap-2"><span class="obj-check">⬜</span> Consulta la lista de productos y obtén un 200</li>
+                                        <li id="obj-crear" class="flex items-center gap-2"><span class="obj-check">⬜</span> Crea un producto válido con POST y obtén un 201</li>
+                                        <li id="obj-error" class="flex items-center gap-2"><span class="obj-check">⬜</span> Provoca un error a propósito (400 o 404)</li>
+                                    </ul>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                        <div>
+                                            <label class="text-xs font-bold text-slate-600 block mb-1" for="req-metodo">Método</label>
+                                            <select id="req-metodo" class="w-full p-2 border rounded-md bg-white text-sm">
+                                                <option value="GET">GET</option>
+                                                <option value="POST">POST</option>
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="text-xs font-bold text-slate-600 block mb-1" for="req-ruta">Endpoint</label>
+                                            <input id="req-ruta" type="text" value="/productos" class="w-full p-2 border rounded-md text-sm font-mono" placeholder="/productos">
+                                        </div>
+                                    </div>
+                                    <div id="req-body-wrap" class="mb-3 hidden">
+                                        <label class="text-xs font-bold text-slate-600 block mb-1" for="req-body">Body (JSON)</label>
+                                        <textarea id="req-body" rows="3" class="w-full p-2 border rounded-md text-sm font-mono" placeholder='{"nombre": "Teclado", "precio": 85000}'></textarea>
+                                    </div>
+                                    <button id="btn-enviar" type="button" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">🚀 Enviar petición</button>
+
+                                    <div id="respuesta" class="mt-4 hidden">
+                                        <p class="text-xs font-bold text-slate-600 mb-1">Respuesta del servidor:</p>
+                                        <div class="terminal" id="respuesta-body"></div>
+                                    </div>
+                                    <p id="reto2-msg" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Inspector de APIs" desbloqueada! Comprobaste éxito y error con tus propias manos.</p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: herramienta web para hacer peticiones HTTP sin instalar nada
+                                     Buscar: "Hoppscotch cliente API online alternativa Postman"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">🛠️ Herramienta</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Hoppscotch — prueba APIs desde el navegador</p>
+                                    <p class="text-slate-600 text-sm mb-4">Alternativa open source a Postman que funciona 100% en la web: construye solicitudes GET, POST, PUT y DELETE sin instalar nada. Ideal para practicar en cualquier equipo.</p>
+                                    <a href="https://hoppscotch.io/" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                                        <span>▶️</span> Abrir Hoppscotch
+                                    </a>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-2"
+                                     Tema: API REST falsa gratuita para practicar peticiones reales
+                                     Buscar: "JSONPlaceholder API REST fake para practicar"
+                                -->
+                                <div id="recurso-ext-2" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">🌐 API de práctica</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">JSONPlaceholder — una API real para practicar</p>
+                                    <p class="text-slate-600 text-sm mb-4">API REST falsa y gratuita con recursos de ejemplo (posts, users, todos…). Perfecta para hacer tus primeras pruebas manuales sin montar un backend propio.</p>
+                                    <a href="https://jsonplaceholder.typicode.com/" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                                        <span>▶️</span> Explorar JSONPlaceholder
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 3 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>📡 Habla como una API: los códigos de estado</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-4">Una prueba no termina cuando la API responde: termina cuando <strong>interpretas</strong> la respuesta y la comparas con lo esperado. Los códigos de estado HTTP son el idioma en que la API te cuenta qué pasó. Se agrupan en familias:</p>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6 text-center">
+                                    <div class="p-2 bg-slate-100 rounded-lg"><p class="font-bold">1xx</p><p class="text-xs text-slate-500">Info</p></div>
+                                    <div class="p-2 bg-green-100 rounded-lg"><p class="font-bold text-green-800">2xx</p><p class="text-xs text-green-700">Éxito ✅</p></div>
+                                    <div class="p-2 bg-yellow-100 rounded-lg"><p class="font-bold text-yellow-800">3xx</p><p class="text-xs text-yellow-700">Redirección</p></div>
+                                    <div class="p-2 bg-orange-100 rounded-lg"><p class="font-bold text-orange-800">4xx</p><p class="text-xs text-orange-700">Error del cliente 😬</p></div>
+                                    <div class="p-2 bg-red-100 rounded-lg"><p class="font-bold text-red-800">5xx</p><p class="text-xs text-red-700">Error del servidor 🔥</p></div>
+                                </div>
+
+                                <p class="mb-4">⚠️ <strong>Ojo:</strong> el código no se analiza solo. Si pides <code class="bg-slate-200 px-1 rounded">GET /productos/15</code> y no existe, lo coherente es un 404 <em>con un mensaje</em> que lo explique. Al probar manualmente verifica siempre 3 cosas: <strong>el código de estado, la estructura de la respuesta y que los datos enviados correspondan con lo recibido</strong>.</p>
+
+                                <!-- ELEMENTO INTERACTIVO: juego de parejas -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 3: Empareja el código con su significado (+10 XP por pareja)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Haz clic en un código (izquierda) y luego en su significado (derecha). ¡Encuentra las 5 parejas!</p>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div id="match-codes" class="space-y-2"></div>
+                                        <div id="match-meanings" class="space-y-2"></div>
+                                    </div>
+                                    <p id="match-feedback" class="mt-3 text-sm font-semibold"></p>
+                                    <p id="reto3-msg" class="mt-2 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Traductor HTTP" desbloqueada! Ya hablas el idioma de las APIs.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 4 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🤖 Del click al código: pruebas automatizadas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-4">Las pruebas manuales son geniales para explorar... pero repetirlas después de <em>cada</em> cambio cansa 😩. Una <strong>prueba automatizada</strong> convierte la verificación en código: la escribes una vez y la ejecutas mil veces con <code class="bg-slate-200 px-1 rounded">npm test</code>.</p>
+
+                                <p class="mb-2 font-semibold text-green-800">🧰 El combo que usaremos (Node.js + Express):</p>
+                                <ul class="list-disc list-inside mb-4 space-y-1 text-sm">
+                                    <li><strong>Node.js Test Runner</strong> (<code class="bg-slate-200 px-1 rounded">node:test</code>): el ejecutor de pruebas que ya viene dentro de Node. Cero instalación 🎉.</li>
+                                    <li><strong>Supertest</strong>: biblioteca que hace solicitudes HTTP directo sobre tu app Express, sin levantar el servidor.</li>
+                                </ul>
+
+                                <p class="mb-2 font-semibold text-green-800">📁 La estructura clave:</p>
+                                <div class="code-block mb-4">proyecto/
+├── src/
+│   ├── app.js          <span class="c">// crea la app Express (sin listen)</span>
+│   └── server.js       <span class="c">// solo la pone a escuchar</span>
+├── tests/
+│   └── productos.test.js   <span class="c">// aquí viven las pruebas</span>
+└── package.json        <span class="c">// "test": "node --test"</span></div>
+                                <p class="mb-4 text-sm">Separar <code class="bg-slate-200 px-1 rounded">app.js</code> de <code class="bg-slate-200 px-1 rounded">server.js</code> permite que las pruebas importen la aplicación <em>sin</em> ejecutar <code class="bg-slate-200 px-1 rounded">app.listen()</code> ni ocupar un puerto.</p>
+
+                                <p class="mb-2 font-semibold text-green-800">🧪 Así se ve una prueba real:</p>
+                                <div class="code-block mb-6"><span class="k">import</span> test <span class="k">from</span> <span class="s">"node:test"</span>;
+<span class="k">import</span> assert <span class="k">from</span> <span class="s">"node:assert/strict"</span>;
+<span class="k">import</span> request <span class="k">from</span> <span class="s">"supertest"</span>;
+<span class="k">import</span> app <span class="k">from</span> <span class="s">"../src/app.js"</span>;
+
+<span class="c">// Dado → Cuando → Entonces (preparar, actuar, verificar)</span>
+test(<span class="s">"GET /productos devuelve 200"</span>, <span class="k">async</span> () =&gt; {
+  <span class="k">const</span> respuesta = <span class="k">await</span> request(app).get(<span class="s">"/productos"</span>);
+  assert.equal(respuesta.status, <span class="s">200</span>);
+  assert.ok(<span class="k">Array</span>.isArray(respuesta.body));
+});</div>
+
+                                <!-- ELEMENTO INTERACTIVO: terminal simulada -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 4: La terminal del tester (+15 XP)</p>
+                                    <p class="text-slate-600 text-sm mb-3">Pulsa <strong>npm test</strong> y observa. Luego activa el modo "romper la API" (simula un cambio en el controlador) y vuelve a ejecutar: así se ve una <em>regresión</em> detectada a tiempo 🔥.</p>
+
+                                    <label class="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700">
+                                        <input type="checkbox" id="chk-romper" class="mision-check">
+                                        😈 Simular cambio que rompe el endpoint (devuelve 500)
+                                    </label>
+
+                                    <div class="terminal mb-3" id="terminal-out">$ _</div>
+                                    <button id="btn-npmtest" type="button" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">▶ npm test</button>
+
+                                    <div class="mt-5 p-3 bg-white border border-slate-200 rounded-lg">
+                                        <p class="text-sm font-semibold text-slate-800 mb-2">🎯 Pregunta rápida: ¿qué línea del código <em>compara</em> el resultado con lo esperado?</p>
+                                        <div class="space-y-2" id="reto4-ops">
+                                            <button type="button" class="reto4-op block w-full text-left p-2 border-2 border-slate-200 rounded-lg text-sm font-mono" data-ok="0">test("GET /productos devuelve 200", ...)</button>
+                                            <button type="button" class="reto4-op block w-full text-left p-2 border-2 border-slate-200 rounded-lg text-sm font-mono" data-ok="0">request(app).get("/productos")</button>
+                                            <button type="button" class="reto4-op block w-full text-left p-2 border-2 border-slate-200 rounded-lg text-sm font-mono" data-ok="1">assert.equal(respuesta.status, 200)</button>
+                                        </div>
+                                        <p id="reto4-feedback" class="text-sm mt-2 font-semibold hidden"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ACORDEÓN 5 -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🗺️ Diseña casos como un profesional</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-4">El error clásico del principiante: probar <strong>solo lo que sale bien</strong>. Una API confiable también responde bien cuando recibe lo que no puede procesar. Para <code class="bg-slate-200 px-1 rounded">GET /productos/:id</code>:</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <div class="p-4 bg-green-50 border border-green-300 rounded-lg">
+                                        <p class="font-bold text-green-800 mb-1">😊 Caso exitoso</p>
+                                        <p class="text-sm">Envías el id de un producto existente → esperas 200 y los datos del producto.</p>
+                                    </div>
+                                    <div class="p-4 bg-orange-50 border border-orange-300 rounded-lg">
+                                        <p class="font-bold text-orange-800 mb-1">😈 Caso de error</p>
+                                        <p class="text-sm">Envías un id que no existe → esperas 404 y un mensaje que lo indique.</p>
+                                    </div>
+                                </div>
+
+                                <p class="font-semibold text-green-800 mb-2">❓ Las 4 preguntas de todo buen caso de prueba:</p>
+                                <ol class="list-decimal list-inside mb-6 space-y-1 text-sm">
+                                    <li>¿Qué <strong>entrada</strong> se utilizará?</li>
+                                    <li>¿Qué <strong>comportamiento</strong> se espera?</li>
+                                    <li>¿Qué <strong>código HTTP</strong> debería producirse?</li>
+                                    <li>¿Qué <strong>información</strong> debería contener la respuesta?</li>
+                                </ol>
+
+                                <p class="mb-4">🧭 Y en la práctica, el flujo profesional combina ambos mundos: primero exploras <strong>manualmente</strong> (Postman) para entender el comportamiento, y después conviertes los casos más importantes en pruebas <strong>automatizadas</strong> que vigilan que nada se rompa con los cambios. Manual explora, automática vigila 🛡️.</p>
+
+                                <!-- ELEMENTO INTERACTIVO: buena o mala práctica -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg">
+                                    <p class="text-sm text-teal-800 font-semibold mb-2">🎮 Reto 5: ¿Buena o mala práctica? (+10 XP por acierto)</p>
+                                    <p class="text-slate-600 text-sm mb-4">Haz clic en cada afirmación para clasificarla. ¡Las buenas prácticas suman puntos!</p>
+
+                                    <div id="sort-list" class="space-y-2"></div>
+                                    <p id="reto5-msg" class="mt-3 text-sm font-bold text-green-700 hidden">🏅 ¡Insignia "Diseñador de casos" desbloqueada! Tus pruebas van a ser claras, útiles y repetibles.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <p class="text-slate-600 mb-6">Tres misiones para ganar tus galones de tester. Marca cada paso que completes: la barra de cada misión te muestra tu avance 📈.</p>
+                <div class="space-y-6">
+
+                    <!-- Misión 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-xl font-bold text-green-700">🕵️ Misión 1: Comprobación manual de endpoints</h3>
+                            <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">Práctica manual</span>
+                        </div>
+                        <p class="mb-4 text-slate-700 leading-relaxed"><strong>Objetivo:</strong> ejecutar pruebas manuales sobre una API REST e interpretar sus respuestas.</p>
+                        <ol class="space-y-2 mb-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Selecciona una API desarrollada durante el curso.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Identifica tres endpoints disponibles.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Ejecuta una solicitud correcta sobre cada endpoint con Postman (u otra herramienta equivalente).</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Registra el método HTTP, la ruta, los datos enviados y el código de estado recibido.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Ejecuta al menos una solicitud incorrecta sobre uno de los endpoints.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="1"><span>Explica si la respuesta obtenida corresponde con el comportamiento esperado.</span></li>
+                        </ol>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div class="mision-barra bg-green-500 h-3 rounded-full transition-all duration-500" data-mision="1" style="width:0%"></div>
+                        </div>
+                        <p class="mision-badge text-sm font-bold text-green-700 hidden" data-mision="1">🏅 ¡Misión cumplida! Tus evidencias cuentan la historia completa.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> documento con la evidencia de cuatro solicitudes realizadas, incluyendo capturas de las respuestas y una explicación breve de los resultados obtenidos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Misión 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-xl font-bold text-green-700">🗺️ Misión 2: Diseño de casos de prueba</h3>
+                            <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">Diseño</span>
+                        </div>
+                        <p class="mb-4 text-slate-700 leading-relaxed"><strong>Objetivo:</strong> establecer casos de prueba para verificar diferentes comportamientos de una API.</p>
+                        <ol class="space-y-2 mb-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Selecciona un endpoint de creación, consulta, actualización o eliminación.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Define un escenario exitoso.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Define dos escenarios de error.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Para cada escenario indica los datos de entrada, el resultado esperado y el código HTTP esperado.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="2"><span>Ejecuta manualmente los tres casos y compara los resultados reales con los esperados.</span></li>
+                        </ol>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div class="mision-barra bg-green-500 h-3 rounded-full transition-all duration-500" data-mision="2" style="width:0%"></div>
+                        </div>
+                        <p class="mision-badge text-sm font-bold text-green-700 hidden" data-mision="2">🏅 ¡Misión cumplida! Diseñaste casos con propósito, no pruebas al azar.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> tabla de casos de prueba acompañada de las evidencias de ejecución y una conclusión sobre el comportamiento del endpoint.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Misión 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-xl font-bold text-green-700">🤖 Misión 3: Automatización de una prueba básica</h3>
+                            <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">Automatización</span>
+                        </div>
+                        <p class="mb-4 text-slate-700 leading-relaxed"><strong>Objetivo:</strong> implementar una prueba automatizada básica sobre un endpoint existente.</p>
+                        <ol class="space-y-2 mb-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Selecciona uno de los casos verificados en la misión anterior.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Configura una herramienta de pruebas compatible con el proyecto backend (Node.js Test Runner + Supertest).</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Implementa una prueba que realice la solicitud correspondiente.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Establece al menos una expectativa sobre el código de estado.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Ejecuta la prueba y comprueba su resultado.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Modifica temporalmente una condición para provocar un fallo y observa cómo la herramienta lo reporta.</span></li>
+                            <li class="flex items-start gap-2"><input type="checkbox" class="mision-check mt-0.5" data-mision="3"><span>Restablece el comportamiento correcto y ejecuta nuevamente la prueba.</span></li>
+                        </ol>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div class="mision-barra bg-green-500 h-3 rounded-full transition-all duration-500" data-mision="3" style="width:0%"></div>
+                        </div>
+                        <p class="mision-badge text-sm font-bold text-green-700 hidden" data-mision="3">🏅 ¡Misión cumplida! Tu primera prueba automatizada está viva.</p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> fragmento del código de la prueba automatizada, acompañado de evidencia de una ejecución exitosa y una breve explicación de lo observado cuando la prueba falló.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Las preguntas suben de nivel: empiezan suave y terminan en modo experto 🧗. Selecciona la respuesta correcta para cada una.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS — estructura intocable
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación de Postman</h3>
+                            <p class="text-slate-600 mb-2">Centro de aprendizaje oficial: guías para enviar solicitudes, organizar colecciones y escribir scripts de prueba.</p>
+                            <a href="https://learning.postman.com/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-1.png" alt="QR Documentación de Postman" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación de Node.js</h3>
+                            <p class="text-slate-600 mb-2">Referencia oficial de la API de Node.js, incluido el módulo <code class="bg-slate-200 px-1 rounded">node:test</code> para pruebas automatizadas.</p>
+                            <a href="https://nodejs.org/docs/latest/api/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-2.png" alt="QR Documentación de Node.js" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación de Express</h3>
+                            <p class="text-slate-600 mb-2">Guías y referencia del framework con el que se construyen las rutas y controladores que vas a probar.</p>
+                            <a href="https://expressjs.com/es/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-3.png" alt="QR Documentación de Express" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 4 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Documentación de Jest</h3>
+                            <p class="text-slate-600 mb-2">El framework de pruebas más popular del ecosistema JavaScript; útil para conocer la siguiente parada después de node:test.</p>
+                            <a href="https://jestjs.io/es-ES/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-4.png" alt="QR Documentación de Jest" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 5 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">MDN – Códigos de estado HTTP</h3>
+                            <p class="text-slate-600 mb-2">La referencia definitiva de todos los códigos de respuesta HTTP, con ejemplos y explicación de cada familia.</p>
+                            <a href="https://developer.mozilla.org/es/docs/Web/HTTP/Reference/Status" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr-recurso-5.png" alt="QR MDN Códigos de estado HTTP" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Calpa Bravo, A. C., &amp; Garzón Mora, J. S. (2022). <i>De las pruebas manuales a las pruebas automáticas en el desarrollo ágil de software: Caso de estudio Universidad de Nariño</i> [Trabajo de grado, Universidad de Nariño]. Universidad de Nariño.<br>
+                            <a href="https://sired.udenar.edu.co/8108/" class="text-green-700 underline break-all" target="_blank">https://sired.udenar.edu.co/8108/</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Rivera Florez, J. D. (2023). <i>Diseño y cobertura de pruebas de software para el backend</i> [Trabajo de grado, Universidad de Antioquia]. Repositorio Institucional Universidad de Antioquia.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Villamizar Vera, A., &amp; Espinel Botero, M. F. (2024). <i>Implementación de pruebas de integración automatizadas en la capa backend de los aplicativos web del proyecto RSI</i> [Trabajo de grado, Universidad Industrial de Santander]. Universidad Industrial de Santander.
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Evaluación del OVA
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "🟢 Nivel 1 — ¿Qué es un caso de prueba?",
+                options: [
+                    "Una situación específica con una entrada definida y un resultado esperado",
+                    "Un error que aparece en producción",
+                    "Una herramienta para escribir código más rápido",
+                    "La lista de endpoints que tiene una API"
+                ],
+                correct: 0
+            },
+            {
+                question: "🟢 Nivel 2 — ¿Qué herramienta permite hacer pruebas manuales de una API sin crear una interfaz gráfica?",
+                options: [
+                    "Excel",
+                    "Postman",
+                    "Git",
+                    "npm"
+                ],
+                correct: 1
+            },
+            {
+                question: "🟡 Nivel 3 — Envías POST /productos con datos válidos y el producto se crea correctamente. ¿Qué código de estado es el más apropiado?",
+                options: [
+                    "200 OK",
+                    "400 Bad Request",
+                    "201 Created",
+                    "404 Not Found"
+                ],
+                correct: 2
+            },
+            {
+                question: "🟡 Nivel 4 — Envías POST /productos sin el campo obligatorio \"nombre\". Una API bien diseñada debería responder…",
+                options: [
+                    "200 OK, porque la ruta existe",
+                    "404 Not Found, porque falta el nombre",
+                    "500 Internal Server Error, porque hubo un problema",
+                    "400 Bad Request, porque los datos enviados son incorrectos"
+                ],
+                correct: 3
+            },
+            {
+                question: "🔴 Nivel 5 — Al escribir pruebas automatizadas, ¿por qué se separa la configuración de la app (app.js) del archivo que levanta el servidor (server.js)?",
+                options: [
+                    "Para que las pruebas usen la aplicación sin ejecutar app.listen() ni ocupar un puerto",
+                    "Porque Express no permite tener todo en un solo archivo",
+                    "Para que el código se vea más ordenado en el editor",
+                    "Porque Supertest solo funciona con dos archivos"
+                ],
+                correct: 0
+            },
+            {
+                question: "🔴 Nivel 6 — Modificas el controlador de productos y al ejecutar npm test la prueba \"GET /productos devuelve 200\" falla. ¿Qué indica este resultado?",
+                options: [
+                    "Que la prueba está mal escrita y hay que borrarla",
+                    "Que el cambio alteró el comportamiento esperado: hay una diferencia entre el resultado esperado y el obtenido",
+                    "Que Node.js Test Runner dejó de funcionar",
+                    "Que el endpoint ya no existe en la API"
+                ],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ===== Sistema de XP (solo dentro de la sección Contenido) =====
+        let ovaXP = 0;
+        const retosListos = new Set();
+
+        function addXP(puntos, retoId, insignia) {
+            ovaXP += puntos;
+            const xpEl = document.getElementById('xp-total');
+            xpEl.textContent = ovaXP;
+            xpEl.classList.remove('xp-pop');
+            void xpEl.offsetWidth;
+            xpEl.classList.add('xp-pop');
+            if (retoId && !retosListos.has(retoId)) {
+                retosListos.add(retoId);
+                document.getElementById('misiones-hechas').textContent = retosListos.size;
+                document.getElementById('xp-barra').style.width = (retosListos.size / 5 * 100) + '%';
+                if (insignia) {
+                    const badge = document.createElement('span');
+                    badge.className = 'bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full';
+                    badge.textContent = insignia;
+                    document.getElementById('insignias').appendChild(badge);
+                }
+            }
+        }
+
+        // ===== Reto 1: Predice el código =====
+        const reto1 = { done: 0 };
+        document.querySelectorAll('.reto1-item').forEach(item => {
+            const correct = parseInt(item.dataset.correct);
+            item.querySelectorAll('.reto1-op').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (item.dataset.done) return;
+                    const fb = item.querySelector('.reto1-feedback');
+                    fb.classList.remove('hidden');
+                    if (parseInt(this.dataset.op) === correct) {
+                        item.dataset.done = '1';
+                        this.classList.add('border-green-500', 'bg-green-100');
+                        fb.textContent = '✅ ¡Correcto! +10 XP';
+                        fb.classList.add('text-green-700');
+                        addXP(10);
+                        reto1.done++;
+                        if (reto1.done === 3) {
+                            document.getElementById('reto1-msg').classList.remove('hidden');
+                            addXP(0, 'reto1', '🏅 Detector de escenarios');
+                        }
+                    } else {
+                        this.classList.add('wrong');
+                        fb.textContent = '❌ Casi… piensa qué le pasó a la solicitud.';
+                        fb.classList.add('text-red-600');
+                        setTimeout(() => this.classList.remove('wrong'), 500);
+                    }
+                });
+            });
+        });
+
+        // ===== Reto 2: Laboratorio de peticiones (API simulada) =====
+        const productosDB = [
+            { id: 1, nombre: 'Teclado', precio: 85000 },
+            { id: 2, nombre: 'Mouse gamer', precio: 45000 }
+        ];
+        let nextProdId = 3;
+        const labObj = { lista: false, crear: false, error: false };
+
+        const reqMetodo = document.getElementById('req-metodo');
+        const reqRuta = document.getElementById('req-ruta');
+        const reqBodyWrap = document.getElementById('req-body-wrap');
+        const reqBody = document.getElementById('req-body');
+        const respWrap = document.getElementById('respuesta');
+        const respOut = document.getElementById('respuesta-body');
+
+        reqMetodo.addEventListener('change', () => {
+            reqBodyWrap.classList.toggle('hidden', reqMetodo.value !== 'POST');
+        });
+
+        function checkLabObj() {
+            if (!labObj.lista) { labObj.lista = true; document.querySelector('#obj-lista .obj-check').textContent = '✅'; addXP(10); }
+        }
+        function checkLabObjCrear() {
+            if (!labObj.crear) { labObj.crear = true; document.querySelector('#obj-crear .obj-check').textContent = '✅'; addXP(10); }
+        }
+        function checkLabObjError() {
+            if (!labObj.error) { labObj.error = true; document.querySelector('#obj-error .obj-check').textContent = '✅'; addXP(10); }
+        }
+        function labCompleto() {
+            if (labObj.lista && labObj.crear && labObj.error) {
+                document.getElementById('reto2-msg').classList.remove('hidden');
+                addXP(0, 'reto2', '🏅 Inspector de APIs');
+            }
+        }
+
+        document.getElementById('btn-enviar').addEventListener('click', () => {
+            const metodo = reqMetodo.value;
+            const ruta = reqRuta.value.trim().replace(/\/+$/, '') || '/';
+            let status, statusText, body;
+
+            const matchId = ruta.match(/^\/productos\/(\d+)$/);
+
+            if (metodo === 'GET' && ruta === '/productos') {
+                status = 200; statusText = 'OK';
+                body = productosDB;
+                checkLabObj();
+            } else if (metodo === 'GET' && matchId) {
+                const prod = productosDB.find(p => p.id === parseInt(matchId[1]));
+                if (prod) {
+                    status = 200; statusText = 'OK'; body = prod;
+                } else {
+                    status = 404; statusText = 'Not Found';
+                    body = { mensaje: 'Producto no encontrado' };
+                    checkLabObjError();
+                }
+            } else if (metodo === 'POST' && ruta === '/productos') {
+                let datos = null;
+                try { datos = JSON.parse(reqBody.value || '{}'); }
+                catch (e) {
+                    status = 400; statusText = 'Bad Request';
+                    body = { mensaje: 'El body no es un JSON válido' };
+                    checkLabObjError();
+                }
+                if (datos) {
+                    if (!datos.nombre) {
+                        status = 400; statusText = 'Bad Request';
+                        body = { mensaje: 'El campo "nombre" es obligatorio' };
+                        checkLabObjError();
+                    } else if (typeof datos.precio !== 'number') {
+                        status = 400; statusText = 'Bad Request';
+                        body = { mensaje: 'El campo "precio" debe ser un número' };
+                        checkLabObjError();
+                    } else {
+                        const nuevo = { id: nextProdId++, nombre: datos.nombre, precio: datos.precio };
+                        productosDB.push(nuevo);
+                        status = 201; statusText = 'Created';
+                        body = nuevo;
+                        checkLabObjCrear();
+                    }
+                }
+            } else {
+                status = 404; statusText = 'Not Found';
+                body = { mensaje: 'Ruta no encontrada en esta API simulada. Prueba /productos o /productos/1' };
+                checkLabObjError();
+            }
+
+            respWrap.classList.remove('hidden');
+            const esOk = status < 400;
+            respOut.innerHTML =
+                `<span class="${esOk ? 'resp-ok' : 'resp-err'} font-bold">HTTP/1.1 ${status} ${statusText}</span>\n` +
+                `<span class="text-slate-400">Content-Type: application/json</span>\n\n` +
+                JSON.stringify(body, null, 2);
+            labCompleto();
+        });
+
+        // ===== Reto 3: Empareja códigos y significados =====
+        const matchData = [
+            { code: '200', meaning: 'Consulta procesada correctamente' },
+            { code: '201', meaning: 'Recurso creado correctamente' },
+            { code: '400', meaning: 'Datos enviados incorrectos' },
+            { code: '404', meaning: 'Recurso no encontrado' },
+            { code: '500', meaning: 'Error interno del servidor' }
+        ];
+        const shuffledMeanings = [...matchData].sort(() => Math.random() - 0.5);
+        const codesCol = document.getElementById('match-codes');
+        const meanCol = document.getElementById('match-meanings');
+        let pickedCode = null, matchCount = 0;
+
+        matchData.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'match-card p-3 bg-white border-2 border-slate-200 rounded-lg text-center font-bold text-lg';
+            el.textContent = d.code;
+            el.dataset.code = d.code;
+            el.dataset.side = 'code';
+            codesCol.appendChild(el);
+        });
+        shuffledMeanings.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'match-card p-3 bg-white border-2 border-slate-200 rounded-lg text-center text-sm';
+            el.textContent = d.meaning;
+            el.dataset.code = d.code;
+            el.dataset.side = 'meaning';
+            meanCol.appendChild(el);
+        });
+
+        document.querySelectorAll('.match-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('done')) return;
+                const fb = document.getElementById('match-feedback');
+                if (this.dataset.side === 'code') {
+                    document.querySelectorAll('.match-card[data-side="code"]').forEach(c => c.classList.remove('picked'));
+                    this.classList.add('picked');
+                    pickedCode = this;
+                } else if (pickedCode) {
+                    if (this.dataset.code === pickedCode.dataset.code) {
+                        this.classList.add('done');
+                        pickedCode.classList.add('done');
+                        pickedCode.classList.remove('picked');
+                        pickedCode = null;
+                        matchCount++;
+                        addXP(10);
+                        fb.textContent = `✅ ¡Pareja encontrada! (${matchCount}/5)`;
+                        fb.className = 'mt-3 text-sm font-semibold text-green-700';
+                        if (matchCount === 5) {
+                            document.getElementById('reto3-msg').classList.remove('hidden');
+                            addXP(0, 'reto3', '🏅 Traductor HTTP');
+                        }
+                    } else {
+                        this.classList.add('wrong');
+                        pickedCode.classList.add('wrong');
+                        fb.textContent = '❌ No coinciden. ¡Inténtalo de nuevo!';
+                        fb.className = 'mt-3 text-sm font-semibold text-red-600';
+                        const pc = pickedCode;
+                        pickedCode = null;
+                        setTimeout(() => {
+                            this.classList.remove('wrong');
+                            pc.classList.remove('wrong', 'picked');
+                        }, 500);
+                    }
+                }
+            });
+        });
+
+        // ===== Reto 4: Terminal simulada + pregunta =====
+        const terminal = document.getElementById('terminal-out');
+        const chkRomper = document.getElementById('chk-romper');
+        document.getElementById('btn-npmtest').addEventListener('click', () => {
+            const roto = chkRomper.checked;
+            terminal.innerHTML = '$ npm test\n\n&gt; test\n&gt; node --test\n\n';
+            const lineas = roto
+                ? [
+                    '✖ GET /productos devuelve 200 (14 ms)',
+                    '  error: expected 200, got 500',
+                    '',
+                    '# tests 1',
+                    '# pass 0',
+                    '# fail 1',
+                    '',
+                    '🔥 La prueba detectó una diferencia entre lo esperado y lo obtenido.',
+                    'Eso es una regresión: algo que funcionaba se rompió con el cambio.'
+                  ]
+                : [
+                    '✔ GET /productos devuelve 200 (12 ms)',
+                    '',
+                    '# tests 1',
+                    '# pass 1',
+                    '# fail 0',
+                    '',
+                    '🎉 Todo en orden: la API respondió lo esperado.'
+                  ];
+            let i = 0;
+            const timer = setInterval(() => {
+                terminal.innerHTML += lineas[i] + '\n';
+                i++;
+                if (i >= lineas.length) clearInterval(timer);
+            }, 220);
+        });
+
+        let reto4done = false;
+        document.querySelectorAll('.reto4-op').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const fb = document.getElementById('reto4-feedback');
+                fb.classList.remove('hidden');
+                if (this.dataset.ok === '1') {
+                    if (!reto4done) { reto4done = true; addXP(15, 'reto4', '🏅 Ojo de águila'); }
+                    this.classList.add('border-green-500', 'bg-green-100');
+                    fb.textContent = '✅ ¡Exacto! assert.equal() compara lo recibido con lo esperado. +15 XP';
+                    fb.className = 'text-sm mt-2 font-semibold text-green-700';
+                } else {
+                    this.classList.add('wrong');
+                    fb.textContent = '❌ Esa línea hace otra cosa. Busca la que compara valores.';
+                    fb.className = 'text-sm mt-2 font-semibold text-red-600';
+                    setTimeout(() => this.classList.remove('wrong'), 500);
+                }
+            });
+        });
+
+        // ===== Reto 5: ¿Buena o mala práctica? =====
+        const sortData = [
+            { text: 'test("funciona") — un nombre que no dice qué se verifica', buena: false },
+            { text: 'Separar los casos exitosos de los casos de error', buena: true },
+            { text: 'Una prueba que solo pasa si ayer quedaron datos en la base', buena: false },
+            { text: 'Nombrar la prueba "GET /productos/:id devuelve 404 si no existe"', buena: true },
+            { text: 'Automatizar únicamente el camino feliz', buena: false },
+            { text: 'Definir entrada y resultado esperado antes de probar', buena: true }
+        ];
+        const sortList = document.getElementById('sort-list');
+        let sortCount = 0;
+
+        sortData.forEach((d, idx) => {
+            const el = document.createElement('div');
+            el.className = 'sort-item p-3 bg-white border-2 border-slate-200 rounded-lg text-sm flex items-center justify-between gap-2';
+            el.innerHTML = `<span>${d.text}</span><span class="text-xs font-bold text-slate-400 whitespace-nowrap">¿buena o mala?</span>`;
+            el.dataset.buena = d.buena ? '1' : '0';
+            el.addEventListener('click', function() {
+                if (this.dataset.clasificado) return;
+                this.dataset.clasificado = '1';
+                const esBuena = this.dataset.buena === '1';
+                this.classList.add(esBuena ? 'buena' : 'mala');
+                const tag = this.querySelector('span:last-child');
+                tag.textContent = esBuena ? '✅ Buena práctica' : '⚠️ Mala práctica';
+                tag.className = 'text-xs font-bold whitespace-nowrap ' + (esBuena ? 'text-green-700' : 'text-orange-700');
+                addXP(10);
+                sortCount++;
+                if (sortCount === sortData.length) {
+                    document.getElementById('reto5-msg').classList.remove('hidden');
+                    addXP(0, 'reto5', '🏅 Diseñador de casos');
+                }
+            });
+            sortList.appendChild(el);
+        });
+
+        // ===== Misiones de Actividades: checkboxes + barras =====
+        document.querySelectorAll('.mision-check[data-mision]').forEach(chk => {
+            chk.addEventListener('change', () => {
+                const m = chk.dataset.mision;
+                const checks = document.querySelectorAll(`.mision-check[data-mision="${m}"]`);
+                const hechos = [...checks].filter(c => c.checked).length;
+                const barra = document.querySelector(`.mision-barra[data-mision="${m}"]`);
+                const badge = document.querySelector(`.mision-badge[data-mision="${m}"]`);
+                barra.style.width = (hechos / checks.length * 100) + '%';
+                badge.classList.toggle('hidden', hechos < checks.length);
+            });
+        });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
