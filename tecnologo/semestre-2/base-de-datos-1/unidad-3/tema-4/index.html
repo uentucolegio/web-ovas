@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: JOIN básicos y consultas aplicadas</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .content-pane img[onclick^="openImgModal"] {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 1024px) {
+            .content-pane img[onclick^="openImgModal"] { width: 75%; }
+        }
+        .sql-code {
+            background-color: #0f172a;
+            color: #bbf7d0;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .sql-code .kw { color: #7dd3fc; font-weight: 600; }
+        .sql-code .cm { color: #94a3b8; font-style: italic; }
+        .sql-input { font-family: Consolas, 'Courier New', monospace; }
+        #venn circle { transition: fill 0.4s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Reconectando las piezas del rompecabezas 🧩</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    ¡Mira todo lo que has recorrido! 🛤️ Desde los conceptos de dato, información y SGBD, pasando por el modelo entidad-relación y su traducción al modelo relacional con normalización, hasta implementar todo en SQL con DDL, DML y consultas SELECT. Pero todavía falta responder la pregunta que motivó, desde el principio, la existencia de las claves foráneas: <strong>¿cómo recupero información que está repartida en varias tablas como una sola respuesta?</strong> 🤔
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La respuesta es <strong>JOIN</strong> 🔗: el mecanismo con el que SQL combina, en una sola consulta, las filas de dos o más tablas relacionadas a través de sus claves primarias y foráneas. Gracias a él puedes responder cosas como <em>"¿cuál es el nombre de cada estudiante y el nombre de cada curso en el que está matriculado?"</em>, que involucra al mismo tiempo tres tablas (estudiante, curso y matricula) que hasta ahora solo sabías consultar por separado.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Dominar el JOIN es la <strong>culminación práctica</strong> de todo el curso: ¿recuerdas que la cardinalidad de una relación decidió dónde ubicar cada clave foránea? 🔑 Pues esa misma clave foránea es la que ahora usarás para <strong>"reconectar"</strong> la información.
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este tema vas a escribir el tipo de consultas que hace a diario un desarrollador o analista de datos profesional. ¡Este es el gran final! <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span><strong>Comprender</strong> el propósito del JOIN como mecanismo para combinar información almacenada en distintas tablas relacionadas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔗</span>
+                        <span><strong>Aplicar</strong> INNER JOIN para recuperar información combinada de dos o más tablas a partir de sus claves primarias y foráneas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">⬅️</span>
+                        <span><strong>Diferenciar y aplicar</strong> LEFT JOIN y RIGHT JOIN para incluir registros sin coincidencia en la tabla relacionada.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🚀</span>
+                        <span><strong>Construir</strong> consultas aplicadas que integren JOIN, WHERE, ORDER BY y funciones de agregación para resolver preguntas de negocio realistas.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- PANEL DE GAMIFICACIÓN DEL CONTENIDO -->
+                    <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Contenido 📚</h2>
+                    <div class="mb-6 p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🎮 Ruta del Conector de Tablas</p>
+                            <p class="font-bold text-green-700 text-lg">⭐ <span id="game-points">0</span> XP</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div id="game-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-2">Abre cada acordeón y completa las 5 misiones para ganar tu insignia 🏆</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span id="badge-m1" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🧩 Armador de piezas</span>
+                            <span id="badge-m2" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🔗 Maestro del ON</span>
+                            <span id="badge-m3" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">⭕ Explorador de JOIN</span>
+                            <span id="badge-m4" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">⚖️ Estratega</span>
+                            <span id="badge-m5" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🚀 Arquitecto de consultas</span>
+                        </div>
+                        <p id="badge-final" class="hidden mt-4 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡INSIGNIA DESBLOQUEADA: CONECTOR DE DATOS! 🎉 Completaste las 5 misiones del contenido.</p>
+                    </div>
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🧩 1. ¿Por qué necesitamos JOIN?</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-3">Cuando normalizaste, <strong>separaste</strong> la información en varias tablas para evitar repeticiones. 🔪 Genial para guardar datos… pero cuando alguien pregunta <em>"¿qué curso ve Ana y qué nota sacó?"</em>, la respuesta está repartida en tres tablas. JOIN es el pegamento que vuelve a unir las piezas usando las claves. 🧩</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-center">
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg"><p class="text-2xl">👩‍🎓</p><p class="font-bold text-blue-800">estudiante</p><p class="text-xs">sabe <strong>quién</strong> es Ana</p></div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg"><p class="text-2xl">📝</p><p class="font-bold text-green-800">matricula</p><p class="text-xs">sabe <strong>qué número</strong> de curso ve y su nota</p></div>
+                                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg"><p class="text-2xl">📚</p><p class="font-bold text-purple-800">curso</p><p class="text-xs">sabe <strong>cómo se llama</strong> ese curso</p></div>
+                                </div>
+                                <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-red-900">💥 <strong>¿Y si olvidas la condición ON?</strong> SQL combina <strong>cada</strong> fila de una tabla con <strong>cada</strong> fila de la otra: el famoso <em>producto cartesiano</em>. Con 3 estudiantes y 3 cursos salen 9 filas sin sentido… con 10.000 estudiantes y 500 cursos, ¡5 millones de filas! 😱 Por eso el ON casi siempre compara la <strong>clave primaria</strong> de una tabla con la <strong>clave foránea</strong> de la otra.</p>
+                                </div>
+
+                                <!-- MISIÓN 1 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m1">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 1: Armador de piezas</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+20 XP</span>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">1️⃣ Para unir matricula con estudiante, ¿qué columnas compara el ON?</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">matricula.nota_final = estudiante.nombre</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">matricula.id_estudiante = estudiante.id_estudiante</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">matricula.id_curso = estudiante.id_estudiante</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">2️⃣ ¿Por qué se escribe <span class="font-mono">estudiante.nombre</span> y <span class="font-mono">curso.nombre</span> en lugar de solo <span class="font-mono">nombre</span>?</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">Porque ambas tablas tienen una columna "nombre" y hay que evitar la ambigüedad</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">Porque SQL siempre exige escribir el nombre de la tabla</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">Porque así la consulta se ejecuta más rápido</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">3️⃣ Unes 4 productos con 5 categorías sin escribir el ON. ¿Cuántas filas obtienes?</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">4</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">9</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">20 (4 × 5)</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🔗 2. INNER JOIN: combinando tablas relacionadas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-3"><strong>INNER JOIN</strong> (o simplemente <strong>JOIN</strong>) combina filas de dos tablas <strong>solo cuando hay coincidencia</strong> según la condición del <code class="bg-slate-100 px-1 rounded">ON</code>. Así obtienes nombres y notas sin tener que lidiar con los números de id. 🎯</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía INNER JOIN_ tablas relacionadas.png" alt="Infografía: INNER JOIN entre estudiante, matricula y curso" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3">✂️ Con <strong>alias de tabla</strong> (e, m, c) la consulta queda más corta y fácil de leer, sobre todo con tres o más tablas. Fíjate también en quién <strong>no</strong> aparece en el resultado y por qué:</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía SQL_ INNER JOIN con alias.png" alt="Infografía: INNER JOIN con alias de tabla, WHERE y ORDER BY" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-yellow-900">👻 <strong>Ojo:</strong> si un estudiante existe pero no tiene ninguna matrícula, el INNER JOIN simplemente <strong>no lo muestra</strong>. Es correcto lógicamente… pero no siempre es lo que necesitas. (Spoiler: para eso existe el LEFT JOIN 😉)</p>
+                                </div>
+
+                                <!-- MISIÓN 2: constructor del ON -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m2">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 2: Maestro del ON</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Muestra cada producto con el nombre de su categoría, ordenado por categoría. Elige las columnas del ON y mira si el resultado tiene sentido. 🔍</p>
+                                    <div class="flex flex-wrap items-center gap-2 mb-3 font-mono text-xs sm:text-sm">
+                                        <span>SELECT p.nombre AS producto, c.nombre AS categoria FROM producto p INNER JOIN categoria c ON</span>
+                                        <select id="on-izq" class="sql-input p-1 border-2 border-teal-200 rounded bg-white"><option value="id_producto">p.id_producto</option><option value="id_categoria">p.id_categoria</option><option value="nombre">p.nombre</option></select>
+                                        <span>=</span>
+                                        <select id="on-der" class="sql-input p-1 border-2 border-teal-200 rounded bg-white"><option value="nombre">c.nombre</option><option value="id_categoria">c.id_categoria</option></select>
+                                        <span>ORDER BY c.nombre ASC;</span>
+                                        <button type="button" class="font-sans bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-1.5 px-4 rounded-lg transition" onclick="ejecutarOn()">▶️ Ejecutar</button>
+                                    </div>
+                                    <div class="overflow-x-auto bg-white rounded-lg border border-teal-200 mb-2">
+                                        <table class="w-full text-sm border-collapse" id="on-table"></table>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto: productos con su categoría</p>
+                                    <p class="text-sm mb-3">Con las tablas <strong>producto</strong> y <strong>categoria</strong> (producto tiene la clave foránea id_categoria), escribe una consulta con INNER JOIN que muestre el nombre de cada producto junto con el <strong>nombre</strong> de su categoría, ordenados alfabéticamente por categoría. ¿Ya la hiciste en la misión? ¡Escríbela completa en tu cuaderno!</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-inner', this)">👀 Ver solución</button>
+                                    <div id="sol-inner" class="hidden mt-4">
+                                        <img src="img/Infografía SQL_ INNER JOIN entre tablas.png" alt="Infografía: INNER JOIN entre producto y categoria" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>⬅️ 3. LEFT JOIN y RIGHT JOIN: que nadie se quede por fuera</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-3"><strong>LEFT JOIN</strong> devuelve <strong>todas</strong> las filas de la tabla de la <strong>izquierda</strong> (la que va en el FROM), más lo que coincida de la derecha. Si no hay coincidencia, las columnas de la derecha salen en <strong>NULL</strong>, pero la fila se conserva. ✅ Así sí aparece el estudiante que todavía no se ha matriculado.</p>
+                                <div class="mb-4">
+                                    <img src="img/LEFT JOIN y RIGHT JOIN_ Guía Visual de SQL.png" alt="Infografía: LEFT JOIN y RIGHT JOIN incluyendo registros sin coincidencia" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-4"><strong>RIGHT JOIN</strong> es el espejo: conserva todas las filas de la tabla de la <strong>derecha</strong>. Se usa mucho menos, porque cualquier RIGHT JOIN se puede reescribir como LEFT JOIN invirtiendo el orden de las tablas, y la mayoría de desarrolladores lo prefieren así por claridad. 🪞</p>
+
+                                <!-- RETO -->
+                                <div class="mb-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto: el reporte del coordinador</p>
+                                    <p class="text-sm mb-3">El coordinador quiere <em>"todos los estudiantes registrados con el curso en el que están matriculados, o 'sin matrícula' si aún no tienen ninguno"</em>. ¿Por qué un INNER JOIN no serviría? Escribe la consulta con LEFT JOIN (puedes dejar el NULL sin resolver: la función COALESCE para cambiarlo se estudia en cursos posteriores).</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-left', this)">👀 Ver solución</button>
+                                    <div id="sol-left" class="hidden mt-4">
+                                        <img src="img/Infografía SQL_ LEFT JOIN explicado.png" alt="Infografía: LEFT JOIN con todos los estudiantes, incluso sin matrícula" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                                <!-- MISIÓN 3: explorador de JOIN -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m3">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 3: Explorador de JOIN</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+40 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-2">Cada reto describe un resultado. Ejecuta el tipo de JOIN que lo produce y observa el diagrama. ⭕</p>
+                                    <p id="jx-reto" class="text-sm font-bold text-teal-900 bg-white border border-teal-200 rounded-lg p-2 mb-3"></p>
+                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
+                                        <div class="bg-white rounded-lg border border-teal-200 overflow-x-auto"><p class="text-xs font-bold text-blue-800 p-2">🅰️ Tabla A (izquierda)</p><table class="w-full text-xs border-collapse" id="jx-a"></table></div>
+                                        <div class="bg-white rounded-lg border border-teal-200 overflow-x-auto"><p class="text-xs font-bold text-green-800 p-2">🅱️ Tabla B (derecha)</p><table class="w-full text-xs border-collapse" id="jx-b"></table></div>
+                                        <div class="bg-white rounded-lg border border-teal-200 p-2 flex items-center justify-center">
+                                            <svg id="venn" viewBox="0 0 220 130" class="w-full max-w-xs" role="img" aria-label="Diagrama de Venn del JOIN seleccionado">
+                                                <defs><clipPath id="clipA"><circle cx="85" cy="65" r="50"></circle></clipPath></defs>
+                                                <circle id="venn-a" cx="85" cy="65" r="50" fill="#f1f5f9"></circle>
+                                                <circle id="venn-b" cx="135" cy="65" r="50" fill="#f1f5f9"></circle>
+                                                <circle id="venn-ab" cx="135" cy="65" r="50" fill="#f1f5f9" clip-path="url(#clipA)"></circle>
+                                                <circle cx="85" cy="65" r="50" fill="none" stroke="#3b82f6" stroke-width="2"></circle>
+                                                <circle cx="135" cy="65" r="50" fill="none" stroke="#22c55e" stroke-width="2"></circle>
+                                                <text x="55" y="70" font-size="18" font-weight="bold" fill="#1e3a8a">A</text>
+                                                <text x="152" y="70" font-size="18" font-weight="bold" fill="#14532d">B</text>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 mb-3">
+                                        <button type="button" class="jx-btn font-mono text-sm px-3 py-1.5 bg-white border-2 border-orange-300 rounded-lg hover:bg-orange-50 transition" data-join="INNER">INNER JOIN</button>
+                                        <button type="button" class="jx-btn font-mono text-sm px-3 py-1.5 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 transition" data-join="LEFT">LEFT JOIN</button>
+                                        <button type="button" class="jx-btn font-mono text-sm px-3 py-1.5 bg-white border-2 border-green-300 rounded-lg hover:bg-green-50 transition" data-join="RIGHT">RIGHT JOIN</button>
+                                        <button type="button" class="jx-btn font-mono text-sm px-3 py-1.5 bg-white border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition" data-join="FULL">FULL OUTER JOIN</button>
+                                    </div>
+                                    <p id="jx-sql" class="font-mono text-xs bg-slate-900 text-green-200 rounded-lg p-2 mb-2">SELECT A.id, A.valor_A, B.valor_B FROM A ___ JOIN B ON A.id = B.id;</p>
+                                    <div class="overflow-x-auto bg-white rounded-lg border border-teal-200 mb-2">
+                                        <table class="w-full text-sm border-collapse" id="jx-out"></table>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>⚖️ 4. Comparando los tipos de JOIN</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-3">Piensa en dos tablas A y B relacionadas:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg"><p class="font-bold text-orange-800 font-mono">INNER JOIN</p><p class="text-sm">Solo la <strong>intersección</strong>: filas con coincidencia en A y B.</p></div>
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-bold text-blue-800 font-mono">LEFT JOIN</p><p class="text-sm">Toda <strong>A</strong> + lo que coincida de B (si no, NULL).</p></div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg"><p class="font-bold text-green-800 font-mono">RIGHT JOIN</p><p class="text-sm">Toda <strong>B</strong> + lo que coincida de A (si no, NULL).</p></div>
+                                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg"><p class="font-bold text-purple-800 font-mono">FULL OUTER JOIN</p><p class="text-sm">Todas las filas de <strong>ambas</strong>, coincidan o no. ⚠️ MySQL no lo trae de forma nativa: se simula uniendo un LEFT y un RIGHT JOIN con <code>UNION</code>.</p></div>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="img/Comparativa visual de tipos de JOIN.png" alt="Infografía: comparativa de INNER, LEFT, RIGHT y FULL OUTER JOIN" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <!-- MISIÓN 4 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m4">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 4: El estratega</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Una tienda online necesita estos reportes. ¿Qué JOIN usarías? 🛒</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2 text-sm">1️⃣ <span class="font-mono">pedido p ___ JOIN cliente c</span>: cada pedido con el nombre de su cliente.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">INNER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">RIGHT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">FULL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2 text-sm">2️⃣ <span class="font-mono">empleado e ___ JOIN departamento d</span>: todos los empleados, aunque aún no tengan departamento.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">INNER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">LEFT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">RIGHT</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2 text-sm">3️⃣ <span class="font-mono">producto p ___ JOIN categoria c</span>: todas las categorías, aunque todavía no tengan productos.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">LEFT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">INNER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">RIGHT</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2 text-sm">4️⃣ Auditoría: todos los usuarios y todas las suscripciones, estén emparejados o no.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">LEFT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">FULL OUTER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">INNER</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🚀 5. Consultas aplicadas: todo junto</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-3">El verdadero poder del JOIN aparece cuando lo combinas con <strong>WHERE, GROUP BY, HAVING, ORDER BY</strong> y las funciones de agregación. Así respondes preguntas de negocio complejas en <strong>una sola consulta</strong>, justo el trabajo diario de un desarrollador o analista de datos. 💼</p>
+                                <p class="mb-3">📌 <strong>Pregunta:</strong> ¿cuántos estudiantes tiene cada curso (con su nombre), mostrando solo los cursos con <strong>más de dos</strong> estudiantes, del más lleno al menos lleno?</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-center text-xs">
+                                    <div class="p-2 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-bold font-mono text-blue-800">INNER JOIN</p><p>combina curso y matrícula</p></div>
+                                    <div class="p-2 bg-green-50 border border-green-200 rounded-lg"><p class="font-bold font-mono text-green-800">GROUP BY + COUNT</p><p>cuenta por curso</p></div>
+                                    <div class="p-2 bg-orange-50 border border-orange-200 rounded-lg"><p class="font-bold font-mono text-orange-800">HAVING</p><p>solo &gt; 2 estudiantes</p></div>
+                                    <div class="p-2 bg-purple-50 border border-purple-200 rounded-lg"><p class="font-bold font-mono text-purple-800">ORDER BY DESC</p><p>de mayor a menor</p></div>
+                                </div>
+
+                                <!-- MISIÓN 5: ensamblar la consulta -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m5">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 5: Arquitecto de consultas</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+40 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Toca las piezas en el orden en que se <strong>escriben</strong> para armar la consulta que responde la pregunta. Al terminar verás cómo la procesa el SGBD. 🔓</p>
+                                    <div class="flex flex-col gap-2 mb-3" id="seq-m5"></div>
+                                    <p class="text-xs font-semibold text-slate-500 mb-1">Tu consulta:</p>
+                                    <div id="seq-m5-out" class="sql-code text-xs" style="min-height:3rem;white-space:pre-wrap;">…</div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                    <div id="m5-reward" class="hidden mt-4">
+                                        <p class="text-sm font-bold text-green-700 mb-2">🔓 ¡Consulta desbloqueada! Así trabaja paso a paso:</p>
+                                        <img src="img/Flujo SQL_ joins, filtros y resultados.png" alt="Infografía: JOIN + GROUP BY + HAVING + ORDER BY, cursos con más de 2 estudiantes" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: Consultas con JOIN, GROUP BY y HAVING combinados
+                                     Buscar: "consultas SQL con JOIN GROUP BY HAVING ejemplos prácticos en español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: consultas aplicadas con JOIN, GROUP BY y HAVING</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"consultas SQL con JOIN GROUP BY HAVING ejemplos prácticos en español"</em></p>
+                                    <a href="#" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: (pega aquí la URL) y ponle el título: (escribe aquí el título)."
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Panel de progreso de actividades -->
+                    <div class="p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🏁 Proyecto final: Sistema de Facturación</p>
+                            <p class="font-bold text-green-700">🎖️ <span id="act-points">0</span>/4 misiones</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-2">
+                            <div id="act-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500">Cierra el curso a lo grande: cada misión te acerca al rango de <strong>Arquitecto de Datos</strong>. 🏗️</p>
+                        <p id="act-badge" class="hidden mt-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡RANGO DESBLOQUEADO: ARQUITECTO DE DATOS! 🎓 Completaste el proyecto final.</p>
+                    </div>
+
+                    <!-- Preparación del proyecto -->
+                    <div class="bg-white border-l-4 border-blue-500 rounded-lg shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-blue-700 mb-3">🛠️ Antes de empezar: carga la estructura</h3>
+                        <p class="mb-3 text-slate-700 leading-relaxed">Carga esta estructura en el SGBD que recomiende tu docente. Puedes usar la imagen como modelo para el proyecto:</p>
+                        <div class="mb-4">
+                            <img src="img/Esquema relacional de facturación y productos.png" alt="Esquema relacional de cliente, factura, detalle_factura y producto" class="w-full rounded-lg border border-blue-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                            <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                        </div>
+                        <ul class="text-sm text-slate-700 space-y-1 list-none">
+                            <li>🏗️ Crea las tablas y aplica la estructura en el SGBD.</li>
+                            <li>📥 Inserta <strong>100 registros</strong> en cada tabla: CLIENTE, FACTURA, DETALLE_FACTURA y PRODUCTO.</li>
+                            <li>🔢 Respeta el orden de las llaves foráneas: primero <strong>CLIENTE</strong> y <strong>PRODUCTO</strong>, luego <strong>FACTURA</strong> y al final <strong>DETALLE_FACTURA</strong>.</li>
+                            <li>🔑 En DETALLE_FACTURA la llave primaria es compuesta (<strong>id_factura + id_producto</strong>): no se puede repetir el mismo producto dentro de una misma factura.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧾 Misión 1: Cada factura con su detalle</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Escribe una consulta con <strong>INNER JOIN</strong> entre las tablas <strong>factura</strong> y <strong>detalle_factura</strong> (donde detalle_factura tiene la clave foránea id_factura) que muestre cada factura junto con los productos y cantidades de su detalle. Completa la condición ON y ejecútala con los datos de prueba:
+                        </p>
+                        <div class="flex flex-wrap items-center gap-2 mb-3 font-mono text-xs sm:text-sm">
+                            <span>SELECT f.id_factura, f.fecha, d.id_producto, d.cantidad, d.subtotal FROM factura f INNER JOIN detalle_factura d ON</span>
+                            <select id="a1-izq" class="sql-input p-1 border-2 border-green-200 rounded bg-white"><option value="f.id_cliente">f.id_cliente</option><option value="f.id_factura">f.id_factura</option></select>
+                            <span>=</span>
+                            <select id="a1-der" class="sql-input p-1 border-2 border-green-200 rounded bg-white"><option value="d.id_producto">d.id_producto</option><option value="d.id_factura">d.id_factura</option></select>
+                            <span>;</span>
+                            <button type="button" class="font-sans bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-1.5 px-4 rounded-lg transition" onclick="probarA1()">🧪 Probar</button>
+                        </div>
+                        <div id="a1-log" class="sql-code text-xs" style="min-height:2.5rem;white-space:pre-wrap;">mysql&gt; _</div>
+                        <div class="overflow-x-auto bg-white rounded-lg border border-green-200 mt-2"><table class="w-full text-sm border-collapse" id="a1-table"></table></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a1', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> consulta con INNER JOIN entre factura y detalle_factura usando su clave primaria y foránea.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📦 Misión 2: Productos activos por categoría</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Escribe una consulta integradora que combine <strong>JOIN, WHERE, GROUP BY y ORDER BY</strong> para responder: <em>"¿cuántos productos activos tiene cada categoría, mostrando solo las categorías con al menos un producto activo, ordenadas de mayor a menor cantidad?"</em> Usa las tablas <strong>producto(id_producto, nombre, precio, activo, id_categoria)</strong> y <strong>categoria(id_categoria, nombre)</strong>.
+                        </p>
+                        <textarea id="act2-text" rows="6" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="SELECT c.nombre, COUNT(...)&#10;FROM ...&#10;INNER JOIN ... ON ...&#10;WHERE ...&#10;GROUP BY ...&#10;ORDER BY ...;"></textarea>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono mt-2" id="a2-chips"></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a2', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> consulta integradora con JOIN, WHERE, GROUP BY y ORDER BY.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">💰 Misión 3: Las categorías más costosas</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Escribe una consulta que muestre el nombre de cada categoría junto con el <strong>precio promedio</strong> de sus productos, usando <strong>INNER JOIN</strong> entre producto y categoria, <strong>GROUP BY</strong> y la función <strong>AVG()</strong>, mostrando solo las categorías cuyo precio promedio <strong>supere los 100000</strong>, ordenadas de mayor a menor precio promedio.
+                        </p>
+                        <textarea id="act3-text" rows="6" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="SELECT c.nombre, AVG(...) AS precio_promedio&#10;FROM ...&#10;INNER JOIN ... ON ...&#10;GROUP BY ...&#10;HAVING ...&#10;ORDER BY ...;"></textarea>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono mt-2" id="a3-chips"></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a3', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> consulta con INNER JOIN, GROUP BY, AVG(), HAVING y ORDER BY.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 4 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a4">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧭 Misión 4: Elige el JOIN correcto</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">Para cada necesidad de negocio, indica qué tipo de JOIN (INNER, LEFT o RIGHT) utilizarías:</p>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a4="1">
+                                <p class="font-semibold text-slate-700 mb-2 text-sm">1️⃣ Mostrar únicamente los productos que sí tienen ventas registradas.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="true">INNER</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="false">LEFT</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="false">RIGHT</button>
+                                </div>
+                                <p class="a4-exp hidden text-xs mt-2 text-slate-600">💡 Solo interesan las coincidencias producto–venta.</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a4="2">
+                                <p class="font-semibold text-slate-700 mb-2 text-sm">2️⃣ Mostrar todos los clientes registrados, hayan realizado pedidos o no.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="false">INNER</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="true">LEFT</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="true">RIGHT</button>
+                                </div>
+                                <p class="a4-exp hidden text-xs mt-2 text-slate-600">💡 <span class="font-mono">cliente LEFT JOIN pedido</span> (o <span class="font-mono">pedido RIGHT JOIN cliente</span>): la tabla que se conserva completa es cliente.</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a4="3">
+                                <p class="font-semibold text-slate-700 mb-2 text-sm">3️⃣ Mostrar todos los cursos con cuántos estudiantes tiene cada uno, incluyendo los cursos sin estudiantes.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="false">INNER</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="true">LEFT</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="true">RIGHT</button>
+                                </div>
+                                <p class="a4-exp hidden text-xs mt-2 text-slate-600">💡 <span class="font-mono">curso LEFT JOIN matricula</span> (o el RIGHT equivalente): ningún curso se queda por fuera, aunque tenga 0 estudiantes.</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a4="4">
+                                <p class="font-semibold text-slate-700 mb-2 text-sm">4️⃣ Mostrar únicamente las matrículas que tienen tanto un estudiante como un curso válidos y existentes.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="true">INNER</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="false">LEFT</button>
+                                    <button type="button" class="a4-opt border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-correct="false">RIGHT</button>
+                                </div>
+                                <p class="a4-exp hidden text-xs mt-2 text-slate-600">💡 Se exige coincidencia en ambas tablas: eso es exactamente lo que hace INNER JOIN.</p>
+                            </div>
+                        </div>
+                        <p id="a4-hint" class="text-sm font-bold mt-3"></p>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a4', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> el tipo de JOIN adecuado para cada necesidad de negocio.</p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🎥 Cómo combinar dos o más tablas — INNER JOIN | PostgreSQL (Video)</h3>
+                            <p class="text-slate-600 mb-2">Video paso a paso para combinar varias tablas con INNER JOIN.</p>
+                            <a href="https://www.youtube.com/watch?v=bRx4f7Nqxlw" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr1.png" alt="QR Cómo combinar dos o más tablas - INNER JOIN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🔗 SQL INNER JOIN</h3>
+                            <p class="text-slate-600 mb-2">Explicación y ejemplos que puedes probar en línea en W3Schools.</p>
+                            <a href="https://www.w3schools.com/sql/sql_join_inner.asp" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr2.png" alt="QR SQL INNER JOIN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 3 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">⭕ ¿Cómo funciona INNER JOIN, LEFT JOIN, RIGHT JOIN y FULL JOIN?</h3>
+                            <p class="text-slate-600 mb-2">Artículo con diagramas que compara los distintos tipos de JOIN.</p>
+                            <a href="https://programacionymas.com/blog/como-funciona-inner-left-right-full-join" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr3.png" alt="QR Cómo funciona INNER, LEFT, RIGHT y FULL JOIN" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PostgreSQL Global Development Group. (2026). <i>PostgreSQL 18 documentation: Joins between tables</i>.<br>
+                            <a href="https://www.postgresql.org/docs/current/tutorial-join.html" class="text-green-700 underline break-all" target="_blank">https://www.postgresql.org/docs/current/tutorial-join.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MySQL. (2026). <i>MySQL 8.4 reference manual: JOIN clause</i>. Oracle Corporation.<br>
+                            <a href="https://dev.mysql.com/doc/refman/8.4/en/join.html" class="text-green-700 underline break-all" target="_blank">https://dev.mysql.com/doc/refman/8.4/en/join.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Coronel, C., &amp; Morris, S. (2019). <i>Database systems: Design, implementation, and management</i> (13.ª ed.). Cengage Learning.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Reis, J., &amp; Housley, M. (2022). <i>Fundamentals of data engineering: Plan and build robust data systems</i>. O'Reilly Media.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="img-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" onclick="closeImgModal()">
+        <img id="img-modal-src" src="" alt="Imagen ampliada" class="max-w-full max-h-full rounded-lg shadow-2xl">
+        <button type="button" class="absolute top-4 right-4 text-white text-3xl font-bold hover:text-green-300" onclick="closeImgModal()">✖</button>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito principal de un JOIN?",
+                options: ["Borrar filas repetidas entre tablas", "Combinar en una sola consulta filas de tablas relacionadas", "Crear nuevas tablas a partir de otras", "Ordenar los resultados de una consulta"],
+                correct: 1
+            },
+            {
+                question: "En un JOIN, ¿qué compara casi siempre la condición ON?",
+                options: ["La clave primaria de una tabla con la clave foránea de la otra", "Los nombres de las dos tablas", "Dos columnas de texto cualesquiera", "El número de filas de cada tabla"],
+                correct: 0
+            },
+            {
+                question: "¿Qué filas devuelve un INNER JOIN?",
+                options: ["Todas las filas de la tabla izquierda", "Todas las filas de ambas tablas", "Solo las filas que tienen coincidencia en ambas tablas", "Solo las filas sin coincidencia"],
+                correct: 2
+            },
+            {
+                question: "¿Por qué se usa la notación tabla.columna (por ejemplo, curso.nombre) en un JOIN?",
+                options: ["Porque es obligatoria en cualquier SELECT", "Para que la consulta corra más rápido", "Para crear un alias permanente", "Para evitar ambigüedad cuando varias tablas tienen columnas con el mismo nombre"],
+                correct: 3
+            },
+            {
+                question: "En FROM matricula m INNER JOIN curso c ON m.id_curso = c.id_curso, ¿qué son m y c?",
+                options: ["Alias de tabla", "Claves foráneas", "Funciones de agregación", "Nombres de columnas"],
+                correct: 0
+            },
+            {
+                question: "Luis Torres está registrado pero no tiene matrículas. ¿Qué consulta lo incluye en un reporte de estudiantes con sus cursos?",
+                options: ["estudiante e INNER JOIN matricula m ...", "estudiante e LEFT JOIN matricula m ...", "Ninguna, es imposible mostrarlo", "estudiante e JOIN matricula m sin ON"],
+                correct: 1
+            },
+            {
+                question: "En un LEFT JOIN, ¿qué valor aparece en las columnas de la tabla derecha cuando no hay coincidencia?",
+                options: ["0", "Un texto vacío", "NULL", "El mismo valor de la tabla izquierda"],
+                correct: 2
+            },
+            {
+                question: "¿Por qué RIGHT JOIN se usa mucho menos que LEFT JOIN?",
+                options: ["Porque es más lento", "Porque MySQL no lo permite", "Porque devuelve resultados incorrectos", "Porque cualquier RIGHT JOIN puede reescribirse como LEFT JOIN invirtiendo el orden de las tablas"],
+                correct: 3
+            },
+            {
+                question: "¿Qué afirmación sobre FULL OUTER JOIN es correcta?",
+                options: ["Devuelve todas las filas de ambas tablas y MySQL no lo trae de forma nativa", "Es igual a INNER JOIN", "Solo devuelve las filas sin coincidencia", "Es el JOIN por defecto de SQL"],
+                correct: 0
+            },
+            {
+                question: "Para listar los cursos con más de 2 estudiantes matriculados, ¿qué combinación necesitas?",
+                options: ["INNER JOIN + WHERE COUNT(*) > 2", "INNER JOIN + GROUP BY + HAVING COUNT(m.id_estudiante) > 2", "LEFT JOIN + ORDER BY + LIMIT 2", "SELECT * FROM curso WHERE estudiantes > 2"],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ============================================
+        // SISTEMA DE GAMIFICACIÓN — Contenido (misiones)
+        // ============================================
+        const MISSION_XP = { m1: 20, m2: 30, m3: 40, m4: 30, m5: 40 };
+        const TOTAL_XP = Object.values(MISSION_XP).reduce((a, b) => a + b, 0);
+        const gameState = { xp: 0, completed: new Set() };
+
+        function updateGamePanel() {
+            document.getElementById('game-points').textContent = gameState.xp;
+            document.getElementById('game-progress').style.width = Math.round((gameState.xp / TOTAL_XP) * 100) + '%';
+        }
+
+        function completeMission(missionId, container) {
+            if (gameState.completed.has(missionId)) return;
+            gameState.completed.add(missionId);
+            gameState.xp += MISSION_XP[missionId] || 0;
+            updateGamePanel();
+            const badge = document.getElementById('badge-' + missionId);
+            if (badge) {
+                badge.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200');
+                badge.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            }
+            setFeedback(container, '🎉 ¡Misión completada! +' + (MISSION_XP[missionId] || 0) + ' XP', true);
+            const reward = document.getElementById(missionId + '-reward');
+            if (reward) reward.classList.remove('hidden');
+            if (gameState.completed.size === Object.keys(MISSION_XP).length) {
+                document.getElementById('badge-final').classList.remove('hidden');
+            }
+        }
+
+        function setFeedback(container, texto, ok) {
+            const fb = container.querySelector('.mission-feedback');
+            fb.textContent = texto;
+            fb.className = 'mission-feedback mt-3 text-sm font-bold ' + (ok ? 'text-green-700' : 'text-red-500');
+        }
+
+        // Opciones de las misiones de selección (m1, m4)
+        document.querySelectorAll('.game-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const group = this.closest('[data-gq]');
+                const missionContainer = this.closest('[data-mission]');
+                if (!group || !missionContainer || group.dataset.solved === 'true') return;
+                if (this.dataset.correct === 'true') {
+                    group.dataset.solved = 'true';
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-green-500', 'border-green-500', 'text-white');
+                    group.querySelectorAll('button').forEach(b => {
+                        b.disabled = true;
+                        if (b !== this) b.classList.add('opacity-50');
+                    });
+                    setFeedback(missionContainer, '¡Correcto! ⭐', true);
+                    const groups = missionContainer.querySelectorAll('[data-gq]');
+                    if (Array.from(groups).every(g => g.dataset.solved === 'true')) {
+                        completeMission(missionContainer.dataset.mission, missionContainer);
+                    }
+                } else {
+                    this.disabled = true;
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-red-100', 'border-red-300', 'text-red-400', 'opacity-60');
+                    setFeedback(missionContainer, '¡Casi! Inténtalo de nuevo 💪', false);
+                }
+            });
+        });
+
+        // Tabla genérica para los simuladores
+        function renderTabla(tablaId, cols, rows, claseFila) {
+            const head = cols.map(c => '<th class="p-2 text-left bg-teal-600 text-white font-mono text-xs">' + c + '</th>').join('');
+            const body = rows.length
+                ? rows.map((r, i) => '<tr class="border-b border-teal-100 ' + (claseFila ? claseFila(r, i) : '') + '">' +
+                    cols.map(c => '<td class="p-2 font-mono text-xs">' + (r[c] === null || r[c] === undefined ? '<span class="text-red-500 italic">NULL</span>' : r[c]) + '</td>').join('') + '</tr>').join('')
+                : '<tr><td class="p-2 text-xs text-slate-400 italic" colspan="' + cols.length + '">(0 filas)</td></tr>';
+            document.getElementById(tablaId).innerHTML = '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>';
+        }
+
+        // ---- Misión 2: constructor del ON ----
+        const CATEGORIAS = [
+            { id_categoria: 1, nombre: 'Electrónicos' }, { id_categoria: 2, nombre: 'Ropa' }, { id_categoria: 3, nombre: 'Hogar' },
+            { id_categoria: 4, nombre: 'Deportes' }, { id_categoria: 5, nombre: 'Libros' }
+        ];
+        const PRODUCTOS = [
+            { id_producto: 1, nombre: 'Laptop', id_categoria: 1 }, { id_producto: 2, nombre: 'Mouse', id_categoria: 1 },
+            { id_producto: 3, nombre: 'Camiseta', id_categoria: 2 }, { id_producto: 4, nombre: 'Pantalón', id_categoria: 2 },
+            { id_producto: 5, nombre: 'Licuadora', id_categoria: 3 }, { id_producto: 6, nombre: 'Balón', id_categoria: 4 },
+            { id_producto: 7, nombre: 'Novela', id_categoria: 5 }
+        ];
+        function ejecutarOn() {
+            const izq = document.getElementById('on-izq').value;
+            const der = document.getElementById('on-der').value;
+            const filas = [];
+            PRODUCTOS.forEach(p => CATEGORIAS.forEach(c => {
+                if (String(p[izq]) === String(c[der])) filas.push({ producto: p.nombre, categoria: c.nombre });
+            }));
+            filas.sort((a, b) => a.categoria.localeCompare(b.categoria, 'es'));
+            renderTabla('on-table', ['producto', 'categoria'], filas);
+            const cont = document.querySelector('[data-mission="m2"]');
+            if (izq === 'id_categoria' && der === 'id_categoria') {
+                completeMission('m2', cont);
+            } else if (!filas.length) {
+                setFeedback(cont, '🕳️ 0 filas: esas columnas nunca coinciden (¡compararon cosas de distinto tipo!). Busca la clave foránea de producto.', false);
+            } else {
+                setFeedback(cont, '😵 ¡Mira el resultado! ¿Un Mouse en "Ropa"? Esas columnas coinciden por casualidad, no por relación. Une la FK de producto con la PK de categoria.', false);
+            }
+        }
+        renderTabla('on-table', ['producto', 'categoria'], []);
+
+        // ---- Misión 3: explorador de JOIN ----
+        const TABLA_A = [{ id: 1, valor_A: 'Ana' }, { id: 2, valor_A: 'Carlos' }, { id: 3, valor_A: 'María' }];
+        const TABLA_B = [{ id: 2, valor_B: 'Matemáticas' }, { id: 3, valor_B: 'Bases de Datos' }, { id: 4, valor_B: 'Redes' }];
+        const RETOS_JOIN = [
+            { txt: '🎯 Reto 1/4: solo las personas que SÍ tienen materia asignada.', tipo: 'INNER' },
+            { txt: '🎯 Reto 2/4: todas las personas de A, tengan o no materia (Redes NO debe aparecer).', tipo: 'LEFT' },
+            { txt: '🎯 Reto 3/4: todas las materias de B, aunque nadie las tenga (Ana NO debe aparecer).', tipo: 'RIGHT' },
+            { txt: '🎯 Reto 4/4: absolutamente todo, de ambas tablas, coincida o no.', tipo: 'FULL' }
+        ];
+        const VENN = {
+            INNER: ['#f1f5f9', '#f1f5f9', '#fdba74'],
+            LEFT:  ['#93c5fd', '#f1f5f9', '#93c5fd'],
+            RIGHT: ['#f1f5f9', '#86efac', '#86efac'],
+            FULL:  ['#c4b5fd', '#c4b5fd', '#c4b5fd']
+        };
+        let retoJoin = 0;
+
+        function calcularJoin(tipo) {
+            const filas = [];
+            const conA = tipo === 'LEFT' || tipo === 'FULL';
+            const conB = tipo === 'RIGHT' || tipo === 'FULL';
+            TABLA_A.forEach(a => {
+                const b = TABLA_B.find(x => x.id === a.id);
+                if (b) filas.push({ 'A.id': a.id, valor_A: a.valor_A, 'B.id': b.id, valor_B: b.valor_B });
+                else if (conA) filas.push({ 'A.id': a.id, valor_A: a.valor_A, 'B.id': null, valor_B: null });
+            });
+            if (conB) TABLA_B.forEach(b => {
+                if (!TABLA_A.some(a => a.id === b.id)) filas.push({ 'A.id': null, valor_A: null, 'B.id': b.id, valor_B: b.valor_B });
+            });
+            return filas;
+        }
+
+        function pintarRetoJoin() {
+            document.getElementById('jx-reto').textContent = retoJoin < RETOS_JOIN.length ? RETOS_JOIN[retoJoin].txt : '🏁 ¡Retos completados! Sigue explorando cuando quieras.';
+        }
+
+        document.querySelectorAll('.jx-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const tipo = this.dataset.join;
+                const colores = VENN[tipo];
+                document.getElementById('venn-a').setAttribute('fill', colores[0]);
+                document.getElementById('venn-b').setAttribute('fill', colores[1]);
+                document.getElementById('venn-ab').setAttribute('fill', colores[2]);
+                document.getElementById('jx-sql').textContent = 'SELECT A.id, A.valor_A, B.id, B.valor_B FROM A ' + (tipo === 'FULL' ? 'FULL OUTER' : tipo) + ' JOIN B ON A.id = B.id;' +
+                    (tipo === 'FULL' ? '   -- ⚠️ en MySQL: LEFT JOIN ... UNION ... RIGHT JOIN' : '');
+                const filas = calcularJoin(tipo);
+                renderTabla('jx-out', ['A.id', 'valor_A', 'B.id', 'valor_B'], filas,
+                    r => (r.valor_A === null || r.valor_B === null) ? 'bg-yellow-50' : '');
+                const cont = document.querySelector('[data-mission="m3"]');
+                if (retoJoin >= RETOS_JOIN.length) return;
+                if (tipo === RETOS_JOIN[retoJoin].tipo) {
+                    retoJoin++;
+                    if (retoJoin === RETOS_JOIN.length) completeMission('m3', cont);
+                    else setFeedback(cont, '✅ ¡Exacto! ' + filas.length + ' filas. Siguiente reto 👇', true);
+                } else {
+                    setFeedback(cont, '🤔 Ese JOIN devuelve ' + filas.length + ' filas. Revisa el resultado: ¿cumple lo que pide el reto?', false);
+                }
+                pintarRetoJoin();
+            });
+        });
+        renderTabla('jx-a', ['id', 'valor_A'], TABLA_A);
+        renderTabla('jx-b', ['id', 'valor_B'], TABLA_B);
+        renderTabla('jx-out', ['A.id', 'valor_A', 'B.id', 'valor_B'], []);
+        pintarRetoJoin();
+
+        // ---- Misión 5: ensamblar la consulta integradora ----
+        const PIEZAS = [
+            'SELECT c.nombre AS curso, COUNT(m.id_estudiante) AS cantidad_estudiantes',
+            'FROM curso c',
+            'INNER JOIN matricula m ON c.id_curso = m.id_curso',
+            'GROUP BY c.nombre',
+            'HAVING COUNT(m.id_estudiante) > 2',
+            'ORDER BY cantidad_estudiantes DESC;'
+        ];
+        const PIEZAS_MEZCLA = [3, 5, 1, 4, 0, 2];
+        let piezaPos = 0;
+        document.getElementById('seq-m5').innerHTML = PIEZAS_MEZCLA.map(i =>
+            '<button type="button" class="seq-btn text-left font-mono text-xs sm:text-sm px-3 py-2 bg-white border-2 border-teal-200 rounded-lg hover:border-teal-500 transition" data-idx="' + i + '">' + PIEZAS[i] + '</button>').join('');
+        document.querySelectorAll('#seq-m5 .seq-btn').forEach(b => b.addEventListener('click', function () {
+            const cont = document.querySelector('[data-mission="m5"]');
+            if (parseInt(this.dataset.idx, 10) === piezaPos) {
+                this.disabled = true;
+                this.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                piezaPos++;
+                document.getElementById('seq-m5-out').textContent = PIEZAS.slice(0, piezaPos).join('\n');
+                if (piezaPos === PIEZAS.length) completeMission('m5', cont);
+                else setFeedback(cont, '¡Bien! ⭐ ¿Qué pieza sigue?', true);
+            } else {
+                setFeedback(cont, '❌ Esa pieza todavía no va. Recuerda: SELECT → FROM → JOIN → GROUP BY → HAVING → ORDER BY', false);
+                this.classList.add('bg-red-100');
+                setTimeout(() => this.classList.remove('bg-red-100'), 600);
+            }
+        }));
+
+        // ============================================
+        // GAMIFICACIÓN — Actividades
+        // ============================================
+        const TOTAL_ACT = 4;
+        const actState = { done: new Set() };
+        const ACT_FLAGS = { a1: false };
+
+        function normalizarSQL(t) {
+            return t.toLowerCase().replace(/\s+/g, ' ').replace(/\s*([,()<>=*;])\s*/g, '$1').trim();
+        }
+
+        // ---- Actividad 1: factura + detalle ----
+        const FACTURAS = [
+            { id_factura: 'F001', fecha: '2026-03-01', id_cliente: 'C001' },
+            { id_factura: 'F002', fecha: '2026-03-02', id_cliente: 'C002' },
+            { id_factura: 'F003', fecha: '2026-03-05', id_cliente: 'C001' }
+        ];
+        const DETALLES = [
+            { id_factura: 'F001', id_producto: 'P001', cantidad: 2, subtotal: 90000 },
+            { id_factura: 'F001', id_producto: 'P003', cantidad: 1, subtotal: 650000 },
+            { id_factura: 'F002', id_producto: 'P002', cantidad: 3, subtotal: 105000 },
+            { id_factura: 'F003', id_producto: 'P001', cantidad: 1, subtotal: 45000 },
+            { id_factura: 'F003', id_producto: 'P004', cantidad: 2, subtotal: 190000 }
+        ];
+        function probarA1() {
+            const izq = document.getElementById('a1-izq').value.split('.')[1];
+            const der = document.getElementById('a1-der').value.split('.')[1];
+            const filas = [];
+            FACTURAS.forEach(f => DETALLES.forEach(d => {
+                if (f[izq] === d[der]) filas.push({ id_factura: f.id_factura, fecha: f.fecha, id_producto: d.id_producto, cantidad: d.cantidad, subtotal: d.subtotal });
+            }));
+            renderTabla('a1-table', ['id_factura', 'fecha', 'id_producto', 'cantidad', 'subtotal'], filas);
+            const log = document.getElementById('a1-log');
+            ACT_FLAGS.a1 = izq === 'id_factura' && der === 'id_factura';
+            log.textContent = ACT_FLAGS.a1
+                ? 'mysql> ' + filas.length + ' rows in set ✅\n🧾 ¡Cada factura quedó unida a sus líneas de detalle!'
+                : 'mysql> ' + filas.length + ' rows in set ⚠️\n🤔 ¿Esas columnas representan la misma cosa? La FK de detalle_factura apunta a la PK de factura.';
+        }
+        renderTabla('a1-table', ['id_factura', 'fecha', 'id_producto', 'cantidad', 'subtotal'], []);
+
+        // ---- Actividades 2 y 3: verificadores de consultas ----
+        const REGLAS = {
+            a2: [
+                { et: 'JOIN', re: /\bjoin\b.+\bon\b/ },
+                { et: 'WHERE activo', re: /\bwhere\b.*activo/ },
+                { et: 'COUNT()', re: /count\(/ },
+                { et: 'GROUP BY', re: /\bgroup by\b/ },
+                { et: 'ORDER BY … DESC', re: /\border by\b.*\bdesc\b/ }
+            ],
+            a3: [
+                { et: 'INNER JOIN', re: /\bjoin\b.+\bon\b/ },
+                { et: 'AVG()', re: /avg\(/ },
+                { et: 'GROUP BY', re: /\bgroup by\b/ },
+                { et: 'HAVING AVG > 100000', re: /\bhaving\b.*avg\(.*\)>100000/ },
+                { et: 'ORDER BY … DESC', re: /\border by\b.*\bdesc\b/ }
+            ]
+        };
+        function evaluarReglas(id) {
+            const q = normalizarSQL(document.getElementById(id.replace('a', 'act') + '-text').value);
+            return REGLAS[id].map(r => ({ et: r.et, ok: r.re.test(q) }));
+        }
+        function pintarChipsReglas(id) {
+            document.getElementById(id + '-chips').innerHTML = evaluarReglas(id).map(r =>
+                '<span class="px-2 py-1 rounded-full border ' + (r.ok ? 'bg-green-500 text-white border-green-500' : 'bg-slate-100 text-slate-400 border-slate-200') + '">' + (r.ok ? '✔ ' : '') + r.et + '</span>').join('');
+        }
+        ['a2', 'a3'].forEach(id => {
+            document.getElementById(id.replace('a', 'act') + '-text').addEventListener('input', () => pintarChipsReglas(id));
+            pintarChipsReglas(id);
+        });
+
+        // ---- Actividad 4: elige el JOIN ----
+        document.querySelectorAll('.a4-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const card = this.closest('[data-a4]');
+                if (card.dataset.solved === 'true') return;
+                const hint = document.getElementById('a4-hint');
+                if (this.dataset.correct === 'true') {
+                    card.dataset.solved = 'true';
+                    this.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                    card.querySelectorAll('.a4-opt').forEach(b => { b.disabled = true; if (b !== this) b.classList.add('opacity-50'); });
+                    card.querySelector('.a4-exp').classList.remove('hidden');
+                    const n = document.querySelectorAll('[data-a4][data-solved="true"]').length;
+                    hint.textContent = n === 4 ? '🧭 ¡Las 4 necesidades resueltas!' : '¡Bien! ⭐ ' + n + '/4';
+                    hint.className = 'text-sm font-bold mt-3 text-green-700';
+                } else {
+                    this.disabled = true;
+                    this.classList.add('bg-red-100', 'border-red-300', 'opacity-60');
+                    hint.textContent = '🤔 Pregúntate: ¿hay filas que deban aparecer aunque no tengan pareja?';
+                    hint.className = 'text-sm font-bold mt-3 text-red-500';
+                }
+            });
+        });
+
+        function completarActividad(id, btn) {
+            if (actState.done.has(id)) return;
+            const container = document.querySelector('[data-act="' + id + '"]');
+            const feedback = container.querySelector('.act-feedback');
+            let ok = false, msg = '';
+            if (id === 'a1') {
+                ok = ACT_FLAGS.a1;
+                msg = 'Primero pulsa 🧪 Probar con la condición ON correcta.';
+            } else if (id === 'a2' || id === 'a3') {
+                const faltan = evaluarReglas(id).filter(r => !r.ok).map(r => r.et);
+                ok = faltan.length === 0;
+                msg = 'A tu consulta le falta: ' + faltan.join(', ') + '.';
+            } else if (id === 'a4') {
+                ok = document.querySelectorAll('[data-a4][data-solved="true"]').length === 4;
+                msg = 'Resuelve las 4 necesidades de negocio 🧭';
+            }
+            if (!ok) {
+                feedback.textContent = '⚠️ ' + msg;
+                feedback.className = 'act-feedback mt-3 text-sm font-bold text-red-500';
+                return;
+            }
+            actState.done.add(id);
+            document.getElementById('act-points').textContent = actState.done.size;
+            document.getElementById('act-progress').style.width = Math.round((actState.done.size / TOTAL_ACT) * 100) + '%';
+            feedback.textContent = actState.done.size === TOTAL_ACT
+                ? '🏆 ¡4/4! Terminaste el proyecto final: ya eres ARQUITECTO DE DATOS 🎓'
+                : '🎉 ¡Misión cumplida! ' + actState.done.size + '/' + TOTAL_ACT + ' actividades completadas';
+            feedback.className = 'act-feedback mt-3 text-sm font-bold text-green-700';
+            if (actState.done.size === TOTAL_ACT) document.getElementById('act-badge').classList.remove('hidden');
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+        }
+
+        // ---- Soluciones desplegables ----
+        function toggleSolucion(id, btn) {
+            const el = document.getElementById(id);
+            const nowVisible = !el.classList.toggle('hidden');
+            if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+            btn.textContent = nowVisible ? '🙈 Ocultar' : btn.dataset.label;
+        }
+
+        // ---- Modal de imagen ----
+        function openImgModal(src) {
+            document.getElementById('img-modal-src').src = src;
+            document.getElementById('img-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeImgModal() {
+            document.getElementById('img-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

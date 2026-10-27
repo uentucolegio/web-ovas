@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: DDL: CREATE, ALTER y DROP</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .content-pane img[onclick^="openImgModal"] {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 1024px) {
+            .content-pane img[onclick^="openImgModal"] { width: 75%; }
+        }
+        .sql-code {
+            background-color: #0f172a;
+            color: #bbf7d0;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .sql-code .kw { color: #7dd3fc; font-weight: 600; }
+        .sql-code .cm { color: #94a3b8; font-style: italic; }
+        .sim-btn { font-family: Consolas, 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Del diagrama a la base de datos real 🏗️</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Hasta ahora todo tu diseño —entidades, tablas, claves y relaciones— vive solo en el papel o en un diagrama. 📝 ¡Llegó el momento de <strong>darle vida</strong>! Vamos a materializarlo dentro de un <strong>SGBD</strong> (Sistema de Gestión de Bases de Datos) usando el idioma que estos sistemas entienden: <strong>SQL</strong> (<em>Structured Query Language</em>). 💬
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    SQL es el lenguaje estándar que usan prácticamente todos los SGBD relacionales: <strong>MySQL, PostgreSQL, SQL Server, Oracle, SQLite</strong> y muchos más. 🌍 Cada motor tiene pequeñas variaciones en su sintaxis (llamadas <strong>dialectos</strong>), pero el núcleo del lenguaje es casi idéntico en todos gracias a los estándares <strong>ISO/IEC</strong>. SQL se divide en subconjuntos según lo que hace cada instrucción: el <strong>DDL</strong> (<em>Data Definition Language</em>), que estudiarás en este tema, se encarga de <strong>definir y modificar la estructura</strong> de la base de datos (tablas, columnas y restricciones), mientras que el <strong>DML</strong> (<em>Data Manipulation Language</em>) trabaja con los datos que viven dentro de esa estructura. 🧱
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este tema vas a <strong>crear, modificar y eliminar</strong> tablas con SQL como lo hace un desarrollador de verdad, sabiendo exactamente qué instrucción usar… y cuál nunca ejecutar a la ligera. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span><strong>Reconocer</strong> el lenguaje de definición de datos (DDL) como el subconjunto de SQL responsable de crear y modificar la estructura de una base de datos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🏗️</span>
+                        <span><strong>Implementar</strong> en SQL, mediante la instrucción CREATE TABLE, el esquema relacional diseñado durante la Unidad 2, incluyendo tipos de datos, claves y restricciones.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🛠️</span>
+                        <span><strong>Modificar</strong> la estructura de tablas existentes utilizando la instrucción ALTER TABLE, sin perder la información ya almacenada.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">💣</span>
+                        <span><strong>Aplicar</strong> correctamente la instrucción DROP para eliminar objetos de la base de datos, reconociendo los riesgos asociados a su uso.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- PANEL DE GAMIFICACIÓN DEL CONTENIDO -->
+                    <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Contenido 📚</h2>
+                    <div class="mb-6 p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🎮 Ruta del Constructor SQL</p>
+                            <p class="font-bold text-green-700 text-lg">⭐ <span id="game-points">0</span> XP</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div id="game-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-2">Abre cada acordeón y completa las 5 misiones para ganar tu insignia 🏆</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span id="badge-m1" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🗂️ Clasificador SQL</span>
+                            <span id="badge-m2" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🏗️ Arquitecto de tablas</span>
+                            <span id="badge-m3" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🔗 Guardián de relaciones</span>
+                            <span id="badge-m4" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🛠️ Remodelador</span>
+                            <span id="badge-m5" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">💣 Desactivador de bombas</span>
+                        </div>
+                        <p id="badge-final" class="hidden mt-4 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡INSIGNIA DESBLOQUEADA: MAESTRO DEL DDL! 🎉 Completaste las 5 misiones del contenido.</p>
+                    </div>
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🗣️ 1. SQL: un idioma con varias "familias"</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">SQL nació en los años 70 en IBM con el nombre de <strong>SEQUEL</strong> y hoy es uno de los lenguajes más usados del planeta. 🌎 Piensa en una base de datos como un <strong>supermercado</strong>: alguien construye las estanterías, alguien acomoda los productos, alguien los busca y alguien decide quién puede entrar a la bodega. En SQL, cada uno de esos trabajos tiene su propia familia de instrucciones: 👇</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                                    <div class="p-3 bg-green-50 border-2 border-green-400 rounded-lg">
+                                        <p class="font-bold text-green-800">🏗️ DDL — Definición</p>
+                                        <p class="text-sm">Construye y remodela las estanterías: la <strong>estructura</strong>.</p>
+                                        <p class="text-xs font-mono text-green-700 mt-1">CREATE · ALTER · DROP · TRUNCATE</p>
+                                    </div>
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <p class="font-bold text-blue-800">📦 DML — Manipulación</p>
+                                        <p class="text-sm">Pone, cambia o saca productos: los <strong>datos</strong>.</p>
+                                        <p class="text-xs font-mono text-blue-700 mt-1">INSERT · UPDATE · DELETE</p>
+                                    </div>
+                                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                                        <p class="font-bold text-purple-800">🔍 DQL — Consulta</p>
+                                        <p class="text-sm">Busca y muestra lo que hay en las estanterías.</p>
+                                        <p class="text-xs font-mono text-purple-700 mt-1">SELECT</p>
+                                    </div>
+                                    <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                        <p class="font-bold text-orange-800">🔐 DCL — Control</p>
+                                        <p class="text-sm">Decide quién puede entrar y qué puede tocar.</p>
+                                        <p class="text-xs font-mono text-orange-700 mt-1">GRANT · REVOKE</p>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                                        <p class="font-bold text-slate-800">🔄 TCL — Transacciones</p>
+                                        <p class="text-sm">Confirma o deshace un grupo de cambios.</p>
+                                        <p class="text-xs font-mono text-slate-600 mt-1">COMMIT · ROLLBACK</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-yellow-900">🐬 <strong>Dato clave:</strong> los ejemplos de este tema usan la sintaxis de <strong>MySQL</strong>. Si trabajas con PostgreSQL o SQL Server, la idea es la misma, pero algunas palabras cambian. ¡Siempre revisa la documentación oficial de tu motor! 📖</p>
+                                </div>
+
+                                <!-- MISIÓN 1 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m1">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 1: Clasifica la instrucción</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+20 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">¿A qué familia pertenece cada instrucción? Si fallas, intenta otra vez. 💪</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono">1️⃣ CREATE TABLE cliente (...);</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🏗️ DDL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">📦 DML</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🔍 DQL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono">2️⃣ SELECT nombre FROM cliente;</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🏗️ DDL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">📦 DML</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🔍 DQL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono">3️⃣ INSERT INTO cliente VALUES (...);</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🏗️ DDL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">📦 DML</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🔐 DCL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono">4️⃣ ALTER TABLE cliente ADD COLUMN telefono VARCHAR(15);</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">📦 DML</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🏗️ DDL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🔄 TCL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="5">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono">5️⃣ GRANT SELECT ON cliente TO invitado;</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🔐 DCL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🔍 DQL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🏗️ DDL</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🏗️ 2. CREATE: creando bases de datos y tablas</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <h4 class="font-bold text-green-800 text-lg mb-2">🗄️ Paso 1: la casa de tus tablas</h4>
+                                <p class="mb-3">Antes de crear cualquier tabla necesitas una <strong>base de datos</strong> donde vivirá. Se crea con <code class="bg-slate-100 px-1 rounded">CREATE DATABASE</code> y se selecciona con <code class="bg-slate-100 px-1 rounded">USE</code>:</p>
+<pre class="sql-code mb-3"><span class="kw">CREATE DATABASE</span> universidad;
+<span class="kw">USE</span> universidad;   <span class="cm">-- a partir de aquí todo se crea dentro de "universidad"</span></pre>
+                                <div class="mb-6">
+                                    <img src="img/Crear una Base de Datos en SQL.png" alt="Infografía: crear una base de datos en SQL con CREATE DATABASE y USE" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <h4 class="font-bold text-green-800 text-lg mb-2">📐 Paso 2: el plano de la tabla</h4>
+                                <p class="mb-3"><code class="bg-slate-100 px-1 rounded">CREATE TABLE</code> define cada columna con tres cosas: <strong>nombre</strong>, <strong>tipo de dato</strong> (¡que es el <strong>dominio</strong> que ya conoces! 🎯) y <strong>restricciones</strong>. Toda tu Unidad 2 cabe en estas líneas:</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía educativa_ CREATE TABLE en SQL.png" alt="Infografía: CREATE TABLE estudiante con tipos de datos y restricciones" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <p class="font-semibold text-green-800 mb-2">🧰 Tu caja de restricciones (toca cada una para ver qué hace):</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+                                    <button type="button" class="constraint-card p-3 bg-yellow-50 border-2 border-yellow-200 rounded-lg text-sm font-bold text-yellow-800 hover:border-yellow-400 transition" data-info="🔑 PRIMARY KEY: identifica cada fila de forma única. No se repite y nunca puede quedar vacía. Ej: id_estudiante.">🔑 PRIMARY KEY</button>
+                                    <button type="button" class="constraint-card p-3 bg-red-50 border-2 border-red-200 rounded-lg text-sm font-bold text-red-800 hover:border-red-400 transition" data-info="🚫 NOT NULL: la columna es obligatoria. Si intentas guardar una fila sin ese dato, el SGBD la rechaza. Ej: nombre.">🚫 NOT NULL</button>
+                                    <button type="button" class="constraint-card p-3 bg-purple-50 border-2 border-purple-200 rounded-lg text-sm font-bold text-purple-800 hover:border-purple-400 transition" data-info="🛡️ UNIQUE: no permite valores repetidos en esa columna, pero no la convierte en clave primaria. Ej: dos estudiantes no pueden tener el mismo correo.">🛡️ UNIQUE</button>
+                                    <button type="button" class="constraint-card p-3 bg-green-50 border-2 border-green-200 rounded-lg text-sm font-bold text-green-800 hover:border-green-400 transition" data-info="⚙️ DEFAULT: valor que se pone solo si no envías ninguno. Ej: activo BOOLEAN DEFAULT TRUE → todo estudiante nuevo arranca activo.">⚙️ DEFAULT</button>
+                                    <button type="button" class="constraint-card p-3 bg-teal-50 border-2 border-teal-200 rounded-lg text-sm font-bold text-teal-800 hover:border-teal-400 transition" data-info="🔢 AUTO_INCREMENT (MySQL): el motor numera solo las filas: 1, 2, 3... En PostgreSQL se logra con GENERATED ALWAYS AS IDENTITY o SERIAL.">🔢 AUTO_INCREMENT</button>
+                                    <button type="button" class="constraint-card p-3 bg-blue-50 border-2 border-blue-200 rounded-lg text-sm font-bold text-blue-800 hover:border-blue-400 transition" data-info="✅ CHECK: una regla que cada valor debe cumplir. Ej: CHECK (precio >= 0) evita precios negativos. MySQL la aplica de verdad desde la versión 8.0.16.">✅ CHECK</button>
+                                </div>
+                                <p id="constraint-info" class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm mb-6">👆 Elige una restricción…</p>
+
+                                <h4 class="font-bold text-green-800 text-lg mb-2">💸 ¿Por qué el dinero va en DECIMAL y no en FLOAT?</h4>
+                                <p class="mb-3">Los tipos <code class="bg-slate-100 px-1 rounded">FLOAT</code> y <code class="bg-slate-100 px-1 rounded">DOUBLE</code> guardan números <em>aproximados</em>: para el computador, <strong>0.1 + 0.2</strong> da <strong>0.30000000000000004</strong> 😱. Con plata eso es inaceptable. <code class="bg-slate-100 px-1 rounded">DECIMAL(10,2)</code> guarda el valor <strong>exacto</strong>: hasta 10 dígitos, 2 de ellos decimales.</p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-600 text-white">
+                                                <th class="p-2 text-left rounded-tl-lg">Tipo</th>
+                                                <th class="p-2 text-left">Guarda…</th>
+                                                <th class="p-2 text-left rounded-tr-lg">Ejemplo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono font-semibold">INT</td><td class="p-2">Enteros</td><td class="p-2">stock = 25</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-mono font-semibold">DECIMAL(p,s)</td><td class="p-2">Números exactos con decimales</td><td class="p-2">precio = 49900.00</td></tr>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono font-semibold">VARCHAR(n)</td><td class="p-2">Texto de largo variable (máx. n)</td><td class="p-2">nombre = 'Laura'</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-mono font-semibold">CHAR(n)</td><td class="p-2">Texto de largo fijo</td><td class="p-2">codigo = 'P001'</td></tr>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono font-semibold">DATE</td><td class="p-2">Fechas</td><td class="p-2">'2008-05-14'</td></tr>
+                                            <tr class="bg-green-50"><td class="p-2 font-mono font-semibold">BOOLEAN</td><td class="p-2">Verdadero / falso</td><td class="p-2">activo = TRUE</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- MISIÓN 2 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m2">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 2: Elige el tipo de dato perfecto</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Estás creando la tabla <strong>producto</strong> de una tienda online. ¿Qué tipo le pones a cada columna? 🛒</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">💰 precio</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">FLOAT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">DECIMAL(10,2)</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">VARCHAR(10)</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">📦 stock</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">INT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">BOOLEAN</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">📅 fecha_ingreso</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">VARCHAR(20)</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">INT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">DATE</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2">✅ disponible (sí / no)</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">BOOLEAN DEFAULT TRUE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DECIMAL(1,0)</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">VARCHAR(2)</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO: entidad PRODUCTO -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto rápido: de la entidad al código</p>
+                                    <p class="text-sm mb-3">Toma la entidad <strong>PRODUCTO</strong> (código, nombre, precio y stock, con su clave primaria). Escribe en tu cuaderno su <code class="bg-white px-1 rounded">CREATE TABLE</code> con tipos de datos y al menos dos restricciones. ¿Listo? Compara tu respuesta 👇</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-producto', this)">👀 Ver solución</button>
+                                    <div id="sol-producto" class="hidden mt-4">
+                                        <img src="img/De la entidad al código SQL.png" alt="Infografía: de la entidad PRODUCTO a su instrucción CREATE TABLE" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: Crear bases de datos y tablas en MySQL con CREATE TABLE
+                                     Buscar: "CREATE TABLE MySQL tipos de datos y restricciones tutorial en español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">✅ Disponible</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: crea tu primera tabla en MySQL paso a paso</p>                                    
+                                    <p class="text-green-800 font-semibold mb-1">🎬 Cómo Crear una Base de Datos y Tablas con MySQL Workbench - Paso a Paso"</p>
+                                        <a href="https://www.youtube.com/watch?v=gTrq_r8Kb6Y" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm cursor-not-allowed">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <!-- <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: (pega aquí la URL) y ponle el título: (escribe aquí el título)."
+                                        </div>
+                                    </div> -->
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>🔗 3. Tablas con clave foránea</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-3">Una clave foránea se declara <strong>dentro del mismo CREATE TABLE</strong> con <code class="bg-slate-100 px-1 rounded">FOREIGN KEY ... REFERENCES</code>. Y aquí va la regla de oro: ⚠️ <strong>la tabla "mamá" (la referenciada) debe existir antes</strong> que la tabla que la referencia. Es como inscribirte a un curso: primero tienen que existir tú y el curso. 🎓</p>
+<pre class="sql-code mb-3"><span class="kw">CREATE TABLE</span> matricula (
+    id_estudiante <span class="kw">INT NOT NULL</span>,
+    id_curso      <span class="kw">INT NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (id_estudiante, id_curso),   <span class="cm">-- clave primaria compuesta</span>
+    <span class="kw">FOREIGN KEY</span> (id_estudiante) <span class="kw">REFERENCES</span> estudiante(id_estudiante)
+        <span class="kw">ON DELETE CASCADE</span>,
+    <span class="kw">FOREIGN KEY</span> (id_curso) <span class="kw">REFERENCES</span> curso(id_curso)
+        <span class="kw">ON DELETE RESTRICT</span>
+);</pre>
+                                <div class="mb-6">
+                                    <img src="img/Infografía SQL_ Claves foráneas y relaciones.png" alt="Infografía: CREATE TABLE matricula con claves foráneas hacia estudiante y curso" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <h4 class="font-bold text-green-800 text-lg mb-2">🚦 ¿Qué pasa si borran a la "mamá"? Las políticas ON DELETE / ON UPDATE</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg"><p class="font-bold text-green-800 font-mono">CASCADE 🌊</p><p class="text-sm">Borras al estudiante y se borran sus matrículas. El cambio "cae en cascada".</p></div>
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg"><p class="font-bold text-red-800 font-mono">RESTRICT ⛔</p><p class="text-sm">No te deja borrar el curso mientras tenga estudiantes inscritos.</p></div>
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-bold text-blue-800 font-mono">SET NULL 🕳️</p><p class="text-sm">Borras el departamento y el empleado queda "sin departamento" (NULL).</p></div>
+                                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg"><p class="font-bold text-purple-800 font-mono">SET DEFAULT ⚙️</p><p class="text-sm">Pone el valor por defecto de la columna. 👀 Ojo: MySQL (InnoDB) lo reconoce pero <strong>no lo permite</strong>; PostgreSQL sí.</p></div>
+                                </div>
+
+                                <!-- MISIÓN 3 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m3">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 3: Guardián de relaciones</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Decide el orden y la política correcta en cada caso. 🧠</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">1️⃣ Vas a crear <strong>categoria</strong> y <strong>producto</strong> (producto tiene FK a categoría). ¿Cuál creas primero?</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🛒 producto</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🏷️ categoria</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🤷 Da igual</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">2️⃣ La tienda NO quiere que se borre una categoría si todavía tiene productos.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ON DELETE CASCADE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ON DELETE SET NULL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">ON DELETE RESTRICT</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">3️⃣ Si un usuario elimina su cuenta, sus comentarios también deben desaparecer.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">ON DELETE CASCADE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ON DELETE RESTRICT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ON DELETE SET NULL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2">4️⃣ Si se cierra un departamento, sus empleados siguen en la empresa pero sin departamento asignado.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ON DELETE CASCADE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">ON DELETE SET NULL</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ON DELETE RESTRICT</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO: categoria / producto -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto en parejas: categoría y producto</p>
+                                    <p class="text-sm mb-3">Escriban, en el orden correcto, el <code class="bg-white px-1 rounded">CREATE TABLE</code> de <strong>categoria(id_categoria, nombre)</strong> y <strong>producto(id_producto, nombre, precio, id_categoria)</strong>, con una política que impida borrar una categoría que tenga productos. 👫</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-categoria', this)">👀 Ver solución</button>
+                                    <div id="sol-categoria" class="hidden mt-4">
+                                        <img src="img/Infografía SQL_ Crear tablas con clave foránea.png" alt="Infografía: CREATE TABLE categoria y producto con clave foránea y ON DELETE RESTRICT" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🛠️ 4. ALTER: remodelando una tabla que ya existe</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-3">Los requerimientos cambian todo el tiempo 🔄: hoy piden el teléfono del estudiante, mañana una regla nueva. <code class="bg-slate-100 px-1 rounded">ALTER TABLE</code> permite <strong>agregar, modificar o eliminar</strong> columnas y restricciones de una tabla que ya existe… ¡incluso con datos adentro! Pero ojo 👀: antes de cada cambio hay que revisar que sea <strong>compatible con los registros guardados</strong>, o podrías perder información o romper la integridad.</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía educativa sobre ALTER TABLE en SQL.png" alt="Infografía: operaciones comunes de ALTER TABLE" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <h4 class="font-bold text-green-800 text-lg mb-2">🌐 Mismo objetivo, distinto dialecto</h4>
+                                <p class="mb-2 text-sm">Hacer obligatoria la columna <strong>nombre</strong> en cada motor:</p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-600 text-white">
+                                                <th class="p-2 text-left rounded-tl-lg">Motor</th>
+                                                <th class="p-2 text-left rounded-tr-lg">Instrucción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-semibold">🐬 MySQL</td><td class="p-2 font-mono text-xs">ALTER TABLE curso MODIFY COLUMN nombre VARCHAR(100) NOT NULL;</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-semibold">🐘 PostgreSQL</td><td class="p-2 font-mono text-xs">ALTER TABLE curso ALTER COLUMN nombre SET NOT NULL;</td></tr>
+                                            <tr class="bg-white"><td class="p-2 font-semibold">🪟 SQL Server</td><td class="p-2 font-mono text-xs">ALTER TABLE curso ALTER COLUMN nombre VARCHAR(100) NOT NULL;</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- MISIÓN 4: simulador ALTER -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m4">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 4: Simulador de remodelación</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+40 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">El coordinador pide dos cambios en la tabla <strong>curso</strong>, que ya tiene datos: ① agregar <strong>intensidad_horaria</strong> y ② que <strong>nombre</strong> sea obligatorio. Ejecuta las instrucciones y mira qué le pasa a la tabla. 🔬</p>
+                                    <div class="flex flex-wrap gap-2 mb-2 text-xs font-semibold">
+                                        <span id="m4-step-add" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">① Columna agregada</span>
+                                        <span id="m4-step-error" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">② Descubre el problema</span>
+                                        <span id="m4-step-notnull" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">③ nombre obligatorio</span>
+                                    </div>
+                                    <div class="overflow-x-auto mb-3 bg-white rounded-lg border border-teal-200">
+                                        <table class="w-full text-sm border-collapse" id="sim-table"></table>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-2 mb-3">
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-teal-200 hover:border-teal-500 rounded-lg px-3 py-2 transition" data-sim="add">▶ ALTER TABLE curso ADD COLUMN intensidad_horaria INT NULL;</button>
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-teal-200 hover:border-teal-500 rounded-lg px-3 py-2 transition" data-sim="notnull">▶ ALTER TABLE curso MODIFY COLUMN nombre VARCHAR(100) NOT NULL;</button>
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-yellow-300 hover:border-yellow-500 rounded-lg px-3 py-2 transition" data-sim="fix">🩹 UPDATE curso SET nombre = 'Redes' WHERE id_curso = 3; <span class="font-sans text-slate-500">(spoiler del próximo tema)</span></button>
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-red-200 hover:border-red-400 rounded-lg px-3 py-2 transition" data-sim="dropcol">▶ ALTER TABLE curso DROP COLUMN intensidad_horaria;</button>
+                                        <button type="button" class="text-left text-xs bg-slate-100 hover:bg-slate-200 rounded-lg px-3 py-2 transition text-slate-600 font-semibold" data-sim="reset">↺ Reiniciar tabla</button>
+                                    </div>
+                                    <div id="sim-log" class="sql-code text-xs" style="min-height:3rem;white-space:pre-wrap;">mysql&gt; _</div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO: curso -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto: lo que acabas de simular, en papel</p>
+                                    <p class="text-sm mb-3">Escribe las dos instrucciones <code class="bg-white px-1 rounded">ALTER TABLE</code> que cumplen el pedido del coordinador sin perder información, y compáralas con la solución.</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-curso', this)">👀 Ver solución</button>
+                                    <div id="sol-curso" class="hidden mt-4">
+                                        <img src="img/Inforgrafia - ALTER TABLE en una tabla existente.png" alt="Infografía: ALTER TABLE sobre la tabla curso antes y después" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-2"
+                                     Tema: ALTER TABLE en MySQL (agregar, modificar y eliminar columnas)
+                                     Buscar: "ALTER TABLE MySQL ADD MODIFY DROP COLUMN explicación en español"
+                                     Activado por el docente: https://www.youtube.com/watch?v=SOUinlTzpjM
+                                -->
+                                <div id="recurso-ext-2" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">✅ Disponible</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Curso MySql 03 - CREATE DROP ALTER TABLE</p>
+                                    <p class="text-slate-600 text-sm mb-4">🎬 Repasa en video cómo crear, modificar y eliminar tablas en MySQL.</p>
+                                    <a href="https://www.youtube.com/watch?v=SOUinlTzpjM" target="_blank" rel="noopener noreferrer"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>💣 5. DROP y TRUNCATE: el botón rojo de SQL</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-3"><code class="bg-slate-100 px-1 rounded">DROP</code> elimina un objeto <strong>completo</strong>: una tabla, una base de datos o una restricción, con <strong>estructura y datos</strong>. Es como demoler la estantería con todo lo que tenía encima. 🧨 Por eso es una de las instrucciones más peligrosas de SQL: muchas empresas solo dejan usarla al <strong>administrador de la base de datos (DBA)</strong> y siempre con una copia de seguridad reciente.</p>
+                                <div class="mb-4">
+                                    <img src="img/DELETE vs DROP_ Guía visual de precauciones.png" alt="Infografía: diferencias y precauciones entre DELETE y DROP" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <h4 class="font-bold text-green-800 text-lg mb-2">🥊 DELETE vs TRUNCATE vs DROP</h4>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-600 text-white">
+                                                <th class="p-2 text-left rounded-tl-lg"></th>
+                                                <th class="p-2 text-center">DELETE</th>
+                                                <th class="p-2 text-center">TRUNCATE</th>
+                                                <th class="p-2 text-center rounded-tr-lg">DROP TABLE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-semibold">Familia</td><td class="p-2 text-center">DML</td><td class="p-2 text-center">DDL</td><td class="p-2 text-center">DDL</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-semibold">¿Borra filas?</td><td class="p-2 text-center">✅ (todas o con WHERE)</td><td class="p-2 text-center">✅ todas</td><td class="p-2 text-center">✅ todas</td></tr>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-semibold">¿Conserva la tabla?</td><td class="p-2 text-center">✅</td><td class="p-2 text-center">✅</td><td class="p-2 text-center">❌</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-semibold">¿Admite WHERE?</td><td class="p-2 text-center">✅</td><td class="p-2 text-center">❌</td><td class="p-2 text-center">❌</td></tr>
+                                            <tr class="bg-white"><td class="p-2 font-semibold">¿Se puede deshacer?</td><td class="p-2 text-center">Con ROLLBACK, dentro de una transacción</td><td class="p-2 text-center" colspan="2">Depende del motor: PostgreSQL sí permite ROLLBACK en una transacción; MySQL hace un <em>commit</em> implícito y no</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-red-900">📰 <strong>Historia real:</strong> en enero de 2017, en GitLab un ingeniero ejecutó un comando de borrado en el servidor de base de datos de <strong>producción</strong> creyendo que estaba en otro servidor. Se perdieron unas <strong>6 horas de datos</strong> de usuarios… y descubrieron que varias de sus copias de seguridad no funcionaban. 😬 Moraleja: revisa <em>dónde</em> estás antes de borrar y prueba tus respaldos.</p>
+                                </div>
+
+                                <p class="font-semibold text-green-800 mb-2">🛡️ Protocolo antes de un DROP (marca cada paso):</p>
+                                <div class="p-3 bg-white border border-slate-200 rounded-lg mb-2 space-y-2 text-sm" id="drop-protocol">
+                                    <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" class="drop-check mt-1"> Verifiqué que estoy en el servidor de <strong>pruebas</strong>, no en producción. 🖥️</label>
+                                    <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" class="drop-check mt-1"> Revisé el nombre exacto de la tabla o base de datos. 🔤</label>
+                                    <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" class="drop-check mt-1"> Tengo una copia de seguridad reciente (y sé restaurarla). 💾</label>
+                                    <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" class="drop-check mt-1"> Uso <code class="bg-slate-100 px-1 rounded">IF EXISTS</code> para evitar errores si la tabla ya no está. ✅</label>
+                                </div>
+                                <button type="button" id="drop-btn" class="bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-lg transition opacity-50 cursor-not-allowed" disabled>💣 DROP TABLE IF EXISTS log_errores;</button>
+                                <p id="drop-msg" class="text-sm font-bold mt-2 mb-6"></p>
+
+                                <!-- MISIÓN 5 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m5">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 5: ¿Qué instrucción usarías?</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Para cada necesidad elige CREATE, ALTER, DROP o TRUNCATE. Al completarla se desbloquea la guía visual. 🔓</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">1️⃣ Eliminar por completo la tabla <strong>log_errores</strong>, que ya no se usa.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">TRUNCATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">DROP</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ALTER</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">2️⃣ Agregar la columna <strong>descuento</strong> a la tabla producto.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">ALTER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">CREATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DROP</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">3️⃣ Vaciar <strong>sesiones_temporales</strong> pero conservar la tabla para seguir usándola.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DROP</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ALTER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">TRUNCATE</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2">4️⃣ Crear la tabla <strong>proveedor</strong> por primera vez.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ALTER</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">CREATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">TRUNCATE</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                    <div id="m5-reward" class="hidden mt-4">
+                                        <p class="text-sm font-bold text-green-700 mb-2">🔓 ¡Guía desbloqueada! Así se escribe cada caso:</p>
+                                        <img src="img/Guía práctica de instrucciones SQL.png" alt="Infografía: elegir la instrucción SQL adecuada (DROP, ALTER, TRUNCATE, CREATE)" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 Copia el bloque de actividad las veces que necesites
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Panel de progreso de actividades -->
+                    <div class="p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🏗️ Obra en construcción: de la idea a las tablas</p>
+                            <p class="font-bold text-green-700">🎖️ <span id="act-points">0</span>/3 misiones</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-2">
+                            <div id="act-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500">Primero el plano, luego las piezas y al final el edificio completo. ¡Completa las 3 misiones y gana el rango de <strong>Constructor de Esquemas</strong>! 👷</p>
+                        <p id="act-badge" class="hidden mt-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡RANGO DESBLOQUEADO: CONSTRUCTOR DE ESQUEMAS! 👷 Tu base de datos ya tiene cimientos sólidos.</p>
+                    </div>
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">📋 Misión 1: El plano — DDL vs DML vs DQL</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Elabora un <strong>cuadro comparativo</strong> entre los lenguajes <strong>DDL</strong>, <strong>DML</strong> y <strong>DQL</strong>. Para cada uno escribe qué hace, sus instrucciones principales y un ejemplo de una línea en SQL. ✍️
+                        </p>
+                        <div class="overflow-x-auto mb-3">
+                            <table class="w-full text-sm border-collapse" style="min-width:560px">
+                                <thead><tr class="bg-green-600 text-white"><th class="p-2 text-left rounded-tl-lg w-1/5">Criterio</th><th class="p-2 text-left">🏗️ DDL</th><th class="p-2 text-left">✏️ DML</th><th class="p-2 text-left rounded-tr-lg">🔎 DQL</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-green-100"><td class="p-2 font-semibold">¿Qué hace?</td><td class="p-1"><textarea class="a1-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="3" data-col="ddl" data-row="que"></textarea></td><td class="p-1"><textarea class="a1-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="3" data-col="dml" data-row="que"></textarea></td><td class="p-1"><textarea class="a1-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="3" data-col="dql" data-row="que"></textarea></td></tr>
+                                    <tr class="border-b border-green-100"><td class="p-2 font-semibold">Instrucciones principales</td><td class="p-1"><textarea class="a1-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2" data-col="ddl" data-row="inst"></textarea></td><td class="p-1"><textarea class="a1-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2" data-col="dml" data-row="inst"></textarea></td><td class="p-1"><textarea class="a1-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2" data-col="dql" data-row="inst"></textarea></td></tr>
+                                    <tr><td class="p-2 font-semibold">Ejemplo en SQL</td><td class="p-1"><textarea class="a1-cell sql-input w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none font-mono" rows="2" data-col="ddl" data-row="ej"></textarea></td><td class="p-1"><textarea class="a1-cell sql-input w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none font-mono" rows="2" data-col="dml" data-row="ej"></textarea></td><td class="p-1"><textarea class="a1-cell sql-input w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none font-mono" rows="2" data-col="dql" data-row="ej"></textarea></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-2">💡 Las celdas se pintan de verde cuando la instrucción o el ejemplo corresponden al lenguaje de su columna.</p>
+                        <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a1', this)">🚀 Completar misión</button>
+                        <button type="button" class="ml-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-a1', this)">👀 Ver cuadro modelo</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div id="sol-a1" class="hidden mt-3 overflow-x-auto">
+                            <table class="w-full text-xs border-collapse bg-slate-50 rounded-lg" style="min-width:560px">
+                                <thead><tr class="bg-slate-200"><th class="p-2 text-left">Criterio</th><th class="p-2 text-left">DDL</th><th class="p-2 text-left">DML</th><th class="p-2 text-left">DQL</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-slate-200"><td class="p-2 font-semibold">¿Qué hace?</td><td class="p-2">Define y modifica la <strong>estructura</strong>: bases de datos, tablas, columnas y restricciones.</td><td class="p-2">Gestiona los <strong>datos</strong>: agrega, cambia o elimina filas.</td><td class="p-2"><strong>Consulta</strong> los datos sin modificarlos.</td></tr>
+                                    <tr class="border-b border-slate-200"><td class="p-2 font-semibold">Instrucciones</td><td class="p-2 font-mono">CREATE, ALTER, DROP, TRUNCATE</td><td class="p-2 font-mono">INSERT, UPDATE, DELETE</td><td class="p-2 font-mono">SELECT</td></tr>
+                                    <tr><td class="p-2 font-semibold">Ejemplo</td><td class="p-2 font-mono">ALTER TABLE curso ADD COLUMN cupo INT;</td><td class="p-2 font-mono">INSERT INTO curso VALUES ('C010','SQL',3);</td><td class="p-2 font-mono">SELECT nombre FROM curso;</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> cuadro comparativo de DDL, DML y DQL con su función, instrucciones y un ejemplo de cada uno.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Misión 2: Rompecabezas — la tabla empleado</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Construye la instrucción <strong>CREATE TABLE</strong> de la tabla <strong>empleado</strong>, con su clave primaria y una clave foránea hacia <strong>departamento</strong>. Si se elimina un departamento, sus empleados <strong>no deben borrarse</strong>: deben quedar sin departamento asignado (<strong>ON DELETE SET NULL</strong>). Usa esta estructura como modelo:
+                        </p>
+                        <div class="mb-4">
+                            <img src="img/Infografía SQL_ estructura de CREATE TABLE.png" alt="Estructura de CREATE TABLE: inicio, nombre de la tabla, información de columnas y fin" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                            <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-2">👇 Toca las piezas en el orden correcto. ¡Cuidado! Hay <strong>2 piezas trampa</strong> que no encajan con lo que se pide. 🪤</p>
+                        <div id="a2-piezas" class="flex flex-wrap gap-2 mb-3"></div>
+                        <pre id="a2-armado" class="sql-code text-xs mb-2" style="min-height:4rem;"></pre>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-1.5 px-4 rounded-lg transition" onclick="verificarA2()">🧪 Ejecutar</button>
+                            <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-1.5 px-4 rounded-lg transition" onclick="deshacerA2()">↩️ Quitar última</button>
+                            <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-1.5 px-4 rounded-lg transition" onclick="reiniciarA2()">↺ Reiniciar</button>
+                        </div>
+                        <div id="a2-log" class="sql-code text-xs mt-2" style="min-height:2.5rem;white-space:pre-wrap;">mysql&gt; _</div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a2', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> instrucción CREATE TABLE de empleado con PRIMARY KEY, FOREIGN KEY hacia departamento y ON DELETE SET NULL.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧾 Misión 3: El edificio completo — sistema de facturación</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Escribe el script completo con las instrucciones <strong>CREATE TABLE</strong> de las tablas <strong>CLIENTE</strong>, <strong>FACTURA</strong>, <strong>DETALLE_FACTURA</strong> y <strong>PRODUCTO</strong>, respetando los tipos de datos, las claves primarias y las claves foráneas del esquema:
+                        </p>
+                        <div class="mb-4">
+                            <img src="img/Esquema relacional de facturación y productos.png" alt="Esquema relacional de cliente, factura, detalle_factura y producto" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                            <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4">
+                            <p class="font-bold text-slate-700 mb-2">🔢 Paso 1: ¿en qué orden se crean?</p>
+                            <p class="text-sm text-slate-600 mb-3">Toca las tablas en el orden en que deben crearse para que ninguna clave foránea apunte a una tabla que todavía no existe.</p>
+                            <div class="flex flex-wrap gap-2 mb-2" id="a3-orden-btns">
+                                <button type="button" class="a3-tabla border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-tabla="detalle_factura">DETALLE_FACTURA</button>
+                                <button type="button" class="a3-tabla border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-tabla="factura">FACTURA</button>
+                                <button type="button" class="a3-tabla border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-tabla="producto">PRODUCTO</button>
+                                <button type="button" class="a3-tabla border-2 border-slate-200 bg-white rounded-lg px-3 py-1 text-sm font-mono text-slate-600 transition" data-tabla="cliente">CLIENTE</button>
+                            </div>
+                            <p id="a3-orden-sel" class="text-sm font-mono text-slate-700 mb-1">Orden: —</p>
+                            <p id="a3-orden-msg" class="text-sm font-bold"></p>
+                            <button type="button" class="mt-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-1 px-3 rounded-lg transition" onclick="reiniciarOrdenA3()">↺ Reiniciar orden</button>
+                        </div>
+
+                        <p class="font-bold text-slate-700 mb-2">⌨️ Paso 2: escribe el script</p>
+                        <textarea id="act3-text" rows="14" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-mono focus:border-green-500 focus:outline-none" placeholder="CREATE TABLE cliente (&#10;    id_cliente CHAR(4) PRIMARY KEY,&#10;    ...&#10;);&#10;&#10;CREATE TABLE ..."></textarea>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono mt-2" id="a3-chips"></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a3', this)">🚀 Completar misión</button>
+                        <button type="button" class="mt-3 ml-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-a3', this)">👀 Ver script modelo</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+<pre id="sol-a3" class="hidden sql-code text-xs mt-3"><span class="kw">CREATE TABLE</span> cliente (
+    id_cliente      <span class="kw">CHAR</span>(4) <span class="kw">PRIMARY KEY</span>,
+    nombre_cliente  <span class="kw">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+    telefono        <span class="kw">VARCHAR</span>(15),
+    correo          <span class="kw">VARCHAR</span>(120),
+    ciudad_cliente  <span class="kw">VARCHAR</span>(60),
+    direccion       <span class="kw">VARCHAR</span>(150)
+);
+
+<span class="kw">CREATE TABLE</span> producto (
+    id_producto      <span class="kw">CHAR</span>(4) <span class="kw">PRIMARY KEY</span>,
+    nombre_producto  <span class="kw">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+    descripcion      <span class="kw">VARCHAR</span>(150),
+    precio_unitario  <span class="kw">DECIMAL</span>(10,2) <span class="kw">NOT NULL</span>,
+    stock            <span class="kw">INT</span>,
+    categoria        <span class="kw">VARCHAR</span>(50)
+);
+
+<span class="kw">CREATE TABLE</span> factura (
+    id_factura   <span class="kw">CHAR</span>(4) <span class="kw">PRIMARY KEY</span>,
+    fecha        <span class="kw">DATE NOT NULL</span>,
+    id_cliente   <span class="kw">CHAR</span>(4) <span class="kw">NOT NULL</span>,
+    metodo_pago  <span class="kw">VARCHAR</span>(30),
+    subtotal     <span class="kw">DECIMAL</span>(10,2),
+    total        <span class="kw">DECIMAL</span>(10,2),
+    <span class="kw">FOREIGN KEY</span> (id_cliente) <span class="kw">REFERENCES</span> cliente(id_cliente)
+);
+
+<span class="kw">CREATE TABLE</span> detalle_factura (
+    id_factura       <span class="kw">CHAR</span>(4),
+    id_producto      <span class="kw">CHAR</span>(4),
+    cantidad         <span class="kw">INT NOT NULL</span>,
+    precio_unitario  <span class="kw">DECIMAL</span>(10,2),
+    descuento        <span class="kw">DECIMAL</span>(5,2),
+    subtotal         <span class="kw">DECIMAL</span>(10,2),
+    <span class="kw">PRIMARY KEY</span> (id_factura, id_producto),   <span class="cm">-- clave compuesta</span>
+    <span class="kw">FOREIGN KEY</span> (id_factura)  <span class="kw">REFERENCES</span> factura(id_factura),
+    <span class="kw">FOREIGN KEY</span> (id_producto) <span class="kw">REFERENCES</span> producto(id_producto)
+);</pre>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> script SQL con las cuatro instrucciones CREATE TABLE del sistema de facturación, en un orden que respete las claves foráneas.</p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🧩 App drawDB</h3>
+                            <p class="text-slate-600 mb-2">Herramienta visual de esquemas de bases de datos para un diseño claro, rápido y colaborativo.</p>
+                            <a href="https://www.drawdb.app/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/QR1.png" alt="QR App drawDB" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">💻 Editor de SQL en línea</h3>
+                            <p class="text-slate-600 mb-2">Escribe y ejecuta tus instrucciones CREATE, ALTER y DROP directamente en el navegador, sin instalar nada.</p>
+                            <a href="https://www.mycompiler.io/es/online-sql-editor" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/QR2.png" alt="QR Editor de SQL en línea" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PostgreSQL Global Development Group. (2026). <i>PostgreSQL 18 documentation: CREATE TABLE</i>.<br>
+                            <a href="https://www.postgresql.org/docs/current/sql-createtable.html" class="text-green-700 underline break-all" target="_blank">https://www.postgresql.org/docs/current/sql-createtable.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MySQL. (2026). <i>MySQL 8.4 reference manual: CREATE TABLE statement</i>. Oracle Corporation.<br>
+                            <a href="https://dev.mysql.com/doc/refman/8.4/en/create-table.html" class="text-green-700 underline break-all" target="_blank">https://dev.mysql.com/doc/refman/8.4/en/create-table.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Coronel, C., &amp; Morris, S. (2019). <i>Database systems: Design, implementation, and management</i> (13.ª ed.). Cengage Learning.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Reis, J., &amp; Housley, M. (2022). <i>Fundamentals of data engineering: Plan and build robust data systems</i>. O'Reilly Media.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="img-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" onclick="closeImgModal()">
+        <img id="img-modal-src" src="" alt="Imagen ampliada" class="max-w-full max-h-full rounded-lg shadow-2xl">
+        <button type="button" class="absolute top-4 right-4 text-white text-3xl font-bold hover:text-green-300" onclick="closeImgModal()">✖</button>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué subconjunto de SQL se encarga de crear y modificar la estructura de una base de datos?",
+                options: ["DML (Data Manipulation Language)", "DDL (Data Definition Language)", "DQL (Data Query Language)", "DCL (Data Control Language)"],
+                correct: 1
+            },
+            {
+                question: "En una instrucción CREATE TABLE, el tipo de dato de cada columna (INT, VARCHAR, DATE…) es la forma en que SQL implementa el concepto de:",
+                options: ["Dominio", "Tupla", "Clave foránea", "Instancia"],
+                correct: 0
+            },
+            {
+                question: "¿Qué restricción impide que dos estudiantes queden registrados con el mismo correo, sin convertir el correo en clave primaria?",
+                options: ["NOT NULL", "DEFAULT", "UNIQUE", "AUTO_INCREMENT"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es el tipo de dato más adecuado para guardar el precio de un producto sin errores de redondeo?",
+                options: ["FLOAT", "VARCHAR(10)", "INT", "DECIMAL(10,2)"],
+                correct: 3
+            },
+            {
+                question: "¿Por qué la tabla matricula debe crearse después de las tablas estudiante y curso?",
+                options: ["Porque SQL crea las tablas en orden alfabético", "Porque la tabla referenciada por una clave foránea debe existir antes que la tabla que la referencia", "Porque matricula tiene más columnas", "Porque una tabla con clave primaria compuesta siempre va de última"],
+                correct: 1
+            },
+            {
+                question: "Una tienda quiere impedir que se elimine una categoría mientras tenga productos asociados. ¿Qué política debe usar en la clave foránea?",
+                options: ["ON DELETE RESTRICT", "ON DELETE CASCADE", "ON DELETE SET NULL", "ON UPDATE CASCADE"],
+                correct: 0
+            },
+            {
+                question: "En MySQL se cambia el tipo o la restricción de una columna con MODIFY COLUMN. ¿Qué usan PostgreSQL y SQL Server para el mismo propósito?",
+                options: ["CHANGE TABLE", "UPDATE COLUMN", "ALTER COLUMN", "RENAME COLUMN"],
+                correct: 2
+            },
+            {
+                question: "Intentas ejecutar ALTER TABLE curso MODIFY COLUMN nombre VARCHAR(100) NOT NULL, pero un registro tiene nombre en NULL. ¿Qué ocurre?",
+                options: ["El registro con NULL se borra automáticamente", "La columna se elimina", "La restricción se aplica solo a los registros nuevos y el NULL se conserva", "La operación falla: primero hay que corregir los datos existentes"],
+                correct: 3
+            },
+            {
+                question: "Necesitas vaciar todos los registros de la tabla sesiones_temporales, pero conservando su estructura para seguir usándola. ¿Qué instrucción usas?",
+                options: ["TRUNCATE TABLE", "DROP TABLE", "ALTER TABLE", "CREATE TABLE"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál afirmación sobre DROP TABLE es correcta?",
+                options: ["Elimina solo las filas que cumplan la condición WHERE", "Elimina la estructura de la tabla y todos sus datos; recuperarla depende del motor, la transacción y las copias de seguridad", "Conserva la estructura de la tabla pero la deja vacía", "Siempre puede deshacerse con ROLLBACK en cualquier motor"],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ============================================
+        // SISTEMA DE GAMIFICACIÓN — Contenido (misiones)
+        // ============================================
+        const MISSION_XP = { m1: 20, m2: 30, m3: 30, m4: 40, m5: 30 };
+        const TOTAL_XP = Object.values(MISSION_XP).reduce((a, b) => a + b, 0);
+        const gameState = { xp: 0, completed: new Set() };
+
+        function updateGamePanel() {
+            document.getElementById('game-points').textContent = gameState.xp;
+            document.getElementById('game-progress').style.width = Math.round((gameState.xp / TOTAL_XP) * 100) + '%';
+        }
+
+        function completeMission(missionId, container) {
+            if (gameState.completed.has(missionId)) return;
+            gameState.completed.add(missionId);
+            gameState.xp += MISSION_XP[missionId] || 0;
+            updateGamePanel();
+            const badge = document.getElementById('badge-' + missionId);
+            if (badge) {
+                badge.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200');
+                badge.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            }
+            const feedback = container.querySelector('.mission-feedback');
+            if (feedback) {
+                feedback.textContent = '🎉 ¡Misión completada! +' + (MISSION_XP[missionId] || 0) + ' XP';
+                feedback.className = 'mission-feedback mt-3 text-sm font-bold text-green-700';
+            }
+            if (missionId === 'm5') document.getElementById('m5-reward').classList.remove('hidden');
+            if (gameState.completed.size === Object.keys(MISSION_XP).length) {
+                document.getElementById('badge-final').classList.remove('hidden');
+            }
+        }
+
+        // Opciones de las misiones de selección (m1, m2, m3, m5)
+        document.querySelectorAll('.game-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const group = this.closest('[data-gq]');
+                const missionContainer = this.closest('[data-mission]');
+                if (!group || !missionContainer || group.dataset.solved === 'true') return;
+                const feedback = missionContainer.querySelector('.mission-feedback');
+                if (this.dataset.correct === 'true') {
+                    group.dataset.solved = 'true';
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-green-500', 'border-green-500', 'text-white');
+                    group.querySelectorAll('button').forEach(b => {
+                        b.disabled = true;
+                        if (b !== this) b.classList.add('opacity-50');
+                    });
+                    feedback.textContent = '¡Correcto! ⭐';
+                    feedback.className = 'mission-feedback mt-3 text-sm font-bold text-green-700';
+                    const groups = missionContainer.querySelectorAll('[data-gq]');
+                    if (Array.from(groups).every(g => g.dataset.solved === 'true')) {
+                        completeMission(missionContainer.dataset.mission, missionContainer);
+                    }
+                } else {
+                    this.disabled = true;
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-red-100', 'border-red-300', 'text-red-400', 'opacity-60');
+                    feedback.textContent = '¡Casi! Inténtalo de nuevo 💪';
+                    feedback.className = 'mission-feedback mt-3 text-sm font-bold text-red-500';
+                }
+            });
+        });
+
+        // ---- Caja de restricciones ----
+        document.querySelectorAll('.constraint-card').forEach(card => {
+            card.addEventListener('click', function () {
+                document.querySelectorAll('.constraint-card').forEach(c => c.classList.remove('ring-2', 'ring-green-500'));
+                this.classList.add('ring-2', 'ring-green-500');
+                document.getElementById('constraint-info').textContent = this.dataset.info;
+            });
+        });
+
+        // ---- Misión 4: simulador ALTER TABLE ----
+        const SIM_INICIAL = () => ({
+            cols: ['id_curso', 'nombre', 'creditos'],
+            rows: [
+                { id_curso: 1, nombre: 'Programación', creditos: 3 },
+                { id_curso: 2, nombre: 'Bases de Datos', creditos: 4 },
+                { id_curso: 3, nombre: null, creditos: 3 }
+            ],
+            nombreNotNull: false
+        });
+        let sim = SIM_INICIAL();
+        const simSteps = { add: false, error: false, notnull: false };
+
+        function renderSim() {
+            const head = sim.cols.map(c => {
+                const lock = (c === 'nombre' && sim.nombreNotNull) ? ' 🔒' : '';
+                return '<th class="p-2 text-left bg-teal-600 text-white font-mono text-xs">' + c + lock + '</th>';
+            }).join('');
+            const body = sim.rows.map(r => '<tr class="border-b border-teal-100">' + sim.cols.map(c => {
+                const v = r[c];
+                return v === null || v === undefined
+                    ? '<td class="p-2 font-mono text-xs text-red-500 italic">NULL</td>'
+                    : '<td class="p-2 font-mono text-xs">' + v + '</td>';
+            }).join('') + '</tr>').join('');
+            document.getElementById('sim-table').innerHTML = '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>';
+        }
+
+        function simLog(texto) {
+            document.getElementById('sim-log').textContent = texto;
+        }
+
+        function marcarPaso(id) {
+            simSteps[id] = true;
+            const chip = document.getElementById('m4-step-' + id);
+            chip.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200');
+            chip.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            if (simSteps.add && simSteps.error && simSteps.notnull) {
+                completeMission('m4', document.querySelector('[data-mission="m4"]'));
+            }
+        }
+
+        document.querySelectorAll('[data-sim]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const accion = this.dataset.sim;
+                if (accion === 'add') {
+                    if (sim.cols.includes('intensidad_horaria')) {
+                        simLog("mysql> ERROR 1060: Duplicate column name 'intensidad_horaria'\n🤔 La columna ya existe: no se puede agregar dos veces.");
+                        return;
+                    }
+                    sim.cols.push('intensidad_horaria');
+                    sim.rows.forEach(r => r.intensidad_horaria = null);
+                    simLog('mysql> Query OK, 0 rows affected\n✅ Columna agregada. Los registros que ya existían quedan con NULL en ella: ¡ningún dato se perdió!');
+                    marcarPaso('add');
+                } else if (accion === 'notnull') {
+                    if (sim.rows.some(r => r.nombre === null)) {
+                        simLog('mysql> ERROR 1138: Invalid use of NULL value\n❌ ¡El SGBD se niega! El curso 3 no tiene nombre, así que no puede volverse obligatorio. Corrige primero el dato 🩹');
+                        marcarPaso('error');
+                        return;
+                    }
+                    sim.nombreNotNull = true;
+                    simLog('mysql> Query OK, 3 rows affected\n✅ Ahora nombre es obligatorio 🔒 para todos los registros futuros.');
+                    if (simSteps.error) marcarPaso('notnull');
+                    else simLog('mysql> Query OK, 3 rows affected\n✅ nombre ya es obligatorio. (Reinicia la tabla para ver qué pasa si hay un NULL escondido 👀)');
+                } else if (accion === 'fix') {
+                    const fila = sim.rows.find(r => r.id_curso === 3);
+                    fila.nombre = 'Redes';
+                    simLog("mysql> Query OK, 1 row affected\n🩹 El curso 3 ya se llama 'Redes'. Ahora intenta de nuevo el MODIFY COLUMN.");
+                } else if (accion === 'dropcol') {
+                    if (!sim.cols.includes('intensidad_horaria')) {
+                        simLog("mysql> ERROR 1091: Can't DROP 'intensidad_horaria'; check that column/key exists\n🤔 No puedes borrar una columna que no existe.");
+                        return;
+                    }
+                    sim.cols = sim.cols.filter(c => c !== 'intensidad_horaria');
+                    sim.rows.forEach(r => delete r.intensidad_horaria);
+                    simLog('mysql> Query OK, 0 rows affected\n⚠️ Columna eliminada… y todos los datos que tenía se fueron con ella. Úsalo con cuidado.');
+                } else if (accion === 'reset') {
+                    sim = SIM_INICIAL();
+                    simLog('mysql> _');
+                }
+                renderSim();
+            });
+        });
+        renderSim();
+
+        // ---- Protocolo antes de DROP ----
+        const dropChecks = document.querySelectorAll('.drop-check');
+        const dropBtn = document.getElementById('drop-btn');
+        dropChecks.forEach(c => c.addEventListener('change', () => {
+            const listo = Array.from(dropChecks).every(x => x.checked);
+            dropBtn.disabled = !listo;
+            dropBtn.classList.toggle('opacity-50', !listo);
+            dropBtn.classList.toggle('cursor-not-allowed', !listo);
+        }));
+        dropBtn.addEventListener('click', () => {
+            const msg = document.getElementById('drop-msg');
+            msg.textContent = '✅ Query OK. Tabla eliminada de forma segura: estabas en pruebas y con respaldo. ¡Así trabaja un profesional! 🦸';
+            msg.className = 'text-sm font-bold mt-2 mb-6 text-green-700';
+        });
+
+        // ============================================
+        // GAMIFICACIÓN — Actividades
+        // ============================================
+        const TOTAL_ACT = 3;
+        const actState = { done: new Set() };
+        const ACT_FLAGS = { a2: false, a3orden: false };
+
+        function normalizarSQL(t) {
+            return t.toLowerCase().replace(/\s+/g, ' ').replace(/\s*([,()<>=*;])\s*/g, '$1').trim();
+        }
+
+        // ---- Actividad 1: cuadro comparativo ----
+        const A1_PATRONES = {
+            ddl: /\b(create|alter|drop|truncate)\b/i,
+            dml: /\b(insert|update|delete)\b/i,
+            dql: /\bselect\b/i
+        };
+        function evaluarCeldaA1(cell) {
+            const txt = cell.value.trim();
+            if (cell.dataset.row === 'que') return txt.length >= 15;
+            return A1_PATRONES[cell.dataset.col].test(txt);
+        }
+        document.querySelectorAll('.a1-cell').forEach(cell => {
+            cell.addEventListener('input', function () {
+                const ok = evaluarCeldaA1(this);
+                this.classList.toggle('border-green-400', ok);
+                this.classList.toggle('bg-green-50', ok);
+            });
+        });
+
+        // ---- Actividad 2: rompecabezas CREATE TABLE empleado ----
+        const PIEZAS_EMP = {
+            ini: 'CREATE TABLE empleado (',
+            c1: '    id_empleado CHAR(4) PRIMARY KEY,',
+            c2: '    nombre_empleado VARCHAR(100) NOT NULL,',
+            c3: '    salario DECIMAL(10,2),',
+            c4: '    id_departamento CHAR(4),',
+            fk: '    FOREIGN KEY (id_departamento) REFERENCES departamento(id_departamento)',
+            od: '        ON DELETE SET NULL',
+            fin: ');',
+            x1: '    id_departamento CHAR(4) NOT NULL,',
+            x2: '        ON DELETE CASCADE'
+        };
+        const ORDEN_MOSTRAR = ['fk', 'c3', 'x2', 'fin', 'c1', 'od', 'ini', 'x1', 'c4', 'c2'];
+        let armadoA2 = [];
+
+        function renderA2() {
+            document.getElementById('a2-piezas').innerHTML = ORDEN_MOSTRAR.map(id =>
+                '<button type="button" class="font-mono text-xs border-2 rounded-lg px-2 py-1 transition ' +
+                (armadoA2.includes(id) ? 'border-slate-200 bg-slate-100 text-slate-300 cursor-not-allowed" disabled' : 'border-green-200 bg-white text-slate-700 hover:border-green-500"') +
+                ' onclick="agregarPiezaA2(\'' + id + '\')">' + PIEZAS_EMP[id].trim() + '</button>').join('');
+            document.getElementById('a2-armado').textContent = armadoA2.length
+                ? armadoA2.map(id => PIEZAS_EMP[id]).join('\n')
+                : '-- Toca las piezas para armar tu CREATE TABLE...';
+        }
+        function agregarPiezaA2(id) {
+            if (ACT_FLAGS.a2 || armadoA2.includes(id)) return;
+            armadoA2.push(id);
+            renderA2();
+        }
+        function deshacerA2() {
+            if (ACT_FLAGS.a2) return;
+            armadoA2.pop();
+            renderA2();
+        }
+        function reiniciarA2() {
+            if (ACT_FLAGS.a2) return;
+            armadoA2 = [];
+            renderA2();
+            document.getElementById('a2-log').textContent = 'mysql> _';
+        }
+        function verificarA2() {
+            const s = armadoA2;
+            const log = document.getElementById('a2-log');
+            let msg;
+            if (s.includes('x1')) {
+                msg = 'ERROR 1830: Column \'id_departamento\' cannot be NOT NULL: needed in a foreign key constraint SET NULL ❌\n🪤 ¡Pieza trampa! Si la columna es NOT NULL, ¿cómo podría quedar en NULL cuando se borre el departamento?';
+            } else if (s.includes('x2')) {
+                msg = 'Query OK… pero ⚠️ con CASCADE, al borrar un departamento se borrarían también sus empleados.\n🪤 ¡Pieza trampa! Se pidió que los empleados se conserven sin departamento.';
+            } else if (s.length < 8) {
+                msg = 'ERROR 1064: You have an error in your SQL syntax ❌\n🧩 Aún faltan piezas: tienes ' + s.length + ' de 8.';
+            } else if (s[0] !== 'ini' || s[7] !== 'fin') {
+                msg = 'ERROR 1064: You have an error in your SQL syntax ❌\n🤔 Mira el modelo: ¿con qué empieza y con qué termina un CREATE TABLE?';
+            } else if (s[5] !== 'fk' || s[6] !== 'od') {
+                msg = 'ERROR 1064: You have an error in your SQL syntax ❌\n🤔 Primero se declaran todas las columnas; después la FOREIGN KEY, y justo detrás su política ON DELETE.';
+            } else {
+                ACT_FLAGS.a2 = true;
+                msg = 'Query OK, 0 rows affected ✅\n🎉 ¡Tabla empleado creada! Ojo: la tabla departamento debe existir ANTES de ejecutar esta instrucción.';
+            }
+            log.textContent = 'mysql> ' + msg;
+        }
+        renderA2();
+
+        // ---- Actividad 3: orden de creación + script FACTURA ----
+        let ordenA3 = [];
+        function evaluarOrdenA3() {
+            const pos = t => ordenA3.indexOf(t);
+            if (pos('factura') < pos('cliente')) return '❌ FACTURA referencia a CLIENTE: CLIENTE debe existir primero.';
+            if (pos('detalle_factura') < pos('factura')) return '❌ DETALLE_FACTURA referencia a FACTURA: FACTURA debe crearse antes.';
+            if (pos('detalle_factura') < pos('producto')) return '❌ DETALLE_FACTURA referencia a PRODUCTO: PRODUCTO debe crearse antes.';
+            return '';
+        }
+        document.querySelectorAll('.a3-tabla').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (ACT_FLAGS.a3orden || ordenA3.includes(this.dataset.tabla)) return;
+                ordenA3.push(this.dataset.tabla);
+                this.disabled = true;
+                this.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                document.getElementById('a3-orden-sel').textContent = 'Orden: ' + ordenA3.map(t => t.toUpperCase()).join(' → ');
+                if (ordenA3.length < 4) return;
+                const error = evaluarOrdenA3();
+                const msg = document.getElementById('a3-orden-msg');
+                ACT_FLAGS.a3orden = !error;
+                msg.textContent = error || '✅ ¡Orden perfecto! Primero las tablas "mamá" (CLIENTE y PRODUCTO, en cualquier orden), luego FACTURA y al final DETALLE_FACTURA.';
+                msg.className = 'text-sm font-bold ' + (error ? 'text-red-500' : 'text-green-700');
+                pintarChipsA3();
+            });
+        });
+        function reiniciarOrdenA3() {
+            if (ACT_FLAGS.a3orden) return;
+            ordenA3 = [];
+            document.querySelectorAll('.a3-tabla').forEach(b => { b.disabled = false; b.classList.remove('bg-green-500', 'text-white', 'border-green-500'); });
+            document.getElementById('a3-orden-sel').textContent = 'Orden: —';
+            document.getElementById('a3-orden-msg').textContent = '';
+        }
+
+        const crear = t => new RegExp('create table (if not exists )?' + t + '\\(');
+        const REGLAS_A3 = [
+            { et: 'Orden de creación (paso 1)', ok: () => ACT_FLAGS.a3orden },
+            { et: 'CREATE TABLE ×4', ok: q => ['cliente', 'producto', 'factura', 'detalle_factura'].every(t => crear(t).test(q)) },
+            { et: 'DECIMAL(10,2)', ok: q => /decimal\(10,2\)/.test(q) },
+            { et: 'FK factura → cliente', ok: q => /foreign key\(id_cliente\)references cliente\(/.test(q) },
+            { et: 'FK detalle → factura', ok: q => /foreign key\(id_factura\)references factura\(/.test(q) },
+            { et: 'FK detalle → producto', ok: q => /foreign key\(id_producto\)references producto\(/.test(q) },
+            { et: 'PK compuesta', ok: q => /primary key\(id_factura,id_producto\)/.test(q) },
+            {
+                et: 'Script en orden', ok: q => {
+                    const i = t => q.search(crear(t));
+                    return ['cliente', 'producto', 'factura', 'detalle_factura'].every(t => i(t) >= 0) &&
+                        i('cliente') < i('factura') && i('factura') < i('detalle_factura') && i('producto') < i('detalle_factura');
+                }
+            }
+        ];
+        function evaluarReglasA3() {
+            const q = normalizarSQL(document.getElementById('act3-text').value);
+            return REGLAS_A3.map(r => ({ et: r.et, ok: r.ok(q) }));
+        }
+        function pintarChipsA3() {
+            document.getElementById('a3-chips').innerHTML = evaluarReglasA3().map(r =>
+                '<span class="px-2 py-1 rounded-full border ' + (r.ok ? 'bg-green-500 text-white border-green-500' : 'bg-slate-100 text-slate-400 border-slate-200') + '">' + (r.ok ? '✔ ' : '') + r.et + '</span>').join('');
+        }
+        document.getElementById('act3-text').addEventListener('input', pintarChipsA3);
+        pintarChipsA3();
+
+        function completarActividad(id, btn) {
+            if (actState.done.has(id)) return;
+            const container = document.querySelector('[data-act="' + id + '"]');
+            const feedback = container.querySelector('.act-feedback');
+            let ok = false, msg = '';
+            if (id === 'a1') {
+                const malas = [...document.querySelectorAll('.a1-cell')].filter(c => !evaluarCeldaA1(c));
+                ok = malas.length === 0;
+                msg = 'Te faltan ' + malas.length + ' de 9 celdas: cada "¿Qué hace?" necesita una explicación y las instrucciones y ejemplos deben corresponder a su lenguaje.';
+            } else if (id === 'a2') {
+                ok = ACT_FLAGS.a2;
+                msg = 'Primero arma la instrucción y pulsa 🧪 Ejecutar hasta ver "Query OK".';
+            } else if (id === 'a3') {
+                const faltan = evaluarReglasA3().filter(r => !r.ok).map(r => r.et);
+                ok = faltan.length === 0;
+                msg = 'A tu script le falta: ' + faltan.join(', ') + '.';
+            }
+            if (!ok) {
+                feedback.textContent = '⚠️ ' + msg;
+                feedback.className = 'act-feedback mt-3 text-sm font-bold text-red-500';
+                return;
+            }
+            actState.done.add(id);
+            document.getElementById('act-points').textContent = actState.done.size;
+            document.getElementById('act-progress').style.width = Math.round((actState.done.size / TOTAL_ACT) * 100) + '%';
+            feedback.textContent = actState.done.size === TOTAL_ACT
+                ? '🏆 ¡3/3! Tu esquema está en pie: ya eres CONSTRUCTOR DE ESQUEMAS 👷'
+                : '🎉 ¡Misión cumplida! ' + actState.done.size + '/' + TOTAL_ACT + ' actividades completadas';
+            feedback.className = 'act-feedback mt-3 text-sm font-bold text-green-700';
+            if (actState.done.size === TOTAL_ACT) document.getElementById('act-badge').classList.remove('hidden');
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+        }
+
+        // ---- Soluciones desplegables ----
+        function toggleSolucion(id, btn) {
+            const el = document.getElementById(id);
+            const nowVisible = !el.classList.toggle('hidden');
+            if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+            btn.textContent = nowVisible ? '🙈 Ocultar' : btn.dataset.label;
+        }
+
+        // ---- Modal de imagen ----
+        function openImgModal(src) {
+            document.getElementById('img-modal-src').src = src;
+            document.getElementById('img-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeImgModal() {
+            document.getElementById('img-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
