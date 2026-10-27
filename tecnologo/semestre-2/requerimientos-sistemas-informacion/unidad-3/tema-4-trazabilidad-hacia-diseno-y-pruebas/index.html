@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OVA: Trazabilidad hacia el diseño y las pruebas</title>
+  <link rel="stylesheet" href="tailwind.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      max-width: 100vw;
+      background: linear-gradient(180deg, #f4fdf6 0%, #f8fafc 100%);
+    }
+    html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    aside.w-64 {
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    @media (min-width: 768px) {
+      main.flex-1 { margin-left: 16rem; }
+    }
+    .md\:hidden.mb-6 {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      background-color: #f8fafc;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    @media (max-width: 767px) {
+      main.flex-1 {
+        padding-top: 12rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+      * { box-sizing: border-box; }
+      body, html, main, .accordion-panel, .content-section {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+      }
+      pre { overflow-x: auto; max-width: 100%; }
+      h2 { font-size: 1.5rem !important; }
+      h3 { font-size: 1.25rem !important; }
+      h4 { font-size: 1.125rem !important; }
+      .accordion-panel {
+        overflow-x: hidden;
+        max-width: 100%;
+        padding: 0.5rem !important;
+      }
+      .content-section {
+        overflow-x: hidden;
+        max-width: 100%;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+    }
+    .sidebar-link {
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-link.active, .sidebar-link:hover {
+      background-color: #e6f4ea;
+      color: #166534;
+      border-left-color: #22c55e;
+    }
+    .content-pane {
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .content-pane.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .quiz-option:hover { background-color: #f0fdf4; }
+    .quiz-option.selected {
+      background-color: #dcfce7;
+      border-color: #22c55e;
+    }
+    .accordion-btn { cursor: pointer; }
+    .accordion-panel { transition: all 0.3s ease; }
+    .mission-card {
+      background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    }
+    .progress-bar {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      transition: width 0.3s ease;
+    }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #cbd5e1; }
+    .score-chip {
+      background: #ecfdf5;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+    .hero-glow {
+      background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 40%, #ecfeff 100%);
+    }
+    .figure-frame {
+      background: white;
+      border: 1px solid #bbf7d0;
+      border-radius: 1rem;
+      box-shadow: 0 10px 20px rgba(34,197,94,0.08);
+      overflow: hidden;
+    }
+    .figure-frame img {
+      width: 100%;
+      height: 220px;
+      object-fit: contain;
+      background: #f8fafc;
+    }
+  </style>
+</head>
+<body class="bg-slate-50">
+  <div class="flex min-h-screen">
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+      <div class="p-4">
+        <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+          <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+        </div>
+      </div>
+      <nav class="mt-6 flex-1">
+        <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+        <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+        <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+        <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+        <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+        <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+        <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+      </nav>
+    </aside>
+
+    <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+      <div class="md:hidden mb-6 flex flex-col items-center">
+        <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+          <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+        </div>
+        <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+          <option value="introduccion">🚀 Introducción</option>
+          <option value="objetivos">🎯 Objetivos</option>
+          <option value="contenido">📚 Contenido</option>
+          <option value="actividades">✍️ Actividades</option>
+          <option value="evaluacion">✔️ Evaluación</option>
+          <option value="recursos">📖 Recursos</option>
+          <option value="bibliografia">📚 Bibliografía</option>
+        </select>
+      </div>
+
+      <div id="introduccion" class="content-pane active">
+        <div class="hero-glow rounded-3xl p-6 sm:p-8 border border-green-200 shadow-lg mb-8">
+          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <span class="inline-block bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">Semestre II • Tema 4</span>
+              <h2 class="text-3xl sm:text-4xl font-bold text-green-800 leading-tight">Trazabilidad hacia el diseño y las pruebas</h2>
+            </div>
+            <div class="bg-white/80 border border-green-200 rounded-2xl px-4 py-3 text-sm text-slate-700 shadow-sm">
+              <div class="font-bold text-green-800">🎯 Propósito</div>
+              <div>Relacionar la necesidad con el diseño y la validación.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-white border-l-4 border-green-500 rounded-xl shadow-sm p-4">
+            <p class="text-2xl font-bold text-green-800">✔️</p>
+            <p class="font-semibold text-slate-800">Cobertura</p>
+            <p class="text-sm text-slate-600">Todos los requisitos deben tener diseño y prueba.</p>
+          </div>
+          <div class="bg-white border-l-4 border-green-500 rounded-xl shadow-sm p-4">
+            <p class="text-2xl font-bold text-green-800">🔗</p>
+            <p class="font-semibold text-slate-800">Justificación</p>
+            <p class="text-sm text-slate-600">Cada funcionalidad responde a una necesidad real.</p>
+          </div>
+          <div class="bg-white border-l-4 border-green-500 rounded-xl shadow-sm p-4">
+            <p class="text-2xl font-bold text-green-800">📌</p>
+            <p class="font-semibold text-slate-800">Impacto</p>
+            <p class="text-sm text-slate-600">Un cambio puede afectar diseño, pruebas y evidencia.</p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-[1.4fr_0.9fr] gap-6 mb-8">
+          <div class="bg-white rounded-2xl shadow-md p-5 border border-green-100">
+            <p class="text-slate-700 leading-relaxed mb-4">
+              La trazabilidad es la capacidad de seguir un requisito desde su origen hasta el producto final y también de regresar desde una pantalla, una prueba o un componente para entender qué necesidad lo motivó. No es solo una hoja de ruta: es la forma de mantener vivas las decisiones del proyecto.
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+              En proyectos reales, un requisito no se queda solo en papel ni en una nota de reunión. Debe poder relacionarse con casos de uso, prototipos, pantallas, reglas de negocio y casos de prueba. Cuando esa conexión existe, el equipo puede decidir mejor, detectar errores antes de tiempo y evaluar el impacto de un cambio sin perder el control.
+            </p>
+            <div class="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+              <p class="text-green-800"><span class="text-xl">✨</span> Cuando la trazabilidad funciona, cada requisito tiene sentido, cada prueba tiene propósito y cada cambio se controla con menos riesgo. <span class="text-xl">🚀</span></p>
+            </div>
+          </div>
+          <div class="figure-frame">
+            <img src="img/figura%201.png" alt="Cadena de trazabilidad" loading="lazy">
+            <div class="p-3 bg-white border-t border-green-200 text-sm text-slate-700 text-center font-medium">Figura 1. Cadena de trazabilidad</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="objetivos" class="content-pane">
+        <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+        <ul class="space-y-4">
+          <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+            <span class="text-green-700 mr-3 text-2xl">🧠</span>
+            <span>Explicar el propósito de la trazabilidad durante el ciclo de vida del software.</span>
+          </li>
+          <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+            <span class="text-green-700 mr-3 text-2xl">🔗</span>
+            <span>Relacionar requerimientos con casos de uso, prototipos, componentes y decisiones de diseño.</span>
+          </li>
+          <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+            <span class="text-green-700 mr-3 text-2xl">✅</span>
+            <span>Transformar criterios de aceptación en casos de prueba verificables y observables.</span>
+          </li>
+          <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+            <span class="text-green-700 mr-3 text-2xl">📊</span>
+            <span>Construir e interpretar una matriz de trazabilidad para detectar cobertura, inconsistencias y riesgos.</span>
+          </li>
+          <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+            <span class="text-green-700 mr-3 text-2xl">🔍</span>
+            <span>Analizar el impacto de un cambio antes de aprobarlo y mantener la evidencia del proyecto actualizada.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div id="contenido" class="content-pane">
+        <div class="w-full max-w-8xl mx-auto">
+          <div class="mb-5 p-5 mission-card border border-green-200 rounded-xl shadow-sm">
+            <div class="flex items-center justify-between gap-4 flex-wrap mb-3">
+              <h3 class="text-xl font-bold text-green-800">🎮 Misión del contenido</h3>
+              <span class="score-chip px-3 py-1 rounded-full font-semibold text-sm" id="content-score">Puntaje: 0/100</span>
+            </div>
+            <div class="progress-bar mb-2">
+              <div class="progress-fill" id="content-progress" style="width: 0%"></div>
+            </div>
+            <p class="text-sm text-slate-600">Completa los retos del contenido para desbloquear confianza en la trazabilidad.</p>
+            <p id="content-achievement" class="hidden mt-3 p-2 bg-green-100 border border-green-300 rounded text-green-800 font-semibold" role="status">🏅 Insignia desbloqueada: Detective de trazabilidad</p>
+          </div>
+
+          <div class="mb-4">
+            <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-concepto">
+              <span>1) Concepto, propósito y principios</span>
+              <span class="ml-2">➕</span>
+            </button>
+          </div>
+          <div id="panel-concepto" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+            <div class="space-y-6 text-slate-700 leading-relaxed">
+              <div class="content-section">
+                <p class="mb-4"><strong>Un vínculo de trazabilidad</strong> registra una relación significativa entre dos elementos del proyecto. Por ejemplo: <strong>REQ 02</strong> se realiza mediante <strong>CU 02</strong>, se representa en <strong>DIS 04</strong> y se verifica con <strong>CP 08</strong>.</p>
+                <p class="mb-4">La clave no está en encadenar códigos, sino en comprender la relación: ¿qué necesidad originó esa pantalla? ¿qué caso de uso la respalda? ¿qué comprobación demuestra que cumple el objetivo?</p>
+                <div class="grid md:grid-cols-2 gap-4 my-5">
+                  <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-800 mb-2">🎯 Propósito</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                      <li>Cobertura</li>
+                      <li>Justificación</li>
+                      <li>Impacto</li>
+                      <li>Consistencia</li>
+                      <li>Auditoría</li>
+                    </ul>
+                  </div>
+                  <div class="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                    <h4 class="font-bold text-teal-800 mb-2">🧩 Principios básicos</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                      <li>Identificadores únicos y estables</li>
+                      <li>Relaciones explícitas y comprensibles</li>
+                      <li>Actualización si hay cambios</li>
+                      <li>Responsables definidos</li>
+                      <li>Evidencia verificable</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p class="font-semibold text-yellow-900">💡 Regla importante:</p>
+                  <p class="text-yellow-800">Los códigos ayudan a seguir la relación, pero no reemplazan la descripción clara del elemento. Un requisito como <strong>REQ 02</strong> debe tener nombre comprensible, por ejemplo: <em>Solicitar certificado</em>.</p>
+                </div>
+                <div class="mt-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                  <p class="font-bold text-green-800 mb-2">⚡ Desafío rápido</p>
+                  <p class="text-slate-700 mb-3">Selecciona la respuesta correcta y suma puntos:</p>
+                  <div class="space-y-3">
+                    <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="concepto" data-correct="true">A. Una trazabilidad útil conecta requisitos con diseño y pruebas con sentido.</button>
+                    <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="concepto" data-correct="false">B. Solo sirve para llenar una matriz al final del proyecto.</button>
+                    <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="concepto" data-correct="false">C. Es un documento que reemplaza la validación del sistema.</button>
+                  </div>
+                  <p class="mt-3 text-sm font-semibold" data-mission-feedback="concepto" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-direcciones">
+              <span>2) Trazabilidad hacia adelante y hacia atrás</span>
+              <span class="ml-2">➕</span>
+            </button>
+          </div>
+          <div id="panel-direcciones" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+            <div class="space-y-6 text-slate-700 leading-relaxed">
+              <div class="content-section">
+                <p class="mb-4">La trazabilidad puede recorrerse en dos direcciones:</p>
+                <div class="grid md:grid-cols-2 gap-4 my-5">
+                  <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-800 mb-2">➡️ Hacia adelante</h4>
+                    <p>Permite seguir un requisito desde la identificación hasta su implementación y validación. Responde: ¿qué quedó desarrollado y probado?</p>
+                  </div>
+                  <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-800 mb-2">⬅️ Hacia atrás</h4>
+                    <p>Permite identificar el requisito que dio origen a una pantalla, componente o prueba. Responde: ¿qué necesidad lo justificó?</p>
+                  </div>
+                </div>
+                <p class="mb-4">Ejemplo: en un sistema de matrícula, la trazabilidad hacia adelante permite verificar que el requisito “Registrar estudiantes” esté implementado y probado. La trazabilidad hacia atrás permite comprobar que el formulario de registro fue diseñado para satisfacer esa necesidad.</p>
+                <div class="figure-frame mb-6">
+                  <img src="img/figura%202.png" alt="Direcciones de trazabilidad" loading="lazy">
+                  <div class="p-3 bg-white border-t border-green-200 text-sm text-slate-700 text-center font-medium">Figura 2. Direcciones de la trazabilidad</div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full bg-white text-sm">
+                    <thead class="bg-green-100 text-green-800">
+                      <tr>
+                        <th class="p-3 text-left">Situación</th>
+                        <th class="p-3 text-left">Dirección útil</th>
+                        <th class="p-3 text-left">Ejemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="p-3">Preparar una entrega</td>
+                        <td class="p-3">Hacia adelante</td>
+                        <td class="p-3">REQ 03 tiene diseño y pruebas aprobadas.</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Revisar una pantalla nueva</td>
+                        <td class="p-3">Hacia atrás</td>
+                        <td class="p-3">DIS 07 proviene de REQ 05.</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Analizar un cambio</td>
+                        <td class="p-3">Ambas</td>
+                        <td class="p-3">Revisar el requisito afectado y sus consecuencias.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p class="font-bold text-green-800 mb-2">🧭 Misión 2: elige la dirección</p>
+                  <p class="text-sm mb-3">Necesitas saber qué pruebas y componentes se derivan de REQ 03. ¿Por dónde empiezas?</p>
+                  <div class="space-y-2">
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-direcciones" data-correct="true">A. Hacia adelante: seguir REQ 03 hasta su diseño y sus pruebas.</button>
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-direcciones" data-correct="false">B. Hacia atrás: buscar qué necesidad originó una prueba.</button>
+                  </div>
+                  <p class="mt-3 text-sm font-semibold" data-mission-feedback="contenido-direcciones" role="status" aria-live="polite"></p>
+                </div>
+                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                     Tema: Trazabilidad de requisitos hacia diseño y pruebas
+                     Buscar: "requirements traceability matrix tutorial software testing"
+                -->
+                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                  </div>
+                  <p class="text-green-800 font-semibold mb-1">Matriz de trazabilidad de requisitos</p>
+                  <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"requirements traceability matrix tutorial software testing"</em></p>
+                  <a href="#" target="_blank" rel="noopener" tabindex="-1" class="inline-flex items-center gap-2 bg-green-600 text-white font-semibold py-2 px-5 rounded-lg text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">
+                    <span>▶️</span> Ver recurso
+                  </a>
+                  <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                    <p class="text-green-800 text-xs font-bold mb-1">💡 Cómo activar este recurso:</p>
+                    <p class="text-green-700 text-xs mb-2">Busca el recurso y dile esto a tu agente de IA en el chat:</p>
+                    <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">"Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: [la URL que encontraste] y ponle el título: [título del recurso]."</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-elementos">
+              <span>3) Elementos que se pueden vincular</span>
+              <span class="ml-2">➕</span>
+            </button>
+          </div>
+          <div id="panel-elementos" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+            <div class="space-y-6 text-slate-700 leading-relaxed">
+              <div class="content-section">
+                <p class="mb-4">La trazabilidad no solo vincula requisitos con pruebas: también conecta la necesidad con el análisis, el diseño y la evidencia final.</p>
+                <div class="overflow-x-auto">
+                  <table class="w-full bg-white text-sm">
+                    <thead class="bg-green-100 text-green-800">
+                      <tr>
+                        <th class="p-3 text-left">Etapa</th>
+                        <th class="p-3 text-left">Elementos</th>
+                        <th class="p-3 text-left">Código sugerido</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="p-3">Necesidad</td>
+                        <td class="p-3">Objetivo, fuente, restricción</td>
+                        <td class="p-3">NEC 01</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Requerimientos</td>
+                        <td class="p-3">Funcional, no funcional, regla</td>
+                        <td class="p-3">REQ 01</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Análisis</td>
+                        <td class="p-3">Caso de uso, actividad, proceso</td>
+                        <td class="p-3">CU 01 / ACT 01</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Diseño</td>
+                        <td class="p-3">Prototipo, pantalla, componente, modelo</td>
+                        <td class="p-3">DIS 01</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Pruebas</td>
+                        <td class="p-3">Criterio, caso y conjunto de prueba</td>
+                        <td class="p-3">CA 01 / CP 01</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">Ejecución</td>
+                        <td class="p-3">Resultado, defecto, evidencia</td>
+                        <td class="p-3">RES 01 / DEF 01</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-5 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                  <p class="font-semibold text-emerald-800 mb-2">🔗 Relaciones recomendadas</p>
+                  <ul class="list-disc list-inside space-y-1 text-sm">
+                    <li><strong>Deriva de:</strong> el elemento nace de otro.</li>
+                    <li><strong>Realiza:</strong> un diseño o componente materializa el requisito.</li>
+                    <li><strong>Verifica:</strong> un caso de prueba comprueba un criterio.</li>
+                    <li><strong>Afecta:</strong> un cambio obliga a revisar otro elemento.</li>
+                    <li><strong>Evidencia:</strong> un resultado demuestra la ejecución.</li>
+                  </ul>
+                </div>
+                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p class="font-bold text-green-800 mb-2">🧩 Misión 3: conecta los elementos</p>
+                  <p class="text-sm mb-3">¿Qué relación expresa que un caso de prueba comprueba un criterio de aceptación?</p>
+                  <div class="space-y-2">
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-elementos" data-correct="true">A. El caso de prueba verifica el criterio.</button>
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-elementos" data-correct="false">B. El criterio se deriva del resultado de ejecución.</button>
+                  </div>
+                  <p class="mt-3 text-sm font-semibold" data-mission-feedback="contenido-elementos" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-matriz">
+              <span>4) Matriz de trazabilidad</span>
+              <span class="ml-2">➕</span>
+            </button>
+          </div>
+          <div id="panel-matriz" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+            <div class="space-y-6 text-slate-700 leading-relaxed">
+              <div class="content-section">
+                <p class="mb-4">La matriz organiza las relaciones en filas y columnas para ver rápidamente si hay vacíos, duplicidades o pruebas sin respaldar.</p>
+                <div class="figure-frame mb-6">
+                  <img src="img/figura%203.png" alt="Estructura de la matriz de trazabilidad" loading="lazy">
+                  <div class="p-3 bg-white border-t border-green-200 text-sm text-slate-700 text-center font-medium">Figura 3. Estructura de una matriz de trazabilidad</div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full bg-white text-sm">
+                    <thead class="bg-green-100 text-green-800">
+                      <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Requerimiento</th>
+                        <th class="p-3 text-left">Caso de uso</th>
+                        <th class="p-3 text-left">Diseño</th>
+                        <th class="p-3 text-left">Prueba</th>
+                        <th class="p-3 text-left">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="p-3">REQ 02</td>
+                        <td class="p-3">Solicitar certificado</td>
+                        <td class="p-3">CU 02</td>
+                        <td class="p-3">DIS 04, DIS 05, DIS 06</td>
+                        <td class="p-3">CP 08</td>
+                        <td class="p-3">Cubierto</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">REQ 03</td>
+                        <td class="p-3">Validar datos obligatorios</td>
+                        <td class="p-3">CU 04</td>
+                        <td class="p-3">DIS 04</td>
+                        <td class="p-3">CP 09</td>
+                        <td class="p-3">Cubierto</td>
+                      </tr>
+                      <tr>
+                        <td class="p-3">REQ 04</td>
+                        <td class="p-3">Consultar estado</td>
+                        <td class="p-3">CU 09</td>
+                        <td class="p-3">DIS 07</td>
+                        <td class="p-3">Pendiente</td>
+                        <td class="p-3">Parcial</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-5 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p class="font-bold text-amber-800">📌 Lectura del resultado:</p>
+                  <p class="text-amber-900">REQ 02 y REQ 03 están vinculados con diseño y pruebas. REQ 04 tiene diseño, pero no evidencia de prueba; por eso su estado es parcial y debe resolverse antes del cierre.</p>
+                </div>
+                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p class="font-bold text-green-800 mb-2">📊 Misión 4: detecta el vacío</p>
+                  <p class="text-sm mb-3">La fila de REQ 04 no tiene caso de prueba asociado. ¿Qué estado representa mejor la evidencia?</p>
+                  <div class="space-y-2">
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-matriz" data-correct="true">A. Parcial: falta una prueba que demuestre su cumplimiento.</button>
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-matriz" data-correct="false">B. Cubierto: basta con que el requisito tenga un diseño.</button>
+                  </div>
+                  <p class="mt-3 text-sm font-semibold" data-mission-feedback="contenido-matriz" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-cobertura">
+              <span>5) Cobertura, cambios y mantenimiento</span>
+              <span class="ml-2">➕</span>
+            </button>
+          </div>
+          <div id="panel-cobertura" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+            <div class="space-y-6 text-slate-700 leading-relaxed">
+              <div class="content-section">
+                <p class="mb-4">La cobertura indica qué proporción de los requerimientos aplicables tiene vínculos esperados con diseño y pruebas. No basta con el porcentaje: también hay que revisar la criticidad de los vacíos.</p>
+                <div class="grid md:grid-cols-3 gap-4">
+                  <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p class="text-3xl font-bold text-green-800">70%</p>
+                    <p class="text-sm text-slate-600">Cobertura de pruebas</p>
+                  </div>
+                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-3xl font-bold text-blue-800">3</p>
+                    <p class="text-sm text-slate-600">Requisitos con vacíos</p>
+                  </div>
+                  <div class="bg-rose-50 border border-rose-200 rounded-lg p-4">
+                    <p class="text-3xl font-bold text-rose-800">1</p>
+                    <p class="text-sm text-slate-600">Cambio con riesgo visible</p>
+                  </div>
+                </div>
+                <div class="mt-5 p-4 bg-white border border-slate-200 rounded-lg">
+                  <p class="font-semibold text-slate-800 mb-2">🛠️ Procedimiento breve para analizar un cambio</p>
+                  <ol class="list-decimal list-inside space-y-1 text-sm">
+                    <li>Identificar el requisito que cambia y la razón.</li>
+                    <li>Recorrer sus vínculos hacia diseño y pruebas.</li>
+                    <li>Revisar dependencias con otros requisitos.</li>
+                    <li>Estimar esfuerzo, riesgo y prioridad.</li>
+                    <li>Actualizar versiones, vínculos y evidencias.</li>
+                  </ol>
+                </div>
+                <div class="mt-5 bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p class="font-bold text-green-800 mb-2">🚨 Error frecuente</p>
+                  <p class="text-slate-700">Marcar todo como “cubierto” sin evidencia es una trampa: la trazabilidad pierde valor cuando el estado es solo una afirmación sin respaldo verificable.</p>
+                </div>
+                <div class="figure-frame mt-6">
+                  <img src="img/figura%204.png" alt="Relación entre requerimiento y diseño" loading="lazy">
+                  <div class="p-3 bg-white border-t border-green-200 text-sm text-slate-700 text-center font-medium">Figura 4. Relación entre un requisito y sus elementos de diseño</div>
+                </div>
+                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p class="font-bold text-green-800 mb-2">🚦 Misión 5: analiza el cambio</p>
+                  <p class="text-sm mb-3">Se añade la aprobación del encargado a una reserva. ¿Qué debes revisar antes de aceptar el cambio?</p>
+                  <div class="space-y-2">
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-cobertura" data-correct="true">A. Requisito, relaciones, diseño, pruebas, riesgo y evidencias.</button>
+                    <button type="button" class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="contenido-cobertura" data-correct="false">B. Solo el texto de la pantalla de confirmación.</button>
+                  </div>
+                  <p class="mt-3 text-sm font-semibold" data-mission-feedback="contenido-cobertura" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="actividades" class="content-pane">
+        <div class="mb-5 p-5 mission-card border border-green-200 rounded-xl shadow-sm">
+          <div class="flex items-center justify-between flex-wrap gap-4 mb-3">
+            <h3 class="text-xl font-bold text-green-800">🎮 Misión práctica</h3>
+            <span class="score-chip px-3 py-1 rounded-full font-semibold text-sm" id="activity-score">Puntaje: 0/120</span>
+          </div>
+          <div class="progress-bar mb-2">
+            <div class="progress-fill" id="activity-progress" style="width: 0%"></div>
+          </div>
+          <p class="text-sm text-slate-600">Resuelve cada misión para consolidar tus habilidades con trazabilidad.</p>
+          <p id="activity-achievement" class="hidden mt-3 p-2 bg-green-100 border border-green-300 rounded text-green-800 font-semibold" role="status">🏅 Insignia desbloqueada: Analista de impacto</p>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+            <h3 class="text-xl font-bold text-green-700 mb-3">🧩 Misión 1: identifica el vínculo correcto</h3>
+            <p class="mb-4 text-slate-700 leading-relaxed">El estudiante quiere reservar un equipo de cómputo y la plataforma debe confirmar la disponibilidad. ¿Qué relación de trazabilidad es más apropiada?</p>
+            <div class="space-y-3">
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad1" data-correct="true">A. REQ 01 → CU 03 → DIS 05 → CP 12</button>
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad1" data-correct="false">B. REQ 01 → CSS → Servicio externo sin evidencia</button>
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad1" data-correct="false">C. CU 03 → CP 12 sin nombre de requisito</button>
+            </div>
+            <p class="mt-3 text-sm font-semibold" data-mission-feedback="actividad1" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+            <h3 class="text-xl font-bold text-green-700 mb-3">📝 Misión 2: escribe un criterio verificable</h3>
+            <p class="mb-4 text-slate-700 leading-relaxed">Elige el criterio de aceptación más útil para una implementación de reserva.</p>
+            <div class="space-y-3">
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad2" data-correct="false">A. El sistema será muy fácil de usar.</button>
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad2" data-correct="true">B. El sistema mostrará la disponibilidad en un máximo de 3 segundos y rechazará fechas sin inventario.</button>
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad2" data-correct="false">C. El encargado va a revisar cada detalle manualmente.</button>
+            </div>
+            <p class="mt-3 text-sm font-semibold" data-mission-feedback="actividad2" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6">
+            <h3 class="text-xl font-bold text-green-700 mb-3">🚀 Misión 3: analiza el impacto del cambio</h3>
+            <p class="mb-4 text-slate-700 leading-relaxed">Si la reserva ahora requiere aprobación del encargado, ¿qué elementos deben revisarse primero?</p>
+            <div class="space-y-3">
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad3" data-correct="false">A. Nada, porque el flujo ya funciona.</button>
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad3" data-correct="true">B. El requisito, el caso de uso, la pantalla de confirmación, la matriz y los casos de prueba asociados.</button>
+              <button class="mission-button border border-green-300 bg-white text-slate-700 px-4 py-2 rounded-lg hover:bg-green-50 w-full text-left" data-group="actividad3" data-correct="false">C. Solo el color del botón de confirmar.</button>
+            </div>
+            <p class="mt-3 text-sm font-semibold" data-mission-feedback="actividad3" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="evaluacion" class="content-pane">
+        <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+        <div class="bg-white p-6 rounded-lg shadow-md border border-green-100">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <p class="text-slate-600">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+            <div class="score-chip px-3 py-2 rounded-full font-semibold">⏱️ Tiempo: <span id="quiz-timer">180</span>s</div>
+          </div>
+          <div id="quiz-container"></div>
+          <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+          <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+        </div>
+      </div>
+
+      <div id="recursos" class="content-pane">
+        <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+        <p class="text-slate-700 leading-relaxed mb-6">Estos recursos te ayudarán a ampliar la práctica de trazabilidad, diseño y validación en proyectos de software.</p>
+        <ul class="space-y-4">
+          <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+            <div>
+              <h3 class="font-bold text-green-700">IREB – Ingeniería de requisitos</h3>
+              <p class="text-slate-600 mb-2">Fundamentos y buenas prácticas para la gestión de requerimientos y trazabilidad.</p>
+              <a href="https://www.ireb.org/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+            </div>
+            <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+              <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                <img src="img/qr1_Rastreabilidad%20de%20un%20extremo%20a%20otro.png" alt="QR IREB" class="max-w-full max-h-full object-contain" loading="lazy">
+              </div>
+            </div>
+          </li>
+
+          <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+            <div>
+              <h3 class="font-bold text-green-700">Creación de casos de prueba manuales</h3>
+              <p class="text-slate-600 mb-2">Recursos para diseñar pruebas funcionales, alternativas y de casos de uso.</p>
+              <a href="https://www.testim.io/blog/manual-testing/" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+            </div>
+            <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+              <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                <img src="img/qr2_Creacion%20de%20casos%20de%20pruebas%20manuales.png" alt="QR casos de prueba" class="max-w-full max-h-full object-contain" loading="lazy">
+              </div>
+            </div>
+          </li>
+
+          <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+            <div>
+              <h3 class="font-bold text-green-700">Artículo de IBM sobre trazabilidad</h3>
+              <p class="text-slate-600 mb-2">Conceptos de trazabilidad, análisis de impacto y gestión del cambio en ingeniería de software.</p>
+              <a href="https://www.ibm.com/think/topics/traceability" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+            </div>
+            <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+              <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                <img src="img/qr3_articulo%20de%20IBM.png" alt="QR IBM" class="max-w-full max-h-full object-contain" loading="lazy">
+              </div>
+            </div>
+          </li>
+
+          <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+            <div>
+              <h3 class="font-bold text-green-700">Trazabilidad entre requisitos</h3>
+              <p class="text-slate-600 mb-2">Ejemplos de cómo relacionar decisiones de negocio, diseño y validación en software.</p>
+              <a href="https://www.projectmanager.com/training/requirements-traceability" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+            </div>
+            <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+              <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                <img src="img/qr4_trazabilidad%20entre%20requisitos.png" alt="QR trazabilidad" class="max-w-full max-h-full object-contain" loading="lazy">
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div id="bibliografia" class="content-pane">
+        <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+        <div class="space-y-6">
+          <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+            <span class="block text-slate-700">International Requirements Engineering Board. (2020). <i>Ingeniería de requisitos: Programa de estudios del nivel fundamental</i> (versión 3.0). IREB.</span>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+            <span class="block text-slate-700">Pressman, R. S., &amp; Maxim, B. R. (2021). <i>Ingeniería del software: Un enfoque práctico</i>. McGraw-Hill.</span>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+            <span class="block text-slate-700">Sommerville, I. (2011). <i>Ingeniería de software</i>. Pearson Educación.</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+        <p class="text-slate-600 font-medium">Creado por:</p>
+        <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+        <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = this.dataset.target;
+        document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+        this.classList.add('active');
+      });
+    });
+
+    document.getElementById('mobile-nav').addEventListener('change', function() {
+      document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById(this.value).classList.add('active');
+    });
+
+    document.querySelectorAll('.accordion-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const targetId = this.dataset.target;
+        const panel = document.querySelector(targetId);
+        const icon = this.querySelector('span:last-child');
+        if (panel.classList.contains('hidden')) {
+          panel.classList.remove('hidden');
+          icon.textContent = '➖';
+        } else {
+          panel.classList.add('hidden');
+          icon.textContent = '➕';
+        }
+      });
+    });
+  </script>
+
+  <script>
+    const contentScoreDisplay = document.getElementById('content-score');
+    const contentProgress = document.getElementById('content-progress');
+    const activityScoreDisplay = document.getElementById('activity-score');
+    const activityProgress = document.getElementById('activity-progress');
+
+    let contentPoints = 0;
+    let activityPoints = 0;
+
+    function updateContentProgress() {
+      const total = 100;
+      const pct = Math.min(100, Math.round((contentPoints / total) * 100));
+      contentScoreDisplay.textContent = `Puntaje: ${contentPoints}/100`;
+      contentProgress.style.width = pct + '%';
+      if (pct === 100) document.getElementById('content-achievement').classList.remove('hidden');
+    }
+
+    function updateActivityProgress() {
+      const total = 120;
+      const pct = Math.min(100, Math.round((activityPoints / total) * 100));
+      activityScoreDisplay.textContent = `Puntaje: ${activityPoints}/120`;
+      activityProgress.style.width = pct + '%';
+      if (pct === 100) document.getElementById('activity-achievement').classList.remove('hidden');
+    }
+
+    document.querySelectorAll('.mission-button').forEach(button => {
+      button.addEventListener('click', function () {
+        const isCorrect = this.dataset.correct === 'true';
+        const group = this.dataset.group;
+        const sameGroupButtons = document.querySelectorAll(`.mission-button[data-group="${group}"]`);
+
+        const feedback = document.querySelector(`[data-mission-feedback="${group}"]`);
+        if (isCorrect) {
+          sameGroupButtons.forEach(button => {
+            button.disabled = true;
+            button.classList.remove('bg-white', 'hover:bg-green-50');
+            if (button.dataset.correct === 'true') {
+              button.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+            }
+          });
+          feedback.textContent = '¡Excelente! 🎉 Misión completada.';
+          feedback.className = 'mt-3 text-sm font-semibold text-green-800';
+          if (group === 'concepto' || group.startsWith('contenido-')) {
+            contentPoints += 20;
+            updateContentProgress();
+          } else {
+            activityPoints += 40;
+            updateActivityProgress();
+          }
+        } else {
+          this.disabled = true;
+          this.classList.remove('bg-white', 'hover:bg-green-50');
+          this.classList.add('bg-red-100', 'border-red-300', 'text-red-700');
+          feedback.textContent = '¡Casi! Inténtalo de nuevo 💪 Revisa las relaciones y vuelve a elegir.';
+          feedback.className = 'mt-3 text-sm font-semibold text-amber-800';
+        }
+      });
+    });
+  </script>
+
+  <script>
+    const quizData = [
+      {
+        question: '¿Qué es la trazabilidad en un proyecto de software?',
+        options: ['Una lista de tareas sin orden ni evidencia', 'La capacidad de seguir un requisito desde su origen hasta su validación', 'Un documento que reemplaza el diseño', 'Una prueba automática sin relación con el negocio'],
+        correct: 1
+      },
+      {
+        question: '¿Cuál es la mejor definición de trazabilidad hacia atrás?',
+        options: ['Ver si un requisito ya fue entregado al usuario', 'Identificar qué necesidad justificó una pantalla, componente o prueba', 'Comparar dos versiones del mismo sistema', 'Crear una base de datos del proyecto'],
+        correct: 1
+      },
+      {
+        question: '¿Qué relación es más útil cuando un requerimiento se transforma en una pantalla o componente?',
+        options: ['Deriva de', 'Realiza', 'Evidencia', 'Se apoya en'],
+        correct: 1
+      },
+      {
+        question: '¿Por qué la matriz de trazabilidad es valiosa?',
+        options: ['Porque reemplaza todo el análisis del proyecto', 'Porque permite detectar vacíos, inconsistencias y requisitos sin prueba', 'Porque elimina la necesidad de diseñar casos de uso', 'Porque obliga a terminar todo el proyecto sin cambios'],
+        correct: 1
+      },
+      {
+        question: '¿Qué criterio de aceptación es verificable?',
+        options: ['El sistema será fácil de usar', 'El sistema mostrará la disponibilidad en menos de 3 segundos', 'La interfaz será moderna y atractiva', 'El encargado tendrá una buena impresión'],
+        correct: 1
+      },
+      {
+        question: 'Si un requisito cambia, ¿qué se debe revisar antes de aprobar el cambio?',
+        options: ['Solo la fecha del proyecto', 'Los vínculos con diseño, pruebas y dependencias asociadas', 'La cantidad de archivos que hay en el proyecto', 'Solo el nombre del requisito'],
+        correct: 1
+      }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    let timeLeft = 180;
+    let timerInterval;
+    let timerStarted = false;
+
+    quizData.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.classList.add('mb-6');
+      div.innerHTML = `
+        <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+          ${item.options.map((opt, i) => `
+            <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                 data-question="${index}" data-option="${i}">
+              <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      quizContainer.appendChild(div);
+    });
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const q = this.dataset.question;
+        document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+
+    function updateTimer() {
+      const timerEl = document.getElementById('quiz-timer');
+      timerEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('submit-quiz-btn').click();
+      }
+      timeLeft -= 1;
+    }
+
+    function startTimer() {
+      if (timerStarted) return;
+      timerStarted = true;
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    document.querySelector('.sidebar-link[data-target="evaluacion"]').addEventListener('click', startTimer);
+    document.getElementById('mobile-nav').addEventListener('change', event => {
+      if (event.target.value === 'evaluacion') startTimer();
+    });
+
+    document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+      clearInterval(timerInterval);
+      let score = 0;
+      quizData.forEach((item, index) => {
+        const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+        if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+      });
+      const result = document.getElementById('quiz-result');
+      const pct = Math.round((score / quizData.length) * 100);
+      result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+      result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+      document.querySelectorAll('.quiz-option').forEach(opt => opt.style.pointerEvents = 'none');
+    });
+  </script>
+
+  <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
