@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Consultas SELECT, filtros, ordenamiento y funciones</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .content-pane img[onclick^="openImgModal"] {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 1024px) {
+            .content-pane img[onclick^="openImgModal"] { width: 75%; }
+        }
+        .sql-code {
+            background-color: #0f172a;
+            color: #bbf7d0;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .sql-code .kw { color: #7dd3fc; font-weight: 600; }
+        .sql-code .cm { color: #94a3b8; font-style: italic; }
+        .sql-input { font-family: Consolas, 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">¡Hazle preguntas a tus datos! 🔍</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Con el DDL creaste la estructura de tu base de datos y con el DML aprendiste a insertar, actualizar y eliminar información. 💪 Pero la verdadera razón por la que existe una base de datos es poder <strong>sacarle información útil</strong> en cualquier momento para responder preguntas concretas: ¿cuáles productos tienen menos stock? 📦 ¿qué estudiantes tienen nota superior a 4.0? 🎓 ¿cuántos pedidos hubo el mes pasado? 🛒 Todas se responden con una sola instrucción, la más usada de todo SQL: <strong>SELECT</strong>.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    SELECT pertenece al <strong>DQL</strong> (<em>Data Query Language</em>) y es la herramienta con la que un desarrollador o analista de datos pasa la mayor parte de su tiempo. 👩‍💻 A diferencia de INSERT, UPDATE y DELETE, <strong>SELECT nunca modifica los datos</strong>: solo los consulta y los muestra. Es una operación de <strong>"solo lectura"</strong>, sin riesgo de dañar nada. 😌
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Vas a construir consultas cada vez más completas: elegir columnas, filtrar filas con condiciones, ordenar y limitar resultados y, al final, resumir la información con funciones de agregación. 📊 Todo esto es la base indispensable para el último tema del curso, donde combinarás varias tablas con <strong>JOIN</strong>. 🔗
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este tema vas a convertir cualquier pregunta de negocio en una consulta SQL que la responde en segundos. ¡Bienvenido al mundo de los analistas de datos! <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🔍</span>
+                        <span><strong>Construir</strong> consultas SELECT para recuperar información específica de una o varias columnas de una tabla.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🎯</span>
+                        <span><strong>Aplicar</strong> filtros mediante la cláusula WHERE utilizando operadores de comparación, lógicos y de patrón sobre distintos tipos de datos.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">↕️</span>
+                        <span><strong>Ordenar y limitar</strong> los resultados de una consulta mediante las cláusulas ORDER BY y LIMIT.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">📊</span>
+                        <span><strong>Aplicar</strong> funciones de agregación (COUNT, SUM, AVG, MAX, MIN) junto con GROUP BY y HAVING para resumir información de un conjunto de datos.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- PANEL DE GAMIFICACIÓN DEL CONTENIDO -->
+                    <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Contenido 📚</h2>
+                    <div class="mb-6 p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🎮 Ruta del Detective de Datos</p>
+                            <p class="font-bold text-green-700 text-lg">⭐ <span id="game-points">0</span> XP</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div id="game-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-2">Abre cada acordeón y completa las 5 misiones para ganar tu insignia 🏆</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span id="badge-m1" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🔍 Explorador SELECT</span>
+                            <span id="badge-m2" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🎯 Maestro del filtro</span>
+                            <span id="badge-m3" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🏅 Creador de rankings</span>
+                            <span id="badge-m4" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">📊 Analista de resúmenes</span>
+                            <span id="badge-m5" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🧠 Mente del SGBD</span>
+                        </div>
+                        <p id="badge-final" class="hidden mt-4 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡INSIGNIA DESBLOQUEADA: DETECTIVE DE DATOS! 🎉 Completaste las 5 misiones del contenido.</p>
+                    </div>
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>🔍 1. SELECT: pidiéndole datos a la tabla</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-3">La forma más simple trae <strong>todas las columnas y todas las filas</strong>. El asterisco <code class="bg-slate-100 px-1 rounded">*</code> es un comodín que significa "todas las columnas":</p>
+                                <div class="mb-4">
+                                    <img src="img/SELECT_ De consulta a resultados.png" alt="Infografía: SELECT * FROM producto y su resultado" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-yellow-900">💡 <strong>Hábito profesional:</strong> en aplicaciones reales evita <code>SELECT *</code> y pide solo las columnas que necesitas. La consulta es más rápida (no viaja información de más) y tu código no se rompe si mañana alguien agrega columnas a la tabla.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="img/Consultando columnas específicas en SQL.png" alt="Infografía: SELECT de columnas específicas nombre, precio y stock" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3">🏷️ Con <code class="bg-slate-100 px-1 rounded">AS</code> le pones un <strong>alias</strong> (apodo temporal) a una columna en el resultado. Súper útil para reportes y con las funciones de agregación que verás más adelante:</p>
+                                <div class="mb-4">
+                                    <img src="img/Alias SQL_ columnas más claras.png" alt="Infografía: alias de columnas con AS" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <!-- MISIÓN 1 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m1">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 1: Explorador SELECT</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+20 XP</span>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">1️⃣ Quieres ver solo el nombre y el precio de los productos. ¿Cuál consulta usas?</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">SELECT * FROM producto;</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">SELECT nombre, precio FROM producto;</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">SELECT producto FROM nombre, precio;</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">2️⃣ Ejecutas <span class="font-mono text-sm">SELECT precio AS precio_venta FROM producto;</span> ¿Qué pasa con la tabla?</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">La columna precio queda renombrada para siempre</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">Nada: el alias solo cambia el nombre en el resultado</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">Se crea una columna nueva llamada precio_venta</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">3️⃣ ¿Por qué SELECT se considera una operación segura?</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">Porque es de solo lectura: nunca modifica los datos</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">Porque siempre hace una copia de seguridad antes</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">Porque solo puede usarla el administrador</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto: nombre completo y correo</p>
+                                    <p class="text-sm mb-3">Escribe una consulta sobre la tabla <strong>estudiante</strong> que muestre solo <strong>nombre</strong> y <strong>correo</strong>, renombrando nombre como <strong>nombre_completo</strong>.</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-alias', this)">👀 Ver solución</button>
+                                    <div id="sol-alias" class="hidden mt-4">
+                                        <img src="img/Infografía SQL_ Tabla, Consulta y Resultado.png" alt="Infografía: SELECT nombre AS nombre_completo, correo FROM estudiante" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>🎯 2. WHERE: filtrando resultados</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-3">El <strong>WHERE</strong> que ya usaste con UPDATE y DELETE hace lo mismo en un SELECT: deja pasar solo las filas que cumplen la condición. 🚦 Tu caja de herramientas:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-bold text-blue-800">⚖️ Comparación</p><p class="text-sm font-mono">=  &lt;&gt;  !=  &gt;  &lt;  &gt;=  &lt;=</p></div>
+                                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg"><p class="font-bold text-purple-800">🧠 Lógicos</p><p class="text-sm"><span class="font-mono">AND</span> (ambas) · <span class="font-mono">OR</span> (al menos una) · <span class="font-mono">NOT</span> (niega)</p></div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg"><p class="font-bold text-green-800">📏 BETWEEN</p><p class="text-sm">Dentro de un rango, <strong>incluyendo</strong> ambos extremos.</p></div>
+                                    <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg"><p class="font-bold text-orange-800">📋 IN</p><p class="text-sm">Coincide con algún valor de una lista: <span class="font-mono">IN (3, 4)</span></p></div>
+                                    <div class="p-3 bg-pink-50 border border-pink-200 rounded-lg"><p class="font-bold text-pink-800">🔤 LIKE</p><p class="text-sm"><span class="font-mono">%</span> = cualquier secuencia · <span class="font-mono">_</span> = un solo carácter</p></div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg"><p class="font-bold text-slate-800">🕳️ IS NULL / IS NOT NULL</p><p class="text-sm">Para preguntar si falta un valor.</p></div>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="img/Guía SQL_ Filtrando resultados con WHERE.png" alt="Infografía: cinco ejemplos de filtros con WHERE" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-red-900">🪤 <strong>La trampa del NULL:</strong> <code>WHERE telefono = NULL</code> nunca devuelve filas. ¿Por qué? NULL significa "valor desconocido", y comparar algo con un desconocido da… desconocido (ni verdadero ni falso). Por eso SQL tiene <code>IS NULL</code>. ¡Hasta <code>NULL = NULL</code> da desconocido! 🤯</p>
+                                </div>
+
+                                <!-- MISIÓN 2: laboratorio de filtros -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m2">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 2: Laboratorio de filtros</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Elige un reto, escoge el WHERE que lo resuelve y ejecútalo. Las filas que pasan el filtro se iluminan. 🔦</p>
+                                    <div class="flex flex-wrap gap-2 mb-3" id="filtro-retos"></div>
+                                    <p id="filtro-reto-actual" class="text-sm font-semibold text-slate-700 mb-2"></p>
+                                    <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                                        <span class="font-mono text-sm self-center">SELECT * FROM producto WHERE</span>
+                                        <select id="filtro-cond" class="sql-input flex-1 p-2 border-2 border-teal-200 rounded-lg text-xs sm:text-sm bg-white focus:border-teal-500 focus:outline-none"></select>
+                                        <button type="button" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="ejecutarFiltro()">▶️ Ejecutar</button>
+                                    </div>
+                                    <div class="overflow-x-auto bg-white rounded-lg border border-teal-200 mb-2">
+                                        <table class="w-full text-sm border-collapse" id="filtro-table"></table>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto en parejas: inalámbricos con presupuesto</p>
+                                    <p class="text-sm mb-3">Escriban un SELECT sobre <strong>producto</strong> que cumpla a la vez: precio <strong>entre 50000 y 300000</strong> y nombre que <strong>contenga "inalámbrico"</strong> en cualquier parte. Pista: BETWEEN, LIKE y el operador lógico correcto. 😉</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-inalambrico', this)">👀 Ver solución</button>
+                                    <div id="sol-inalambrico" class="hidden mt-4">
+                                        <img src="img/Infografía SQL_ Filtrado de productos inalámbricos.png" alt="Infografía: SELECT con BETWEEN, AND y LIKE para productos inalámbricos" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>↕️ 3. ORDER BY y LIMIT: rankings y top 5</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-3">¿Recuerdas que en el modelo relacional <strong>el orden de las filas no importa</strong>? Por eso, si quieres un orden, hay que pedirlo con <code class="bg-slate-100 px-1 rounded">ORDER BY</code>: <strong>ASC</strong> ⬆️ (ascendente, el valor por defecto) o <strong>DESC</strong> ⬇️ (descendente). Puedes ordenar por varias columnas: si hay empate en la primera, decide la segunda.</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía SQL_ ordenamiento y límites.png" alt="Infografía: ORDER BY DESC y ORDER BY por dos columnas" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3"><code class="bg-slate-100 px-1 rounded">LIMIT</code> corta el resultado a un máximo de filas. Combinado con ORDER BY te da los famosos <strong>"top"</strong>: los 5 más caros, los 3 mejores promedios… 🏆</p>
+                                <div class="mb-4">
+                                    <img src="img/Flujo SQL_ tabla, consulta y resultados.png" alt="Infografía: los 5 productos con mayor precio con ORDER BY y LIMIT" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead><tr class="bg-green-600 text-white"><th class="p-2 text-left rounded-tl-lg">Motor</th><th class="p-2 text-left rounded-tr-lg">Los 5 más caros</th></tr></thead>
+                                        <tbody>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-semibold">🐬 MySQL / 🐘 PostgreSQL</td><td class="p-2 font-mono text-xs">... ORDER BY precio DESC LIMIT 5;</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-semibold">🪟 SQL Server</td><td class="p-2 font-mono text-xs">SELECT TOP 5 nombre, precio FROM producto ORDER BY precio DESC;</td></tr>
+                                            <tr class="bg-white"><td class="p-2 font-semibold">📜 Estándar SQL</td><td class="p-2 font-mono text-xs">... ORDER BY precio DESC FETCH FIRST 5 ROWS ONLY;</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- MISIÓN 3: ranking -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m3">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 3: Creador de rankings</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Configura la consulta para obtener <strong>los 3 cursos con más créditos</strong>, de mayor a menor, mostrando nombre y créditos. 🏅</p>
+                                    <div class="flex flex-wrap items-center gap-2 mb-3 font-mono text-xs sm:text-sm">
+                                        <span>SELECT nombre, creditos FROM curso ORDER BY</span>
+                                        <select id="rk-col" class="sql-input p-1 border-2 border-teal-200 rounded bg-white"><option value="id_curso">id_curso</option><option value="nombre">nombre</option><option value="creditos">creditos</option></select>
+                                        <select id="rk-dir" class="sql-input p-1 border-2 border-teal-200 rounded bg-white"><option>ASC</option><option>DESC</option></select>
+                                        <span>LIMIT</span>
+                                        <select id="rk-lim" class="sql-input p-1 border-2 border-teal-200 rounded bg-white"><option value="0">(sin límite)</option><option>3</option><option>5</option></select>
+                                        <button type="button" class="font-sans bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-1.5 px-4 rounded-lg transition" onclick="ejecutarRanking()">▶️ Ejecutar</button>
+                                    </div>
+                                    <div class="overflow-x-auto bg-white rounded-lg border border-teal-200 mb-2">
+                                        <table class="w-full text-sm border-collapse" id="rk-table"></table>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                    <div id="m3-reward" class="hidden mt-4">
+                                        <div class="p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-900 mb-3">🤔 <strong>Ojo con los empates:</strong> Redes, Sistemas Operativos y Seguridad Informática también tienen 4 créditos. ¿Por qué salió Base de Datos I? Porque el SGBD desempata como le parezca. Para un ranking justo agrega un segundo criterio: <code>ORDER BY creditos DESC, nombre ASC</code>.</div>
+                                        <img src="img/Consulta SQL_ Los 3 cursos con más créditos ejemplo.png" alt="Infografía: los 3 cursos con mayor número de créditos" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>📊 4. Funciones de agregación, GROUP BY y HAVING</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-3">Hasta ahora cada consulta devolvía filas una por una. Pero muchas preguntas piden <strong>resumir muchas filas en un solo valor</strong>: ¿cuántos estudiantes hay? ¿cuál es el precio promedio? Para eso están las <strong>funciones de agregación</strong>: 🧮</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4 text-center text-sm">
+                                    <div class="p-2 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-mono font-bold text-blue-800">COUNT()</p><p class="text-xs">cuenta filas</p></div>
+                                    <div class="p-2 bg-green-50 border border-green-200 rounded-lg"><p class="font-mono font-bold text-green-800">SUM()</p><p class="text-xs">suma</p></div>
+                                    <div class="p-2 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="font-mono font-bold text-yellow-800">AVG()</p><p class="text-xs">promedio</p></div>
+                                    <div class="p-2 bg-red-50 border border-red-200 rounded-lg"><p class="font-mono font-bold text-red-800">MAX()</p><p class="text-xs">el más alto</p></div>
+                                    <div class="p-2 bg-purple-50 border border-purple-200 rounded-lg"><p class="font-mono font-bold text-purple-800">MIN()</p><p class="text-xs">el más bajo</p></div>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="img/Infografía SQL_ funciones de agregación.png" alt="Infografía: COUNT, AVG, MAX y MIN con ejemplos" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3">🗂️ Se vuelven aún más poderosas con <code class="bg-slate-100 px-1 rounded">GROUP BY</code>: agrupa las filas que comparten un valor y calcula la función <strong>para cada grupo</strong>. Es como separar tus fotos por álbum y contar cuántas hay en cada uno. 📸</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía SQL_ Agrupación con GROUP BY.png" alt="Infografía: GROUP BY id_categoria con COUNT" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3">🚦 ¿Y si quieres solo los grupos que cumplen algo, como "categorías con más de 5 productos"? <strong>WHERE no sirve</strong>, porque se evalúa <em>antes</em> de agrupar. Para filtrar <em>después</em> de agrupar existe <code class="bg-slate-100 px-1 rounded">HAVING</code>.</p>
+                                <div class="mb-4">
+                                    <img src="img/Infografía SQL_ Filtrado de grupos con HAVING.png" alt="Infografía: HAVING COUNT(*) > 5 y diferencia entre WHERE y HAVING" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+
+                                <!-- Calculadora de agregados -->
+                                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="font-bold text-blue-800 mb-2">🧮 Calculadora de agregados (juega con ella)</p>
+                                    <div class="flex flex-wrap items-center gap-2 mb-3 font-mono text-xs sm:text-sm">
+                                        <span>SELECT</span>
+                                        <span id="agg-grp-col" class="hidden">id_categoria,</span>
+                                        <select id="agg-fn" class="sql-input p-1 border-2 border-blue-200 rounded bg-white"><option value="COUNT">COUNT(*)</option><option value="SUM">SUM(precio)</option><option value="AVG">AVG(precio)</option><option value="MAX">MAX(precio)</option><option value="MIN">MIN(precio)</option></select>
+                                        <span>FROM producto</span>
+                                        <label class="font-sans flex items-center gap-1"><input type="checkbox" id="agg-group"> GROUP BY id_categoria</label>
+                                        <label class="font-sans flex items-center gap-1"><input type="checkbox" id="agg-having"> HAVING COUNT(*) &gt; 2</label>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div class="overflow-x-auto bg-white rounded-lg border border-blue-200"><p class="text-xs font-bold text-blue-800 p-2">📦 producto</p><table class="w-full text-xs border-collapse" id="agg-src"></table></div>
+                                        <div class="overflow-x-auto bg-white rounded-lg border border-blue-200"><p class="text-xs font-bold text-blue-800 p-2">📊 Resultado</p><table class="w-full text-xs border-collapse" id="agg-out"></table><p id="agg-note" class="text-xs text-slate-500 p-2"></p></div>
+                                    </div>
+                                </div>
+
+                                <!-- MISIÓN 4 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m4">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 4: ¿Qué herramienta usas?</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Para cada pregunta de negocio elige la función y la cláusula necesarias. Al terminar se desbloquean las consultas resueltas. 🔓</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">1️⃣ ¿Cuántos cursos tienen 4 créditos?</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">COUNT + WHERE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">SUM + HAVING</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">COUNT + GROUP BY</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">2️⃣ ¿Cuál es la nota promedio de cada curso por separado?</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">AVG + WHERE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">AVG + GROUP BY</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">MAX + GROUP BY</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">3️⃣ ¿Cuáles departamentos tienen más de 10 empleados?</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">COUNT + WHERE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">SUM + GROUP BY</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">COUNT + GROUP BY + HAVING</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2">4️⃣ ¿Cuál es el salario más alto de toda la empresa?</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">MAX (sin cláusulas extra)</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">MAX + GROUP BY</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">SUM + HAVING</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                    <div id="m4-reward" class="hidden mt-4">
+                                        <p class="text-sm font-bold text-green-700 mb-2">🔓 ¡Consultas desbloqueadas! Así se resuelve cada pregunta:</p>
+                                        <img src="img/Infografía SQL_ Cuatro ejemplos prácticos.png" alt="Infografía: cuatro preguntas de negocio resueltas con agregación" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: GROUP BY y HAVING en SQL
+                                     Buscar: "GROUP BY y HAVING SQL explicación con ejemplos en español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: GROUP BY y HAVING explicados con ejemplos</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"GROUP BY y HAVING SQL explicación con ejemplos en español"</em></p>
+                                    <a href="#" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: (pega aquí la URL) y ponle el título: (escribe aquí el título)."
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🧠 5. El orden secreto en que el SGBD lee tu consulta</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-3">Tú escribes la consulta empezando por SELECT, pero el SGBD <strong>no la procesa en ese orden</strong>. 😮 Lógicamente, primero busca la tabla, luego filtra, agrupa, filtra grupos y recién ahí elige columnas y ordena. Entender esto resuelve dos misterios clásicos:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg"><p class="font-bold text-orange-800">❓ ¿Por qué WHERE no acepta COUNT()?</p><p class="text-sm">Porque WHERE trabaja <strong>antes</strong> de que existan los grupos: todavía no hay nada que contar. Por eso existe HAVING.</p></div>
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-bold text-blue-800">❓ ¿Por qué ORDER BY sí acepta alias?</p><p class="text-sm">Porque ORDER BY ocurre <strong>después</strong> del SELECT, cuando el alias ya fue creado. En el WHERE el alias aún no existe.</p></div>
+                                </div>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead><tr class="bg-green-600 text-white"><th class="p-2 text-left rounded-tl-lg">Cláusula</th><th class="p-2 text-left">✍️ Orden al escribir</th><th class="p-2 text-left rounded-tr-lg">⚙️ Orden lógico de ejecución</th></tr></thead>
+                                        <tbody>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono">SELECT</td><td class="p-2">1</td><td class="p-2">5</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-mono">FROM</td><td class="p-2">2</td><td class="p-2">1</td></tr>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono">WHERE</td><td class="p-2">3</td><td class="p-2">2</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-mono">GROUP BY</td><td class="p-2">4</td><td class="p-2">3</td></tr>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono">HAVING</td><td class="p-2">5</td><td class="p-2">4</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-mono">ORDER BY</td><td class="p-2">6</td><td class="p-2">6</td></tr>
+                                            <tr class="bg-white"><td class="p-2 font-mono">LIMIT</td><td class="p-2">7</td><td class="p-2">7</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- MISIÓN 5: secuencia -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m5">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 5: Piensa como el SGBD</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+40 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Toca las cláusulas en el <strong>orden lógico de ejecución</strong> (no en el que se escriben). Sin mirar la tabla, ¿eh? 😏</p>
+                                    <div class="flex flex-wrap gap-2 mb-3" id="seq-m5"></div>
+                                    <p class="text-xs font-semibold text-slate-500 mb-1">Tu secuencia:</p>
+                                    <div id="seq-m5-out" class="sql-code text-xs" style="min-height:2.5rem;white-space:pre-wrap;">…</div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Panel de progreso de actividades -->
+                    <div class="p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">📈 Analista de datos por un día</p>
+                            <p class="font-bold text-green-700">🎖️ <span id="act-points">0</span>/4 misiones</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-2">
+                            <div id="act-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500">La gerencia te pidió respuestas rápidas. Escribe cada consulta y pulsa <strong>Probar</strong>: el verificador revisa tu SQL y te muestra el resultado. 🧪</p>
+                        <p id="act-badge" class="hidden mt-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡RANGO DESBLOQUEADO: ANALISTA SQL! 🎉 Completaste las 4 misiones.</p>
+                    </div>
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">💎 Misión 1: Los productos premium</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Escribe una consulta SELECT sobre la tabla <strong>producto</strong> que muestre el <strong>nombre</strong> y el <strong>precio</strong> de los productos con precio <strong>mayor a 100000</strong>, ordenados de <strong>mayor a menor</strong> precio.
+                        </p>
+                        <textarea id="act1-text" rows="4" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="SELECT ..."></textarea>
+                        <button type="button" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="probarA1()">🧪 Probar</button>
+                        <div id="a1-log" class="sql-code text-xs mt-3" style="min-height:2.5rem;white-space:pre-wrap;">mysql&gt; _</div>
+                        <div class="overflow-x-auto bg-white rounded-lg border border-green-200 mt-2"><table class="w-full text-sm border-collapse" id="a1-table"></table></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a1', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> sentencia SELECT que devuelva las columnas solicitadas y que cumpla con los parámetros establecidos.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">👥 Misión 2: ¿Cuántos hay en cada curso?</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Escribe una consulta que use <strong>GROUP BY</strong> y <strong>COUNT()</strong> para mostrar cuántos estudiantes hay matriculados en <strong>cada curso</strong>, a partir de la tabla <strong>matricula(id_matricula, id_estudiante, id_curso)</strong>.
+                        </p>
+                        <textarea id="act2-text" rows="4" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="SELECT id_curso, ..."></textarea>
+                        <button type="button" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="probarA2()">🧪 Probar</button>
+                        <div id="a2-log" class="sql-code text-xs mt-3" style="min-height:2.5rem;white-space:pre-wrap;">mysql&gt; _</div>
+                        <div class="overflow-x-auto bg-white rounded-lg border border-green-200 mt-2"><table class="w-full text-sm border-collapse" id="a2-table"></table></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a2', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> sentencia SELECT que use el agrupamiento con GROUP BY y la función COUNT().</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">⚖️ Misión 3: WHERE vs HAVING, cara a cara</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Explica con tus propias palabras la diferencia entre <strong>WHERE</strong> y <strong>HAVING</strong>, indicando en qué momento se debe usar cada una. Completa el cuadro comparativo:
+                        </p>
+                        <div class="overflow-x-auto mb-3">
+                            <table class="w-full text-sm border-collapse">
+                                <thead><tr class="bg-green-600 text-white"><th class="p-2 text-left rounded-tl-lg w-1/4">Criterio</th><th class="p-2 text-left">WHERE</th><th class="p-2 text-left rounded-tr-lg">HAVING</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-green-100"><td class="p-2 font-semibold">¿Qué filtra?</td><td class="p-1"><textarea class="a3-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td><td class="p-1"><textarea class="a3-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td></tr>
+                                    <tr class="border-b border-green-100"><td class="p-2 font-semibold">¿Cuándo actúa?</td><td class="p-1"><textarea class="a3-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td><td class="p-1"><textarea class="a3-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td></tr>
+                                    <tr class="border-b border-green-100"><td class="p-2 font-semibold">¿Acepta funciones de agregación?</td><td class="p-1"><textarea class="a3-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td><td class="p-1"><textarea class="a3-cell w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td></tr>
+                                    <tr><td class="p-2 font-semibold">Ejemplo</td><td class="p-1"><textarea class="a3-cell sql-input w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td><td class="p-1"><textarea class="a3-cell sql-input w-full p-2 border-2 border-slate-200 rounded text-xs focus:border-green-500 focus:outline-none" rows="2"></textarea></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a3', this)">🚀 Completar misión</button>
+                            <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-a3', this)">👀 Comparar con un cuadro modelo</button>
+                        </div>
+                        <div id="sol-a3" class="hidden mt-3 overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead><tr class="bg-slate-600 text-white"><th class="p-2 text-left">Criterio</th><th class="p-2 text-left">WHERE</th><th class="p-2 text-left">HAVING</th></tr></thead>
+                                <tbody>
+                                    <tr class="bg-white border-b"><td class="p-2 font-semibold">¿Qué filtra?</td><td class="p-2">Filas individuales</td><td class="p-2">Grupos ya formados</td></tr>
+                                    <tr class="bg-slate-50 border-b"><td class="p-2 font-semibold">¿Cuándo actúa?</td><td class="p-2">Antes de GROUP BY</td><td class="p-2">Después de GROUP BY</td></tr>
+                                    <tr class="bg-white border-b"><td class="p-2 font-semibold">¿Agregación?</td><td class="p-2">No</td><td class="p-2">Sí (COUNT, AVG, SUM…)</td></tr>
+                                    <tr class="bg-slate-50"><td class="p-2 font-semibold">Ejemplo</td><td class="p-2 font-mono text-xs">WHERE precio &gt; 100000</td><td class="p-2 font-mono text-xs">HAVING COUNT(*) &gt; 5</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> cuadro comparativo.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 4 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a4">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧠 Misión 4: Tu propia pregunta de negocio</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Con las tablas de la unidad (<strong>producto, categoria, estudiante, curso, matricula</strong>), escribe una consulta SELECT completa que combine <strong>al menos cuatro</strong> de estas cláusulas: WHERE, GROUP BY, HAVING, ORDER BY, LIMIT. Escribe también, en una frase, la <strong>pregunta de negocio</strong> que responde. 💡 <em>Ejemplo: "las tres categorías con más productos activos y precio promedio superior a 100000".</em>
+                        </p>
+                        <label for="act4-preg" class="block text-sm font-semibold text-slate-700 mb-1">❓ Pregunta de negocio:</label>
+                        <input id="act4-preg" type="text" class="w-full p-2 border-2 border-slate-200 rounded-lg text-sm mb-3 focus:border-green-500 focus:outline-none" placeholder="¿Cuáles son...?">
+                        <label for="act4-text" class="block text-sm font-semibold text-slate-700 mb-1">🧾 Tu consulta:</label>
+                        <textarea id="act4-text" rows="6" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="SELECT ...&#10;FROM ...&#10;WHERE ...&#10;GROUP BY ...&#10;HAVING ...&#10;ORDER BY ...&#10;LIMIT ...;"></textarea>
+                        <p class="text-xs font-semibold text-slate-500 mt-2 mb-1">Cláusulas detectadas (en vivo):</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono" id="a4-chips"></div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a4', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800"><span class="font-bold">📝 Producto esperado:</span> expresión SQL en la que se utilicen SELECT, WHERE, GROUP BY, HAVING, ORDER BY y LIMIT.</p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🎥 Consulta de datos: SELECT + WHERE — Curso de PostgreSQL (Video)</h3>
+                            <p class="text-slate-600 mb-2">Video práctico sobre cómo consultar y filtrar datos con SELECT y WHERE.</p>
+                            <a href="https://www.youtube.com/watch?v=9MrC8xJtUYw" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr1.png" alt="QR Consulta de datos: SELECT + WHERE" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">📊 Funciones de agregación SQL</h3>
+                            <p class="text-slate-600 mb-2">Explicación y ejemplos interactivos de COUNT, SUM, AVG, MAX y MIN en W3Schools (en español).</p>
+                            <a href="https://www-w3schools-com.translate.goog/sql/sql_aggregate_functions.asp?_x_tr_sl=en&amp;_x_tr_tl=es&amp;_x_tr_hl=es&amp;_x_tr_pto=tc" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr2.png" alt="QR Funciones de agregación SQL" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PostgreSQL Global Development Group. (2026). <i>PostgreSQL 18 documentation: Queries</i>.<br>
+                            <a href="https://www.postgresql.org/docs/current/queries.html" class="text-green-700 underline break-all" target="_blank">https://www.postgresql.org/docs/current/queries.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MySQL. (2026). <i>MySQL 8.4 reference manual: SELECT statement</i>. Oracle Corporation.<br>
+                            <a href="https://dev.mysql.com/doc/refman/8.4/en/select.html" class="text-green-700 underline break-all" target="_blank">https://dev.mysql.com/doc/refman/8.4/en/select.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Coronel, C., &amp; Morris, S. (2019). <i>Database systems: Design, implementation, and management</i> (13.ª ed.). Cengage Learning.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Reis, J., &amp; Housley, M. (2022). <i>Fundamentals of data engineering: Plan and build robust data systems</i>. O'Reilly Media.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="img-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" onclick="closeImgModal()">
+        <img id="img-modal-src" src="" alt="Imagen ampliada" class="max-w-full max-h-full rounded-lg shadow-2xl">
+        <button type="button" class="absolute top-4 right-4 text-white text-3xl font-bold hover:text-green-300" onclick="closeImgModal()">✖</button>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿A qué subconjunto de SQL pertenece la instrucción SELECT?",
+                options: ["DDL", "DML", "DQL", "DCL"],
+                correct: 2
+            },
+            {
+                question: "¿Por qué se recomienda evitar SELECT * en aplicaciones reales?",
+                options: ["Porque SELECT * modifica los datos", "Porque trae información innecesaria y el código se vuelve frágil ante cambios en la tabla", "Porque solo funciona en PostgreSQL", "Porque no permite usar WHERE"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace la palabra clave AS en SELECT precio AS precio_venta FROM producto?",
+                options: ["Renombra temporalmente la columna en el resultado", "Cambia para siempre el nombre de la columna", "Crea una nueva tabla", "Convierte el precio en texto"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál condición encuentra los clientes cuyo nombre empieza por 'Mar'?",
+                options: ["nombre = 'Mar%'", "nombre LIKE '%Mar'", "nombre IN ('Mar')", "nombre LIKE 'Mar%'"],
+                correct: 3
+            },
+            {
+                question: "¿Cuál es la forma correcta de buscar los estudiantes que NO tienen teléfono registrado?",
+                options: ["WHERE telefono = NULL", "WHERE telefono IS NULL", "WHERE telefono = ''", "WHERE telefono == NULL"],
+                correct: 1
+            },
+            {
+                question: "precio BETWEEN 50000 AND 300000 incluye un producto que cuesta exactamente 300000?",
+                options: ["Sí, BETWEEN incluye ambos extremos", "No, BETWEEN excluye los extremos", "Solo si se agrega ORDER BY", "Depende del tipo DECIMAL"],
+                correct: 0
+            },
+            {
+                question: "¿Qué consulta devuelve los 5 productos más caros en MySQL?",
+                options: ["SELECT nombre, precio FROM producto LIMIT 5;", "SELECT nombre, precio FROM producto ORDER BY precio ASC LIMIT 5;", "SELECT nombre, precio FROM producto ORDER BY precio DESC LIMIT 5;", "SELECT TOP precio FROM producto WHERE 5;"],
+                correct: 2
+            },
+            {
+                question: "¿Qué devuelve SELECT COUNT(*) FROM estudiante; en una tabla con 5 estudiantes?",
+                options: ["Los 5 nombres", "El número 5", "El id más alto", "Un error, porque falta GROUP BY"],
+                correct: 1
+            },
+            {
+                question: "Quieres la cantidad de productos de cada categoría. ¿Qué cláusula necesitas junto a COUNT(*)?",
+                options: ["ORDER BY id_categoria", "WHERE id_categoria", "LIMIT id_categoria", "GROUP BY id_categoria"],
+                correct: 3
+            },
+            {
+                question: "¿Por qué no se puede escribir WHERE COUNT(*) > 5 para filtrar las categorías con más de 5 productos?",
+                options: ["Porque WHERE se evalúa antes de agrupar; para filtrar grupos se usa HAVING", "Porque COUNT solo funciona con LIMIT", "Porque WHERE solo acepta textos", "Sí se puede, es equivalente a HAVING"],
+                correct: 0
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ============================================
+        // SISTEMA DE GAMIFICACIÓN — Contenido (misiones)
+        // ============================================
+        const MISSION_XP = { m1: 20, m2: 30, m3: 30, m4: 30, m5: 40 };
+        const TOTAL_XP = Object.values(MISSION_XP).reduce((a, b) => a + b, 0);
+        const gameState = { xp: 0, completed: new Set() };
+
+        function updateGamePanel() {
+            document.getElementById('game-points').textContent = gameState.xp;
+            document.getElementById('game-progress').style.width = Math.round((gameState.xp / TOTAL_XP) * 100) + '%';
+        }
+
+        function completeMission(missionId, container) {
+            if (gameState.completed.has(missionId)) return;
+            gameState.completed.add(missionId);
+            gameState.xp += MISSION_XP[missionId] || 0;
+            updateGamePanel();
+            const badge = document.getElementById('badge-' + missionId);
+            if (badge) {
+                badge.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200');
+                badge.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            }
+            const feedback = container.querySelector('.mission-feedback');
+            if (feedback) {
+                feedback.textContent = '🎉 ¡Misión completada! +' + (MISSION_XP[missionId] || 0) + ' XP';
+                feedback.className = 'mission-feedback mt-3 text-sm font-bold text-green-700';
+            }
+            const reward = document.getElementById(missionId + '-reward');
+            if (reward) reward.classList.remove('hidden');
+            if (gameState.completed.size === Object.keys(MISSION_XP).length) {
+                document.getElementById('badge-final').classList.remove('hidden');
+            }
+        }
+
+        function setFeedback(container, texto, ok) {
+            const fb = container.querySelector('.mission-feedback');
+            fb.textContent = texto;
+            fb.className = 'mission-feedback mt-3 text-sm font-bold ' + (ok ? 'text-green-700' : 'text-red-500');
+        }
+
+        // Opciones de las misiones de selección (m1, m4)
+        document.querySelectorAll('.game-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const group = this.closest('[data-gq]');
+                const missionContainer = this.closest('[data-mission]');
+                if (!group || !missionContainer || group.dataset.solved === 'true') return;
+                if (this.dataset.correct === 'true') {
+                    group.dataset.solved = 'true';
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-green-500', 'border-green-500', 'text-white');
+                    group.querySelectorAll('button').forEach(b => {
+                        b.disabled = true;
+                        if (b !== this) b.classList.add('opacity-50');
+                    });
+                    setFeedback(missionContainer, '¡Correcto! ⭐', true);
+                    const groups = missionContainer.querySelectorAll('[data-gq]');
+                    if (Array.from(groups).every(g => g.dataset.solved === 'true')) {
+                        completeMission(missionContainer.dataset.mission, missionContainer);
+                    }
+                } else {
+                    this.disabled = true;
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-red-100', 'border-red-300', 'text-red-400', 'opacity-60');
+                    setFeedback(missionContainer, '¡Casi! Inténtalo de nuevo 💪', false);
+                }
+            });
+        });
+
+        // Tabla genérica para los simuladores
+        function renderTabla(tablaId, cols, rows, claseFila) {
+            const head = cols.map(c => '<th class="p-2 text-left bg-teal-600 text-white font-mono text-xs">' + c + '</th>').join('');
+            const body = rows.length
+                ? rows.map((r, i) => '<tr class="border-b border-teal-100 ' + (claseFila ? claseFila(r, i) : '') + '">' +
+                    cols.map(c => '<td class="p-2 font-mono text-xs">' + (r[c] === null ? '<span class="text-red-500 italic">NULL</span>' : r[c]) + '</td>').join('') + '</tr>').join('')
+                : '<tr><td class="p-2 text-xs text-slate-400 italic" colspan="' + cols.length + '">(0 filas)</td></tr>';
+            document.getElementById(tablaId).innerHTML = '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>';
+        }
+
+        // ---- Misión 2: laboratorio de filtros ----
+        const PRODUCTOS_FILTRO = [
+            { codigo: 'P001', nombre: 'Mouse inalámbrico', precio: 120000 },
+            { codigo: 'P002', nombre: 'Teclado mecánico', precio: 280000 },
+            { codigo: 'P003', nombre: 'Audífonos inalámbrico Pro', precio: 250000 },
+            { codigo: 'P004', nombre: 'Monitor LED', precio: 650000 },
+            { codigo: 'P005', nombre: 'Cargador inalámbrico', precio: 80000 },
+            { codigo: 'P006', nombre: 'Parlante bluetooth', precio: 45000 }
+        ];
+        const CONDICIONES = [
+            { sql: "precio > 100000", fn: p => p.precio > 100000 },
+            { sql: "precio < 100000", fn: p => p.precio < 100000 },
+            { sql: "precio BETWEEN 50000 AND 300000", fn: p => p.precio >= 50000 && p.precio <= 300000 },
+            { sql: "nombre LIKE 'M%'", fn: p => p.nombre.startsWith('M') },
+            { sql: "nombre LIKE '%M%'", fn: p => p.nombre.toLowerCase().includes('m') },
+            { sql: "nombre LIKE '%inalámbrico%' AND precio > 100000", fn: p => p.nombre.includes('inalámbrico') && p.precio > 100000 },
+            { sql: "nombre LIKE '%inalámbrico%' OR precio > 100000", fn: p => p.nombre.includes('inalámbrico') || p.precio > 100000 },
+            { sql: "codigo IN ('P001', 'P004', 'P006')", fn: p => ['P001', 'P004', 'P006'].includes(p.codigo) }
+        ];
+        const RETOS_FILTRO = [
+            { txt: '💸 Productos baratos: precio menor a 100.000', esperado: ['P005', 'P006'] },
+            { txt: '🔤 Productos cuyo nombre empieza por "M"', esperado: ['P001', 'P004'] },
+            { txt: '📡 Inalámbricos que cuestan más de 100.000', esperado: ['P001', 'P003'] },
+            { txt: '📏 Precio entre 50.000 y 300.000 (extremos incluidos)', esperado: ['P001', 'P002', 'P003', 'P005'] }
+        ];
+        let retoActual = 0;
+        const retosResueltos = new Set();
+        let filasFiltradas = null;
+
+        function pintarRetos() {
+            document.getElementById('filtro-retos').innerHTML = RETOS_FILTRO.map((r, i) =>
+                '<button type="button" class="text-xs font-semibold px-3 py-1 rounded-full border-2 transition ' +
+                (retosResueltos.has(i) ? 'bg-green-500 text-white border-green-500' : i === retoActual ? 'bg-teal-200 text-teal-900 border-teal-400' : 'bg-white text-slate-600 border-slate-200') +
+                '" onclick="elegirReto(' + i + ')">' + (retosResueltos.has(i) ? '✅ ' : '') + 'Reto ' + (i + 1) + '</button>').join('');
+            document.getElementById('filtro-reto-actual').textContent = '🎯 ' + RETOS_FILTRO[retoActual].txt;
+        }
+        function elegirReto(i) { retoActual = i; pintarRetos(); }
+        function pintarFiltro() {
+            renderTabla('filtro-table', ['codigo', 'nombre', 'precio'], PRODUCTOS_FILTRO,
+                p => filasFiltradas === null ? '' : filasFiltradas.includes(p.codigo) ? 'bg-yellow-100 font-semibold' : 'opacity-30');
+        }
+        function ejecutarFiltro() {
+            const cond = CONDICIONES[document.getElementById('filtro-cond').value];
+            filasFiltradas = PRODUCTOS_FILTRO.filter(cond.fn).map(p => p.codigo);
+            pintarFiltro();
+            const cont = document.querySelector('[data-mission="m2"]');
+            const esperado = RETOS_FILTRO[retoActual].esperado;
+            const ok = esperado.length === filasFiltradas.length && esperado.every(c => filasFiltradas.includes(c));
+            if (ok) {
+                retosResueltos.add(retoActual);
+                setFeedback(cont, '🎯 ¡Filtro perfecto! ' + filasFiltradas.length + ' fila(s). Reto ' + (retoActual + 1) + ' resuelto ⭐', true);
+                const pendiente = RETOS_FILTRO.findIndex((r, i) => !retosResueltos.has(i));
+                if (pendiente === -1) completeMission('m2', cont); else retoActual = pendiente;
+            } else {
+                setFeedback(cont, '🤔 Ese filtro devolvió ' + filasFiltradas.length + ' fila(s), pero no son las que pide el reto. ¡Prueba otra condición!', false);
+            }
+            pintarRetos();
+        }
+        document.getElementById('filtro-cond').innerHTML = CONDICIONES.map((c, i) => '<option value="' + i + '">' + c.sql + '</option>').join('');
+        pintarRetos();
+        pintarFiltro();
+
+        // ---- Misión 3: ranking de cursos ----
+        const CURSOS_RK = [
+            { id_curso: 1, nombre: 'Programación I', creditos: 3 },
+            { id_curso: 2, nombre: 'Base de Datos I', creditos: 4 },
+            { id_curso: 3, nombre: 'Redes de Computadores', creditos: 4 },
+            { id_curso: 4, nombre: 'Ingeniería de Software', creditos: 5 },
+            { id_curso: 5, nombre: 'Inteligencia Artificial', creditos: 3 },
+            { id_curso: 6, nombre: 'Sistemas Operativos', creditos: 4 },
+            { id_curso: 7, nombre: 'Arquitectura de Computadores', creditos: 3 },
+            { id_curso: 8, nombre: 'Gestión de Proyectos', creditos: 5 },
+            { id_curso: 9, nombre: 'Seguridad Informática', creditos: 4 },
+            { id_curso: 10, nombre: 'Desarrollo Web', creditos: 3 }
+        ];
+        function ejecutarRanking() {
+            const col = document.getElementById('rk-col').value;
+            const dir = document.getElementById('rk-dir').value;
+            const lim = parseInt(document.getElementById('rk-lim').value, 10);
+            let filas = CURSOS_RK.slice().sort((a, b) => {
+                const r = typeof a[col] === 'string' ? a[col].localeCompare(b[col], 'es') : a[col] - b[col];
+                return dir === 'ASC' ? r : -r;
+            });
+            if (lim) filas = filas.slice(0, lim);
+            renderTabla('rk-table', ['nombre', 'creditos'], filas);
+            const cont = document.querySelector('[data-mission="m3"]');
+            if (col === 'creditos' && dir === 'DESC' && lim === 3) {
+                completeMission('m3', cont);
+            } else if (col !== 'creditos') {
+                setFeedback(cont, '🤔 Queremos el ranking por créditos, no por ' + col + '.', false);
+            } else if (dir !== 'DESC') {
+                setFeedback(cont, '⬆️ Así quedan de menor a mayor. ¡Queremos los más altos primero!', false);
+            } else {
+                setFeedback(cont, '✂️ Buen orden, pero el reto pide solo los 3 primeros.', false);
+            }
+        }
+        renderTabla('rk-table', ['nombre', 'creditos'], CURSOS_RK);
+
+        // ---- Calculadora de agregados ----
+        const PRODUCTOS_AGG = [
+            { id_producto: 1, nombre: 'Teclado', precio: 45000, id_categoria: 1 },
+            { id_producto: 2, nombre: 'Mouse', precio: 35000, id_categoria: 1 },
+            { id_producto: 3, nombre: 'Monitor', precio: 650000, id_categoria: 2 },
+            { id_producto: 4, nombre: 'Audífonos', precio: 95000, id_categoria: 1 },
+            { id_producto: 5, nombre: 'Impresora', precio: 520000, id_categoria: 2 },
+            { id_producto: 6, nombre: 'Cargador', precio: 25000, id_categoria: 3 },
+            { id_producto: 7, nombre: 'Parlante', precio: 120000, id_categoria: 3 },
+            { id_producto: 8, nombre: 'Cámara web', precio: 180000, id_categoria: 1 }
+        ];
+        function agregar(fn, filas) {
+            const precios = filas.map(f => f.precio);
+            if (fn === 'COUNT') return filas.length;
+            if (fn === 'SUM') return precios.reduce((a, b) => a + b, 0);
+            if (fn === 'AVG') return Math.round(precios.reduce((a, b) => a + b, 0) / precios.length * 100) / 100;
+            if (fn === 'MAX') return Math.max.apply(null, precios);
+            return Math.min.apply(null, precios);
+        }
+        function calcularAgregado() {
+            const fn = document.getElementById('agg-fn').value;
+            const agrupar = document.getElementById('agg-group').checked;
+            const havingBox = document.getElementById('agg-having');
+            havingBox.disabled = !agrupar;
+            if (!agrupar) havingBox.checked = false;
+            document.getElementById('agg-grp-col').classList.toggle('hidden', !agrupar);
+            const etiqueta = fn === 'COUNT' ? 'COUNT(*)' : fn + '(precio)';
+            const nota = document.getElementById('agg-note');
+            if (!agrupar) {
+                renderTabla('agg-out', [etiqueta], [{ [etiqueta]: agregar(fn, PRODUCTOS_AGG) }]);
+                nota.textContent = '👉 Sin GROUP BY, toda la tabla se resume en UNA sola fila.';
+                renderTabla('agg-src', ['nombre', 'precio', 'id_categoria'], PRODUCTOS_AGG);
+                return;
+            }
+            const grupos = {};
+            PRODUCTOS_AGG.forEach(p => { (grupos[p.id_categoria] = grupos[p.id_categoria] || []).push(p); });
+            let filas = Object.keys(grupos).map(k => ({ id_categoria: k, [etiqueta]: agregar(fn, grupos[k]), _n: grupos[k].length }));
+            if (havingBox.checked) filas = filas.filter(f => f._n > 2);
+            renderTabla('agg-out', ['id_categoria', etiqueta], filas);
+            nota.textContent = havingBox.checked
+                ? '🚦 HAVING dejó pasar solo los grupos con más de 2 productos.'
+                : '🗂️ Una fila por cada categoría. Los colores de la izquierda muestran los grupos.';
+            const colores = { 1: 'bg-red-50', 2: 'bg-blue-50', 3: 'bg-green-50' };
+            renderTabla('agg-src', ['nombre', 'precio', 'id_categoria'], PRODUCTOS_AGG, p => colores[p.id_categoria]);
+        }
+        ['agg-fn', 'agg-group', 'agg-having'].forEach(id => document.getElementById(id).addEventListener('change', calcularAgregado));
+        calcularAgregado();
+
+        // ---- Misión 5: secuencia del orden lógico ----
+        const ORDEN_LOGICO = ['FROM', 'WHERE', 'GROUP BY', 'HAVING', 'SELECT', 'ORDER BY', 'LIMIT'];
+        const ORDEN_MEZCLADO = ['SELECT', 'HAVING', 'LIMIT', 'FROM', 'ORDER BY', 'GROUP BY', 'WHERE'];
+        let seqPos = 0;
+        function iniciarSecuencia() {
+            seqPos = 0;
+            document.getElementById('seq-m5-out').textContent = '…';
+            document.getElementById('seq-m5').innerHTML = ORDEN_MEZCLADO.map(c =>
+                '<button type="button" class="seq-btn font-mono text-sm px-3 py-1.5 bg-white border-2 border-teal-200 rounded-lg hover:border-teal-500 transition" data-val="' + c + '">' + c + '</button>').join('');
+            document.querySelectorAll('#seq-m5 .seq-btn').forEach(b => b.addEventListener('click', clickSecuencia));
+        }
+        function clickSecuencia() {
+            const cont = document.querySelector('[data-mission="m5"]');
+            if (this.dataset.val === ORDEN_LOGICO[seqPos]) {
+                this.disabled = true;
+                this.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                seqPos++;
+                document.getElementById('seq-m5-out').textContent = ORDEN_LOGICO.slice(0, seqPos).map((c, i) => (i + 1) + '. ' + c).join('   →   ');
+                if (seqPos === ORDEN_LOGICO.length) completeMission('m5', cont);
+                else setFeedback(cont, '¡Bien! ⭐ ¿Qué sigue?', true);
+            } else {
+                setFeedback(cont, '❌ ' + this.dataset.val + ' todavía no. Pregúntate: ¿qué necesita existir antes? 🤔', false);
+                this.classList.add('bg-red-100');
+                setTimeout(() => this.classList.remove('bg-red-100'), 600);
+            }
+        }
+        iniciarSecuencia();
+
+        // ============================================
+        // GAMIFICACIÓN — Actividades
+        // ============================================
+        const TOTAL_ACT = 4;
+        const actState = { done: new Set() };
+        const ACT_FLAGS = { a1: false, a2: false };
+
+        function normalizarSQL(t) {
+            return t.toLowerCase().replace(/\s+/g, ' ').replace(/\s*([,()<>=*;])\s*/g, '$1').trim();
+        }
+        function logA(id, t) { document.getElementById(id).textContent = t; }
+
+        // ---- Actividad 1 ----
+        const PRODUCTOS_A1 = [
+            { nombre: 'Teclado inalámbrico', precio: 120000 }, { nombre: 'Mouse óptico', precio: 35000 },
+            { nombre: 'Monitor 24"', precio: 890000 }, { nombre: 'Audífonos inalámbricos', precio: 250000 },
+            { nombre: 'Cámara web', precio: 180000 }, { nombre: 'Impresora', precio: 520000 },
+            { nombre: 'Disco duro externo', precio: 310000 }, { nombre: 'Altavoz Bluetooth', precio: 210000 }
+        ];
+        function probarA1() {
+            const q = normalizarSQL(document.getElementById('act1-text').value);
+            ACT_FLAGS.a1 = false;
+            renderTabla('a1-table', ['nombre', 'precio'], []);
+            if (!/^select /.test(q)) return logA('a1-log', '❌ Una consulta empieza con SELECT 😉');
+            if (!/^select nombre,precio from/.test(q)) return logA('a1-log', '❌ Revisa las columnas: se piden exactamente nombre y precio, en ese orden.');
+            if (!/from producto/.test(q)) return logA('a1-log', '❌ ¿De qué tabla salen los datos? FROM ...');
+            if (!/where precio>100000/.test(q)) return logA('a1-log', '❌ Falta el filtro: precio mayor a 100000 (WHERE precio > 100000).');
+            if (!/order by precio desc/.test(q)) return logA('a1-log', '❌ Falta ordenar de mayor a menor precio (ORDER BY precio DESC).');
+            if (q.indexOf('where') > q.indexOf('order by')) return logA('a1-log', '❌ El WHERE va antes del ORDER BY.');
+            const filas = PRODUCTOS_A1.filter(p => p.precio > 100000).sort((a, b) => b.precio - a.precio);
+            renderTabla('a1-table', ['nombre', 'precio'], filas);
+            logA('a1-log', 'mysql> ' + filas.length + ' rows in set ✅\n💎 ¡Consulta perfecta! Estos son los productos premium.');
+            ACT_FLAGS.a1 = true;
+        }
+
+        // ---- Actividad 2 ----
+        const MATRICULAS_A2 = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5, 5, 5, 5, 5];
+        function probarA2() {
+            const q = normalizarSQL(document.getElementById('act2-text').value);
+            ACT_FLAGS.a2 = false;
+            renderTabla('a2-table', ['id_curso', 'cantidad'], []);
+            if (!/^select /.test(q)) return logA('a2-log', '❌ Una consulta empieza con SELECT 😉');
+            if (!/count\(/.test(q)) return logA('a2-log', '❌ Para contar estudiantes necesitas COUNT().');
+            if (!/from matricula/.test(q)) return logA('a2-log', '❌ Los datos salen de la tabla matricula.');
+            if (!/group by (\w+\.)?id_curso/.test(q)) return logA('a2-log', '❌ Hay que agrupar por curso: GROUP BY id_curso.');
+            if (!/^select (\w+\.)?id_curso/.test(q)) return logA('a2-log', '💡 Casi: muestra también id_curso en el SELECT, si no, no sabrás a qué curso corresponde cada número.');
+            const conteo = {};
+            MATRICULAS_A2.forEach(c => { conteo[c] = (conteo[c] || 0) + 1; });
+            renderTabla('a2-table', ['id_curso', 'cantidad'], Object.keys(conteo).map(k => ({ id_curso: k, cantidad: conteo[k] })));
+            logA('a2-log', 'mysql> 5 rows in set ✅\n👥 ¡Agrupación correcta! Una fila por curso con su cantidad de estudiantes.');
+            ACT_FLAGS.a2 = true;
+        }
+
+        // ---- Actividad 4: detector de cláusulas ----
+        const CLAUSULAS = ['where', 'group by', 'having', 'order by', 'limit'];
+        function clausulasDetectadas() {
+            const q = normalizarSQL(document.getElementById('act4-text').value);
+            return CLAUSULAS.filter(c => new RegExp('(^|[ )])' + c + ' ').test(q + ' '));
+        }
+        function pintarChips() {
+            const det = clausulasDetectadas();
+            document.getElementById('a4-chips').innerHTML = CLAUSULAS.map(c =>
+                '<span class="px-2 py-1 rounded-full border ' + (det.includes(c) ? 'bg-green-500 text-white border-green-500' : 'bg-slate-100 text-slate-400 border-slate-200') + '">' + c.toUpperCase() + '</span>').join('') +
+                '<span class="px-2 py-1 font-sans font-bold ' + (det.length >= 4 ? 'text-green-700' : 'text-slate-500') + '">' + det.length + '/4 mínimo</span>';
+        }
+        document.getElementById('act4-text').addEventListener('input', pintarChips);
+        pintarChips();
+
+        function completarActividad(id, btn) {
+            if (actState.done.has(id)) return;
+            const container = document.querySelector('[data-act="' + id + '"]');
+            const feedback = container.querySelector('.act-feedback');
+            let ok = false, msg = '';
+            if (id === 'a1' || id === 'a2') {
+                ok = ACT_FLAGS[id];
+                msg = 'Primero pulsa 🧪 Probar y logra que tu consulta funcione.';
+            } else if (id === 'a3') {
+                const celdas = Array.from(container.querySelectorAll('.a3-cell')).map(c => c.value.trim());
+                ok = celdas.every(c => c.length >= 4);
+                msg = 'Completa las 8 casillas del cuadro comparativo ✍️';
+            } else if (id === 'a4') {
+                const q = normalizarSQL(document.getElementById('act4-text').value);
+                const det = clausulasDetectadas();
+                const preg = document.getElementById('act4-preg').value.trim();
+                const posiciones = det.map(c => q.indexOf(c));
+                const enOrden = posiciones.every((p, i) => i === 0 || p > posiciones[i - 1]);
+                const tabla = /from (producto|categoria|estudiante|curso|matricula)\b/.test(q);
+                ok = /^select /.test(q) && tabla && det.length >= 4 && enOrden && preg.length >= 15;
+                msg = !/^select /.test(q) ? 'Tu consulta debe empezar con SELECT.'
+                    : !tabla ? 'Usa una de las tablas de la unidad en el FROM (producto, categoria, estudiante, curso o matricula).'
+                    : det.length < 4 ? 'Te faltan cláusulas: necesitas al menos 4 de WHERE, GROUP BY, HAVING, ORDER BY, LIMIT.'
+                    : !enOrden ? 'Revisa el orden: WHERE → GROUP BY → HAVING → ORDER BY → LIMIT.'
+                    : 'Escribe la pregunta de negocio que responde tu consulta ❓';
+            }
+            if (!ok) {
+                feedback.textContent = '⚠️ ' + msg;
+                feedback.className = 'act-feedback mt-3 text-sm font-bold text-red-500';
+                return;
+            }
+            actState.done.add(id);
+            document.getElementById('act-points').textContent = actState.done.size;
+            document.getElementById('act-progress').style.width = Math.round((actState.done.size / TOTAL_ACT) * 100) + '%';
+            feedback.textContent = actState.done.size === TOTAL_ACT
+                ? '🏆 ¡4/4 misiones cumplidas! La gerencia ya tiene a su ANALISTA SQL 📈'
+                : '🎉 ¡Misión cumplida! ' + actState.done.size + '/' + TOTAL_ACT + ' actividades completadas';
+            feedback.className = 'act-feedback mt-3 text-sm font-bold text-green-700';
+            if (actState.done.size === TOTAL_ACT) document.getElementById('act-badge').classList.remove('hidden');
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+        }
+
+        // ---- Soluciones desplegables ----
+        function toggleSolucion(id, btn) {
+            const el = document.getElementById(id);
+            const nowVisible = !el.classList.toggle('hidden');
+            if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+            btn.textContent = nowVisible ? '🙈 Ocultar' : btn.dataset.label;
+        }
+
+        // ---- Modal de imagen ----
+        function openImgModal(src) {
+            document.getElementById('img-modal-src').src = src;
+            document.getElementById('img-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeImgModal() {
+            document.getElementById('img-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>

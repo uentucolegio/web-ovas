@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: DML: INSERT, UPDATE y DELETE</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           ESTILOS BASE — NO MODIFICAR
+           ============================================= */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        aside.w-64 {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            main.flex-1 { margin-left: 16rem; }
+        }
+        .md\:hidden.mb-6 {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background-color: #f8fafc;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 767px) {
+            main.flex-1 {
+                padding-top: 12rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            * { box-sizing: border-box; }
+            body, html, main, .accordion-panel, .content-section {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            pre { overflow-x: auto; max-width: 100%; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            h4 { font-size: 1.125rem !important; }
+            .accordion-panel {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding: 0.5rem !important;
+            }
+            .content-section {
+                overflow-x: hidden;
+                max-width: 100%;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .speech-controls { flex-wrap: wrap; gap: 0.5rem; }
+            .speech-controls button { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #e6f4ea;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+        .content-pane {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-pane.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option:hover { background-color: #f0fdf4; }
+        .quiz-option.selected {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+        }
+        .accordion-btn { cursor: pointer; }
+        .accordion-panel { transition: all 0.3s ease; }
+        /* =============================================
+           ESTILOS PERSONALIZADOS DEL OVA
+           Agrega aquí los estilos propios de este OVA
+           ============================================= */
+        .content-pane img[onclick^="openImgModal"] {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 1024px) {
+            .content-pane img[onclick^="openImgModal"] { width: 75%; }
+        }
+        .sql-code {
+            background-color: #0f172a;
+            color: #bbf7d0;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .sql-code .kw { color: #7dd3fc; font-weight: 600; }
+        .sql-code .cm { color: #94a3b8; font-style: italic; }
+        .sim-btn { font-family: Consolas, 'Courier New', monospace; }
+        .sql-input { font-family: Consolas, 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- =============================================
+             SIDEBAR — NO MODIFICAR ESTRUCTURA NI ESTILOS
+             Solo cambiar los textos de los enlaces si es necesario
+             ============================================= -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width:150px;height:150px;" class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700" data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700" data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- =============================================
+             CONTENIDO PRINCIPAL
+             ============================================= -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+
+            <!-- MOBILE HEADER — NO MODIFICAR -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width:100px;height:100px;" class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: INTRODUCCIÓN
+                 ============================================= -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">¡Hora de llenar tu base de datos! 📥</h2>
+
+                <!-- [INICIO CONTENIDO — INTRODUCCIÓN] -->
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Con el DDL construiste la estructura de tu base de datos: tablas, columnas, tipos de datos, claves primarias, claves foráneas y restricciones. 🏗️ Pero una base de datos recién creada está <strong>completamente vacía</strong>: es apenas un <strong>"esqueleto"</strong> sin información real. 💀 Para que un sistema de software sea útil hay que poder <strong>insertar</strong> información nueva, <strong>modificar</strong> la que ya existe cuando cambian las circunstancias y <strong>eliminar</strong> la que ya no se necesita. Esas tres operaciones son el corazón del <strong>DML</strong> (<em>Data Manipulation Language</em>). 💚
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    A diferencia del DDL, que cambia la estructura, el DML trabaja siempre sobre el <strong>contenido</strong> de las tablas, es decir, sobre las <strong>tuplas (filas)</strong>. Sus tres instrucciones fundamentales son <strong>INSERT</strong> ➕ (agregar filas), <strong>UPDATE</strong> ✏️ (modificar filas) y <strong>DELETE</strong> 🗑️ (eliminar filas). Su sintaxis es sencilla, pero usarlas bien exige entender las restricciones que definiste en el DDL: el SGBD <strong>rechazará automáticamente</strong> cualquier operación que las viole, protegiendo así la integridad de tu información. 🛡️
+                </p>
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <span class="text-xl">✨</span> Al terminar este tema vas a darle vida a tus tablas: agregar, cambiar y borrar datos con precisión de cirujano… sin dañar ni un solo registro de más. <span class="text-xl">🚀</span>
+                    </p>
+                </div>
+                <!-- [FIN CONTENIDO — INTRODUCCIÓN] -->
+
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: OBJETIVOS
+                 ============================================= -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — OBJETIVOS] -->
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧠</span>
+                        <span><strong>Reconocer</strong> el lenguaje de manipulación de datos (DML) como el subconjunto de SQL responsable de insertar, actualizar y eliminar información dentro de las tablas ya creadas.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">➕</span>
+                        <span><strong>Insertar</strong> registros en una tabla mediante la instrucción INSERT, respetando los tipos de datos, dominios y restricciones definidos en el DDL.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">✏️</span>
+                        <span><strong>Modificar</strong> información existente mediante la instrucción UPDATE, utilizando condiciones adecuadas para afectar únicamente los registros deseados.</span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🗑️</span>
+                        <span><strong>Eliminar</strong> registros mediante la instrucción DELETE, comprendiendo los riesgos de omitir la cláusula WHERE y su relación con la integridad referencial.</span>
+                    </li>
+                    <!-- [FIN CONTENIDO — OBJETIVOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: CONTENIDO
+                 ============================================= -->
+            <div id="contenido" class="content-pane">
+                <div class="w-full max-w-8xl mx-auto">
+
+                    <!-- PANEL DE GAMIFICACIÓN DEL CONTENIDO -->
+                    <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">Contenido 📚</h2>
+                    <div class="mb-6 p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🎮 Ruta del Manipulador de Datos</p>
+                            <p class="font-bold text-green-700 text-lg">⭐ <span id="game-points">0</span> XP</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-3">
+                            <div id="game-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-2">Abre cada acordeón y completa las 5 misiones para ganar tu insignia 🏆</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span id="badge-m1" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">📱 Traductor CRUD</span>
+                            <span id="badge-m2" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🚪 Portero del SGBD</span>
+                            <span id="badge-m3" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🎯 Francotirador del WHERE</span>
+                            <span id="badge-m4" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🔮 Profeta de la cascada</span>
+                            <span id="badge-m5" class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">🔄 Maestro de transacciones</span>
+                        </div>
+                        <p id="badge-final" class="hidden mt-4 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡INSIGNIA DESBLOQUEADA: CIRUJANO DE DATOS! 🎉 Completaste las 5 misiones del contenido.</p>
+                    </div>
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 1] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-1">
+                            <span>📱 1. DML: lo que pasa cada vez que usas una app</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-1" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-1-contenido" class="content-section">
+                                <p class="mb-4">Aunque no lo notes, ejecutas DML todo el día. 😮 Cada vez que te registras en una app, cambias tu foto de perfil o borras un mensaje, por detrás hay una instrucción SQL trabajando. Los desarrolladores resumen esas operaciones en una sigla famosa: <strong>CRUD</strong>. 👇</p>
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
+                                        <p class="text-2xl">➕</p>
+                                        <p class="font-bold text-green-800">C — Create</p>
+                                        <p class="text-xs font-mono text-green-700">INSERT</p>
+                                    </div>
+                                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg text-center">
+                                        <p class="text-2xl">🔍</p>
+                                        <p class="font-bold text-purple-800">R — Read</p>
+                                        <p class="text-xs font-mono text-purple-700">SELECT <span class="font-sans">(próximo tema)</span></p>
+                                    </div>
+                                    <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                                        <p class="text-2xl">✏️</p>
+                                        <p class="font-bold text-yellow-800">U — Update</p>
+                                        <p class="text-xs font-mono text-yellow-700">UPDATE</p>
+                                    </div>
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+                                        <p class="text-2xl">🗑️</p>
+                                        <p class="font-bold text-red-800">D — Delete</p>
+                                        <p class="text-xs font-mono text-red-700">DELETE</p>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-yellow-900">🧱 <strong>Recuerda:</strong> el DDL cambia la <em>estructura</em> (las estanterías) y el DML cambia el <em>contenido</em> (lo que hay en ellas). Un INSERT nunca crea columnas y un DELETE nunca borra la tabla.</p>
+                                </div>
+
+                                <!-- MISIÓN 1 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m1">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 1: ¿Qué SQL hay detrás de tu app?</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+20 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-3">Elige la instrucción DML que se ejecuta en cada acción. 📲</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">1️⃣ Te creas una cuenta nueva en una red social.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">INSERT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">UPDATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DELETE</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">2️⃣ Cambias tu foto de perfil.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">INSERT</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">UPDATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DELETE</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">3️⃣ Borras un comentario que publicaste.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">UPDATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DROP</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">DELETE</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2">4️⃣ Compras algo y el inventario baja en 1 unidad.</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="true">UPDATE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">DELETE</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-mono text-slate-600 hover:border-teal-400 transition" data-correct="false">ALTER</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 1] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 2] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-2">
+                            <span>➕ 2. INSERT: agregando nuevos registros</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-2" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-2-contenido" class="content-section">
+                                <p class="mb-3"><code class="bg-slate-100 px-1 rounded">INSERT INTO</code> agrega una o varias filas nuevas. Le dices <strong>en qué tabla</strong>, <strong>en qué columnas</strong> y <strong>qué valores</strong>, en el mismo orden y con el tipo correcto:</p>
+<pre class="sql-code mb-3"><span class="kw">INSERT INTO</span> estudiante (nombre, correo, fecha_nacimiento)
+<span class="kw">VALUES</span> ('Juan Pérez', 'juan.perez@correo.edu.co', '2004-03-15');</pre>
+                                <div class="mb-4">
+                                    <img src="img/INSERT_ nuevos registros en SQL.png" alt="Infografía: INSERT de un registro en la tabla estudiante" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg"><p class="font-bold text-teal-800">🔢 ¿Y el id_estudiante?</p><p class="text-sm">No aparece porque es <strong>AUTO_INCREMENT</strong>: el SGBD le asigna solo el siguiente número.</p></div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg"><p class="font-bold text-green-800">⚙️ ¿Y activo?</p><p class="text-sm">Tampoco aparece: su <strong>DEFAULT TRUE</strong> se aplica automáticamente.</p></div>
+                                </div>
+                                <p class="mb-3">💡 Puedes insertar <strong>varias filas en una sola instrucción</strong>, separando cada grupo de valores con coma. Es mucho más eficiente que ejecutar muchos INSERT sueltos. Mira las cuatro formas más usadas:</p>
+                                <div class="mb-4">
+                                    <img src="img/Tutorial SQL_ INSERT y nuevos registros.png" alt="Infografía: cuatro formas de usar INSERT, advertencias y recomendaciones" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <div class="mb-6">
+                                    <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('resumen-insert', this)">📌 Ver más variantes de INSERT</button>
+                                    <div id="resumen-insert" class="hidden mt-4">
+                                        <img src="img/INSERT_ Agregando nuevos registros.png" alt="Infografía: variantes de INSERT, incluyendo solo algunas columnas y datos desde otra tabla" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                                <h4 class="font-bold text-green-800 text-lg mb-2">🚪 El SGBD es un portero estricto</h4>
+                                <p class="mb-3">Antes de dejar entrar una fila, el SGBD revisa <strong>todas</strong> las restricciones del DDL. Si algo falla, la fila no entra y te muestra un error. Estos son los mensajes de MySQL que más vas a ver:</p>
+                                <div class="overflow-x-auto mb-4">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-green-600 text-white">
+                                                <th class="p-2 text-left rounded-tl-lg">Error</th>
+                                                <th class="p-2 text-left">Qué significa</th>
+                                                <th class="p-2 text-left rounded-tr-lg">Integridad que protege</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono text-xs">1062 Duplicate entry</td><td class="p-2">Valor repetido en PRIMARY KEY o UNIQUE</td><td class="p-2">🔑 De entidad</td></tr>
+                                            <tr class="bg-green-50 border-b border-green-100"><td class="p-2 font-mono text-xs">1048 Column cannot be null</td><td class="p-2">Falta un dato NOT NULL</td><td class="p-2">🎯 De dominio</td></tr>
+                                            <tr class="bg-white border-b border-green-100"><td class="p-2 font-mono text-xs">1366 Incorrect integer value</td><td class="p-2">Texto donde va un número (ej: 'tres')</td><td class="p-2">🎯 De dominio</td></tr>
+                                            <tr class="bg-green-50"><td class="p-2 font-mono text-xs">1452 Foreign key constraint fails</td><td class="p-2">La referencia no existe en la tabla "mamá"</td><td class="p-2">🔗 Referencial</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- MISIÓN 2 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m2">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 2: Sé el portero del SGBD</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-2">La tabla <strong>producto</strong> ya tiene los códigos 101, 102 y 103, y solo existen las categorías 1 y 2. ¿Dejas entrar cada fila? 🚪</p>
+                                    <p class="text-xs font-mono bg-white border border-teal-200 rounded p-2 mb-3">producto(codigo PK, nombre NOT NULL, precio NOT NULL, stock NOT NULL, id_categoria FK)</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono text-sm">1️⃣ VALUES (104, 'Audífonos', 89000.00, 10, 1)</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">✅ Entra</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">❌ Clave duplicada</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">❌ Falla la FK</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono text-sm">2️⃣ VALUES (101, 'Cable HDMI', 15000.00, 30, 1)</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">✅ Entra</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">❌ Clave duplicada</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">❌ Dato nulo</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono text-sm">3️⃣ VALUES (105, NULL, 20000.00, 5, 2)</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">✅ Entra</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">❌ Falla la FK</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">❌ Dato nulo</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="4">
+                                            <p class="font-semibold text-slate-700 mb-2 font-mono text-sm">4️⃣ VALUES (106, 'Impresora láser', 850000.00, 5, 999)</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">❌ Falla la FK</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">✅ Entra</button>
+                                                <button type="button" class="game-opt border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">❌ Clave duplicada</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO: INSERT producto -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto: tres productos y un error a propósito</p>
+                                    <p class="text-sm mb-3">Con la tabla <strong>producto(codigo, nombre, precio, stock, id_categoria)</strong>, escribe un INSERT que agregue <strong>tres productos en una sola instrucción</strong>. Luego escribe otro INSERT que <strong>viole una restricción a propósito</strong> y explica qué error devolvería el SGBD. 😈</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-insert', this)">👀 Ver solución</button>
+                                    <div id="sol-insert" class="hidden mt-4">
+                                        <img src="img/Infografía SQL INSERT_ registros y restricciones.png" alt="Infografía: INSERT de tres productos y un INSERT que viola la clave foránea" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 2] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 3] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-3">
+                            <span>✏️ 3. UPDATE: modificando registros existentes</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-3" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-3-contenido" class="content-section">
+                                <p class="mb-3"><code class="bg-slate-100 px-1 rounded">UPDATE</code> cambia valores de filas que ya existen. Tiene dos piezas clave: <strong>SET</strong> (qué columnas y con qué valor) y <strong>WHERE</strong> (a cuáles filas). 🎯</p>
+                                <div class="mb-4">
+                                    <img src="img/Actualización SQL_ Antes y Después.png" alt="Infografía: UPDATE del producto P001, antes y después" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3 text-sm">👀 ¿Notaste <code class="bg-slate-100 px-1 rounded">stock = stock - 1</code>? Puedes calcular el valor nuevo <strong>a partir del valor actual</strong>, sin tener que saber cuánto había.</p>
+
+                                <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-red-900">⚠️ <strong>El WHERE es lo más importante (y lo más delicado) de un UPDATE.</strong> Si lo olvidas, el cambio se aplica a <strong>TODAS</strong> las filas de la tabla. 😱 Por eso herramientas como MySQL Workbench traen activado el <em>modo de actualización segura</em> (<code>sql_safe_updates</code>), que bloquea los UPDATE y DELETE sin un WHERE sobre una clave.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="img/Infografía SQL_ UPDATE seguro con WHERE.png" alt="Infografía: el riesgo de UPDATE sin WHERE y la buena práctica de verificar con SELECT" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-4">✅ <strong>Truco profesional:</strong> antes de un UPDATE con datos reales, ejecuta un <strong>SELECT con el mismo WHERE</strong> para ver cuáles y cuántas filas se van a afectar. (En el próximo tema dominarás el SELECT. 😉)</p>
+
+                                <!-- MISIÓN 3: simulador UPDATE -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m3">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 3: Francotirador del WHERE</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-2">Objetivo: marcar como inactivo <strong>solo</strong> al estudiante 5. Primero verifica con SELECT y luego dispara el UPDATE correcto. Si quieres, prueba el UPDATE sin WHERE para ver el desastre (puedes restaurar). 🎯</p>
+                                    <div class="flex flex-wrap gap-2 mb-2 text-xs font-semibold">
+                                        <span id="m3-step-select" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">① Verificar con SELECT</span>
+                                        <span id="m3-step-update" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">② UPDATE preciso</span>
+                                    </div>
+                                    <div class="overflow-x-auto mb-3 bg-white rounded-lg border border-teal-200">
+                                        <table class="w-full text-sm border-collapse" id="upd-table"></table>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-2 mb-3">
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-purple-200 hover:border-purple-400 rounded-lg px-3 py-2 transition" data-upd="select">🔍 SELECT * FROM estudiante WHERE id_estudiante = 5;</button>
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-red-200 hover:border-red-400 rounded-lg px-3 py-2 transition" data-upd="bad">▶ UPDATE estudiante SET activo = FALSE;</button>
+                                        <button type="button" class="sim-btn text-left text-xs sm:text-sm bg-white border-2 border-teal-200 hover:border-teal-500 rounded-lg px-3 py-2 transition" data-upd="good">▶ UPDATE estudiante SET activo = FALSE WHERE id_estudiante = 5;</button>
+                                        <button type="button" class="text-left text-xs bg-slate-100 hover:bg-slate-200 rounded-lg px-3 py-2 transition text-slate-600 font-semibold" data-upd="reset">↺ Restaurar tabla desde la copia de seguridad</button>
+                                    </div>
+                                    <div id="upd-log" class="sql-code text-xs" style="min-height:3rem;white-space:pre-wrap;">mysql&gt; _</div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RETO: UPDATE estudiante -->
+                                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                                    <p class="font-bold text-green-800 mb-2">🧩 Reto: el error del compañero</p>
+                                    <p class="text-sm mb-3">Un compañero quería inactivar solo al estudiante con <strong>id_estudiante = 5</strong> y ejecutó <code class="bg-white px-1 rounded">UPDATE estudiante SET activo = FALSE;</code>. ¿Qué pasó realmente? ¿Qué consecuencias tendría en un sistema con miles de estudiantes? Reescribe la instrucción correcta.</p>
+                                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-update', this)">👀 Ver solución</button>
+                                    <div id="sol-update" class="hidden mt-4">
+                                        <img src="img/UPDATE con y sin cláusula WHERE.png" alt="Infografía: UPDATE estudiante con y sin cláusula WHERE" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 3] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 4] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-4">
+                            <span>🗑️ 4. DELETE: eliminando registros (sin romper relaciones)</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-4" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-4-contenido" class="content-section">
+                                <p class="mb-3"><code class="bg-slate-100 px-1 rounded">DELETE FROM</code> elimina filas y deja la tabla intacta (no como <code class="bg-slate-100 px-1 rounded">DROP TABLE</code>, que la demuele). Igual que en UPDATE, el <strong>WHERE</strong> decide cuáles filas se van… y si lo olvidas, ¡se van <strong>todas</strong>! 🧹</p>
+                                <div class="mb-4">
+                                    <img src="img/Eliminar registros SQL con integridad referencial.png" alt="Infografía: DELETE con y sin WHERE e integridad referencial al eliminar" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-3">🔗 Si la fila que quieres borrar está siendo <strong>referenciada por una clave foránea</strong>, lo que pase depende de la política que definiste al crearla: <strong>RESTRICT</strong> ⛔ rechaza el borrado, <strong>CASCADE</strong> 🌊 borra también las filas relacionadas, <strong>SET NULL</strong> 🕳️ las deja sin referencia.</p>
+
+                                <div class="p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg mb-4">
+                                    <p class="text-sm text-blue-900">🤫 <strong>Secreto de la industria: el "borrado lógico".</strong> Muchas apps no hacen DELETE de verdad cuando "eliminas" tu cuenta: hacen un <code>UPDATE usuario SET activo = FALSE</code> (o guardan una fecha de eliminación). Así pueden recuperar tu cuenta si te arrepientes y conservar el historial de pedidos o facturas. Por eso algunas plataformas te dan 30 días para volver. 😉</p>
+                                </div>
+
+                                <!-- MISIÓN 4 -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m4">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 4: Predice la cascada</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+30 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-2">En la tabla <strong>matricula</strong>, la FK hacia estudiante es <strong>ON DELETE CASCADE</strong> y la FK hacia curso es <strong>ON DELETE RESTRICT</strong>. ¿Qué pasa? 🔮 Al terminar se desbloquea la explicación visual.</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="1">
+                                            <p class="font-semibold text-slate-700 mb-2">(a) <span class="font-mono text-sm">DELETE FROM estudiante WHERE id_estudiante = 7;</span> — el estudiante 7 tiene 3 matrículas.</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">⛔ El SGBD rechaza el borrado</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🌊 Se borra el estudiante y sus 3 matrículas</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🕳️ Se borra el estudiante y sus matrículas quedan con NULL</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="2">
+                                            <p class="font-semibold text-slate-700 mb-2">(b) <span class="font-mono text-sm">DELETE FROM curso WHERE id_curso = 2;</span> — el curso 2 tiene estudiantes matriculados.</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">⛔ El SGBD rechaza el borrado: el curso y las matrículas siguen intactos</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🌊 Se borra el curso y todas sus matrículas</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🗑️ Se borra el curso y las matrículas quedan "huérfanas"</button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-lg border border-teal-200" data-gq="3">
+                                            <p class="font-semibold text-slate-700 mb-2">(c) <span class="font-mono text-sm">DELETE FROM matricula;</span> — sin WHERE.</p>
+                                            <div class="flex flex-col gap-2">
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">💣 Se borra la tabla matricula completa, estructura incluida</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="false">🚫 Da error de sintaxis porque falta el WHERE</button>
+                                                <button type="button" class="game-opt text-left border-2 border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-teal-400 transition" data-correct="true">🧹 Se borran todas las matrículas, pero la tabla sigue existiendo</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                    <div id="m4-reward" class="hidden mt-4">
+                                        <p class="text-sm font-bold text-green-700 mb-2">🔓 ¡Explicación desbloqueada! Así se ven los casos (a) y (b):</p>
+                                        <img src="img/DELETE y claves foráneas_ CASCADE vs RESTRICT.png" alt="Infografía: DELETE en matrícula con ON DELETE CASCADE y ON DELETE RESTRICT" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                        <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 4] -->
+
+                    <!-- [INICIO CONTENIDO — ACORDEÓN 5] -->
+                    <div class="mb-4">
+                        <button type="button" class="w-full flex justify-between items-center p-4 bg-green-100 border border-green-300 rounded-t-lg focus:outline-none font-bold text-green-800 text-lg accordion-btn mb-2 text-left" data-target="#panel-subtema-5">
+                            <span>🔄 5. Transacciones: todo o nada</span>
+                            <span class="ml-2">➕</span>
+                        </button>
+                    </div>
+                    <div id="panel-subtema-5" class="accordion-panel hidden bg-white border border-t-0 border-green-300 rounded-b-lg p-4 mb-6">
+                        <div class="space-y-6 text-slate-700 leading-relaxed">
+
+                            <div id="subtema-5-contenido" class="content-section">
+                                <p class="mb-3">Imagina que le transfieres plata a un amigo desde tu app del banco 💸: el sistema <strong>descuenta</strong> de tu cuenta y <strong>suma</strong> en la de él. ¿Y si se cae la conexión justo en la mitad? 😨 Tu plata desaparecería en el aire. Para evitarlo existen las <strong>transacciones</strong>: un grupo de operaciones que se tratan como <strong>una sola unidad indivisible</strong>. O se aplican todas… o ninguna.</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg"><p class="font-bold text-blue-800 font-mono">START TRANSACTION ▶️</p><p class="text-sm">Empieza el grupo de cambios.</p></div>
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg"><p class="font-bold text-green-800 font-mono">COMMIT ✅</p><p class="text-sm">Confirma todo de forma permanente.</p></div>
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg"><p class="font-bold text-red-800 font-mono">ROLLBACK ⏪</p><p class="text-sm">Deshace todo lo hecho desde el inicio.</p></div>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="img/Guía visual de transacciones SQL.png" alt="Infografía: transacción con UPDATE de stock, INSERT de venta, COMMIT y ROLLBACK" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                                    <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                                </div>
+                                <p class="mb-4 text-sm">🎓 Este es solo un primer acercamiento. Las transacciones tienen cuatro propiedades famosas, <strong>ACID</strong> (Atomicidad, Consistencia, Aislamiento y Durabilidad), que estudiarás a fondo en cursos avanzados de bases de datos.</p>
+
+                                <!-- MISIÓN 5: simulador de transacción -->
+                                <div class="mt-4 p-4 bg-teal-50 border border-teal-300 rounded-lg" data-mission="m5">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                        <p class="text-sm text-teal-800 font-semibold">🎮 Misión 5: Simulador de venta</p>
+                                        <span class="text-xs font-bold bg-teal-200 text-teal-900 px-2 py-1 rounded-full">+40 XP</span>
+                                    </div>
+                                    <p class="text-slate-600 text-sm mb-2">Registra la venta de un teclado: descuenta el stock e inserta la venta dentro de una transacción. Logra <strong>una venta confirmada con COMMIT</strong> y <strong>salva otra con ROLLBACK</strong> después de una falla. ⚡</p>
+                                    <div class="flex flex-wrap gap-2 mb-2 text-xs font-semibold">
+                                        <span id="m5-step-commit" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">✅ Venta confirmada</span>
+                                        <span id="m5-step-rollback" class="px-2 py-1 rounded-full bg-slate-100 text-slate-400 border border-slate-200">⏪ Falla revertida</span>
+                                        <span id="tx-status" class="px-2 py-1 rounded-full bg-slate-200 text-slate-600">Sin transacción</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div class="bg-white rounded-lg border border-teal-200 overflow-x-auto">
+                                            <p class="text-xs font-bold text-teal-800 p-2">📦 producto</p>
+                                            <table class="w-full text-xs border-collapse" id="tx-producto"></table>
+                                        </div>
+                                        <div class="bg-white rounded-lg border border-teal-200 overflow-x-auto">
+                                            <p class="text-xs font-bold text-teal-800 p-2">🧾 venta</p>
+                                            <table class="w-full text-xs border-collapse" id="tx-venta"></table>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                                        <button type="button" class="sim-btn text-left text-xs bg-white border-2 border-blue-200 hover:border-blue-400 rounded-lg px-3 py-2 transition" data-tx="start">1️⃣ START TRANSACTION;</button>
+                                        <button type="button" class="sim-btn text-left text-xs bg-white border-2 border-teal-200 hover:border-teal-500 rounded-lg px-3 py-2 transition" data-tx="update">2️⃣ UPDATE producto SET stock = stock - 1 WHERE codigo = 'P001';</button>
+                                        <button type="button" class="sim-btn text-left text-xs bg-white border-2 border-teal-200 hover:border-teal-500 rounded-lg px-3 py-2 transition" data-tx="insert">3️⃣ INSERT INTO venta (codigo_producto, cantidad) VALUES ('P001', 1);</button>
+                                        <button type="button" class="sim-btn text-left text-xs bg-white border-2 border-yellow-300 hover:border-yellow-500 rounded-lg px-3 py-2 transition" data-tx="fail">⚡ Simular caída de la conexión</button>
+                                        <button type="button" class="sim-btn text-left text-xs bg-white border-2 border-green-300 hover:border-green-500 rounded-lg px-3 py-2 transition" data-tx="commit">✅ COMMIT;</button>
+                                        <button type="button" class="sim-btn text-left text-xs bg-white border-2 border-red-200 hover:border-red-400 rounded-lg px-3 py-2 transition" data-tx="rollback">⏪ ROLLBACK;</button>
+                                    </div>
+                                    <div id="tx-log" class="sql-code text-xs" style="min-height:3rem;white-space:pre-wrap;">mysql&gt; _</div>
+                                    <p class="mission-feedback mt-3 text-sm font-bold"></p>
+                                </div>
+
+                                <!-- RECURSO-EXTERNO id="recurso-ext-1"
+                                     Tema: Transacciones en SQL (START TRANSACTION, COMMIT y ROLLBACK)
+                                     Buscar: "transacciones SQL COMMIT ROLLBACK MySQL explicación en español"
+                                -->
+                                <div id="recurso-ext-1" class="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">📹 Recurso sugerido</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">⏳ URL pendiente</span>
+                                    </div>
+                                    <p class="text-green-800 font-semibold mb-1">Video: transacciones en SQL con COMMIT y ROLLBACK</p>
+                                    <p class="text-slate-600 text-sm mb-4">🔍 Búsqueda sugerida: <em>"transacciones SQL COMMIT ROLLBACK MySQL explicación en español"</em></p>
+                                    <a href="#" target="_blank"
+                                       class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm opacity-50 cursor-not-allowed">
+                                        <span>▶️</span> Ver recurso
+                                    </a>
+                                    <div class="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                        <p class="text-green-800 text-xs font-bold mb-1">💬 Cómo activar este recurso:</p>
+                                        <p class="text-green-700 text-xs mb-2">Busca el video o recurso y dile esto a tu agente de IA en el chat:</p>
+                                        <div class="bg-white border border-green-300 rounded p-2 text-xs text-slate-700 italic select-all">
+                                            "Encontré un recurso para el recurso-ext-1 del OVA. Actualízalo con esta URL: (pega aquí la URL) y ponle el título: (escribe aquí el título)."
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- [FIN CONTENIDO — ACORDEÓN 5] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: ACTIVIDADES
+                 ============================================= -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — ACTIVIDADES] -->
+
+                    <!-- Panel de progreso de actividades -->
+                    <div class="p-4 sm:p-5 bg-white border-2 border-green-300 rounded-xl shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <p class="font-bold text-green-800 text-lg">🕵️ Operación: Base de Datos Limpia</p>
+                            <p class="font-bold text-green-700">🎖️ <span id="act-points">0</span>/3 misiones</p>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-2">
+                            <div id="act-progress" class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500">Eres el nuevo responsable de la base de datos académica. Cumple las 3 misiones para ganar el rango de <strong>Agente DML</strong>. 🕶️</p>
+                        <p id="act-badge" class="hidden mt-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg text-yellow-800 text-sm font-bold text-center">🏆 ¡RANGO DESBLOQUEADO: AGENTE DML! 🎉 Completaste las 3 misiones.</p>
+                    </div>
+
+                    <!-- Actividad 1 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a1">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🔎 Misión 1: El detective de instrucciones</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Alguien dejó estas instrucciones listas para ejecutar sobre la tabla <strong>curso(id_curso, nombre, creditos, intensidad_horaria)</strong>. Identifica cuáles tienen errores de sintaxis o pueden afectar registros que no deberían modificarse. 🕵️
+                        </p>
+                        <div class="space-y-3 mb-4">
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a1="1" data-ok="false">
+                                <p class="font-mono text-xs sm:text-sm mb-2 break-all"><span class="text-slate-400">-- Instrucción 1</span><br>INSERT INTO curso VALUES (6, 'Programación Web', 'tres', 144);</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-green-400 transition" data-val="true">✅ Está bien</button>
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-red-400 transition" data-val="false">⚠️ Tiene un problema</button>
+                                </div>
+                                <p class="a1-exp hidden text-xs mt-2 text-slate-600">💡 <strong>'tres'</strong> es texto y la columna creditos es numérica (error de dominio). Además, no indicar la lista de columnas hace la instrucción frágil si la tabla cambia.</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a1="2" data-ok="false">
+                                <p class="font-mono text-xs sm:text-sm mb-2"><span class="text-slate-400">-- Instrucción 2</span><br>UPDATE curso SET creditos = 4;</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-green-400 transition" data-val="true">✅ Está bien</button>
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-red-400 transition" data-val="false">⚠️ Tiene un problema</button>
+                                </div>
+                                <p class="a1-exp hidden text-xs mt-2 text-slate-600">💡 ¡No tiene WHERE! Todos los cursos quedarían con 4 créditos.</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a1="3" data-ok="true">
+                                <p class="font-mono text-xs sm:text-sm mb-2"><span class="text-slate-400">-- Instrucción 3</span><br>DELETE FROM curso WHERE id_curso = 3;</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-green-400 transition" data-val="true">✅ Está bien</button>
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-red-400 transition" data-val="false">⚠️ Tiene un problema</button>
+                                </div>
+                                <p class="a1-exp hidden text-xs mt-2 text-slate-600">💡 Correcta: el WHERE apunta a un solo curso. (Si ese curso tuviera matrículas con RESTRICT, el SGBD lo rechazaría, pero la instrucción está bien escrita).</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg" data-a1="4" data-ok="true">
+                                <p class="font-mono text-xs sm:text-sm mb-2 break-all"><span class="text-slate-400">-- Instrucción 4</span><br>INSERT INTO curso (id_curso, nombre, creditos, intensidad_horaria)<br>VALUES (7, 'Redes de Computadores', 3, 144);</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-green-400 transition" data-val="true">✅ Está bien</button>
+                                    <button type="button" class="a1-opt border-2 border-slate-200 rounded-lg px-3 py-1 text-sm font-medium text-slate-600 bg-white hover:border-red-400 transition" data-val="false">⚠️ Tiene un problema</button>
+                                </div>
+                                <p class="a1-exp hidden text-xs mt-2 text-slate-600">💡 Correcta: indica las columnas y cada valor respeta su tipo de dato.</p>
+                            </div>
+                        </div>
+                        <p id="a1-hint" class="text-sm font-bold mb-3"></p>
+                        <label for="act1-text" class="block text-sm font-semibold text-slate-700 mb-1">✍️ Escribe aquí las instrucciones corregidas:</label>
+                        <textarea id="act1-text" rows="5" class="sql-input w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="INSERT INTO curso (...) VALUES (...);&#10;UPDATE curso SET ... WHERE ...;"></textarea>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button type="button" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a1', this)">🚀 Completar misión</button>
+                            <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="toggleSolucion('sol-a1', this)">👀 Ver una posible solución</button>
+                        </div>
+<pre id="sol-a1" class="hidden sql-code mt-3"><span class="cm">-- Instrucción 1 corregida (créditos numérico y columnas explícitas)</span>
+<span class="kw">INSERT INTO</span> curso (id_curso, nombre, creditos, intensidad_horaria)
+<span class="kw">VALUES</span> (6, 'Programación Web', 3, 144);
+
+<span class="cm">-- Instrucción 2 corregida (solo el curso deseado)</span>
+<span class="kw">UPDATE</span> curso <span class="kw">SET</span> creditos = 4 <span class="kw">WHERE</span> id_curso = 6;
+
+<span class="cm">-- Instrucciones 3 y 4: correctas, no requieren cambios</span></pre>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> las instrucciones INSERT, UPDATE y DELETE con su estructura corregida.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 2 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a2">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🏗️ Misión 2: Nuevo curso en el catálogo</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            La universidad abre un curso nuevo. Completa los espacios para <strong>insertarlo</strong> en la tabla <strong>curso</strong> y luego <strong>actualiza</strong> ese mismo curso para subirle <strong>un crédito</strong>. Al ejecutar verás el resultado en la tabla. 👇
+                        </p>
+                        <div class="mb-4">
+                            <img src="img/Infografía SQL_ Curso, INSERT y UPDATE.png" alt="Tabla CURSO con la estructura de INSERT y de UPDATE por completar" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                            <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="font-bold text-blue-800 mb-2">➕ Estructura de INSERT</p>
+                                <div class="space-y-2 text-sm font-mono">
+                                    <div class="flex flex-wrap items-center gap-1">INSERT INTO <input id="ins-tabla" class="sql-input w-28 p-1 border-2 border-blue-200 rounded focus:border-blue-500 focus:outline-none" placeholder="tabla"></div>
+                                    <div class="flex flex-wrap items-center gap-1">VALUES (
+                                        <input id="ins-id" class="sql-input w-20 p-1 border-2 border-blue-200 rounded focus:border-blue-500 focus:outline-none" placeholder="C006">,
+                                        <input id="ins-nombre" class="sql-input w-40 p-1 border-2 border-blue-200 rounded focus:border-blue-500 focus:outline-none" placeholder="nombre">,
+                                        <input id="ins-cred" class="sql-input w-14 p-1 border-2 border-blue-200 rounded focus:border-blue-500 focus:outline-none" placeholder="cr.">,
+                                        <input id="ins-horas" class="sql-input w-14 p-1 border-2 border-blue-200 rounded focus:border-blue-500 focus:outline-none" placeholder="h">);</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                <p class="font-bold text-orange-800 mb-2">✏️ Estructura de UPDATE</p>
+                                <div class="space-y-2 text-sm font-mono">
+                                    <div class="flex flex-wrap items-center gap-1">UPDATE <input id="upd-tabla" class="sql-input w-28 p-1 border-2 border-orange-200 rounded focus:border-orange-500 focus:outline-none" placeholder="tabla"></div>
+                                    <div class="flex flex-wrap items-center gap-1">SET <input id="upd-col" class="sql-input w-24 p-1 border-2 border-orange-200 rounded focus:border-orange-500 focus:outline-none" placeholder="columna"> = <input id="upd-expr" class="sql-input w-32 p-1 border-2 border-orange-200 rounded focus:border-orange-500 focus:outline-none" placeholder="nuevo valor"></div>
+                                    <div class="flex flex-wrap items-center gap-1">WHERE <input id="upd-wcol" class="sql-input w-24 p-1 border-2 border-orange-200 rounded focus:border-orange-500 focus:outline-none" placeholder="columna"> = <input id="upd-wval" class="sql-input w-20 p-1 border-2 border-orange-200 rounded focus:border-orange-500 focus:outline-none" placeholder="valor">;</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition mb-3" onclick="ejecutarCurso()">▶️ Ejecutar INSERT y UPDATE</button>
+                        <div id="curso-log" class="sql-code text-xs mb-3" style="min-height:2.5rem;white-space:pre-wrap;">mysql&gt; _</div>
+                        <div class="overflow-x-auto bg-white rounded-lg border border-green-200">
+                            <table class="w-full text-sm border-collapse" id="curso-table"></table>
+                        </div>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a2', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> la estructura de un INSERT que agregue un nuevo registro y la de un UPDATE que actualice ese registro existente.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actividad 3 -->
+                    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-6" data-act="a3">
+                        <h3 class="text-xl font-bold text-green-700 mb-3">🧾 Misión 3: El cliente que quería desaparecer</h3>
+                        <p class="mb-4 text-slate-700 leading-relaxed">
+                            Un cliente pide que lo borren del sistema, pero tiene facturas asociadas en la tabla <strong>factura</strong>, y la clave foránea se definió con <strong>ON DELETE RESTRICT</strong>. ¿Qué ocurriría al intentar eliminarlo de la tabla <strong>cliente</strong>? 🤔
+                        </p>
+                        <div class="mb-4">
+                            <img src="img/Esquema relacional de facturación y productos.png" alt="Esquema relacional de cliente, factura, detalle_factura y producto" class="w-full rounded-lg border border-green-200 shadow-sm cursor-zoom-in hover:shadow-md transition" loading="lazy" onclick="openImgModal(this.src)">
+                            <p class="text-xs text-slate-500 text-center mt-1">📷 Fuente: elaboración propia con apoyo de inteligencia artificial generativa, ChatGPT, 2026 — clic para ampliar 🔍</p>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-700 mb-2">1️⃣ Primero, tu predicción:</p>
+                        <div class="flex flex-col gap-2 mb-2">
+                            <button type="button" class="a3-opt text-left border-2 border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:border-green-400 transition" data-correct="false">🌊 Se elimina el cliente y todas sus facturas</button>
+                            <button type="button" class="a3-opt text-left border-2 border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:border-green-400 transition" data-correct="true">⛔ El SGBD rechaza la eliminación y todo queda como estaba</button>
+                            <button type="button" class="a3-opt text-left border-2 border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:border-green-400 transition" data-correct="false">🕳️ Se elimina el cliente y sus facturas quedan con id_cliente en NULL</button>
+                        </div>
+                        <p id="a3-hint" class="text-sm font-bold mb-3"></p>
+                        <label for="act3-text" class="block text-sm font-semibold text-slate-700 mb-1">2️⃣ Explícalo con tus propias palabras (¿qué pasa y por qué es bueno para el negocio?):</label>
+                        <textarea id="act3-text" rows="4" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:outline-none" placeholder="Al intentar eliminar el cliente..."></textarea>
+                        <button type="button" class="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition" onclick="completarActividad('a3', this)">🚀 Completar misión</button>
+                        <p class="act-feedback mt-3 text-sm font-bold"></p>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-800">
+                                <span class="font-bold">📝 Producto esperado:</span> párrafo corto expresado con tus propias palabras.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — ACTIVIDADES] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: EVALUACIÓN
+                 ============================================= -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido. Selecciona la respuesta correcta para cada pregunta.</p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn" class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: RECURSOS
+                 Reemplaza nombre, descripción, URL e imagen QR.
+                 NO cambiar clases ni estructura HTML.
+                 ============================================= -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para ampliar tu conocimiento, te recomendamos explorar los siguientes recursos:</p>
+                <ul class="space-y-4">
+
+                    <!-- [INICIO CONTENIDO — RECURSOS] -->
+
+                    <!-- Recurso 1 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🏋️ SQL: Ejercicios prácticos para la instrucción INSERT</h3>
+                            <p class="text-slate-600 mb-2">Ejercicios resueltos paso a paso para practicar INSERT con distintos casos y restricciones.</p>
+                            <a href="https://www.techonthenet.com/sql/insert_exercises.php" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr1.png" alt="QR SQL: Ejercicios prácticos para la instrucción INSERT" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Recurso 2 -->
+                    <li class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">🎥 CRUD en PostgreSQL: Selecciona, Inserta, Actualiza y Elimina con ejemplos prácticos</h3>
+                            <p class="text-slate-600 mb-2">Video con ejemplos prácticos de las cuatro operaciones CRUD sobre una base de datos real.</p>
+                            <a href="https://www.youtube.com/watch?v=X2EDKnTyuho" target="_blank" class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center" style="width:2cm;height:2cm;">
+                                <img src="img/qr2.png" alt="QR CRUD en PostgreSQL" class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- [FIN CONTENIDO — RECURSOS] -->
+
+                </ul>
+            </div>
+
+            <!-- =============================================
+                 SECCIÓN: BIBLIOGRAFÍA
+                 ============================================= -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+
+                    <!-- [INICIO CONTENIDO — BIBLIOGRAFÍA] -->
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            PostgreSQL Global Development Group. (2026). <i>PostgreSQL 18 documentation: INSERT, UPDATE, DELETE</i>.<br>
+                            <a href="https://www.postgresql.org/docs/current/dml.html" class="text-green-700 underline break-all" target="_blank">https://www.postgresql.org/docs/current/dml.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            MySQL. (2026). <i>MySQL 8.4 reference manual: Data manipulation statements</i>. Oracle Corporation.<br>
+                            <a href="https://dev.mysql.com/doc/refman/8.4/en/sql-data-manipulation-statements.html" class="text-green-700 underline break-all" target="_blank">https://dev.mysql.com/doc/refman/8.4/en/sql-data-manipulation-statements.html</a>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Coronel, C., &amp; Morris, S. (2019). <i>Database systems: Design, implementation, and management</i> (13.ª ed.). Cengage Learning.
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Reis, J., &amp; Housley, M. (2022). <i>Fundamentals of data engineering: Plan and build robust data systems</i>. O'Reilly Media.
+                        </span>
+                    </div>
+
+                    <!-- [FIN CONTENIDO — BIBLIOGRAFÍA] -->
+
+                </div>
+            </div>
+
+            <!-- =============================================
+                 FOOTER CON CRÉDITOS — NO MODIFICAR
+                 ============================================= -->
+            <footer class="mt-12 pt-6 border-t-2 border-slate-200 text-center">
+                <p class="text-slate-600 font-medium">Creado por:</p>
+                <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia CINTIA</p>
+                <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="img-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" onclick="closeImgModal()">
+        <img id="img-modal-src" src="" alt="Imagen ampliada" class="max-w-full max-h-full rounded-lg shadow-2xl">
+        <button type="button" class="absolute top-4 right-4 text-white text-3xl font-bold hover:text-green-300" onclick="closeImgModal()">✖</button>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+         ============================================= -->
+
+    <!-- Script de navegación entre secciones — NO MODIFICAR -->
+    <script>
+        // Navegación desktop (sidebar)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Navegación mobile (select)
+        document.getElementById('mobile-nav').addEventListener('change', function() {
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(this.value).classList.add('active');
+        });
+
+        // Acordeones
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const panel = document.querySelector(targetId);
+                const icon = this.querySelector('span:last-child');
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    icon.textContent = '➖';
+                } else {
+                    panel.classList.add('hidden');
+                    icon.textContent = '➕';
+                }
+            });
+        });
+
+    </script>
+
+    <!-- =============================================
+         QUIZ — Preguntas de evaluación
+         ============================================= -->
+    <script>
+        const quizData = [
+            {
+                question: "¿Sobre qué trabaja siempre el DML?",
+                options: ["Sobre la estructura de las tablas (columnas y restricciones)", "Sobre el contenido de las tablas, es decir, sus filas", "Sobre los permisos de los usuarios", "Sobre la creación de bases de datos"],
+                correct: 1
+            },
+            {
+                question: "En INSERT INTO estudiante (nombre, correo, fecha_nacimiento) VALUES (...), ¿por qué no se escribe id_estudiante?",
+                options: ["Porque es AUTO_INCREMENT y el SGBD le asigna el valor automáticamente", "Porque las claves primarias nunca se pueden insertar", "Porque es opcional y quedará en NULL", "Porque SQL lo ignora siempre"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál es la ventaja de insertar varias filas en una sola instrucción INSERT?",
+                options: ["Salta las restricciones de la tabla", "Permite omitir los tipos de datos", "Es más eficiente que ejecutar muchos INSERT independientes", "Crea las columnas que falten"],
+                correct: 2
+            },
+            {
+                question: "Intentas insertar un producto con id_categoria = 999, pero esa categoría no existe. ¿Qué ocurre?",
+                options: ["Se crea automáticamente la categoría 999", "El producto se inserta con id_categoria en NULL", "El producto se inserta sin problema", "El SGBD rechaza la fila por violar la clave foránea"],
+                correct: 3
+            },
+            {
+                question: "En un UPDATE, ¿qué función cumple la cláusula SET?",
+                options: ["Indica qué columnas cambiar y con qué nuevo valor", "Indica qué filas serán afectadas", "Confirma los cambios de forma permanente", "Define el tipo de dato de la columna"],
+                correct: 0
+            },
+            {
+                question: "¿Qué ocurre al ejecutar UPDATE producto SET precio = 195000; sin WHERE?",
+                options: ["Solo se actualiza el primer producto", "Todos los productos de la tabla quedan con precio 195000", "El SGBD siempre lo rechaza por error de sintaxis", "No pasa nada hasta escribir COMMIT"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la buena práctica recomendada antes de ejecutar un UPDATE o un DELETE sobre datos reales?",
+                options: ["Desactivar todas las restricciones de la tabla", "Ejecutar primero DROP TABLE como prueba", "Ejecutar un SELECT con el mismo WHERE para ver cuáles y cuántas filas se afectarán", "Quitar la clave primaria"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es la diferencia entre DELETE FROM matricula; y DROP TABLE matricula;?",
+                options: ["Son exactamente iguales", "DELETE elimina la tabla y DROP solo sus filas", "DELETE da error sin WHERE y DROP no", "DELETE elimina todas las filas y conserva la tabla; DROP elimina también la tabla"],
+                correct: 3
+            },
+            {
+                question: "La FK de factura hacia cliente es ON DELETE RESTRICT. Si intentas borrar un cliente que tiene facturas, ¿qué pasa?",
+                options: ["El SGBD rechaza la eliminación", "Se borran el cliente y sus facturas", "Las facturas quedan con id_cliente en NULL", "Se borra solo el cliente y las facturas quedan huérfanas"],
+                correct: 0
+            },
+            {
+                question: "Durante una venta se descontó el stock, pero la conexión se cayó antes de registrar la venta. Dentro de una transacción, ¿qué instrucción deja la base de datos como estaba?",
+                options: ["COMMIT", "ROLLBACK", "TRUNCATE", "DELETE"],
+                correct: 1
+            }
+        ];
+
+        // Renderizado del quiz — NO MODIFICAR
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('mb-6');
+            div.innerHTML = `
+                <p class="font-semibold text-slate-800 mb-3">${index + 1}. ${item.question}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 options-grid">
+                    ${item.options.map((opt, i) => `
+                        <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 cursor-pointer transition-colors"
+                             data-question="${index}" data-option="${i}">
+                            <span class="font-medium text-green-700 mr-2">${String.fromCharCode(65+i)}.</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const q = this.dataset.question;
+                document.querySelectorAll(`[data-question="${q}"]`).forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+            let score = 0;
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`.quiz-option.selected[data-question="${index}"]`);
+                if (selected && parseInt(selected.dataset.option) === item.correct) score++;
+            });
+            const result = document.getElementById('quiz-result');
+            const pct = Math.round((score / quizData.length) * 100);
+            result.textContent = `Obtuviste ${score} de ${quizData.length} (${pct}%)`;
+            result.className = `mt-4 text-lg font-bold ${pct >= 60 ? 'text-green-700' : 'text-red-600'}`;
+        });
+    </script>
+
+    <!-- =============================================
+         SCRIPTS DE ACTIVIDADES INTERACTIVAS
+         ============================================= -->
+    <script>
+        // ============================================
+        // SISTEMA DE GAMIFICACIÓN — Contenido (misiones)
+        // ============================================
+        const MISSION_XP = { m1: 20, m2: 30, m3: 30, m4: 30, m5: 40 };
+        const TOTAL_XP = Object.values(MISSION_XP).reduce((a, b) => a + b, 0);
+        const gameState = { xp: 0, completed: new Set() };
+
+        function updateGamePanel() {
+            document.getElementById('game-points').textContent = gameState.xp;
+            document.getElementById('game-progress').style.width = Math.round((gameState.xp / TOTAL_XP) * 100) + '%';
+        }
+
+        function completeMission(missionId, container) {
+            if (gameState.completed.has(missionId)) return;
+            gameState.completed.add(missionId);
+            gameState.xp += MISSION_XP[missionId] || 0;
+            updateGamePanel();
+            const badge = document.getElementById('badge-' + missionId);
+            if (badge) {
+                badge.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200');
+                badge.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            }
+            const feedback = container.querySelector('.mission-feedback');
+            if (feedback) {
+                feedback.textContent = '🎉 ¡Misión completada! +' + (MISSION_XP[missionId] || 0) + ' XP';
+                feedback.className = 'mission-feedback mt-3 text-sm font-bold text-green-700';
+            }
+            if (missionId === 'm4') document.getElementById('m4-reward').classList.remove('hidden');
+            if (gameState.completed.size === Object.keys(MISSION_XP).length) {
+                document.getElementById('badge-final').classList.remove('hidden');
+            }
+        }
+
+        function marcarChip(id) {
+            const chip = document.getElementById(id);
+            chip.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200');
+            chip.classList.add('bg-green-500', 'text-white', 'border-green-500');
+        }
+
+        // Opciones de las misiones de selección (m1, m2, m4)
+        document.querySelectorAll('.game-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const group = this.closest('[data-gq]');
+                const missionContainer = this.closest('[data-mission]');
+                if (!group || !missionContainer || group.dataset.solved === 'true') return;
+                const feedback = missionContainer.querySelector('.mission-feedback');
+                if (this.dataset.correct === 'true') {
+                    group.dataset.solved = 'true';
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-green-500', 'border-green-500', 'text-white');
+                    group.querySelectorAll('button').forEach(b => {
+                        b.disabled = true;
+                        if (b !== this) b.classList.add('opacity-50');
+                    });
+                    feedback.textContent = '¡Correcto! ⭐';
+                    feedback.className = 'mission-feedback mt-3 text-sm font-bold text-green-700';
+                    const groups = missionContainer.querySelectorAll('[data-gq]');
+                    if (Array.from(groups).every(g => g.dataset.solved === 'true')) {
+                        completeMission(missionContainer.dataset.mission, missionContainer);
+                    }
+                } else {
+                    this.disabled = true;
+                    this.classList.remove('border-slate-200', 'text-slate-600');
+                    this.classList.add('bg-red-100', 'border-red-300', 'text-red-400', 'opacity-60');
+                    feedback.textContent = '¡Casi! Inténtalo de nuevo 💪';
+                    feedback.className = 'mission-feedback mt-3 text-sm font-bold text-red-500';
+                }
+            });
+        });
+
+        // Tabla genérica para los simuladores
+        function renderTabla(tablaId, cols, rows, claseFila) {
+            const head = cols.map(c => '<th class="p-2 text-left bg-teal-600 text-white font-mono text-xs">' + c + '</th>').join('');
+            const body = rows.length
+                ? rows.map((r, i) => '<tr class="border-b border-teal-100 ' + (claseFila ? claseFila(r, i) : '') + '">' +
+                    cols.map(c => '<td class="p-2 font-mono text-xs">' + r[c] + '</td>').join('') + '</tr>').join('')
+                : '<tr><td class="p-2 text-xs text-slate-400 italic" colspan="' + cols.length + '">(sin filas)</td></tr>';
+            document.getElementById(tablaId).innerHTML = '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>';
+        }
+
+        // ---- Misión 3: simulador UPDATE ----
+        const UPD_INICIAL = () => [
+            { id_estudiante: 1, nombre: 'Ana López', activo: 'TRUE' },
+            { id_estudiante: 2, nombre: 'Carlos Ruiz', activo: 'TRUE' },
+            { id_estudiante: 3, nombre: 'María Gómez', activo: 'TRUE' },
+            { id_estudiante: 4, nombre: 'Luis Torres', activo: 'FALSE' },
+            { id_estudiante: 5, nombre: 'Juan Pérez', activo: 'TRUE' }
+        ];
+        let updRows = UPD_INICIAL();
+        let updMarcadas = new Set();
+        let updClase = '';
+        const updSteps = { select: false, update: false };
+        let updDanada = false;
+
+        function renderUpd() {
+            renderTabla('upd-table', ['id_estudiante', 'nombre', 'activo'], updRows,
+                r => updMarcadas.has(r.id_estudiante) ? updClase : '');
+        }
+
+        function updLog(t) { document.getElementById('upd-log').textContent = t; }
+
+        document.querySelectorAll('[data-upd]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const accion = this.dataset.upd;
+                if (accion === 'select') {
+                    updMarcadas = new Set([5]); updClase = 'bg-yellow-100';
+                    updLog('mysql> 1 row in set\n🔍 Solo Juan Pérez cumple la condición. ¡Ese es tu objetivo! 🎯');
+                    updSteps.select = true; marcarChip('m3-step-select');
+                } else if (accion === 'bad') {
+                    updRows.forEach(r => r.activo = 'FALSE');
+                    updMarcadas = new Set(updRows.map(r => r.id_estudiante)); updClase = 'bg-red-100';
+                    updDanada = true;
+                    updLog('mysql> Query OK, 4 rows affected\nRows matched: 5  Changed: 4\n😱 ¡TODOS los estudiantes quedaron inactivos! Imagina esto con 10.000 estudiantes reales… Restaura la copia de seguridad.');
+                } else if (accion === 'good') {
+                    if (updDanada) {
+                        updLog('⚠️ La tabla está dañada por el UPDATE sin WHERE. Restaura primero la copia de seguridad 💾');
+                        return;
+                    }
+                    updRows.find(r => r.id_estudiante === 5).activo = 'FALSE';
+                    updMarcadas = new Set([5]); updClase = 'bg-green-100';
+                    if (!updSteps.select) {
+                        updLog('mysql> Query OK, 1 row affected\n✅ Funcionó… pero un profesional verifica antes con SELECT. ¡Restaura y hazlo en orden! 🔍');
+                    } else {
+                        updLog('mysql> Query OK, 1 row affected\n🎯 ¡Disparo perfecto! Solo Juan Pérez quedó inactivo.');
+                        updSteps.update = true; marcarChip('m3-step-update');
+                        completeMission('m3', document.querySelector('[data-mission="m3"]'));
+                    }
+                } else if (accion === 'reset') {
+                    updRows = UPD_INICIAL(); updMarcadas = new Set(); updDanada = false;
+                    updLog('mysql> _   💾 Tabla restaurada desde la copia de seguridad.');
+                }
+                renderUpd();
+            });
+        });
+        renderUpd();
+
+        // ---- Misión 5: simulador de transacción ----
+        let tx = { stock: 10, ventas: [], activa: false, snapshot: null, updated: false, inserted: false, fallo: false };
+        const txSteps = { commit: false, rollback: false };
+
+        function renderTx() {
+            renderTabla('tx-producto', ['codigo', 'nombre', 'stock'], [{ codigo: 'P001', nombre: 'Teclado', stock: tx.stock }],
+                () => tx.updated ? 'bg-yellow-100' : '');
+            renderTabla('tx-venta', ['id', 'codigo_producto', 'cantidad'], tx.ventas,
+                (r, i) => (tx.inserted && i === tx.ventas.length - 1) ? 'bg-yellow-100' : '');
+            const st = document.getElementById('tx-status');
+            st.textContent = tx.activa ? '🟡 Transacción abierta' : 'Sin transacción';
+            st.className = 'px-2 py-1 rounded-full ' + (tx.activa ? 'bg-yellow-200 text-yellow-900' : 'bg-slate-200 text-slate-600');
+        }
+
+        function txLog(t) { document.getElementById('tx-log').textContent = t; }
+
+        function revisarTx() {
+            if (txSteps.commit && txSteps.rollback) completeMission('m5', document.querySelector('[data-mission="m5"]'));
+        }
+
+        document.querySelectorAll('[data-tx]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const accion = this.dataset.tx;
+                if (accion === 'start') {
+                    if (tx.activa) { txLog('⚠️ Ya hay una transacción abierta. Termínala con COMMIT o ROLLBACK.'); return; }
+                    tx.activa = true; tx.updated = false; tx.inserted = false; tx.fallo = false;
+                    tx.snapshot = { stock: tx.stock, ventas: tx.ventas.slice() };
+                    txLog('mysql> START TRANSACTION;\n▶️ Transacción iniciada. Nada se confirma hasta el COMMIT.');
+                } else if (!tx.activa) {
+                    txLog('⚠️ Primero inicia la transacción con START TRANSACTION 1️⃣');
+                    return;
+                } else if (tx.fallo) {
+                    if (accion === 'rollback') {
+                        tx.stock = tx.snapshot.stock; tx.ventas = tx.snapshot.ventas;
+                        tx.activa = false; tx.updated = false; tx.inserted = false; tx.fallo = false;
+                        txLog('mysql> ROLLBACK;\n⏪ ¡Salvado! El stock volvió a su valor anterior y no quedó ninguna venta a medias. 🦸');
+                        txSteps.rollback = true; marcarChip('m5-step-rollback'); revisarTx();
+                    } else {
+                        txLog('💥 La conexión se cayó. Lo único sensato ahora es deshacer todo: ROLLBACK ⏪');
+                        return;
+                    }
+                } else if (accion === 'update') {
+                    if (tx.updated) { txLog('⚠️ Ya descontaste el stock de esta venta.'); return; }
+                    tx.stock -= 1; tx.updated = true;
+                    txLog('mysql> UPDATE ... \nQuery OK, 1 row affected  📦 Stock descontado (pendiente de confirmar).');
+                } else if (accion === 'insert') {
+                    if (!tx.updated) { txLog('⚠️ Primero descuenta el stock (paso 2️⃣).'); return; }
+                    if (tx.inserted) { txLog('⚠️ La venta ya fue registrada.'); return; }
+                    tx.ventas.push({ id: 100 + tx.ventas.length + 1, codigo_producto: 'P001', cantidad: 1 });
+                    tx.inserted = true;
+                    txLog('mysql> INSERT ... \nQuery OK, 1 row affected  🧾 Venta registrada (pendiente de confirmar).');
+                } else if (accion === 'fail') {
+                    if (!tx.updated || tx.inserted) {
+                        txLog('ℹ️ Para ver el peligro real, simula la falla justo después de descontar el stock y ANTES de registrar la venta.');
+                        return;
+                    }
+                    tx.fallo = true;
+                    txLog('💥 ¡Se cayó la conexión! El stock bajó pero la venta nunca se registró: la base de datos quedó inconsistente. ¿Qué haces? 🤔');
+                } else if (accion === 'commit') {
+                    if (!(tx.updated && tx.inserted)) { txLog('⚠️ No confirmes una venta incompleta: faltan pasos 2️⃣ y 3️⃣.'); return; }
+                    tx.activa = false; tx.updated = false; tx.inserted = false;
+                    txLog('mysql> COMMIT;\n✅ Venta confirmada de forma permanente: stock y venta van juntos.');
+                    txSteps.commit = true; marcarChip('m5-step-commit'); revisarTx();
+                } else if (accion === 'rollback') {
+                    tx.stock = tx.snapshot.stock; tx.ventas = tx.snapshot.ventas;
+                    tx.activa = false; tx.updated = false; tx.inserted = false;
+                    txLog('mysql> ROLLBACK;\n⏪ Cambios deshechos. (Para ganar el logro, simula primero una caída de conexión ⚡)');
+                }
+                renderTx();
+            });
+        });
+        renderTx();
+
+        // ============================================
+        // GAMIFICACIÓN — Actividades
+        // ============================================
+        const actState = { done: new Set() };
+        const ACT_FLAGS = { a1: false, a2: false, a3: false };
+
+        function completarActividad(id, btn) {
+            if (actState.done.has(id)) return;
+            const container = document.querySelector('[data-act="' + id + '"]');
+            const feedback = container.querySelector('.act-feedback');
+            let ok = false, msg = '';
+            if (id === 'a1') {
+                const text = document.getElementById('act1-text').value.trim();
+                const tieneWhere = /where/i.test(text);
+                const sinTres = !/'tres'/i.test(text);
+                ok = ACT_FLAGS.a1 && text.length >= 40 && tieneWhere && sinTres;
+                msg = !ACT_FLAGS.a1 ? 'Primero clasifica bien las 4 instrucciones 🔎'
+                    : !tieneWhere ? 'Tu UPDATE corregido necesita un WHERE 🎯'
+                    : !sinTres ? "Ojo: 'tres' sigue siendo texto; los créditos van como número 🔢"
+                    : 'Escribe las instrucciones corregidas completas ✍️';
+            } else if (id === 'a2') {
+                ok = ACT_FLAGS.a2;
+                msg = 'Primero ejecuta con éxito tu INSERT y tu UPDATE ▶️';
+            } else if (id === 'a3') {
+                const text = document.getElementById('act3-text').value.trim();
+                ok = ACT_FLAGS.a3 && text.length >= 80;
+                msg = !ACT_FLAGS.a3 ? 'Elige primero la predicción correcta 🔮' : 'Tu explicación está muy corta: escribe al menos 2 o 3 frases 📝';
+            }
+            if (!ok) {
+                feedback.textContent = '⚠️ ' + msg;
+                feedback.className = 'act-feedback mt-3 text-sm font-bold text-red-500';
+                return;
+            }
+            actState.done.add(id);
+            document.getElementById('act-points').textContent = actState.done.size;
+            document.getElementById('act-progress').style.width = Math.round((actState.done.size / 3) * 100) + '%';
+            feedback.textContent = actState.done.size === 3
+                ? '🏆 ¡3/3 misiones cumplidas! Ya eres un AGENTE DML certificado 🕶️'
+                : '🎉 ¡Misión cumplida! ' + actState.done.size + '/3 actividades completadas';
+            feedback.className = 'act-feedback mt-3 text-sm font-bold text-green-700';
+            if (actState.done.size === 3) document.getElementById('act-badge').classList.remove('hidden');
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+        }
+
+        // ---- Actividad 1: detective de instrucciones ----
+        document.querySelectorAll('.a1-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const card = this.closest('[data-a1]');
+                if (card.dataset.solved === 'true') return;
+                const hint = document.getElementById('a1-hint');
+                if (this.dataset.val === card.dataset.ok) {
+                    card.dataset.solved = 'true';
+                    this.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                    card.querySelectorAll('.a1-opt').forEach(b => { b.disabled = true; if (b !== this) b.classList.add('opacity-50'); });
+                    card.querySelector('.a1-exp').classList.remove('hidden');
+                    const resueltas = document.querySelectorAll('[data-a1][data-solved="true"]').length;
+                    hint.textContent = resueltas === 4 ? '🕵️ ¡Caso resuelto! Ahora escribe las versiones corregidas 👇' : '¡Bien visto! ⭐ ' + resueltas + '/4 instrucciones revisadas';
+                    hint.className = 'text-sm font-bold mb-3 text-green-700';
+                    if (resueltas === 4) ACT_FLAGS.a1 = true;
+                } else {
+                    this.disabled = true;
+                    this.classList.add('bg-red-100', 'border-red-300', 'opacity-60');
+                    hint.textContent = '🤔 Mira de nuevo: revisa los tipos de datos y si hay un WHERE.';
+                    hint.className = 'text-sm font-bold mb-3 text-red-500';
+                }
+            });
+        });
+
+        // ---- Actividad 2: INSERT + UPDATE en la tabla curso ----
+        const CURSOS_BASE = [
+            { id_curso: 'C001', nombre: 'Base de Datos I', creditos: 4, intensidad_horaria: 64 },
+            { id_curso: 'C002', nombre: 'Programación I', creditos: 3, intensidad_horaria: 48 },
+            { id_curso: 'C003', nombre: 'Redes', creditos: 3, intensidad_horaria: 48 },
+            { id_curso: 'C004', nombre: 'Ingeniería de Software', creditos: 4, intensidad_horaria: 64 },
+            { id_curso: 'C005', nombre: 'Estructuras de Datos', creditos: 4, intensidad_horaria: 64 }
+        ];
+        const COLS_CURSO = ['id_curso', 'nombre', 'creditos', 'intensidad_horaria'];
+
+        function limpiarValor(v) { return v.trim().replace(/^['"]|['"]$/g, '').trim(); }
+
+        function ejecutarCurso() {
+            const val = id => document.getElementById(id).value.trim();
+            const log = t => { document.getElementById('curso-log').textContent = t; };
+            const filas = CURSOS_BASE.map(c => Object.assign({}, c));
+            ACT_FLAGS.a2 = false;
+
+            // INSERT
+            const idNuevo = limpiarValor(val('ins-id')).toUpperCase();
+            const nombre = limpiarValor(val('ins-nombre'));
+            const cred = val('ins-cred'), horas = val('ins-horas');
+            if (val('ins-tabla').toLowerCase() !== 'curso') { log("❌ ERROR 1146: la tabla '" + (val('ins-tabla') || '?') + "' no existe. ¿En qué tabla van los cursos? 🤔"); renderTabla('curso-table', COLS_CURSO, filas); return; }
+            if (!idNuevo || !nombre || !cred || !horas) { log('❌ Faltan valores en el INSERT: la tabla tiene 4 columnas y necesitas 4 valores.'); renderTabla('curso-table', COLS_CURSO, filas); return; }
+            if (filas.some(f => f.id_curso === idNuevo)) { log("❌ ERROR 1062: Duplicate entry '" + idNuevo + "' for key 'PRIMARY'. Ese código ya existe 🔑"); renderTabla('curso-table', COLS_CURSO, filas); return; }
+            if (!/^\d+$/.test(cred) || !/^\d+$/.test(horas)) { log("❌ ERROR 1366: Incorrect integer value. creditos e intensidad_horaria deben ser números enteros (nada de 'tres') 🔢"); renderTabla('curso-table', COLS_CURSO, filas); return; }
+            const nueva = { id_curso: idNuevo, nombre: nombre, creditos: parseInt(cred, 10), intensidad_horaria: parseInt(horas, 10) };
+            filas.push(nueva);
+            let salida = 'mysql> INSERT INTO curso VALUES (\'' + idNuevo + '\', \'' + nombre + '\', ' + cred + ', ' + horas + ');\nQuery OK, 1 row affected ✅\n';
+
+            // UPDATE
+            const expr = val('upd-expr').replace(/\s+/g, '').toLowerCase();
+            const wval = limpiarValor(val('upd-wval')).toUpperCase();
+            if (val('upd-tabla').toLowerCase() !== 'curso') { log(salida + "❌ UPDATE: la tabla '" + (val('upd-tabla') || '?') + "' no es la correcta."); renderTabla('curso-table', COLS_CURSO, filas, f => f === nueva ? 'bg-blue-100' : ''); return; }
+            if (val('upd-col').toLowerCase() !== 'creditos') { log(salida + '❌ UPDATE: queremos cambiar los créditos. ¿Qué columna va en el SET? 🤔'); renderTabla('curso-table', COLS_CURSO, filas, f => f === nueva ? 'bg-blue-100' : ''); return; }
+            if (!val('upd-wcol')) { log(salida + '😱 ¡Sin WHERE! Ese UPDATE cambiaría TODOS los cursos. Completa la condición.'); renderTabla('curso-table', COLS_CURSO, filas, f => f === nueva ? 'bg-blue-100' : ''); return; }
+            if (val('upd-wcol').toLowerCase() !== 'id_curso' || wval !== idNuevo) { log(salida + '⚠️ El WHERE no apunta al curso que acabas de crear (' + idNuevo + '). Usa su clave primaria 🎯'); renderTabla('curso-table', COLS_CURSO, filas, f => f === nueva ? 'bg-blue-100' : ''); return; }
+            if (expr !== 'creditos+1') {
+                const fijo = parseInt(expr, 10);
+                if (String(fijo) === expr && fijo === nueva.creditos + 1) {
+                    salida += '💡 Funciona, pero es más robusto escribir creditos = creditos + 1 (no dependes de saber el valor actual).\n';
+                } else {
+                    log(salida + '❌ El nuevo valor debe subir los créditos en UNA unidad. Pista: usa el valor actual de la columna ➕1');
+                    renderTabla('curso-table', COLS_CURSO, filas, f => f === nueva ? 'bg-blue-100' : '');
+                    return;
+                }
+            }
+            nueva.creditos += 1;
+            salida += 'mysql> UPDATE curso SET creditos = creditos + 1 WHERE id_curso = \'' + idNuevo + '\';\nQuery OK, 1 row affected ✅\n🎉 ¡Curso creado y actualizado sin tocar los demás!';
+            log(salida);
+            renderTabla('curso-table', COLS_CURSO, filas, f => f === nueva ? 'bg-green-100' : '');
+            ACT_FLAGS.a2 = true;
+        }
+        renderTabla('curso-table', COLS_CURSO, CURSOS_BASE);
+
+        // ---- Actividad 3: predicción ON DELETE RESTRICT ----
+        document.querySelectorAll('.a3-opt').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.a3-opt').forEach(b => b.classList.remove('bg-green-500', 'text-white', 'border-green-500', 'bg-red-100', 'border-red-300'));
+                const hint = document.getElementById('a3-hint');
+                if (this.dataset.correct === 'true') {
+                    this.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                    ACT_FLAGS.a3 = true;
+                    hint.textContent = '🎯 ¡Exacto! RESTRICT protege las facturas: el cliente no se puede borrar mientras tenga facturas asociadas.';
+                    hint.className = 'text-sm font-bold mb-3 text-green-700';
+                } else {
+                    this.classList.add('bg-red-100', 'border-red-300');
+                    ACT_FLAGS.a3 = false;
+                    hint.textContent = '🤔 Esa sería otra política (CASCADE o SET NULL). ¿Qué hace RESTRICT?';
+                    hint.className = 'text-sm font-bold mb-3 text-red-500';
+                }
+            });
+        });
+
+        // ---- Soluciones desplegables ----
+        function toggleSolucion(id, btn) {
+            const el = document.getElementById(id);
+            const nowVisible = !el.classList.toggle('hidden');
+            if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+            btn.textContent = nowVisible ? '🙈 Ocultar' : btn.dataset.label;
+        }
+
+        // ---- Modal de imagen ----
+        function openImgModal(src) {
+            document.getElementById('img-modal-src').src = src;
+            document.getElementById('img-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeImgModal() {
+            document.getElementById('img-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+    </script>
+
+    <!-- Plugin de accesibilidad — NO MODIFICAR NI MOVER -->
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+</html>
