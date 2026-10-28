@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Prompting técnico, verificación y registro de comandos generados con IA</title>
+    <meta name="description"
+        content="Aprende a redactar prompts técnicos para obtener comandos y scripts de Bash, a verificarlos antes de ejecutarlos con man, bash -n, ShellCheck y modos de simulación, y a registrar el trabajo con history, script, tee y una bitácora.">
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;"
+                    class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;"
+                    class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- ===================== INTRODUCCIÓN ===================== -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">
+                    Prompting técnico, verificación y registro de comandos generados con IA
+                </h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Las herramientas de inteligencia artificial, como <strong>ChatGPT</strong>,
+                    <strong>Claude</strong>, <strong>Gemini</strong> y <strong>GitHub Copilot</strong>, pueden
+                    ayudarte a crear comandos de Linux y scripts de Bash rápidamente. Sin embargo, sus respuestas
+                    pueden contener errores o instrucciones que afecten los archivos y la seguridad de un servidor.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Por eso, <strong>no basta con copiar y ejecutar un comando: es necesario entenderlo y verificarlo
+                        antes de usarlo</strong>. Un error en una instrucción puede borrar archivos importantes o
+                    modificar permisos de forma insegura. En esta guía aprenderás a formular solicitudes claras a la
+                    IA, verificar los comandos generados y registrar los resultados para trabajar de forma segura y
+                    organizada.
+                </p>
+
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <i class="fa-solid fa-terminal"></i> <strong>¡Confía, pero verifica! Un buen prompt reduce las
+                            suposiciones de la IA, la lectura crítica detecta los riesgos antes de ejecutar y el
+                            registro deja evidencia de lo que hiciste.
+                            <i class="fa-solid fa-robot"></i> <i class="fa-solid fa-shield-halved"></i>
+                            <i class="fa-solid fa-clipboard-check"></i></strong>
+                    </p>
+                </div>
+
+                <!-- Síntesis de voz -->
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4"
+                    data-target="introduccion">
+                    <button
+                        class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button
+                        class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button
+                        class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-introduccion" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-introduccion" min="0.5" max="2"
+                            step="0.1" value="1" class="w-24">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== OBJETIVOS ===================== -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-comments"></i></span>
+                        <span>
+                            Redactar prompts técnicos que especifiquen sistema operativo, shell, rutas reales,
+                            restricciones de seguridad y formato de respuesta para obtener comandos y scripts de Bash
+                            precisos.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        <span>
+                            Identificar en un comando o script generado por IA los patrones de riesgo más frecuentes:
+                            operaciones destructivas, permisos excesivos, variables sin comillas, opciones inexistentes
+                            y diferencias entre GNU y BSD.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <span>
+                            Verificar comandos antes de ejecutarlos mediante <code>man</code>, <code>--help</code>,
+                            <code>type</code>, <code>bash -n</code>, <code>shellcheck</code>, modos de simulación y
+                            trazas con <code>set -x</code>, dentro de un entorno de prueba aislado.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-clipboard-list"></i></span>
+                        <span>
+                            Registrar de forma auditable el proceso de trabajo con IA usando <code>history</code> con
+                            marcas de tiempo, <code>script</code>, <code>tee</code> y una bitácora versionada.
+                        </span>
+                    </li>
+                </ul>
+
+                <!-- Síntesis de voz -->
+                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4"
+                    data-target="objetivos">
+                    <button
+                        class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
+                        <span class="mr-1">▶️</span> Leer
+                    </button>
+                    <button
+                        class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏸️</span> Pausar
+                    </button>
+                    <button
+                        class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center"
+                        disabled>
+                        <span class="mr-1">⏹️</span> Detener
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <label for="speech-rate-objetivos" class="text-sm text-green-800 mr-2">Velocidad:</label>
+                        <input type="range" class="speech-rate" id="speech-rate-objetivos" min="0.5" max="2" step="0.1"
+                            value="1" class="w-24">
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== CONTENIDO ===================== -->
+            <div id="contenido" class="content-pane">
+                <!-- Hero banner -->
+                <div class="ux-hero">
+                    <h2 style="display: flex; align-items: center; gap: 10px;">
+                        <div class="bs-hero-icon">
+                            <img src="img/manometro.gif" alt="Manómetro" style="width: 32px; height: 32px; object-fit: contain;">
+                        </div>
+                        Prompting técnico, verificación y registro de comandos con IA
+                    </h2>
+                    <p>Aprende a pedir comandos a la IA con precisión, a revisarlos críticamente antes de ejecutarlos
+                        y a dejar evidencia auditable de tu trabajo con history, script, tee y una bitácora.</p>
+                </div>
+
+                <!-- Progress dots -->
+                <div class="prog-dots" id="ux-prog">
+                    <div class="prog-dot done" title="Prompting técnico"></div>
+                    <div class="prog-dot" title="Patrones de riesgo"></div>
+                    <div class="prog-dot" title="Documentación y validación"></div>
+                    <div class="prog-dot" title="Ejecución controlada"></div>
+                    <div class="prog-dot" title="Registro y bitácora"></div>
+                    <span class="section-counter" id="ux-counter">Tema 1 de 5</span>
+                </div>
+
+                <!-- TABS de navegación -->
+                <div class="ux-tabs" role="tablist">
+                    <button class="ux-tab-btn active" onclick="showUxSection('prompt',0)" id="tab-prompt">
+                        <i class="fa-solid fa-comments ux-tab-icon" aria-hidden="true"></i>
+                        <span>Prompting técnico</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('riesgos',1)" id="tab-riesgos">
+                        <i class="fa-solid fa-triangle-exclamation ux-tab-icon" aria-hidden="true"></i>
+                        <span>Patrones de riesgo</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('verificar',2)" id="tab-verificar">
+                        <i class="fa-solid fa-magnifying-glass ux-tab-icon" aria-hidden="true"></i>
+                        <span>Documentación y validación</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('ejecucion',3)" id="tab-ejecucion">
+                        <i class="fa-solid fa-flask ux-tab-icon" aria-hidden="true"></i>
+                        <span>Ejecución controlada</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('registro',4)" id="tab-registro">
+                        <i class="fa-solid fa-clipboard-list ux-tab-icon" aria-hidden="true"></i>
+                        <span>Registro y bitácora</span>
+                    </button>
+                </div>
+
+                <!-- ===== SECCIÓN 1: PROMPTING TÉCNICO ===== -->
+                <div class="ux-section active bs-verde" id="sec-prompt">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-comments"></i></span>
+                        Prompting técnico</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            Pedir un comando a la IA es como pedir indicaciones a alguien que no conoce tu ciudad: si
+                            no le dices dónde estás ni a dónde vas, te dará una ruta basada en
+                            <em>suposiciones</em>. Mientras más datos reales entregues, más exacta será la ruta.
+                        </p>
+                    </div>
+
+                    <p class="bs-p">
+                        Un <strong>prompt</strong> es la instrucción en lenguaje natural que se entrega a un modelo de
+                        IA. En el trabajo con terminal, el <strong>prompt técnico</strong> es aquel que reduce la
+                        ambigüedad al mínimo: el modelo solo dispone de la información escrita en la solicitud, de modo
+                        que todo dato omitido (distribución, versión de una herramienta, ruta real, si el comando
+                        correrá con <code>sudo</code>) será completado con una suposición. La calidad del comando
+                        obtenido depende directamente de cuántas de esas suposiciones se eliminan.
+                    </p>
+
+                    <h4 class="bs-h4">Los cinco componentes de un prompt técnico</h4>
+                    <p style="color:#374151;font-size:.88rem;margin:0 0 8px;">Haz clic en cada componente para ver qué
+                        suposición evita:</p>
+                    <div class="bs-anat">
+                        <div class="bs-token-wrap" id="an-entorno" onclick="showAnat('entorno')"><span class="bs-token">Entorno</span><span class="bs-token-lbl">sistema y versiones</span></div>
+                        <div class="bs-token-wrap" id="an-contexto" onclick="showAnat('contexto')"><span class="bs-token">Contexto</span><span class="bs-token-lbl">rutas reales</span></div>
+                        <div class="bs-token-wrap" id="an-objetivo" onclick="showAnat('objetivo')"><span class="bs-token">Objetivo</span><span class="bs-token-lbl">qué lograr</span></div>
+                        <div class="bs-token-wrap" id="an-restricciones" onclick="showAnat('restricciones')"><span class="bs-token">Restricciones</span><span class="bs-token-lbl">qué NO hacer</span></div>
+                        <div class="bs-token-wrap" id="an-formato" onclick="showAnat('formato')"><span class="bs-token">Formato</span><span class="bs-token-lbl">cómo responder</span></div>
+                    </div>
+                    <div class="bs-panel" id="anat-info-panel"></div>
+
+                    <div class="bs-table-wrap" style="margin-top:16px;">
+                        <table class="bs-table">
+                            <thead>
+                                <tr>
+                                    <th>Componente</th>
+                                    <th>Qué debe incluir</th>
+                                    <th>Ejemplo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td>Entorno</td><td>Sistema operativo y versión, shell, herramientas y versiones relevantes</td><td>Ubuntu 24.04, Bash 5.2, GNU rsync 3.2, Node.js 20</td></tr>
+                                <tr onclick="highlightRow(this)"><td>Contexto</td><td>Rutas reales, estructura del proyecto, usuario que ejecuta</td><td>El build de Vite queda en <code>~/proyectos/portafolio-react/dist</code>; se publica en <code>/var/www/portafolio</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td>Objetivo</td><td>Qué se quiere lograr, en una o dos frases</td><td>Sincronizar <code>dist/</code> con la carpeta publicada sin tocar <code>uploads/</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td>Restricciones</td><td>Lo que el comando <strong>no</strong> debe hacer</td><td>Sin <code>sudo</code>, sin borrar <code>uploads/</code>, sin <code>chmod 777</code>, con simulación previa</td></tr>
+                                <tr onclick="highlightRow(this)"><td>Formato de salida</td><td>Cómo se quiere la respuesta</td><td>Script con <code>set -euo pipefail</code>, comentarios por bloque y una explicación de cada opción usada</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4 class="bs-h4">Un prompt débil frente a un prompt técnico</h4>
+                    <p class="bs-p">Para la misma tarea, un prompt débil como <em>«dame un comando para subir mi página al
+                            servidor»</em> obliga al modelo a suponer la herramienta, el origen, el destino y el
+                        sistema: la respuesta puede ser <code>scp</code>, <code>rsync</code>, <code>ftp</code> o un
+                        flujo con Docker, y ninguno ajustado al proyecto real. Compara:</p>
+
+                    <div class="bs-dos">
+                        <div class="bs-card bs-rosa">
+                            <div class="bs-card-title"><i class="fa-solid fa-circle-xmark"></i> Prompt débil</div>
+                            <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">prompt</span></div>
+<div class="bs-code"><span class="c"># una sola línea, sin datos</span>
+dame un comando para subir
+mi página al servidor</div>
+                            <p class="bs-p" style="margin:0;">Sin entorno, sin rutas y sin restricciones: todo es
+                                suposición.</p>
+                        </div>
+                        <div class="bs-card bs-verde">
+                            <div class="bs-card-title"><i class="fa-solid fa-circle-check"></i> Prompt técnico</div>
+                            <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">prompt</span></div>
+<div class="bs-code"><span class="k">Entorno:</span> Ubuntu 24.04, Bash 5.2,
+  GNU rsync 3.2.7. Sin sudo.
+<span class="k">Contexto:</span> React con Vite en
+  ~/proyectos/portafolio-react.
+  npm run build genera dist/. El sitio
+  está en /var/www/portafolio y tiene
+  uploads/ con imágenes de usuarios.
+<span class="k">Objetivo:</span> script deploy.sh que copie
+  dist/ a /var/www/portafolio, elimine
+  archivos obsoletos y conserve uploads/.
+<span class="k">Restricciones:</span> sin chmod 777 ni rm -rf;
+  modo de simulación; validar que dist/
+  exista antes de copiar.
+<span class="k">Formato:</span> script comentado con
+  set -euo pipefail y una tabla con cada
+  opción de rsync y su función.</div>
+                        </div>
+                    </div>
+
+                    <p class="bs-p">
+                        Cada línea cumple una función: el entorno fija la sintaxis (GNU y no BSD, Bash y no Zsh); el
+                        contexto entrega rutas reales en lugar de marcadores como <code>/ruta/a/tu/proyecto</code>; la
+                        restricción sobre <code>uploads/</code> obliga al modelo a resolver la exclusión; el modo de
+                        simulación facilita la verificación posterior, y pedir la tabla de opciones obliga a que la
+                        respuesta sea revisable punto por punto.
+                    </p>
+
+                    <h4 class="bs-h4">Prácticas complementarias</h4>
+                    <ul class="bs-list">
+                        <li><strong>Pedir la explicación de cada opción</strong>, no solo el comando. Una explicación
+                            incoherente con la documentación es señal de una opción inventada.</li>
+                        <li><strong>Entregar la salida real de los errores.</strong> Si el comando falla, se pega el
+                            mensaje exacto de la terminal (por ejemplo,
+                            <code>rsync: [Receiver] mkdir "/var/www/portafolio" failed: Permission denied (13)</code>)
+                            en lugar de escribir «no funcionó».</li>
+                        <li><strong>Iterar sobre la misma conversación</strong> para corregir, en lugar de iniciar una
+                            nueva sin contexto.</li>
+                        <li><strong>Pedir alternativas más seguras</strong> cuando la respuesta incluye
+                            <code>sudo</code>, <code>rm -rf</code> o cambios de permisos recursivos.</li>
+                    </ul>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span><strong>Errores comunes:</strong> pegar en el prompt el contenido de un archivo
+                            <code>.env</code>, llaves SSH o tokens de API. Los datos sensibles se reemplazan por valores
+                            ficticios (<code>DB_PASSWORD=&lt;oculto&gt;</code>) antes de enviarlos a cualquier servicio
+                            externo. También es frecuente aceptar rutas de marcador de posición
+                            (<code>/path/to/project</code>) y ejecutarlas sin reemplazarlas.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 2: PATRONES DE RIESGO ===== -->
+                <div class="ux-section bs-rosa" id="sec-riesgos">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        Lectura crítica: patrones de riesgo</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            Revisar un comando generado por IA es como <em>leer la letra pequeña</em> de un contrato
+                            antes de firmarlo: si no lo lees completo, puedes aceptar condiciones que no querías.
+                        </p>
+                    </div>
+
+                    <p class="bs-p">
+                        La primera verificación se hace <strong>sin ejecutar nada</strong>: consiste en leer el
+                        comando completo y localizar las construcciones que pueden causar daños irreversibles o
+                        comportamientos inesperados. Los modelos de IA reproducen patrones frecuentes en foros y
+                        repositorios públicos, incluidos los malos. Estos aparecen con regularidad en respuestas
+                        generadas:
+                    </p>
+
+                    <p style="color:#374151;font-size:.88rem;margin:0 0 8px;">Haz clic en cada fila para resaltarla:</p>
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr>
+                                    <th>Patrón</th>
+                                    <th>Riesgo</th>
+                                    <th>Alternativa segura</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>rm -rf $DIR/*</code></td><td>Si <code>DIR</code> está vacía o mal escrita, se convierte en <code>rm -rf /*</code></td><td><code>rm -rf "${DIR:?}"/*</code> aborta si la variable está vacía; mejor aún, listar antes con <code>ls</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>chmod -R 777</code></td><td>Cualquier usuario del sistema puede leer, modificar y ejecutar los archivos</td><td><code>755</code> para carpetas y <code>644</code> para archivos, o permisos específicos para el usuario del servicio</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>curl https://... | sudo bash</code></td><td>Ejecuta como administrador un código que no se ha leído</td><td>Descargar el script, leerlo y luego ejecutarlo</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>sudo</code> innecesario</td><td>Acciones sobre archivos propios terminan con dueño <code>root</code></td><td>Ejecutar sin <code>sudo</code> y escalar solo si aparece <code>Permission denied</code> justificado</td></tr>
+                                <tr onclick="highlightRow(this)"><td>Variables sin comillas</td><td>Rutas con espacios se parten en varios argumentos</td><td><code>"$VARIABLE"</code> siempre entre comillas dobles</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>rsync --delete</code>, <code>find -delete</code>, <code>git clean -fd</code>, <code>docker system prune -a</code></td><td>Borrado masivo sin confirmación</td><td>Ejecutar primero el modo de simulación</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>sed -i ''</code></td><td>Sintaxis de macOS (BSD); en GNU/Linux falla o produce resultados inesperados</td><td>En Linux, <code>sed -i 's/.../.../' archivo</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>&gt; archivo</code></td><td>Redirección que vacía el archivo antes de escribir</td><td><code>&gt;&gt;</code> cuando se quiere agregar al final</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4 class="bs-h4">Las opciones inventadas también son un riesgo</h4>
+                    <p class="bs-p">Los modelos pueden generar opciones con nombres verosímiles que no existen, como
+                        <code>rsync --backup-dated</code>. Toda opción que no se haya usado antes se comprueba en la
+                        documentación del sistema, que es el tema de la siguiente pestaña.</p>
+
+                    <div class="bs-grid bs-rosa">
+                        <div class="bs-mini">
+                            <span class="bs-op">GNU</span>
+                            <p>Sintaxis de Linux. El prompt debe indicar «GNU» cuando el servidor es Ubuntu o Debian.</p>
+                        </div>
+                        <div class="bs-mini">
+                            <span class="bs-op">BSD</span>
+                            <p>Sintaxis de macOS. Un comando pensado para BSD puede fallar o actuar distinto en Linux.</p>
+                        </div>
+                    </div>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-eye"></i>
+                        <span><strong>Regla de oro:</strong> si no puedes explicar con tus palabras qué hace cada parte
+                            de un comando, todavía no estás listo para ejecutarlo.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 3: DOCUMENTACIÓN Y VALIDACIÓN ===== -->
+                <div class="ux-section bs-azul" id="sec-verificar">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        Documentación y validación de sintaxis</h3>
+
+                    <h4 class="bs-h4" style="margin-top:0;">Consultar la documentación del sistema</h4>
+                    <p class="bs-p">
+                        La fuente autorizada sobre lo que hace un comando es la documentación instalada en el propio
+                        sistema, porque corresponde exactamente a la <strong>versión que se va a ejecutar</strong>.
+                        Linux ofrece varias herramientas para consultarla:
+                    </p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr>
+                                    <th>Comando</th>
+                                    <th>Función</th>
+                                    <th>Cuándo usarlo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>man rsync</code></td><td>Abre el manual completo (<em>manual page</em>)</td><td>Para leer la descripción detallada de una opción</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>rsync --help</code></td><td>Resumen breve de opciones</td><td>Para una consulta rápida, combinado con <code>grep</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>man -k compress</code></td><td>Busca en las descripciones de todos los manuales</td><td>Cuando no se sabe qué comando cumple una función</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>type ll</code></td><td>Indica si un nombre es un programa, un alias, una función o un comando interno de Bash</td><td>Cuando un comando se comporta distinto a lo esperado</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>which node</code></td><td>Muestra la ruta del ejecutable que se usará</td><td>Para confirmar qué versión de un programa está en el <code>PATH</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>rsync --version</code></td><td>Versión instalada</td><td>Para comparar con la versión indicada en el prompt</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="bs-p">Dentro de <code>man</code>, la tecla <code>/</code> abre una búsqueda: escribir
+                        <code>/--delete</code> y pulsar Enter salta a la primera aparición, <code>n</code> avanza a la
+                        siguiente y <code>q</code> sale del manual. Con <code>--help</code>, la búsqueda se hace mediante
+                        una tubería:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">Terminal — bash</span></div>
+<div class="bs-code"><span class="p">usuario@equipo:~$</span> rsync <span class="v">--help</span> | grep -- <span class="s">'--delete'</span>
+<span class="p">usuario@equipo:~$</span> rsync <span class="v">--help</span> | grep -- <span class="s">'--backup-dated'</span> || <span class="k">echo</span> <span class="s">"La opción no existe en esta versión"</span></div>
+
+                    <p class="bs-p">El doble guion <code>--</code> después de <code>grep</code> indica que lo siguiente
+                        es el patrón de búsqueda y no una opción de <code>grep</code>; sin él, <code>grep</code>
+                        interpretaría <code>--delete</code> como una opción propia. En la segunda línea, si
+                        <code>grep</code> no encuentra coincidencias devuelve un código de salida distinto de cero y
+                        se ejecuta el <code>echo</code> posterior a <code>||</code>.</p>
+
+                    <h4 class="bs-h4">Validación de sintaxis: <code>bash -n</code> y ShellCheck</h4>
+                    <p class="bs-p">
+                        Antes de ejecutar un script generado se comprueba que su sintaxis sea válida y que no contenga
+                        errores conocidos.
+                    </p>
+                    <div class="bs-grid">
+                        <div class="bs-mini bs-azul">
+                            <span class="bs-op">bash -n</span>
+                            <p>Lee el script completo y reporta errores de sintaxis (un <code>if</code> sin
+                                <code>fi</code>, comillas sin cerrar) <strong>sin ejecutar ninguna línea</strong>. Si no
+                                imprime nada, la sintaxis es válida, lo que no garantiza que el script haga lo
+                                correcto.</p>
+                        </div>
+                        <div class="bs-mini bs-teal">
+                            <span class="bs-op">ShellCheck</span>
+                            <p>Analizador estático de scripts de shell: detecta variables sin comillas, comparaciones
+                                mal escritas y comandos peligrosos. Se instala con
+                                <code>sudo apt install shellcheck</code> y existe como extensión de VS Code.</p>
+                        </div>
+                        <div class="bs-mini bs-morado">
+                            <span class="bs-op">SC2086</span>
+                            <p>Cada advertencia tiene un código que puede consultarse en la wiki del proyecto para
+                                conocer la causa y la corrección.</p>
+                        </div>
+                    </div>
+
+                    <p class="bs-p">El siguiente script fue generado por un asistente a partir del prompt
+                        <em>«script para recompilar mi tienda y apuntar a la API de producción»</em>. Las líneas
+                        marcadas en rosa son las problemáticas:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">script generado por IA</span></div>
+<div class="bs-code"><span class="c">1  #!/bin/bash</span>
+2  BUILD_DIR=~/proyectos/tienda-web/dist
+3  <span class="e">rm -rf $BUILD_DIR/*</span>
+4  npm run build --prefix ~/proyectos/tienda-web
+5  <span class="e">sed -i '' 's/localhost:3000/api.tienda-web.co/'</span> ~/proyectos/tienda-web/.env.production
+6  <span class="e">chmod -R 777 $BUILD_DIR</span></div>
+
+                    <div class="bs-card bs-azul">
+                        <div class="bs-card-title"><i class="fa-solid fa-stethoscope"></i> Diagnóstico</div>
+                        <ul class="bs-list" style="margin-bottom:0;">
+                            <li><code>bash -n</code> <strong>no reporta ningún error</strong>, porque la sintaxis es
+                                válida.</li>
+                            <li>ShellCheck señala <code>SC2115</code> en la línea 3: si <code>BUILD_DIR</code> llegara
+                                vacía, la orden se convertiría en <code>rm -rf /*</code>. Si la ruta se recibiera como
+                                argumento (<code>BUILD_DIR=$1</code>), también marcaría <code>SC2086</code> por usar la
+                                variable sin comillas.</li>
+                            <li>La línea 5 usa la sintaxis de <code>sed</code> de macOS: en Linux toma <code>''</code>
+                                como el patrón y la expresión de reemplazo como un nombre de archivo
+                                (<code>sed: can't read s/localhost:3000/...: No such file or directory</code>).</li>
+                            <li>La línea 6 asigna permisos <code>777</code> que no son necesarios para servir archivos
+                                estáticos.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                        <span>Ninguna de las herramientas por sí sola encuentra todos los problemas;
+                            <strong>se complementan</strong>: la lectura crítica, la documentación, <code>bash -n</code>
+                            y ShellCheck.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 4: EJECUCIÓN CONTROLADA ===== -->
+                <div class="ux-section bs-teal" id="sec-ejecucion">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-flask"></i></span>
+                        Ejecución controlada: simulación, trazas y aislamiento</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            Es como el <em>ensayo general</em> de una obra: se practica en un escenario de prueba antes
+                            de presentarla ante el público. En el escenario de prueba, un error no cuesta nada.
+                        </p>
+                    </div>
+
+                    <h4 class="bs-h4" style="margin-top:0;">Simulación (<em>dry run</em>)</h4>
+                    <p class="bs-p">Una vez revisado el código, el siguiente paso es observar qué haría el comando sin
+                        que lo haga. Muchas herramientas incluyen un modo de simulación que reporta las acciones
+                        previstas sin modificar nada:</p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr>
+                                    <th>Herramienta</th>
+                                    <th>Simulación</th>
+                                    <th>Ejecución real</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td>rsync</td><td><code>rsync -avn --delete dist/ /var/www/portafolio/</code></td><td>La misma orden sin <code>-n</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td>find</td><td><code>find logs/ -name '*.log' -mtime +7 -print</code></td><td>Reemplazar <code>-print</code> por <code>-delete</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td>git clean</td><td><code>git clean -nd</code></td><td><code>git clean -fd</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td>sed</td><td><code>sed 's/localhost/api.tienda-web.co/' .env.production</code> (imprime el resultado)</td><td>Agregar <code>-i</code> para modificar el archivo</td></tr>
+                                <tr onclick="highlightRow(this)"><td>apt-get</td><td><code>apt-get -s install nginx</code></td><td>Sin <code>-s</code>, con <code>sudo</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td>rm, mv, cp</td><td><code>-i</code> pide confirmación por cada archivo</td><td>Sin <code>-i</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="bs-p">Cuando la herramienta no tiene modo de simulación, se antepone <code>echo</code> al
+                        comando destructivo para imprimirlo en lugar de ejecutarlo:
+                        <code>echo rm -rf "$BUILD_DIR"/*</code> muestra la lista exacta de rutas que se eliminarían,
+                        con las variables y patrones ya expandidos.</p>
+
+                    <h4 class="bs-h4">Trazas con <code>bash -x</code> y <code>set -x</code></h4>
+                    <p class="bs-p">Para observar un script mientras se ejecuta se usa la traza de Bash.
+                        <code>bash -x deploy.sh</code>, o la línea <code>set -x</code> dentro del script, imprime cada
+                        orden antes de ejecutarla, precedida de <code>+</code> y con las variables ya reemplazadas por
+                        sus valores:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">Terminal — bash</span></div>
+<div class="bs-code">+ BUILD_DIR=/home/estudiante/proyectos/tienda-web/dist
++ '[' -d /home/estudiante/proyectos/tienda-web/dist ']'
++ rsync -avn --delete /home/estudiante/proyectos/tienda-web/dist/ /home/estudiante/practica-u3/srv/www/tienda/</div>
+
+                    <p class="bs-p">Esta salida permite confirmar que cada ruta es la esperada antes de quitar el modo
+                        de simulación. La traza se desactiva con <code>set +x</code>.</p>
+
+                    <h4 class="bs-h4">Entornos de prueba aislados</h4>
+                    <p class="bs-p">Ningún comando generado por IA se prueba por primera vez sobre datos reales.
+                        Existen tres niveles de aislamiento, de menor a mayor:</p>
+
+                    <ol class="bs-pasos">
+                        <li><strong>Copia de práctica.</strong> Se replica la estructura en una carpeta de prueba (por
+                            ejemplo <code>~/practica-u3/srv/www/tienda</code>) con <code>cp -a</code>, que conserva
+                            permisos y fechas, y se ajustan las rutas del script para apuntar a ella.</li>
+                        <li><strong>Punto de restauración con Git.</strong> En un proyecto versionado se confirma que
+                            <code>git status</code> esté limpio antes de ejecutar el comando; si el resultado no es el
+                            esperado, <code>git diff</code> muestra los cambios y <code>git restore .</code> los
+                            revierte.</li>
+                        <li><strong>Contenedor desechable.</strong> Con Docker instalado,
+                            <code>docker run --rm -it -v "$PWD":/work -w /work ubuntu:24.04 bash</code> abre una
+                            terminal en un Ubuntu limpio con la carpeta actual montada en <code>/work</code>;
+                            <code>--rm</code> elimina el contenedor al salir. Es útil para probar instalaciones con
+                            <code>apt</code> sin alterar el sistema propio.</li>
+                    </ol>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span><strong>Errores comunes:</strong> probar en la copia y luego ejecutar sobre producción un
+                            script distinto al probado, por ejemplo tras «un último ajuste» pedido a la IA. Cualquier
+                            cambio en el script <strong>reinicia el ciclo de verificación</strong>.</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 5: REGISTRO Y BITÁCORA ===== -->
+                <div class="ux-section bs-morado" id="sec-registro">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-clipboard-list"></i></span>
+                        Registro del trabajo con IA</h3>
+
+                    <h4 class="bs-h4" style="margin-top:0;">Historial de comandos con marcas de tiempo</h4>
+                    <p class="bs-p">
+                        <code>history</code> es un comando interno de Bash que lista las órdenes ejecutadas en la
+                        terminal, numeradas en orden. Bash guarda el historial en memoria durante la sesión y lo
+                        escribe en el archivo <code>~/.bash_history</code> al cerrarla. Por defecto no registra la
+                        fecha ni la hora, un dato indispensable para reconstruir qué se hizo y cuándo; la variable
+                        <code>HISTTIMEFORMAT</code> lo activa.
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">Terminal — bash</span></div>
+<div class="bs-code"><span class="p">usuario@equipo:~$</span> <span class="k">export</span> HISTTIMEFORMAT=<span class="s">'%F %T  '</span>
+<span class="p">usuario@equipo:~$</span> history 5
+<span class="p">usuario@equipo:~$</span> history | grep rsync
+<span class="p">usuario@equipo:~$</span> history <span class="v">-a</span></div>
+
+                    <ul class="bs-list">
+                        <li>La primera línea define el formato de fecha (el mismo de <code>date</code>); para que sea
+                            permanente se agrega al final de <code>~/.bashrc</code>.</li>
+                        <li>La segunda muestra las cinco órdenes más recientes, ahora con fecha y hora.</li>
+                        <li>La tercera filtra solo las órdenes que contienen <code>rsync</code>.</li>
+                        <li>La cuarta escribe de inmediato en <code>~/.bash_history</code> las órdenes de la sesión
+                            actual, sin esperar a cerrar la terminal.</li>
+                    </ul>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>En Ubuntu, <code>HISTCONTROL=ignoreboth</code> viene activada en <code>~/.bashrc</code>:
+                            las órdenes que empiezan con un espacio no se guardan en el historial. Sirve para evitar que
+                            un token o una contraseña quede registrada, pero también explica por qué a veces una orden
+                            «no aparece».</span>
+                    </div>
+
+                    <h4 class="bs-h4">Grabación de sesiones con <code>script</code></h4>
+                    <p class="bs-p"><code>script</code> graba en un archivo todo lo que aparece en la pantalla de la
+                        terminal, desde que se inicia hasta que se termina con <code>exit</code>.</p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr>
+                                    <th>Uso</th>
+                                    <th>Función</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>script ~/practica-u3/registros/sesion.log</code></td><td>Inicia la grabación y sobrescribe el archivo si existe</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>script -a archivo.log</code></td><td>Agrega al final del archivo (<em>append</em>)</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>script -q archivo.log</code></td><td>Omite los mensajes de inicio y fin de grabación</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>exit</code> o <code>Ctrl+D</code></td><td>Termina la grabación</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>less -R archivo.log</code></td><td>Muestra el archivo interpretando los códigos de color</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-microphone-slash"></i>
+                        <span><strong>Errores comunes:</strong> olvidar el <code>exit</code> y seguir trabajando dentro
+                            de la grabación, o grabar una sesión en la que se muestra el contenido de
+                            <code>.env</code> o se escribe una contraseña. El archivo de <code>script</code> guarda
+                            exactamente lo que aparece en pantalla.</span>
+                    </div>
+
+                    <h4 class="bs-h4">Registro de ejecuciones con <code>tee</code></h4>
+                    <p class="bs-p">Para conservar solo la salida de un script concreto, sin grabar toda la sesión, se
+                        usa <code>tee</code>, que copia lo que recibe por la entrada estándar tanto a la pantalla como a
+                        un archivo. Combinado con la traza de Bash y la redirección de errores produce un registro
+                        completo de una ejecución:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">Terminal — bash</span></div>
+<div class="bs-code"><span class="p">usuario@equipo:~$</span> bash <span class="v">-x</span> scripts/deploy.sh 2&gt;&amp;1 | tee <span class="v">-a</span> registros/deploy_$(date +%F).log</div>
+
+                    <p class="bs-p"><code>bash -x</code> genera la traza de cada orden; esa traza se escribe en la
+                        salida de errores, por lo que <code>2&gt;&amp;1</code> la une a la salida estándar para que
+                        ambas pasen por la tubería. <code>tee -a</code> muestra todo en la terminal y lo agrega al log
+                        del día, cuyo nombre incluye la fecha gracias a la sustitución de comandos.</p>
+
+                    <h4 class="bs-h4">Bitácora de uso de IA y control de versiones</h4>
+                    <p class="bs-p">Los registros anteriores muestran <em>qué</em> se ejecutó, pero no <em>por qué</em> ni
+                        <em>de dónde</em> salió. La <strong>bitácora</strong> es un archivo en Markdown, por ejemplo
+                        <code>docs/registro-ia.md</code> dentro del repositorio, donde cada entrada documenta un uso de
+                        IA con campos fijos. Su propósito es que otro integrante del equipo, o el mismo autor semanas
+                        después, pueda entender y reproducir la decisión.</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">docs/registro-ia.md</span></div>
+<div class="bs-code"><span class="k">## 2026-09-30 — Script de despliegue del portafolio</span>
+
+- <span class="k">**Asistente:**</span> Claude (chat web)
+- <span class="k">**Prompt:**</span> ver `docs/prompts/deploy-portafolio.txt`
+- <span class="k">**Archivo resultante:**</span> `scripts/deploy.sh`
+- <span class="k">**Verificación:**</span>
+  - `bash -n` sin errores; ShellCheck: SC2115 en línea 12 (corregido con `${DESTINO:?}`)
+  - `rsync --help`: confirmadas `-a`, `-v`, `-n`, `--delete`, `--exclude`
+  - Simulación con `-n` sobre `~/practica-u3/srv/www/portafolio`: `uploads/` no se ve afectada
+- <span class="k">**Cambios respecto a la respuesta original:**</span> se eliminó `chmod -R 777`; se agregó validación de `dist/`
+- <span class="k">**Evidencia:**</span> `registros/deploy_2026-09-30.log`
+- <span class="k">**Resultado:**</span> desplegado sin errores</div>
+
+                    <p class="bs-p">Además de la bitácora, el propio script indica su procedencia mediante un comentario
+                        de cabecera, de modo que la información viaja con el archivo:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">scripts/deploy.sh</span></div>
+<div class="bs-code"><span class="c">#!/usr/bin/env bash
+# deploy.sh — Publica dist/ en /var/www/portafolio conservando uploads/
+# Origen: generado con asistente de IA el 2026-09-30 y revisado manualmente.
+# Verificación y cambios: docs/registro-ia.md (entrada 2026-09-30)</span>
+<span class="k">set</span> <span class="v">-euo</span> pipefail</div>
+
+                    <p class="bs-p">Finalmente, el script, el prompt y la bitácora se versionan juntos con Git en un
+                        mismo <em>commit</em>, para que el historial del repositorio muestre que el código y su
+                        verificación llegaron a la vez:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">Terminal — bash</span></div>
+<div class="bs-code"><span class="p">usuario@equipo:~$</span> git add scripts/deploy.sh docs/registro-ia.md docs/prompts/deploy-portafolio.txt
+<span class="p">usuario@equipo:~$</span> git commit <span class="v">-m</span> <span class="s">"feat(scripts): agrega deploy.sh generado con IA y verificado"</span></div>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-lock"></i>
+                        <span><strong>Errores comunes:</strong> versionar los archivos de script o los logs de
+                            ejecución cuando contienen rutas internas, nombres de usuario o variables de entorno. Lo
+                            recomendable es agregar la carpeta <code>registros/</code> al archivo
+                            <code>.gitignore</code> y versionar solo la bitácora, que resume la evidencia sin exponer
+                            datos sensibles.</span>
+                    </div>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span><strong>Ciclo completo:</strong> prompt técnico · lectura crítica · documentación ·
+                            <code>bash -n</code> y ShellCheck · simulación y traza · entorno aislado · registro
+                            (<code>history</code>, <code>script</code>, <code>tee</code>) · bitácora y
+                            <em>commit</em>.</span>
+                    </div>
+                </div>
+
+                <!-- Botones de navegación -->
+                <div style="display:flex;justify-content:space-between;margin-top:28px;flex-wrap:wrap;gap:10px;">
+                    <button id="ux-prev" class="bs-btn bs-btn-sec" onclick="navigateUx(-1)" style="display:none;">←
+                        Anterior</button>
+                    <button id="ux-next" class="bs-btn bs-btn-main" onclick="navigateUx(1)"
+                        style="margin-left:auto;">Siguiente →</button>
+                </div>
+
+                <!-- Lógica JS del contenido -->
+                <script>
+                    (function () {
+                        const sections = ['prompt', 'riesgos', 'verificar', 'ejecucion', 'registro'];
+                        let current = 0;
+
+                        window.showUxSection = function (id, idx) {
+                            sections.forEach(s => {
+                                document.getElementById('sec-' + s)?.classList.remove('active');
+                                document.getElementById('tab-' + s)?.classList.remove('active');
+                            });
+                            document.getElementById('sec-' + id)?.classList.add('active');
+                            document.getElementById('tab-' + id)?.classList.add('active');
+                            current = idx;
+                            updateNav();
+                        };
+
+                        window.navigateUx = function (dir) {
+                            let next = Math.min(Math.max(current + dir, 0), sections.length - 1);
+                            showUxSection(sections[next], next);
+                            document.getElementById('tab-' + sections[next])?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        };
+
+                        function updateNav() {
+                            const prev = document.getElementById('ux-prev');
+                            const next = document.getElementById('ux-next');
+                            const dots = document.querySelectorAll('#ux-prog .prog-dot');
+                            const counter = document.getElementById('ux-counter');
+                            if (prev) prev.style.display = current > 0 ? 'block' : 'none';
+                            if (next) next.innerHTML = current < sections.length - 1 ? 'Siguiente →' : '<i class="fa-solid fa-circle-check"></i> Completado';
+                            if (counter) counter.textContent = 'Tema ' + (current + 1) + ' de ' + sections.length;
+                            dots.forEach((d, i) => d.classList.toggle('done', i <= current));
+                        }
+
+                        window.highlightRow = function (row) {
+                            const table = row.closest('table');
+                            if (!table) return;
+                            table.querySelectorAll('tbody tr').forEach(r => r.classList.remove('sel'));
+                            row.classList.add('sel');
+                        };
+
+                        // Anatomía interactiva de un prompt técnico
+                        const anatData = {
+                            entorno: {
+                                color: '#508C46',
+                                title: 'Entorno — sistema operativo, shell y versiones',
+                                desc: 'Indica la distribución y versión, el shell y las herramientas relevantes. <strong>Evita suponer</strong> si el comando es de GNU (Linux) o de BSD (macOS), o si se usa Bash o Zsh.',
+                                ej: 'Ubuntu 24.04, Bash 5.2, GNU rsync 3.2.7'
+                            },
+                            contexto: {
+                                color: '#08AFE6',
+                                title: 'Contexto — rutas reales y estructura del proyecto',
+                                desc: 'Entrega las rutas verdaderas y el usuario que ejecuta. <strong>Evita</strong> que el modelo escriba marcadores como <code>/ruta/a/tu/proyecto</code> que luego se ejecutan sin reemplazar.',
+                                ej: 'El build queda en ~/proyectos/portafolio-react/dist; se publica en /var/www/portafolio'
+                            },
+                            objetivo: {
+                                color: '#16BAAF',
+                                title: 'Objetivo — qué se quiere lograr',
+                                desc: 'Se escribe en una o dos frases. <strong>Evita</strong> que el modelo elija por su cuenta la herramienta (<code>scp</code>, <code>rsync</code>, <code>ftp</code>…).',
+                                ej: 'Sincronizar dist/ con la carpeta publicada sin tocar uploads/'
+                            },
+                            restricciones: {
+                                color: '#E22F6B',
+                                title: 'Restricciones — lo que el comando no debe hacer',
+                                desc: 'Prohíbe de forma explícita lo peligroso y exige la simulación. <strong>Evita</strong> respuestas con <code>sudo</code>, <code>rm -rf</code> o <code>chmod 777</code> y facilita la verificación posterior.',
+                                ej: 'Sin sudo, sin borrar uploads/, sin chmod 777, con modo de simulación'
+                            },
+                            formato: {
+                                color: '#6752A0',
+                                title: 'Formato de salida — cómo se quiere la respuesta',
+                                desc: 'Pide comentarios y una explicación de cada opción. <strong>Obliga</strong> a que la respuesta sea revisable punto por punto: una explicación incoherente delata una opción inventada.',
+                                ej: 'Script con set -euo pipefail, comentarios por bloque y una tabla con cada opción de rsync'
+                            }
+                        };
+
+                        window.showAnat = function (part) {
+                            const panel = document.getElementById('anat-info-panel');
+                            const data = anatData[part];
+                            if (!panel || !data) return;
+                            document.querySelectorAll('.bs-token-wrap').forEach(p => p.classList.remove('active'));
+                            document.getElementById('an-' + part)?.classList.add('active');
+                            panel.style.display = 'block';
+                            panel.style.borderLeftColor = data.color;
+                            panel.innerHTML =
+                                '<strong>' + data.title + '</strong>' +
+                                '<p style="margin:6px 0 8px;">' + data.desc + '</p>' +
+                                '<div style="background:#F3F4F6;border:1px solid #D1D5DB;border-radius:6px;padding:6px 10px;font-size:.85rem;">' +
+                                '<i class="fa-solid fa-lightbulb"></i> <em>Ejemplo:</em> ' + data.ej + '</div>';
+                        };
+
+                        updateNav();
+                    })();
+                </script>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== ACTIVIDADES ===================== -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+
+                <!-- ===== ACTIVIDAD 1: AUDITORÍA DE UN SCRIPT GENERADO POR IA ===== -->
+                <div class="bs-act bs-rosa">
+                    <div class="bs-act-head">
+                        <span class="bs-badge-ico"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        <h3>Actividad 1. Auditoría y corrección de un script de despliegue generado por IA</h3>
+                        <span class="bs-act-tag">Lectura crítica y verificación</span>
+                    </div>
+                    <p class="bs-p">
+                        <strong>Caso propuesto:</strong> un asistente de IA generó el script
+                        <code>limpiar-build.sh</code> a partir del prompt <em>«script para limpiar el build y apuntar
+                            a la API de producción»</em>. Tu tarea es identificar sus patrones de riesgo, verificarlo
+                        con las herramientas del sistema y corregirlo <strong>antes</strong> de ejecutarlo sobre una
+                        copia de práctica. Resuelve primero los retos en la terminal simulada y luego repite la
+                        práctica en tu propio equipo.
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">limpiar-build.sh (no lo ejecutes todavía)</span></div>
+<div class="bs-code"><span class="c">1  #!/bin/bash</span>
+2  BUILD_DIR=~/practica-u3/tienda-web/dist
+3  <span class="e">rm -rf $BUILD_DIR/*</span>
+4  <span class="e">sed -i '' 's/localhost:3000/api.tienda-web.co/'</span> ~/practica-u3/tienda-web/.env.production
+5  <span class="e">chmod -R 777 $BUILD_DIR</span></div>
+
+                    <div id="a1-challenge" class="bs-reto">
+                        <div class="bs-reto-top"><i class="fa-solid fa-bullseye"></i>
+                            <span>Reto <span id="a1-num">1</span> de <span id="a1-total">13</span></span></div>
+                        <p id="a1-text" class="bs-reto-text"></p>
+                        <p id="a1-hint" class="bs-reto-hint"></p>
+                    </div>
+
+                    <div class="bs-term">
+                        <div class="bs-term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span>
+                            <span style="margin-left:8px;">estudiante@linux:~</span></div>
+                        <div id="a1-body" class="bs-term-body"></div>
+                        <div class="bs-term-input">
+                            <span class="prompt" id="a1-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a1-input" placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="bs-act-foot">
+                        <button id="a1-reset" class="bs-btn bs-btn-sec" style="padding:8px 22px;">Reiniciar</button>
+                        <div class="bs-track"><div id="a1-progress" class="bs-fill"></div></div>
+                        <span id="a1-score" class="bs-score">0/13</span>
+                    </div>
+                    <div id="a1-feedback" class="bs-feedback"></div>
+
+                    <details class="bs-details bs-rosa">
+                        <summary><i class="fa-solid fa-laptop-code"></i> Guion para realizarla en tu equipo</summary>
+                        <div class="inner">
+                            <ol class="bs-pasos" style="margin-top:12px;">
+                                <li>Prepara un entorno de prueba aislado con archivos de ejemplo:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> mkdir -p ~/practica-u3/tienda-web/dist
+<span class="p">$</span> cd ~/practica-u3/tienda-web
+<span class="p">$</span> touch dist/index.html dist/app.js dist/estilos.css
+<span class="p">$</span> echo <span class="s">"VITE_API_URL=http://localhost:3000"</span> &gt; .env.production</div></li>
+                                <li>Crea el archivo <code>limpiar-build.sh</code> con el script mostrado arriba.
+                                    <strong>No lo ejecutes todavía.</strong></li>
+                                <li><strong>Lectura crítica:</strong> con ayuda de la tabla de patrones de riesgo del
+                                    contenido, identifica al menos tres problemas del script. Para cada uno, indica la
+                                    línea, el riesgo y la alternativa segura.</li>
+                                <li>Verifica el script con las herramientas del sistema y anota lo que reporta cada
+                                    una:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> bash -n limpiar-build.sh
+<span class="p">$</span> shellcheck limpiar-build.sh
+<span class="p">$</span> sed --help | grep -- <span class="s">'-i'</span></div>
+                                    Si <code>shellcheck</code> no está instalado, puedes usar la extensión de
+                                    ShellCheck en VS Code.</li>
+                                <li>Crea una versión corregida llamada <code>limpiar-build-seguro.sh</code> que
+                                    cumpla con lo siguiente:
+                                    <ul class="bs-list" style="margin-top:8px;">
+                                        <li>Use <code>#!/usr/bin/env bash</code> y <code>set -euo pipefail</code>.</li>
+                                        <li>Guarde la ruta en una variable entre comillas y valide con
+                                            <code>[[ -d ... ]]</code> que la carpeta exista.</li>
+                                        <li>Use <code>"${BUILD_DIR:?}"/*</code> en lugar de <code>$BUILD_DIR/*</code>.</li>
+                                        <li>Use la sintaxis de <code>sed</code> para Linux y elimine el
+                                            <code>chmod -R 777</code>.</li>
+                                        <li>Antes de borrar, anteponga <code>echo</code> al comando <code>rm</code> para
+                                            simular, y use <code>sed</code> sin <code>-i</code> para ver el cambio sin
+                                            aplicarlo.</li>
+                                    </ul></li>
+                                <li>Ejecuta la versión corregida con traza y revisa que las rutas sean las
+                                    esperadas:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> bash -x limpiar-build-seguro.sh</div></li>
+                                <li>Cuando la simulación sea correcta, quita el <code>echo</code>, agrega <code>-i</code>
+                                    a <code>sed</code> y ejecuta de nuevo. Comprueba el resultado con
+                                    <code>ls dist</code> y <code>cat .env.production</code>.</li>
+                            </ol>
+                            <div class="bs-entregable"><strong><i class="fa-solid fa-box-archive"></i> Producto esperado:</strong>
+                                documento con las evidencias de los puntos solucionados: los problemas identificados
+                                (línea, riesgo y alternativa segura), lo que reportó cada herramienta, el script
+                                <code>limpiar-build-seguro.sh</code> y capturas de la traza y del resultado final.</div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- ===== ACTIVIDAD 2: PROMPT TÉCNICO Y REGISTRO DEL TRABAJO CON IA ===== -->
+                <div class="bs-act bs-teal">
+                    <div class="bs-act-head">
+                        <span class="bs-badge-ico"><i class="fa-solid fa-clipboard-list"></i></span>
+                        <h3>Actividad 2. Prompt técnico y registro del trabajo con IA</h3>
+                        <span class="bs-act-tag">Prompting + registro auditable</span>
+                    </div>
+                    <p class="bs-p">
+                        <strong>Caso propuesto:</strong> necesitas un script que elimine los archivos
+                        <code>.log</code> con más de 7 días de <code>~/practica-u3/api/logs</code>. Redacta un prompt
+                        técnico completo, verifica el script que genere la IA y deja evidencia del proceso con
+                        <code>history</code>, <code>script</code>, <code>tee</code> y una bitácora. Practica la
+                        secuencia de comandos en la terminal simulada y luego repítela en tu equipo.
+                    </p>
+
+                    <div id="a2-challenge" class="bs-reto">
+                        <div class="bs-reto-top"><i class="fa-solid fa-bullseye"></i>
+                            <span>Reto <span id="a2-num">1</span> de <span id="a2-total">16</span></span></div>
+                        <p id="a2-text" class="bs-reto-text"></p>
+                        <p id="a2-hint" class="bs-reto-hint"></p>
+                    </div>
+
+                    <div class="bs-term">
+                        <div class="bs-term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span>
+                            <span style="margin-left:8px;">estudiante@linux:~</span></div>
+                        <div id="a2-body" class="bs-term-body"></div>
+                        <div class="bs-term-input">
+                            <span class="prompt" id="a2-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a2-input" placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="bs-act-foot">
+                        <button id="a2-reset" class="bs-btn bs-btn-sec" style="padding:8px 22px;">Reiniciar</button>
+                        <div class="bs-track"><div id="a2-progress" class="bs-fill"></div></div>
+                        <span id="a2-score" class="bs-score">0/16</span>
+                    </div>
+                    <div id="a2-feedback" class="bs-feedback"></div>
+
+                    <details class="bs-details bs-teal">
+                        <summary><i class="fa-solid fa-laptop-code"></i> Guion para realizarla en tu equipo</summary>
+                        <div class="inner">
+                            <ol class="bs-pasos" style="margin-top:12px;">
+                                <li>Prepara una carpeta de logs de práctica con archivos antiguos y recientes:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> mkdir -p ~/practica-u3/api/logs ~/practica-u3/api/registros ~/practica-u3/api/docs
+<span class="p">$</span> cd ~/practica-u3/api/logs
+<span class="p">$</span> touch -d <span class="s">"10 days ago"</span> acceso-viejo.log error-viejo.log
+<span class="p">$</span> touch acceso-hoy.log error-hoy.log</div></li>
+                                <li>Escribe dos prompts para pedir a la IA un script que elimine los archivos
+                                    <code>.log</code> con más de 7 días de <code>~/practica-u3/api/logs</code>:
+                                    <ul class="bs-list" style="margin-top:8px;">
+                                        <li>Un prompt débil de una sola línea.</li>
+                                        <li>Un prompt técnico con los cinco componentes: entorno, contexto, objetivo,
+                                            restricciones (sin <code>sudo</code>, con modo de simulación) y formato de
+                                            salida.</li>
+                                    </ul></li>
+                                <li>Envía ambos prompts a una herramienta de IA y compara las respuestas. Guarda el
+                                    script obtenido con el prompt técnico como
+                                    <code>~/practica-u3/api/limpiar-logs.sh</code>.</li>
+                                <li>Activa el registro de la sesión antes de verificar:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> cd ~/practica-u3/api
+<span class="p">$</span> export HISTTIMEFORMAT=<span class="s">'%F %T '</span>
+<span class="p">$</span> script registros/sesion_$(date +%F).txt</div></li>
+                                <li>Dentro de la sesión grabada, verifica el script:
+                                    <ul class="bs-list" style="margin-top:8px;">
+                                        <li>Revisa la sintaxis con <code>bash -n limpiar-logs.sh</code>.</li>
+                                        <li>Confirma en la documentación las opciones de <code>find</code> que use el
+                                            script, por ejemplo con <code>man find</code> o
+                                            <code>find --help | grep -- '-mtime'</code>.</li>
+                                        <li>Ejecuta primero el modo de simulación y guarda la salida con
+                                            <code>bash -x limpiar-logs.sh 2&gt;&amp;1 | tee -a registros/limpiar_$(date +%F).log</code>.</li>
+                                        <li>Si solo aparecen los archivos con más de 7 días, ejecuta el modo real y
+                                            comprueba el resultado con <code>ls logs</code>.</li>
+                                    </ul></li>
+                                <li>Escribe <code>exit</code> para terminar la grabación y consulta las últimas órdenes
+                                    con <code>history 15</code>.</li>
+                                <li>Crea el archivo <code>docs/registro-ia.md</code> con una entrada de bitácora como la
+                                    del contenido (asistente, prompt, archivo resultante, verificación, cambios
+                                    respecto a la respuesta original, evidencia y resultado). Agrega también un
+                                    comentario de cabecera en el script que indique su origen.</li>
+                            </ol>
+                            <div class="bs-entregable"><strong><i class="fa-solid fa-box-archive"></i> Producto esperado:</strong>
+                                documento con las evidencias de los puntos solucionados: los dos prompts y su
+                                comparación, el script verificado, el archivo de la sesión grabada, el log de la
+                                ejecución, la salida de <code>history 15</code> y la bitácora
+                                <code>docs/registro-ia.md</code>.</div>
+                        </div>
+                    </details>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== EVALUACIÓN ===================== -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación. Preguntas de selección
+                    múltiple (marca la respuesta correcta)</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre prompting técnico, lectura
+                        crítica de comandos generados con IA, verificación (<code>man</code>, <code>bash -n</code>,
+                        ShellCheck, simulación y trazas) y registro del trabajo (<code>history</code>,
+                        <code>script</code>, <code>tee</code> y bitácora). Selecciona la respuesta correcta para cada
+                        pregunta.
+                    </p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn"
+                        class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar
+                        evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== RECURSOS ===================== -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para profundizar en el uso de la inteligencia
+                    artificial y de herramientas inteligentes en la terminal de Linux, te recomendamos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">IntelliShell - administrador de comandos inteligente
+                                para Linux</h3>
+                            <p class="text-slate-600 text-sm mt-1">Artículo que presenta IntelliShell, una herramienta
+                                para guardar, buscar y reutilizar comandos en la terminal de Linux, útil para organizar
+                                los comandos que verificas y utilizas con frecuencia.</p>
+                            <a href="https://serverspace.io/es/support/help/intellishell-intelligent-command-manager-for-linux-terminal-and-shell/"
+                                target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Anexo1.png" alt="IntelliShell - administrador de comandos inteligente para Linux"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Integra la IA en tu terminal de Linux</h3>
+                            <p class="text-slate-600 text-sm mt-1">Video que muestra cómo incorporar asistentes de
+                                inteligencia artificial en la terminal de Linux, para complementar lo aprendido sobre
+                                prompting técnico y verificación de comandos.</p>
+                            <a href="https://www.youtube.com/watch?v=trriapY0Cso"
+                                target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Anexo2.png" alt="Integra la IA en tu terminal de Linux"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== BIBLIOGRAFÍA ===================== -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Coddy. (s. f.). <i>Code review prompts: How to review code with AI</i>.
+                            <a href="https://coddy.tech/docs/es/prompts/prompts-for-code-review"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">coddy.tech</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            CodeRabbit. (s. f.). <i>CodeRabbit CLI</i>.
+                            <a href="https://docs.coderabbit.ai/cli"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">docs.coderabbit.ai</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            VT Security. (2026, octubre). <i>mi LINUX a un agente de IA</i> [Video]. YouTube.
+                            <a href="https://www.youtube.com/watch?v=HiMF5jh-YmA"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">youtube.com</a>
+                        </span>
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div><!-- /bibliografia -->
+        </main>
+    </div>
+
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/speech.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/accordion.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Scripts para respaldos, organización de archivos y diagnóstico</title>
+    <meta name="description"
+        content="Aprende a crear scripts de Bash para respaldar proyectos con tar, rsync y find, organizar archivos con for y case, diagnosticar el sistema y programar tareas periódicas con cron.">
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;"
+                    class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;"
+                    class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- ===================== INTRODUCCIÓN ===================== -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">
+                    Scripts para respaldos, organización de archivos y diagnóstico
+                </h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    En las unidades anteriores aprendiste a utilizar la terminal para ejecutar comandos de Linux. En
+                    esta guía aprenderás a crear <strong>scripts de Bash</strong>, archivos que permiten automatizar
+                    varias tareas con una sola ejecución.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Los scripts son útiles para realizar tareas frecuentes en el desarrollo web, como crear copias de
+                    seguridad con <code class="bg-slate-100 px-1 rounded">tar</code> y
+                    <code class="bg-slate-100 px-1 rounded">rsync</code>, organizar archivos con
+                    <code class="bg-slate-100 px-1 rounded">for</code>,
+                    <code class="bg-slate-100 px-1 rounded">case</code> y
+                    <code class="bg-slate-100 px-1 rounded">find</code>, revisar el estado de un servidor y programar
+                    su ejecución periódica con <code class="bg-slate-100 px-1 rounded">cron</code>. Además, ayudan a
+                    reducir errores y ahorrar tiempo, ya que permiten repetir las mismas instrucciones de forma
+                    automática. Al finalizar, podrás crear scripts básicos para automatizar tareas comunes en entornos
+                    Linux.
+                </p>
+
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        <i class="fa-solid fa-terminal"></i> <strong>¡Automatiza con criterio! Un script bien
+                            construido valida sus datos antes de actuar, informa su resultado con un código de salida y
+                            se ejecuta solo cuando lo programas.
+                            <i class="fa-brands fa-linux"></i> <i class="fa-solid fa-box-archive"></i>
+                            <i class="fa-solid fa-clock"></i></strong>
+                    </p>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== OBJETIVOS ===================== -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-terminal"></i></span>
+                        <span>
+                            Construir scripts de Bash ejecutables que usen variables, argumentos, condicionales y
+                            códigos de salida para controlar su comportamiento ante errores.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-box-archive"></i></span>
+                        <span>
+                            Implementar un script de respaldo.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-folder-tree"></i></span>
+                        <span>
+                            Automatizar la clasificación de archivos por tipo o fecha mediante <code>find</code>,
+                            bucles <code>for</code> y la estructura <code>case</code>.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl"><i class="fa-solid fa-clock"></i></span>
+                        <span>
+                            Programar la ejecución periódica de un script con <code>cron</code>, interpretando
+                            correctamente la sintaxis de la tabla de tareas.
+                        </span>
+                    </li>
+                </ul>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== CONTENIDO ===================== -->
+            <div id="contenido" class="content-pane">
+                <!-- Hero banner -->
+                <div class="ux-hero">
+                    <h2 style="display: flex; align-items: center; gap: 10px;">
+                        <div class="bs-hero-icon">
+                            <img src="img/manometro.gif" alt="Manómetro" style="width: 32px; height: 32px; object-fit: contain;">
+                        </div>
+                        Scripts para respaldos, organización de archivos y diagnóstico
+                    </h2>
+                    <p>Aprende a crear scripts de Bash con variables, argumentos, condicionales y códigos de salida;
+                        respalda proyectos con tar, rsync y find; clasifica archivos con for y case; diagnostica el
+                        sistema y programa tus scripts con cron.</p>
+                </div>
+
+                <!-- Progress dots -->
+                <div class="prog-dots" id="ux-prog">
+                    <div class="prog-dot done" title="Scripts y variables"></div>
+                    <div class="prog-dot" title="Condicionales y códigos de salida"></div>
+                    <div class="prog-dot" title="Respaldos"></div>
+                    <div class="prog-dot" title="Organización de archivos"></div>
+                    <div class="prog-dot" title="Diagnóstico y logs"></div>
+                    <div class="prog-dot" title="Programación con cron"></div>
+                    <span class="section-counter" id="ux-counter">Tema 1 de 6</span>
+                </div>
+
+                <!-- TABS de navegación -->
+                <div class="ux-tabs" role="tablist">
+                    <button class="ux-tab-btn active" onclick="showUxSection('scripts',0)" id="tab-scripts">
+                        <i class="fa-solid fa-terminal ux-tab-icon" aria-hidden="true"></i>
+                        <span>Scripts y variables</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('cond',1)" id="tab-cond">
+                        <i class="fa-solid fa-code-branch ux-tab-icon" aria-hidden="true"></i>
+                        <span>Condicionales y <code>exit</code></span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('respaldos',2)" id="tab-respaldos">
+                        <i class="fa-solid fa-box-archive ux-tab-icon" aria-hidden="true"></i>
+                        <span>Respaldos: <code>tar</code> <code>rsync</code> <code>find</code></span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('organizar',3)" id="tab-organizar">
+                        <i class="fa-solid fa-folder-tree ux-tab-icon" aria-hidden="true"></i>
+                        <span>Organización: <code>for</code> y <code>case</code></span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('diag',4)" id="tab-diag">
+                        <i class="fa-solid fa-stethoscope ux-tab-icon" aria-hidden="true"></i>
+                        <span>Diagnóstico y logs</span>
+                    </button>
+                    <button class="ux-tab-btn" onclick="showUxSection('cron',5)" id="tab-cron">
+                        <i class="fa-solid fa-clock ux-tab-icon" aria-hidden="true"></i>
+                        <span>Programación con <code>cron</code></span>
+                    </button>
+                </div>
+
+                <!-- ===== SECCIÓN 1: SCRIPTS Y VARIABLES ===== -->
+                <div class="ux-section active bs-verde" id="sec-scripts">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-terminal"></i></span>
+                        Estructura de un script, variables y argumentos</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            Un script es como una <em>receta de cocina</em>: una lista de pasos escritos en un archivo
+                            que Bash ejecuta de arriba hacia abajo, sin que tengas que teclear cada comando.
+                        </p>
+                    </div>
+
+                    <h4 class="bs-h4">Estructura de un script de Bash</h4>
+                    <p class="bs-p">
+                        Un <strong>script de Bash</strong> es un archivo de texto plano que contiene una secuencia de
+                        comandos que el intérprete <code>bash</code> ejecuta de arriba hacia abajo. Por convención se
+                        guarda con extensión <code>.sh</code> y, en un proyecto web, suele ubicarse en una carpeta
+                        <code>scripts/</code> dentro del repositorio (por ejemplo
+                        <code>~/proyectos/tienda-web/scripts/respaldo.sh</code>) para que quede versionado con Git
+                        junto al código.
+                    </p>
+                    <p class="bs-p">
+                        La primera línea de todo script es el <strong>shebang</strong>, cuyo nombre proviene de los
+                        caracteres <code>#</code> (<em>sharp</em>) y <code>!</code> (<em>bang</em>). Indica al sistema
+                        qué intérprete debe ejecutar el archivo:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">encabezado de un script</span></div>
+<div class="bs-code"><span class="c">#!/usr/bin/env bash</span>
+<span class="k">set</span> <span class="v">-euo</span> pipefail</div>
+
+                    <div class="bs-grid">
+                        <div class="bs-mini bs-amarillo"><span class="bs-op">#!/usr/bin/env bash</span><p>Busca <code>bash</code> en el PATH del usuario; es más portátil que escribir <code>#!/bin/bash</code> de forma fija.</p></div>
+                        <div class="bs-mini bs-azul"><span class="bs-op">set -e</span><p>Detiene el script en cuanto un comando falla, en lugar de continuar con un estado inconsistente.</p></div>
+                        <div class="bs-mini bs-teal"><span class="bs-op">set -u</span><p>Produce un error si se usa una variable que no fue definida.</p></div>
+                        <div class="bs-mini bs-morado"><span class="bs-op">set -o pipefail</span><p>Hace que una tubería se considere fallida si cualquiera de sus comandos falla, no solo el último.</p></div>
+                    </div>
+
+                    <h4 class="bs-h4">¿Cómo ejecutar un script?</h4>
+                    <p class="bs-p">Existen dos formas de ejecutarlo:</p>
+                    <ol class="bs-pasos">
+                        <li><strong>A través del intérprete:</strong>
+                            <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> bash scripts/respaldo.sh</div>
+                        </li>
+                        <li><strong>Con permiso de ejecución</strong> (una sola vez) y llamándolo directamente:
+                            <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> chmod +x scripts/respaldo.sh
+<span class="p">$</span> ./scripts/respaldo.sh</div>
+                        </li>
+                    </ol>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>El <code>./</code> es obligatorio porque el directorio actual <strong>no forma parte del
+                            PATH</strong>.</span>
+                    </div>
+
+                    <div class="bs-card bs-rosa">
+                        <div class="bs-card-title"><i class="fa-solid fa-circle-xmark"></i> Errores comunes</div>
+                        <ul class="bs-list" style="margin:0;">
+                            <li>Guardar el archivo con finales de línea de Windows (CRLF) desde VS Code produce el
+                                error <code>/usr/bin/env: 'bash\r': No such file or directory</code>; se corrige
+                                seleccionando <strong>LF</strong> en la barra inferior del editor.</li>
+                            <li><code>Permission denied</code> indica que falta el <code>chmod +x</code>.</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="bs-h4">Variables y sustitución de comandos</h4>
+                    <p class="bs-p">
+                        Una variable en Bash se declara con <code>NOMBRE=valor</code>, <strong>sin espacios</strong>
+                        alrededor del signo igual, y se lee anteponiendo <code>$</code>. Por convención, las variables
+                        de configuración de un script se escriben en mayúsculas.
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">variables de configuración</span></div>
+<div class="bs-code">PROYECTO=<span class="s">"$HOME/proyectos/tienda-web"</span>
+DESTINO=<span class="s">"$HOME/respaldos"</span>
+FECHA=$(date +%Y-%m-%d_%H%M)
+ARCHIVO=<span class="s">"$DESTINO/tienda-web_$FECHA.tar.gz"</span>
+<span class="k">echo</span> <span class="s">"Se generará: $ARCHIVO"</span></div>
+
+                    <p class="bs-p">
+                        La sintaxis <code>$(comando)</code> se denomina <strong>sustitución de comandos</strong>:
+                        ejecuta el comando y reemplaza la expresión por su salida. En el ejemplo,
+                        <code>date +%Y-%m-%d_%H%M</code> devuelve un texto como <code>2026-09-30_1415</code>, que se
+                        usa para que cada respaldo tenga un nombre único y ordenable alfabéticamente. Los formatos de
+                        <code>date</code> más usados en nombres de archivo son:
+                    </p>
+
+                    <p style="color:#374151;font-size:.88rem;margin:0 0 8px;">Haz clic en cada fila para resaltarla:</p>
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Formato</th><th>Salida de ejemplo</th><th>Uso típico</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>+%F</code></td><td><code>2026-09-30</code></td><td>Respaldos diarios</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>+%Y-%m-%d_%H%M</code></td><td><code>2026-09-30_1415</code></td><td>Varios respaldos en un mismo día</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>+%Y-%m</code></td><td><code>2026-09</code></td><td>Carpetas mensuales de logs o recursos</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>+%s</code></td><td><code>1790795700</code></td><td>Marcas de tiempo para cálculos</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4 class="bs-h4">Argumentos del script</h4>
+                    <p class="bs-p">
+                        Los argumentos que recibe el script desde la línea de comandos se leen con <code>$1</code>,
+                        <code>$2</code>, etc.; <code>$#</code> contiene la cantidad de argumentos y <code>$0</code> el
+                        nombre del script. La expresión <code>${1:-valor}</code> asigna un <strong>valor por
+                        defecto</strong> cuando el argumento no se envía:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">argumento con valor por defecto</span></div>
+<div class="bs-code">PROYECTO=<span class="s">"${1:-$HOME/proyectos/tienda-web}"</span></div>
+
+                    <p class="bs-p">
+                        Con esta línea, <code>./respaldo.sh ~/proyectos/blog-astro</code> respalda el blog, mientras
+                        que <code>./respaldo.sh</code> sin argumentos respalda la tienda.
+                    </p>
+
+                    <div class="bs-card bs-rosa">
+                        <div class="bs-card-title"><i class="fa-solid fa-circle-xmark"></i> Errores comunes</div>
+                        <ul class="bs-list" style="margin:0;">
+                            <li>Escribir <code>FECHA = $(date +%F)</code> con espacios hace que Bash interprete
+                                <code>FECHA</code> como un comando.</li>
+                            <li>Usar una variable sin comillas (<code>cd $PROYECTO</code>) falla si la ruta contiene
+                                espacios, como <code>~/Proyectos UNI/tienda-web</code>; por eso las variables con rutas
+                                se escriben siempre entre comillas dobles: <code>cd "$PROYECTO"</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 2: CONDICIONALES Y CÓDIGOS DE SALIDA ===== -->
+                <div class="ux-section bs-azul" id="sec-cond">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-code-branch"></i></span>
+                        Condicionales y códigos de salida</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            El código de salida es como el <em>semáforo</em> con el que cada comando avisa cómo le fue:
+                            <strong>0</strong> es luz verde (éxito) y cualquier otro número es una alerta de error.
+                        </p>
+                    </div>
+
+                    <p class="bs-p">
+                        Todo comando en Linux termina con un <strong>código de salida</strong> (<em>exit status</em>):
+                        <code>0</code> significa éxito y cualquier otro valor indica un error. El código del último
+                        comando ejecutado queda en la variable especial <code>$?</code>. Los condicionales
+                        <code>if</code> de Bash se basan precisamente en estos códigos.
+                    </p>
+                    <p class="bs-p">
+                        Para evaluar condiciones sobre archivos y textos se usa <code>[[ ... ]]</code>, con
+                        <strong>espacios obligatorios</strong> después de <code>[[</code> y antes de <code>]]</code>.
+                        Las pruebas más utilizadas en scripts de administración son:
+                    </p>
+
+                    <p style="color:#374151;font-size:.88rem;margin:0 0 8px;">Haz clic en cada fila para resaltarla:</p>
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Prueba</th><th>Es verdadera cuando…</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>-d ruta</code></td><td>la ruta existe y es un directorio</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-f ruta</code></td><td>la ruta existe y es un archivo regular</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-e ruta</code></td><td>la ruta existe (de cualquier tipo)</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-z "$VAR"</code></td><td>la variable está vacía</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>"$A" == "$B"</code></td><td>los textos son iguales</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>$N -gt 80</code></td><td>el número es mayor que 80 (<code>-lt</code>, <code>-ge</code>, <code>-le</code>, <code>-eq</code>)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="bs-p">
+                        El siguiente fragmento valida la entrada antes de hacer cualquier operación, una práctica
+                        indispensable en scripts que crean o borran archivos:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">validación de entrada</span></div>
+<div class="bs-code"><span class="k">if</span> [[ <span class="v">!</span> <span class="v">-d</span> <span class="s">"$PROYECTO"</span> ]]; <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"Error: no existe el directorio $PROYECTO"</span> <span class="v">&gt;&amp;2</span>
+  <span class="k">exit</span> 1
+<span class="k">fi</span>
+
+<span class="k">if</span> [[ <span class="v">!</span> <span class="v">-f</span> <span class="s">"$PROYECTO/package.json"</span> ]]; <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"Aviso: $PROYECTO no parece un proyecto Node.js"</span> <span class="v">&gt;&amp;2</span>
+<span class="k">fi</span>
+
+mkdir -p <span class="s">"$DESTINO"</span></div>
+
+                    <h4 class="bs-h4">Anatomía de una validación</h4>
+                    <p style="color:#374151;font-size:.88rem;margin:0 0 8px;">Haz clic en cada parte de
+                        <code>if [[ ! -d "$PROYECTO" ]]; then exit 1 fi</code> para conocer su función:</p>
+                    <div class="bs-anat">
+                        <div class="bs-token-wrap" id="an-if" onclick="showAnat('if', this)"><span class="bs-token">if</span><span class="bs-token-lbl">palabra clave</span></div>
+                        <div class="bs-token-wrap" id="an-corchete" onclick="showAnat('corchete', this)"><span class="bs-token">[[ &nbsp;&nbsp; ]]</span><span class="bs-token-lbl">prueba</span></div>
+                        <div class="bs-token-wrap" id="an-neg" onclick="showAnat('neg', this)"><span class="bs-token">!</span><span class="bs-token-lbl">negación</span></div>
+                        <div class="bs-token-wrap" id="an-op" onclick="showAnat('op', this)"><span class="bs-token">-d</span><span class="bs-token-lbl">operador</span></div>
+                        <div class="bs-token-wrap" id="an-ruta" onclick="showAnat('ruta', this)"><span class="bs-token">"$PROYECTO"</span><span class="bs-token-lbl">ruta entre comillas</span></div>
+                        <div class="bs-token-wrap" id="an-then" onclick="showAnat('then', this)"><span class="bs-token">; then</span><span class="bs-token-lbl">inicio del bloque</span></div>
+                        <div class="bs-token-wrap" id="an-exit" onclick="showAnat('exit', this)"><span class="bs-token">exit 1</span><span class="bs-token-lbl">código de salida</span></div>
+                        <div class="bs-token-wrap" id="an-fi" onclick="showAnat('fi', this)"><span class="bs-token">fi</span><span class="bs-token-lbl">cierre</span></div>
+                    </div>
+                    <div class="bs-panel" id="anat-info-panel"></div>
+
+                    <p class="bs-p">
+                        La primera condición usa <code>!</code> para <strong>negar</strong> la prueba: si el directorio
+                        no existe, se imprime un mensaje y el script termina con <code>exit 1</code>, lo que permite
+                        que otro programa (o cron) sepa que la ejecución falló. La redirección <code>&gt;&amp;2</code>
+                        envía el mensaje a la <strong>salida de errores</strong> en lugar de la salida estándar, de
+                        modo que los errores se distinguen en los logs. La segunda condición solo advierte, sin
+                        detener la ejecución. Finalmente, <code>mkdir -p</code> crea la carpeta de destino si no
+                        existe y no genera error si ya existe.
+                    </p>
+
+                    <h4 class="bs-h4">Un comando como condición</h4>
+                    <p class="bs-p">
+                        Un comando también puede usarse directamente como condición. Por ejemplo,
+                        <code>if command -v docker &gt; /dev/null; then ...</code> verifica si Docker está instalado
+                        antes de intentar usarlo; <code>/dev/null</code> es un archivo especial que descarta todo lo que
+                        se le envía.
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">verificar Docker y leer $?</span></div>
+<div class="bs-code"><span class="k">if</span> command -v docker &gt; /dev/null; <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"Docker está instalado"</span>
+<span class="k">fi</span>
+
+<span class="p">$</span> ./scripts/respaldo.sh ~/proyectos/no-existe
+<span class="p">$</span> echo $?
+1</div>
+                </div>
+
+                <!-- ===== SECCIÓN 3: RESPALDOS ===== -->
+                <div class="ux-section bs-teal" id="sec-respaldos">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-box-archive"></i></span>
+                        Respaldos con tar, rsync y find</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            <code>tar</code> es como <em>empacar tu proyecto en una caja sellada</em>;
+                            <code>rsync</code> es como <em>mantener una copia gemela</em> que solo se actualiza con lo
+                            que cambió; y <code>find</code> es el <em>encargado de bodega</em> que retira las cajas
+                            viejas.
+                        </p>
+                    </div>
+
+                    <h4 class="bs-h4">Respaldos comprimidos con tar</h4>
+                    <p class="bs-p">
+                        El comando <code>tar</code> (de <em>tape archive</em>, porque originalmente se usaba para
+                        escribir en cintas magnéticas) agrupa muchos archivos y carpetas en un solo archivo,
+                        conservando la estructura de directorios y los permisos. Combinado con compresión
+                        <code>gzip</code> produce los conocidos archivos <code>.tar.gz</code>, el formato estándar
+                        para respaldar proyectos y configuraciones en servidores Linux.
+                    </p>
+                    <p class="bs-p">
+                        La sintaxis general es <code>tar [opciones] archivo.tar.gz rutas...</code>. Las opciones se
+                        combinan en un solo bloque de letras:
+                    </p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Opción</th><th>Significado</th><th>Cuándo usarla</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>-c</code></td><td><em>create</em>: crea un archivo nuevo</td><td>Al generar el respaldo</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-x</code></td><td><em>extract</em>: extrae el contenido</td><td>Al restaurar un respaldo</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-t</code></td><td><em>list</em>: lista el contenido sin extraer</td><td>Para verificar un respaldo antes de restaurarlo</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-z</code></td><td>comprime o descomprime con gzip</td><td>Siempre que el archivo termine en <code>.tar.gz</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-f</code></td><td>indica el nombre del archivo; debe ir <strong>al final del bloque</strong></td><td>Siempre</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-v</code></td><td><em>verbose</em>: muestra cada archivo procesado</td><td>En pruebas manuales; se omite en scripts automáticos</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-C dir</code></td><td>cambia al directorio indicado antes de operar</td><td>Para evitar rutas absolutas dentro del respaldo</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>--exclude=patrón</code></td><td>omite archivos o carpetas que coincidan</td><td>Para excluir <code>node_modules</code>, <code>dist</code>, <code>.git</code>, <code>*.log</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="bs-p">Los tres usos fundamentales son crear, listar y restaurar:</p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">crear, listar y restaurar</span></div>
+<div class="bs-code"><span class="p">$</span> tar <span class="v">-czf</span> ~/respaldos/nginx_2026-09-30.tar.gz <span class="v">-C</span> /etc nginx
+<span class="p">$</span> tar <span class="v">-tzf</span> ~/respaldos/nginx_2026-09-30.tar.gz | head
+<span class="p">$</span> tar <span class="v">-xzf</span> ~/respaldos/tienda-web_2026-09-30_1415.tar.gz <span class="v">-C</span> ~/restauracion</div>
+
+                    <p class="bs-p">
+                        La primera línea respalda la configuración de Nginx: <code>-C /etc</code> hace que el archivo
+                        contenga la ruta relativa <code>nginx/sites-available/...</code> en lugar de
+                        <code>/etc/nginx/...</code>. La segunda lista las primeras entradas del respaldo para comprobar
+                        que no está vacío. La tercera restaura un proyecto dentro de <code>~/restauracion</code>, sin
+                        tocar la copia de trabajo original.
+                    </p>
+
+                    <div class="bs-card bs-rosa">
+                        <div class="bs-card-title"><i class="fa-solid fa-circle-xmark"></i> Errores comunes con tar</div>
+                        <ul class="bs-list" style="margin:0;">
+                            <li><strong>Escribir <code>-cfz</code> en lugar de <code>-czf</code>.</strong> Como
+                                <code>-f</code> toma el siguiente texto como nombre de archivo,
+                                <code>tar -cfz respaldo.tar.gz ...</code> crea un archivo llamado <code>z</code>. La
+                                regla es que <code>f</code> sea siempre la última letra del bloque.</li>
+                            <li><strong>Incluir <code>node_modules/</code>.</strong> En un proyecto Node.js esta
+                                carpeta puede pesar más de 300 MB y se regenera con <code>npm install</code> a partir de
+                                <code>package.json</code> y <code>package-lock.json</code>. Lo mismo ocurre con
+                                <code>dist/</code> o <code>build/</code>, que se regeneran con
+                                <code>npm run build</code>.</li>
+                            <li><strong>Respaldar con rutas absolutas.</strong> Sin <code>-C</code>, al extraer el
+                                respaldo se recrea la ruta completa dentro del destino.</li>
+                            <li><strong>Respaldar el archivo <code>.env</code> sin control.</strong> Contiene
+                                credenciales de base de datos y llaves de API; si el respaldo se comparte o se sube a un
+                                repositorio, esas credenciales quedan expuestas. Se debe decidir de forma explícita si
+                                se incluye y proteger el respaldo con permisos <code>600</code>.</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="bs-h4">Sincronización con rsync</h4>
+                    <p class="bs-p">
+                        <code>rsync</code> (<em>remote sync</em>) copia archivos entre dos ubicaciones transfiriendo
+                        únicamente lo que cambió desde la última sincronización. A diferencia de <code>tar</code>, no
+                        genera un archivo comprimido sino una <strong>réplica navegable</strong> del directorio, lo que
+                        lo hace adecuado para mantener un espejo actualizado del proyecto en un disco externo o para
+                        desplegar una carpeta <code>dist/</code> a un servidor remoto por SSH.
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">espejo del proyecto</span></div>
+<div class="bs-code"><span class="p">$</span> rsync <span class="v">-av</span> <span class="v">--delete</span> <span class="v">--exclude=</span><span class="s">'node_modules/'</span> <span class="v">--exclude=</span><span class="s">'.git/'</span> \
+    ~/proyectos/tienda-web/ /media/estudiante/USB/espejo-tienda-web/</div>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Opción</th><th>Función</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>-a</code></td><td>modo archivo: copia recursivamente y conserva permisos, fechas y enlaces simbólicos</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-v</code></td><td>muestra los archivos transferidos</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-n</code> o <code>--dry-run</code></td><td>simula la operación sin copiar ni borrar nada</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>--delete</code></td><td>elimina del destino los archivos que ya no existen en el origen</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>--exclude</code></td><td>omite rutas que coincidan con el patrón</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-z</code></td><td>comprime durante la transferencia (útil por red)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span><strong>Cuidado con la barra final del origen:</strong>
+                            <code>rsync -a ~/proyectos/tienda-web/ destino/</code> copia el <em>contenido</em> de la
+                            carpeta dentro de <code>destino/</code>, mientras que
+                            <code>rsync -a ~/proyectos/tienda-web destino/</code> copia la carpeta completa y crea
+                            <code>destino/tienda-web/</code>. Combinado con <code>--delete</code>, un origen o destino
+                            mal escrito puede borrar archivos que no se deseaba eliminar. Por eso, toda orden con
+                            <code>--delete</code> se prueba primero con <code>--dry-run</code> y se revisa la salida
+                            antes de ejecutarla de verdad.</span>
+                    </div>
+
+                    <h4 class="bs-h4">Rotación de respaldos con find</h4>
+                    <p class="bs-p">
+                        Un script de respaldo que se ejecuta todos los días llena el disco en pocas semanas si no
+                        elimina las copias antiguas. Este proceso se conoce como <strong>rotación</strong> y se
+                        implementa con <code>find</code>, comando que recorre un directorio de forma recursiva y
+                        selecciona archivos según criterios como nombre, tipo, tamaño o fecha de modificación, para
+                        luego listarlos o actuar sobre ellos.
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">rotación: primero listar, luego borrar</span></div>
+<div class="bs-code"><span class="p">$</span> find ~/respaldos <span class="v">-maxdepth</span> 1 <span class="v">-type</span> f <span class="v">-name</span> <span class="s">'tienda-web_*.tar.gz'</span> <span class="v">-mtime</span> +7 <span class="v">-print</span>
+<span class="p">$</span> find ~/respaldos <span class="v">-maxdepth</span> 1 <span class="v">-type</span> f <span class="v">-name</span> <span class="s">'tienda-web_*.tar.gz'</span> <span class="v">-mtime</span> +7 <span class="v">-delete</span></div>
+
+                    <div class="bs-grid">
+                        <div class="bs-mini bs-verde"><span class="bs-op">-maxdepth 1</span><p>Limita la búsqueda a la carpeta indicada, sin entrar en subcarpetas.</p></div>
+                        <div class="bs-mini bs-azul"><span class="bs-op">-type f</span><p>Selecciona solo archivos regulares (<code>d</code> sería directorios).</p></div>
+                        <div class="bs-mini bs-teal"><span class="bs-op">-name 'patrón'</span><p>Filtra por patrón; las comillas simples evitan que la terminal expanda el <code>*</code> antes de que <code>find</code> lo reciba.</p></div>
+                        <div class="bs-mini bs-morado"><span class="bs-op">-mtime +7</span><p>Selecciona archivos modificados hace <strong>más</strong> de 7 días completos (<code>-mtime -1</code> sería menos de un día).</p></div>
+                        <div class="bs-mini bs-naranja"><span class="bs-op">-print</span><p>Lista los resultados.</p></div>
+                        <div class="bs-mini bs-rosa"><span class="bs-op">-delete</span><p>Elimina los resultados.</p></div>
+                    </div>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span><strong>Error común:</strong> <code>find</code> evalúa sus expresiones de izquierda a
+                            derecha, por lo que <code>find ~/respaldos -delete -name '*.tar.gz'</code> borra todo el
+                            contenido de la carpeta <em>antes</em> de filtrar por nombre. La acción <code>-delete</code>
+                            va siempre al final, y la orden se ejecuta primero con <code>-print</code> para confirmar
+                            qué archivos se verían afectados.</span>
+                    </div>
+
+                    <h4 class="bs-h4">Script completo de respaldo</h4>
+                    <p class="bs-p">
+                        El siguiente script integra los apartados anteriores. Recibe opcionalmente la ruta del
+                        proyecto, genera un respaldo fechado sin dependencias ni compilaciones, lo verifica y conserva
+                        solo los últimos 7 días:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">respaldo.sh</span></div>
+<div class="bs-code"><span class="c">#!/usr/bin/env bash</span>
+<span class="k">set</span> <span class="v">-euo</span> pipefail
+
+PROYECTO=<span class="s">"${1:-$HOME/proyectos/tienda-web}"</span>
+DESTINO=<span class="s">"$HOME/respaldos"</span>
+DIAS_RETENCION=7
+NOMBRE=$(basename <span class="s">"$PROYECTO"</span>)
+FECHA=$(date +%Y-%m-%d_%H%M)
+ARCHIVO=<span class="s">"$DESTINO/${NOMBRE}_${FECHA}.tar.gz"</span>
+
+<span class="k">if</span> [[ ! -d <span class="s">"$PROYECTO"</span> ]]; <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"[ERROR] No existe $PROYECTO"</span> &gt;&amp;2
+  <span class="k">exit</span> 1
+<span class="k">fi</span>
+mkdir -p <span class="s">"$DESTINO"</span>
+
+tar -czf <span class="s">"$ARCHIVO"</span> \
+  --exclude=<span class="s">'node_modules'</span> --exclude=<span class="s">'dist'</span> --exclude=<span class="s">'.git'</span> --exclude=<span class="s">'*.log'</span> \
+  -C <span class="s">"$(dirname "$PROYECTO")"</span> <span class="s">"$NOMBRE"</span>
+
+<span class="k">if</span> tar -tzf <span class="s">"$ARCHIVO"</span> &gt; /dev/null; <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"[OK] $(date '+%F %T') Respaldo creado: $ARCHIVO ($(du -h "$ARCHIVO" | cut -f1))"</span>
+<span class="k">else</span>
+  <span class="k">echo</span> <span class="s">"[ERROR] El archivo $ARCHIVO está dañado"</span> &gt;&amp;2
+  <span class="k">exit</span> 2
+<span class="k">fi</span>
+
+find <span class="s">"$DESTINO"</span> -maxdepth 1 -type f -name <span class="s">"${NOMBRE}_*.tar.gz"</span> -mtime +<span class="s">"$DIAS_RETENCION"</span> -delete</div>
+
+                    <ol class="bs-pasos">
+                        <li><strong>Configuración.</strong> Las primeras variables concentran lo que puede cambiar: si
+                            se necesita otro destino o más días de retención, solo se modifica ese bloque.
+                            <code>basename</code> extrae el último componente de la ruta (<code>tienda-web</code>) y
+                            <code>dirname</code> la carpeta que lo contiene (<code>/home/estudiante/proyectos</code>);
+                            ambos se usan para que <code>tar -C</code> guarde rutas relativas.</li>
+                        <li><strong>Validación.</strong> El primer <code>if</code> impide continuar si el proyecto no
+                            existe y <code>mkdir -p</code> crea la carpeta de destino.</li>
+                        <li><strong>Creación.</strong> El comando <code>tar</code> está dividido en tres líneas
+                            mediante <code>\</code>, que indica a Bash que la orden continúa en la siguiente línea; no
+                            debe haber ningún espacio después de esa barra.</li>
+                        <li><strong>Verificación.</strong> <code>tar -tzf</code> lee el archivo completo: si está
+                            corrupto devuelve un código distinto de cero y el script informa el error con
+                            <code>exit 2</code>. Si todo es correcto, se imprime una línea con fecha, hora, ruta y
+                            tamaño, apta para acumularse en un log.</li>
+                        <li><strong>Rotación.</strong> La última línea elimina solo los respaldos de este mismo
+                            proyecto, gracias al patrón <code>${NOMBRE}_*.tar.gz</code>.</li>
+                    </ol>
+                </div>
+
+                <!-- ===== SECCIÓN 4: ORGANIZACIÓN CON FOR Y CASE ===== -->
+                <div class="ux-section bs-morado" id="sec-organizar">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-folder-tree"></i></span>
+                        Organización de archivos con for, case y find</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            Un script clasificador es como un <em>cartero que reparte la correspondencia</em>: toma
+                            cada sobre (<code>for</code>), lee la dirección (<code>case</code>) y lo deja en el buzón
+                            correcto.
+                        </p>
+                    </div>
+
+                    <h4 class="bs-h4">Recorrer archivos con bucles for</h4>
+                    <p class="bs-p">
+                        El bucle <code>for</code> ejecuta un bloque de comandos una vez por cada elemento de una lista.
+                        En scripts de organización, esa lista suele construirse con un patrón de nombres (<em>glob</em>),
+                        que la terminal expande a los archivos que coinciden:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">for sobre archivos .png</span></div>
+<div class="bs-code"><span class="k">for</span> imagen <span class="k">in</span> ~/proyectos/landing-cafe/public/img/*.png; <span class="k">do</span>
+  <span class="k">echo</span> <span class="s">"Procesando $imagen"</span>
+<span class="k">done</span></div>
+
+                    <p class="bs-p">
+                        La variable <code>imagen</code> toma en cada vuelta la ruta de un archivo <code>.png</code>
+                        distinto. El bloque se delimita con <code>do</code> y <code>done</code>.
+                    </p>
+
+                    <div class="bs-card bs-rosa">
+                        <div class="bs-card-title"><i class="fa-solid fa-circle-xmark"></i> Errores comunes</div>
+                        <ul class="bs-list" style="margin:0;">
+                            <li>Si la carpeta no contiene ningún <code>.png</code>, Bash no expande el patrón y el
+                                bucle se ejecuta una vez con el texto literal <code>*.png</code>. Se evita activando al
+                                inicio del script <code>shopt -s nullglob</code>, que hace que un patrón sin
+                                coincidencias produzca una lista vacía.</li>
+                            <li>Es un error recorrer la salida de <code>ls</code> (<code>for f in $(ls)</code>),
+                                porque los nombres con espacios, como <code>logo cafe final.png</code>, se parten en
+                                varias palabras.</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="bs-h4">Extraer nombre y extensión</h4>
+                    <p class="bs-p">
+                        Para clasificar un archivo es necesario conocer su extensión. Bash permite obtenerla sin
+                        comandos externos mediante la <strong>expansión de parámetros</strong>, que recorta texto de una
+                        variable según un patrón. Con <code>archivo="hero-banner.WEBP"</code>:
+                    </p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Expresión</th><th>Resultado</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>${archivo##*.}</code></td><td><code>WEBP</code></td><td>elimina todo hasta el último punto: la extensión</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>${archivo%.*}</code></td><td><code>hero-banner</code></td><td>elimina desde el último punto: el nombre sin extensión</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>${archivo,,}</code></td><td><code>hero-banner.webp</code></td><td>convierte a minúsculas</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>La conversión a minúsculas es importante porque Linux distingue mayúsculas:
+                            <code>foto.JPG</code> y <code>foto.jpg</code> son archivos distintos, y un patrón que solo
+                            contemple <code>jpg</code> ignoraría el primero.</span>
+                    </div>
+
+                    <h4 class="bs-h4">Clasificar con case</h4>
+                    <p class="bs-p">
+                        La estructura <code>case</code> compara un valor contra varios patrones y ejecuta el bloque del
+                        primero que coincida. Es más legible que encadenar varios <code>if</code> cuando se evalúan
+                        muchas alternativas, como las extensiones de un proyecto web. Cada patrón termina en
+                        <code>)</code>, varios patrones se separan con <code>|</code>, cada bloque cierra con
+                        <code>;;</code> y <code>*)</code> actúa como <strong>caso por defecto</strong>.
+                    </p>
+                    <p class="bs-p">
+                        El siguiente script ordena los recursos que entrega un diseñador en una sola carpeta y los
+                        ubica en la estructura <code>public/</code> de un proyecto:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">organizar.sh</span></div>
+<div class="bs-code"><span class="c">#!/usr/bin/env bash</span>
+<span class="k">set</span> <span class="v">-euo</span> pipefail
+shopt -s nullglob
+
+ORIGEN=<span class="s">"${1:-$HOME/Descargas/recursos-landing}"</span>
+DESTINO=<span class="s">"$HOME/proyectos/landing-cafe/public"</span>
+
+<span class="k">for</span> archivo <span class="k">in</span> <span class="s">"$ORIGEN"</span>/*; <span class="k">do</span>
+  [[ -f <span class="s">"$archivo"</span> ]] <span class="v">||</span> <span class="k">continue</span>
+  nombre=$(basename <span class="s">"$archivo"</span>)
+  extension=<span class="s">"${nombre##*.}"</span>
+  extension=<span class="s">"${extension,,}"</span>
+
+  <span class="k">case</span> <span class="s">"$extension"</span> <span class="k">in</span>
+    png|jpg|jpeg|webp|svg|gif) carpeta=<span class="s">"img"</span> ;;
+    woff|woff2|ttf|otf)        carpeta=<span class="s">"fonts"</span> ;;
+    css)                       carpeta=<span class="s">"css"</span> ;;
+    js|mjs)                    carpeta=<span class="s">"js"</span> ;;
+    mp4|webm)                  carpeta=<span class="s">"video"</span> ;;
+    *)                         carpeta=<span class="s">"otros"</span> ;;
+  <span class="k">esac</span>
+
+  mkdir -p <span class="s">"$DESTINO/$carpeta"</span>
+  mv -n <span class="s">"$archivo"</span> <span class="s">"$DESTINO/$carpeta/"</span>
+  <span class="k">echo</span> <span class="s">"$nombre -&gt; public/$carpeta/"</span>
+<span class="k">done</span></div>
+
+                    <p class="bs-p">
+                        La línea <code>[[ -f "$archivo" ]] || continue</code> usa el operador <code>||</code> («o»
+                        lógico): si el elemento no es un archivo regular, por ejemplo una subcarpeta,
+                        <code>continue</code> salta a la siguiente vuelta del bucle. Luego se obtiene el nombre, se
+                        extrae la extensión y se pasa a minúsculas. El bloque <code>case</code> asigna la carpeta de
+                        destino, y cualquier extensión no prevista termina en <code>otros/</code> para revisión
+                        manual. Finalmente, <code>mkdir -p</code> garantiza que la carpeta exista y
+                        <code>mv -n</code> (<em>no clobber</em>) mueve el archivo sin sobrescribir uno que ya exista con
+                        el mismo nombre en el destino; en ese caso el archivo permanece en el origen, lo que evita
+                        pérdidas de información.
+                    </p>
+
+                    <h4 class="bs-h4">Organizar por fecha</h4>
+                    <p class="bs-p">
+                        Otra forma habitual de organización es agrupar archivos por mes, por ejemplo, los logs de una
+                        aplicación o las capturas de pantalla de pruebas. El comando
+                        <code>date -r archivo +%Y-%m</code> devuelve el año y mes de la última modificación de ese
+                        archivo, valor que puede usarse como nombre de carpeta:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">carpeta por mes</span></div>
+<div class="bs-code">mes=$(date <span class="v">-r</span> <span class="s">"$archivo"</span> +%Y-%m)
+mkdir -p <span class="s">"$HOME/proyectos/api-pedidos/logs/archivo/$mes"</span>
+mv -n <span class="s">"$archivo"</span> <span class="s">"$HOME/proyectos/api-pedidos/logs/archivo/$mes/"</span></div>
+
+                    <h4 class="bs-h4">Actuar sobre los resultados de find</h4>
+                    <p class="bs-p">
+                        Cuando los archivos están repartidos en subcarpetas, <code>find</code> es más adecuado que un
+                        <code>for</code> con patrones. La acción <code>-exec</code> ejecuta un comando sobre cada
+                        resultado; <code>{}</code> representa el archivo encontrado y <code>\;</code> marca el final del
+                        comando:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">find con -exec y -prune</span></div>
+<div class="bs-code"><span class="p">$</span> find ~/proyectos/api-pedidos/logs <span class="v">-type</span> f <span class="v">-name</span> <span class="s">'*.log'</span> <span class="v">-mtime</span> +3 <span class="v">-exec</span> gzip {} \;
+<span class="p">$</span> find ~/proyectos <span class="v">-type</span> d <span class="v">-name</span> node_modules <span class="v">-prune</span> <span class="v">-o</span> <span class="v">-type</span> f <span class="v">-size</span> +5M <span class="v">-print</span></div>
+
+                    <p class="bs-p">
+                        La primera orden comprime con <code>gzip</code> los logs con más de 3 días, que pasan a llamarse
+                        <code>app.log.gz</code> y ocupan una fracción del espacio original. La segunda localiza archivos
+                        de más de 5 MB en todos los proyectos, útiles de detectar antes de un <code>git push</code>; la
+                        combinación <code>-name node_modules -prune -o</code> le indica a <code>find</code> que no entre
+                        en las carpetas <code>node_modules</code>, que de otro modo llenarían el resultado.
+                    </p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Criterio de find</th><th>Ejemplo</th><th>Selecciona</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>-name</code> / <code>-iname</code></td><td><code>-iname '*.jpg'</code></td><td>por nombre (<code>-iname</code> ignora mayúsculas)</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-type</code></td><td><code>-type d</code></td><td>por tipo: <code>f</code> archivo, <code>d</code> directorio</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-size</code></td><td><code>-size +5M</code></td><td>por tamaño (<code>k</code>, <code>M</code>, <code>G</code>)</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-mtime</code></td><td><code>-mtime -1</code></td><td>por días desde la última modificación</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>-empty</code></td><td><code>-type d -empty</code></td><td>carpetas o archivos vacíos</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN 5: DIAGNÓSTICO Y LOGS ===== -->
+                <div class="ux-section bs-naranja" id="sec-diag">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-stethoscope"></i></span>
+                        Diagnóstico del sistema y análisis de logs</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            Diagnosticar un servidor es como una <em>consulta médica</em>: primero se toman los signos
+                            vitales (carga, disco, memoria), luego se revisa si el órgano clave (el proceso) funciona y,
+                            por último, se lee el historial clínico (los logs).
+                        </p>
+                    </div>
+
+                    <h4 class="bs-h4">Comandos de diagnóstico del sistema</h4>
+                    <p class="bs-p">
+                        Cuando un sitio deja de responder, el diagnóstico sigue un orden: primero se revisa si la
+                        máquina tiene recursos disponibles (carga, disco, memoria), después si el proceso de la
+                        aplicación está en ejecución y escuchando en su puerto, y por último qué dicen los logs. Cada
+                        uno de los siguientes comandos responde una de esas preguntas.
+                    </p>
+
+                    <div class="bs-table-wrap">
+                        <table class="bs-table">
+                            <thead>
+                                <tr><th>Comando</th><th>Pregunta que responde</th><th>Qué observar</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="highlightRow(this)"><td><code>uptime</code></td><td>¿Cuánto lleva encendido el equipo y qué tan cargado está?</td><td>Los tres valores de <em>load average</em> (1, 5 y 15 min); si superan el número de núcleos (<code>nproc</code>), hay saturación</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>df -h</code></td><td>¿Queda espacio en las particiones?</td><td>La columna <code>Use%</code>; por encima de 90 % en <code>/</code> pueden fallar <code>npm install</code>, Docker y la escritura de logs</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>du -sh ruta/*</code></td><td>¿Qué carpetas ocupan más espacio?</td><td>Se ordena con <code>sort -h</code> para ver las más pesadas al final</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>free -h</code></td><td>¿Cuánta memoria RAM queda?</td><td>La columna <code>available</code>, no <code>free</code>: Linux usa la RAM libre como caché y la libera cuando se necesita</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>ps aux --sort=-%mem</code></td><td>¿Qué procesos consumen más memoria?</td><td>Se combina con <code>head -n 6</code> para ver los cinco primeros</td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>ss -tulpn</code></td><td>¿Qué puertos están abiertos y qué proceso los usa?</td><td>Si el puerto 3000 (Node.js) o 80 (Nginx) aparece en estado <code>LISTEN</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>tail -n 50 archivo</code> / <code>tail -f archivo</code></td><td>¿Qué se registró recientemente?</td><td><code>-f</code> (<em>follow</em>) muestra en vivo las líneas nuevas; se sale con <code>Ctrl+C</code></td></tr>
+                                <tr onclick="highlightRow(this)"><td><code>journalctl -u nginx --since "1 hour ago"</code></td><td>¿Qué registró un servicio de systemd?</td><td>Mensajes de error al arrancar o reiniciar el servicio</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="bs-p">
+                        Todos los comandos de tamaño aceptan <code>-h</code> (<em>human-readable</em>), que muestra las
+                        cantidades en K, M o G en lugar de bloques o bytes. En el caso de <code>ss</code>, las letras
+                        significan: <code>t</code> TCP, <code>u</code> UDP, <code>l</code> solo puertos en escucha,
+                        <code>p</code> proceso propietario y <code>n</code> números en lugar de nombres de servicio; la
+                        columna del proceso requiere <code>sudo</code> para mostrar procesos de otros usuarios.
+                    </p>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span><strong>Caso típico:</strong> al ejecutar <code>npm run dev</code> aparece el error
+                            <code>EADDRINUSE: address already in use :::3000</code>. La orden
+                            <code>ss -tlpn | grep ':3000'</code> muestra qué proceso ocupa el puerto y su PID, con lo
+                            cual se decide si cerrarlo o usar otro puerto.</span>
+                    </div>
+
+                    <h4 class="bs-h4">Análisis de logs con tuberías</h4>
+                    <p class="bs-p">
+                        Los logs de acceso de Nginx (<code>/var/log/nginx/access.log</code>) registran una línea por
+                        petición con un formato fijo, llamado <em>combined</em>:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">una línea de access.log</span></div>
+<div class="bs-code">190.24.81.17 - - [30/Sep/2026:10:15:32 -0500] <span class="s">"GET /api/productos HTTP/1.1"</span> 200 1532 <span class="s">"-"</span> <span class="s">"Mozilla/5.0"</span></div>
+
+                    <p class="bs-p">
+                        Si se separa la línea por espacios, el campo 1 es la <strong>IP</strong> del cliente, el 7 la
+                        <strong>ruta</strong> solicitada y el 9 el <strong>código de estado HTTP</strong>.
+                        <code>awk</code> es una herramienta que procesa texto por columnas: <code>$1</code> representa el
+                        primer campo de cada línea, <code>$9</code> el noveno, y una condición antes de las llaves
+                        filtra las líneas. Encadenado con <code>sort</code>, <code>uniq</code> y <code>head</code>
+                        mediante tuberías (<code>|</code>), permite responder preguntas concretas:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">preguntas sobre el log</span></div>
+<div class="bs-code">LOG=/var/log/nginx/access.log
+<span class="c"># Las cinco IP con más peticiones</span>
+awk <span class="s">'{print $1}'</span> <span class="s">"$LOG"</span> | sort | uniq -c | sort <span class="v">-rn</span> | head <span class="v">-n</span> 5
+<span class="c"># Rutas que devolvieron 404</span>
+awk <span class="s">'$9 == 404 {print $7}'</span> <span class="s">"$LOG"</span> | sort | uniq -c | sort <span class="v">-rn</span>
+<span class="c"># Cantidad de errores del servidor (500 a 599)</span>
+grep <span class="v">-c</span> <span class="s">'" 5[0-9][0-9] '</span> <span class="s">"$LOG"</span></div>
+
+                    <ol class="bs-pasos">
+                        <li><strong>Top de IP:</strong> <code>awk</code> imprime solo la IP, <code>sort</code> agrupa las
+                            iguales, <code>uniq -c</code> las cuenta, <code>sort -rn</code> ordena numéricamente de
+                            mayor a menor y <code>head</code> conserva las cinco primeras.</li>
+                        <li><strong>Rutas con 404:</strong> lista los recursos que no existen, útil para detectar enlaces
+                            rotos o recursos faltantes tras un despliegue.</li>
+                        <li><strong>Errores 5xx:</strong> cuenta con <code>grep -c</code> las respuestas de error del
+                            servidor (códigos 500 a 599).</li>
+                    </ol>
+
+                    <div class="bs-alerta">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span><strong>Error común:</strong> <code>uniq</code> solo agrupa líneas iguales
+                            <em>consecutivas</em>; si se omite el primer <code>sort</code>, el conteo sale fragmentado e
+                            incorrecto.</span>
+                    </div>
+
+                    <h4 class="bs-h4">Script de diagnóstico con umbral de alerta</h4>
+                    <p class="bs-p">
+                        El siguiente script reúne los comandos anteriores en un reporte fechado y emite una alerta cuando
+                        el disco supera un umbral:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">diagnostico.sh</span></div>
+<div class="bs-code"><span class="c">#!/usr/bin/env bash</span>
+<span class="k">set</span> <span class="v">-uo</span> pipefail
+
+UMBRAL_DISCO=80
+REPORTE=<span class="s">"$HOME/diagnosticos/diagnostico_$(date +%F_%H%M).txt"</span>
+mkdir -p <span class="s">"$(dirname "$REPORTE")"</span>
+
+{
+  <span class="k">echo</span> <span class="s">"=== Diagnóstico de $(hostname) - $(date '+%F %T') ==="</span>
+  <span class="k">echo</span>; <span class="k">echo</span> <span class="s">"--- Carga ---"</span>;      uptime
+  <span class="k">echo</span>; <span class="k">echo</span> <span class="s">"--- Disco ---"</span>;      df -h /
+  <span class="k">echo</span>; <span class="k">echo</span> <span class="s">"--- Memoria ---"</span>;    free -h
+  <span class="k">echo</span>; <span class="k">echo</span> <span class="s">"--- Top 5 procesos por memoria ---"</span>
+  ps aux --sort=-%mem | head -n 6
+  <span class="k">echo</span>; <span class="k">echo</span> <span class="s">"--- Puertos en escucha ---"</span>; ss -tln
+} | tee <span class="s">"$REPORTE"</span>
+
+USO=$(df --output=pcent / | tail -n 1 | tr -dc <span class="s">'0-9'</span>)
+<span class="k">if</span> (( USO &gt; UMBRAL_DISCO )); <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"[ALERTA] La partición / está al ${USO}%"</span> | tee -a <span class="s">"$REPORTE"</span>
+  <span class="k">exit</span> 1
+<span class="k">fi</span></div>
+
+                    <p class="bs-p">
+                        En este script se usa <code>set -uo pipefail</code> <strong>sin <code>-e</code></strong>, porque
+                        un diagnóstico debe seguir recopilando información aunque un comando individual falle. Las
+                        llaves <code>{ ... }</code> agrupan todas las salidas para redirigirlas juntas; <code>tee</code>
+                        las muestra en pantalla y al mismo tiempo las guarda en el archivo del reporte
+                        (<code>tee -a</code> agrega al final en lugar de sobrescribir). Para obtener el porcentaje de
+                        disco como número, <code>df --output=pcent /</code> imprime solo la columna de uso,
+                        <code>tail -n 1</code> descarta el encabezado y <code>tr -dc '0-9'</code> elimina todo lo que no
+                        sea dígito (el espacio y el símbolo <code>%</code>). Los dobles paréntesis
+                        <code>(( ... ))</code> evalúan expresiones aritméticas, donde se pueden usar <code>&gt;</code> y
+                        <code>&lt;</code> directamente.
+                    </p>
+                </div>
+
+                <!-- ===== SECCIÓN 6: PROGRAMACIÓN CON CRON ===== -->
+                <div class="ux-section bs-rosa" id="sec-cron">
+                    <h3 class="bs-h3"><span class="bs-badge-ico"><i class="fa-solid fa-clock"></i></span>
+                        Programar scripts con cron</h3>
+
+                    <div class="bs-card bs-amarillo">
+                        <div class="bs-card-title"><i class="fa-solid fa-lightbulb"></i> Imagínalo así</div>
+                        <p class="bs-p" style="margin:0;">
+                            <code>cron</code> es como un <em>despertador con muchas alarmas</em>: cada línea de la tabla
+                            define cuándo suena y qué script debe ejecutarse en ese momento.
+                        </p>
+                    </div>
+
+                    <p class="bs-p">
+                        <code>cron</code> (del griego <em>chronos</em>, tiempo) es el servicio de Linux que ejecuta
+                        comandos de forma periódica. Cada usuario tiene su propia tabla de tareas, que se edita con
+                        <code>crontab -e</code> y se consulta con <code>crontab -l</code>. Cada línea define
+                        <strong>cinco campos de tiempo</strong> seguidos del comando:
+                    </p>
+
+                    <div class="bs-code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span><span class="ttl">crontab -e</span></div>
+<div class="bs-code"><span class="c"># min  hora  día-mes  mes  día-semana  comando</span>
+  30   2     *        *    *           /home/estudiante/proyectos/tienda-web/scripts/respaldo.sh &gt;&gt; /home/estudiante/respaldos/respaldo.log 2&gt;&amp;1
+  0    */6   *        *    *           /home/estudiante/scripts/diagnostico.sh &gt; /dev/null 2&gt;&amp;1
+  0    8     *        *    1-5         /home/estudiante/scripts/organizar-recursos.sh</div>
+
+                    <p class="bs-p">
+                        La primera tarea ejecuta el respaldo todos los días a las <strong>2:30 a. m.</strong>; la
+                        segunda, el diagnóstico <strong>cada seis horas</strong>; la tercera, la organización de
+                        recursos a las <strong>8:00 de lunes a viernes</strong>. El asterisco significa «cualquier
+                        valor», <code>*/6</code> «cada 6» y <code>1-5</code> un rango (0 y 7 representan el domingo). El
+                        sitio <strong>crontab.guru</strong> traduce una expresión a lenguaje natural y es útil para
+                        verificarla.
+                    </p>
+
+                    <h4 class="bs-h4">Anatomía de una línea de crontab</h4>
+                    <p style="color:#374151;font-size:.88rem;margin:0 0 8px;">Haz clic en cada parte de la primera tarea
+                        para conocer su función:</p>
+                    <div class="bs-anat">
+                        <div class="bs-token-wrap" id="an-min" onclick="showAnat('min', this)"><span class="bs-token">30</span><span class="bs-token-lbl">minuto</span></div>
+                        <div class="bs-token-wrap" id="an-hora" onclick="showAnat('hora', this)"><span class="bs-token">2</span><span class="bs-token-lbl">hora</span></div>
+                        <div class="bs-token-wrap" id="an-dia" onclick="showAnat('dia', this)"><span class="bs-token">*</span><span class="bs-token-lbl">día del mes</span></div>
+                        <div class="bs-token-wrap" id="an-mes" onclick="showAnat('mes', this)"><span class="bs-token">*</span><span class="bs-token-lbl">mes</span></div>
+                        <div class="bs-token-wrap" id="an-sem" onclick="showAnat('sem', this)"><span class="bs-token">*</span><span class="bs-token-lbl">día de la semana</span></div>
+                        <div class="bs-token-wrap" id="an-cmd" onclick="showAnat('cmd', this)"><span class="bs-token">/home/…/respaldo.sh</span><span class="bs-token-lbl">comando</span></div>
+                        <div class="bs-token-wrap" id="an-log" onclick="showAnat('log', this)"><span class="bs-token">&gt;&gt; respaldo.log 2&gt;&amp;1</span><span class="bs-token-lbl">salida a un log</span></div>
+                    </div>
+                    <div class="bs-panel" id="anat-cron-panel"></div>
+
+                    <div class="bs-card bs-rosa">
+                        <div class="bs-card-title"><i class="fa-solid fa-circle-xmark"></i> Errores comunes</div>
+                        <ul class="bs-list" style="margin:0;">
+                            <li><strong>Usar rutas relativas o <code>~</code>.</strong> <code>cron</code> no se ejecuta
+                                desde la carpeta personal ni carga la misma configuración de la terminal; las rutas
+                                deben ser <strong>absolutas</strong>, tanto la del script como las que usa internamente
+                                (por eso los scripts de esta guía usan <code>$HOME</code>).</li>
+                            <li><strong>Asumir el mismo PATH.</strong> Herramientas instaladas con <code>nvm</code>,
+                                como <code>node</code> o <code>npm</code>, pueden no encontrarse; se invocan con su ruta
+                                completa, obtenida con <code>which node</code>.</li>
+                            <li><strong>No guardar la salida.</strong> Sin <code>&gt;&gt; archivo.log 2&gt;&amp;1</code>,
+                                los mensajes y errores se pierden. <code>&gt;&gt;</code> agrega al log y
+                                <code>2&gt;&amp;1</code> redirige la salida de errores (descriptor 2) al mismo destino
+                                que la salida estándar (descriptor 1).</li>
+                            <li><strong>Olvidar el permiso de ejecución.</strong> El script debe tener
+                                <code>chmod +x</code>, o la línea debe invocarlo como
+                                <code>bash /ruta/al/script.sh</code>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bs-nota">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span><strong>Lista de verificación:</strong> shebang y <code>set -euo pipefail</code> ·
+                            variables entre comillas · validar entradas con <code>[[ ]]</code> y <code>exit</code> ·
+                            probar <code>find</code> con <code>-print</code> y <code>rsync</code> con
+                            <code>--dry-run</code> · rutas absolutas y log en <code>cron</code>.</span>
+                    </div>
+                </div>
+
+                <!-- Botones de navegación -->
+                <div style="display:flex;justify-content:space-between;margin-top:28px;flex-wrap:wrap;gap:10px;">
+                    <button id="ux-prev" class="bs-btn bs-btn-sec" onclick="navigateUx(-1)" style="display:none;">←
+                        Anterior</button>
+                    <button id="ux-next" class="bs-btn bs-btn-main" onclick="navigateUx(1)"
+                        style="margin-left:auto;">Siguiente →</button>
+                </div>
+
+                <!-- Lógica JS del contenido -->
+                <script>
+                    (function () {
+                        const sections = ['scripts', 'cond', 'respaldos', 'organizar', 'diag', 'cron'];
+                        let current = 0;
+
+                        window.showUxSection = function (id, idx) {
+                            sections.forEach(s => {
+                                document.getElementById('sec-' + s)?.classList.remove('active');
+                                document.getElementById('tab-' + s)?.classList.remove('active');
+                            });
+                            document.getElementById('sec-' + id)?.classList.add('active');
+                            document.getElementById('tab-' + id)?.classList.add('active');
+                            current = idx;
+                            updateNav();
+                        };
+
+                        window.navigateUx = function (dir) {
+                            let next = Math.min(Math.max(current + dir, 0), sections.length - 1);
+                            showUxSection(sections[next], next);
+                            document.getElementById('tab-' + sections[next])?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        };
+
+                        function updateNav() {
+                            const prev = document.getElementById('ux-prev');
+                            const next = document.getElementById('ux-next');
+                            const dots = document.querySelectorAll('#ux-prog .prog-dot');
+                            const counter = document.getElementById('ux-counter');
+                            if (prev) prev.style.display = current > 0 ? 'block' : 'none';
+                            if (next) next.innerHTML = current < sections.length - 1 ? 'Siguiente →' : '<i class="fa-solid fa-circle-check"></i> Completado';
+                            if (counter) counter.textContent = 'Tema ' + (current + 1) + ' de ' + sections.length;
+                            dots.forEach((d, i) => d.classList.toggle('done', i <= current));
+                        }
+
+                        window.highlightRow = function (row) {
+                            const table = row.closest('table');
+                            if (!table) return;
+                            table.querySelectorAll('tbody tr').forEach(r => r.classList.remove('sel'));
+                            row.classList.add('sel');
+                        };
+
+                        // Anatomías interactivas: validación con [[ ]] y línea de crontab
+                        const anatData = {
+                            if: {
+                                color: '#508C46',
+                                title: '<code>if</code> — Inicio del condicional',
+                                desc: 'Palabra clave que abre la estructura condicional. Bash evalúa lo que sigue y decide si ejecuta o no las instrucciones del bloque.',
+                                tip: 'Todo if debe cerrarse con fi.'
+                            },
+                            corchete: {
+                                color: '#08AFE6',
+                                title: '<code>[[ ]]</code> — Expresión de prueba',
+                                desc: 'Los dobles corchetes encierran la condición que se evalúa. Deben tener <strong>un espacio</strong> después de <code>[[</code> y antes de <code>]]</code>.',
+                                tip: 'Incorrecto: [[-d "$X"]]  ·  Correcto: [[ -d "$X" ]]'
+                            },
+                            neg: {
+                                color: '#E22F6B',
+                                title: '<code>!</code> — Negación',
+                                desc: 'Invierte el resultado de la prueba: la condición se cumple cuando el directorio <strong>no</strong> existe.',
+                                tip: 'Sin ! la condición se cumpliría cuando el directorio sí existe.'
+                            },
+                            op: {
+                                color: '#16BAAF',
+                                title: '<code>-d</code> — Operador de archivo',
+                                desc: 'Comprueba que la ruta existe y es un <strong>directorio</strong>. Otras opciones: <code>-f</code> (archivo regular), <code>-e</code> (existe) y <code>-z</code> (variable vacía).',
+                                tip: 'Para archivos usa -f en lugar de -d.'
+                            },
+                            ruta: {
+                                color: '#6752A0',
+                                title: '<code>"$PROYECTO"</code> — Ruta entre comillas',
+                                desc: 'Es la ruta que se evalúa, guardada en una variable. Las comillas evitan problemas si la ruta contiene espacios, como <code>~/Proyectos UNI/tienda-web</code>.',
+                                tip: 'Usa siempre comillas dobles alrededor de las variables con rutas.'
+                            },
+                            then: {
+                                color: '#F89F32',
+                                title: '<code>; then</code> — Inicio del bloque',
+                                desc: 'El punto y coma separa la condición de <code>then</code>, que indica dónde comienzan las instrucciones que se ejecutan <strong>solo si la condición es verdadera</strong>.',
+                                tip: 'Puedes escribir then en una línea aparte, sin punto y coma.'
+                            },
+                            exit: {
+                                color: '#E22F6B',
+                                title: '<code>exit 1</code> — Código de salida',
+                                desc: 'Termina el script y devuelve el código <code>1</code>: cualquier valor distinto de 0 indica error. Así otro programa (o cron) sabe que la ejecución falló; se consulta con <code>$?</code>.',
+                                tip: 'Convención de esta guía: 1 = entrada inválida, 2 = respaldo dañado.'
+                            },
+                            fi: {
+                                color: '#508C46',
+                                title: '<code>fi</code> — Cierre del condicional',
+                                desc: '<code>fi</code> es <code>if</code> escrito al revés: marca el final de la estructura. Olvidarlo produce un error de sintaxis.',
+                                tip: 'Los ciclos se cierran con done; los if, con fi; los case, con esac.'
+                            },
+                            min: {
+                                color: '#508C46',
+                                title: '<code>30</code> — Minuto',
+                                desc: 'Minuto de la hora en que se ejecuta la tarea. Admite valores de 0 a 59.',
+                                tip: 'Con 30 y la hora 2, la tarea corre a las 2:30.'
+                            },
+                            hora: {
+                                color: '#08AFE6',
+                                title: '<code>2</code> — Hora',
+                                desc: 'Hora del día en formato de 24 horas (0 a 23). Con <code>*/6</code> la tarea se ejecutaría cada seis horas.',
+                                tip: '2 equivale a las 2:00 a. m.; 14 a las 2:00 p. m.'
+                            },
+                            dia: {
+                                color: '#16BAAF',
+                                title: '<code>*</code> — Día del mes',
+                                desc: 'Día del mes (1 a 31). El asterisco significa «cualquier valor»: la tarea corre todos los días.',
+                                tip: '* = cualquier valor.'
+                            },
+                            mes: {
+                                color: '#6752A0',
+                                title: '<code>*</code> — Mes',
+                                desc: 'Mes del año (1 a 12). Con asterisco, la tarea corre todos los meses.',
+                                tip: 'Puedes usar rangos (1-6) o listas (1,4,7).'
+                            },
+                            sem: {
+                                color: '#F89F32',
+                                title: '<code>*</code> — Día de la semana',
+                                desc: 'Día de la semana (0 a 7, donde 0 y 7 representan el domingo). Con <code>1-5</code> la tarea corre de lunes a viernes.',
+                                tip: '1-5 = lunes a viernes.'
+                            },
+                            cmd: {
+                                color: '#E22F6B',
+                                title: '<code>/home/…/respaldo.sh</code> — Comando',
+                                desc: 'Es el script que se ejecuta. Debe indicarse con <strong>ruta absoluta</strong> y tener permiso de ejecución (<code>chmod +x</code>), porque cron no usa la misma configuración que tu terminal.',
+                                tip: 'No uses ~ ni rutas relativas dentro de crontab.'
+                            },
+                            log: {
+                                color: '#508C46',
+                                title: '<code>&gt;&gt; respaldo.log 2&gt;&amp;1</code> — Salida a un log',
+                                desc: '<code>&gt;&gt;</code> agrega la salida al final del archivo y <code>2&gt;&amp;1</code> envía también los errores (descriptor 2) al mismo destino que la salida estándar (descriptor 1).',
+                                tip: 'Revisa el resultado con tail ~/respaldos/respaldo.log.'
+                            }
+                        };
+
+                        window.showAnat = function (part, el) {
+                            const data = anatData[part];
+                            const wrap = el.closest('.bs-anat');
+                            const panel = wrap ? wrap.nextElementSibling : null;
+                            if (!panel || !data) return;
+                            wrap.querySelectorAll('.bs-token-wrap').forEach(p => p.classList.remove('active'));
+                            el.classList.add('active');
+                            panel.style.display = 'block';
+                            panel.style.borderLeftColor = data.color;
+                            panel.innerHTML =
+                                '<strong>' + data.title + '</strong>' +
+                                '<p style="margin:6px 0 8px;">' + data.desc + '</p>' +
+                                '<div style="background:#F3F4F6;border:1px solid #D1D5DB;border-radius:6px;padding:6px 10px;font-size:.85rem;">' +
+                                '<i class="fa-solid fa-lightbulb"></i> <em>Recuerda:</em> ' + data.tip + '</div>';
+                        };
+
+                        updateNav();
+                    })();
+                </script>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== ACTIVIDADES ===================== -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+
+                <!-- ===== ACTIVIDAD 1: RESPALDO AUTOMATIZADO ===== -->
+                <div class="bs-act bs-teal">
+                    <div class="bs-act-head">
+                        <span class="bs-badge-ico"><i class="fa-solid fa-box-archive"></i></span>
+                        <h3>Actividad 1. Respaldo automatizado</h3>
+                        <span class="bs-act-tag">tar + exit + cron</span>
+                    </div>
+                    <p class="bs-p">
+                        <strong>Caso propuesto:</strong> crea un script de respaldo con <code>tar</code> que excluya
+                        carpetas innecesarias, verifica y restaura el respaldo, comprueba el código de salida ante un
+                        error y programa su ejecución diaria con <code>cron</code>. Practica en la terminal simulada y
+                        luego repite el proceso en tu propio equipo.
+                    </p>
+
+                    <div id="a1-challenge" class="bs-reto">
+                        <div class="bs-reto-top"><i class="fa-solid fa-bullseye"></i>
+                            <span>Reto <span id="a1-num">1</span> de <span id="a1-total">15</span></span></div>
+                        <p id="a1-text" class="bs-reto-text"></p>
+                        <p id="a1-hint" class="bs-reto-hint"></p>
+                    </div>
+
+                    <div class="bs-term">
+                        <div class="bs-term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span>
+                            <span style="margin-left:8px;">estudiante@linux:~</span></div>
+                        <div id="a1-body" class="bs-term-body"></div>
+                        <div class="bs-term-input">
+                            <span class="prompt" id="a1-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a1-input" placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="bs-act-foot">
+                        <button id="a1-reset" class="bs-btn bs-btn-sec" style="padding:8px 22px;">Reiniciar</button>
+                        <div class="bs-track"><div id="a1-progress" class="bs-fill"></div></div>
+                        <span id="a1-score" class="bs-score">0/15</span>
+                    </div>
+                    <div id="a1-feedback" class="bs-feedback"></div>
+
+                    <details class="bs-details bs-teal">
+                        <summary><i class="fa-solid fa-laptop-code"></i> Guion para realizarla en tu equipo</summary>
+                        <div class="inner">
+                            <ol class="bs-pasos" style="margin-top:12px;">
+                                <li>Crea un proyecto de práctica con algunos archivos de ejemplo:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> mkdir -p ~/proyectos/tienda-web/{src,node_modules,dist,scripts}
+<span class="p">$</span> cd ~/proyectos/tienda-web
+<span class="p">$</span> touch package.json src/index.js node_modules/libreria.js dist/app.js error.log</div></li>
+                                <li>Crea el archivo <code>scripts/respaldo.sh</code> con el siguiente contenido:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="c">#!/usr/bin/env bash</span>
+<span class="k">set</span> <span class="v">-euo</span> pipefail
+
+PROYECTO=<span class="s">"${1:-$HOME/proyectos/tienda-web}"</span>
+DESTINO=<span class="s">"$HOME/respaldos"</span>
+NOMBRE=$(basename <span class="s">"$PROYECTO"</span>)
+FECHA=$(date +%Y-%m-%d_%H%M)
+ARCHIVO=<span class="s">"$DESTINO/${NOMBRE}_${FECHA}.tar.gz"</span>
+
+<span class="k">if</span> [[ ! -d <span class="s">"$PROYECTO"</span> ]]; <span class="k">then</span>
+  <span class="k">echo</span> <span class="s">"[ERROR] No existe $PROYECTO"</span> &gt;&amp;2
+  <span class="k">exit</span> 1
+<span class="k">fi</span>
+
+mkdir -p <span class="s">"$DESTINO"</span>
+tar -czf <span class="s">"$ARCHIVO"</span> --exclude=<span class="s">'node_modules'</span> --exclude=<span class="s">'dist'</span> \
+  --exclude=<span class="s">'*.log'</span> -C <span class="s">"$(dirname "$PROYECTO")"</span> <span class="s">"$NOMBRE"</span>
+<span class="k">echo</span> <span class="s">"[OK] Respaldo creado: $ARCHIVO"</span></div></li>
+                                <li>Asigna permiso de ejecución con <code>chmod +x scripts/respaldo.sh</code> y
+                                    ejecútalo con <code>./scripts/respaldo.sh</code>. Anota el nombre del respaldo que
+                                    muestra el script.</li>
+                                <li>Verifica el contenido del respaldo sin extraerlo, reemplazando el nombre por el que
+                                    obtuviste:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> tar -tzf ~/respaldos/tienda-web_AAAA-MM-DD_HHMM.tar.gz</div>
+                                    Comprueba que <strong>no</strong> aparezcan <code>node_modules</code>,
+                                    <code>dist</code> ni <code>error.log</code>.</li>
+                                <li>Restaura el respaldo en una carpeta aparte y revisa su contenido:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> mkdir -p ~/restauracion
+<span class="p">$</span> tar -xzf ~/respaldos/tienda-web_AAAA-MM-DD_HHMM.tar.gz -C ~/restauracion
+<span class="p">$</span> ls -R ~/restauracion</div></li>
+                                <li>Ejecuta el script con una ruta que no existe,
+                                    <code>./scripts/respaldo.sh ~/proyectos/no-existe</code>, y luego consulta el código
+                                    de salida con <code>echo $?</code>.</li>
+                                <li>Programa el respaldo con <code>crontab -e</code> para que se ejecute todos los días a
+                                    las 2:30 a. m. Usa rutas absolutas (consulta tu ruta personal con
+                                    <code>echo $HOME</code>):
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;">30 2 * * * /home/TU_USUARIO/proyectos/tienda-web/scripts/respaldo.sh &gt;&gt; /home/TU_USUARIO/respaldos/respaldo.log 2&gt;&amp;1</div>
+                                    Para comprobar que funciona, puedes usar temporalmente <code>*/2 * * * *</code> (cada
+                                    2 minutos), revisar el log con <code>tail ~/respaldos/respaldo.log</code> y luego
+                                    dejar de nuevo la programación diaria. Confirma la tarea con
+                                    <code>crontab -l</code>.</li>
+                            </ol>
+                            <div class="bs-entregable"><strong><i class="fa-solid fa-box-archive"></i> Producto esperado:</strong>
+                                documento con las evidencias (capturas y respuestas) de los puntos solucionados.</div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- ===== ACTIVIDAD 2: ORGANIZACIÓN DE RECURSOS Y DIAGNÓSTICO ===== -->
+                <div class="bs-act bs-morado">
+                    <div class="bs-act-head">
+                        <span class="bs-badge-ico"><i class="fa-solid fa-folder-tree"></i></span>
+                        <h3>Actividad 2. Organización de recursos y diagnóstico del sistema</h3>
+                        <span class="bs-act-tag">for + case + diagnóstico</span>
+                    </div>
+                    <p class="bs-p">
+                        <strong>Caso propuesto:</strong> clasifica por extensión los archivos que entregó un diseñador
+                        usando <code>for</code> y <code>case</code>, y luego usa los comandos de diagnóstico para
+                        revisar el estado del equipo. Practica en la terminal simulada y después en tu propio equipo.
+                    </p>
+
+                    <div id="a2-challenge" class="bs-reto">
+                        <div class="bs-reto-top"><i class="fa-solid fa-bullseye"></i>
+                            <span>Reto <span id="a2-num">1</span> de <span id="a2-total">16</span></span></div>
+                        <p id="a2-text" class="bs-reto-text"></p>
+                        <p id="a2-hint" class="bs-reto-hint"></p>
+                    </div>
+
+                    <div class="bs-term">
+                        <div class="bs-term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot w"></span>
+                            <span style="margin-left:8px;">estudiante@linux:~</span></div>
+                        <div id="a2-body" class="bs-term-body"></div>
+                        <div class="bs-term-input">
+                            <span class="prompt" id="a2-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a2-input" placeholder="Escribe tu comando aquí..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="bs-act-foot">
+                        <button id="a2-reset" class="bs-btn bs-btn-sec" style="padding:8px 22px;">Reiniciar</button>
+                        <div class="bs-track"><div id="a2-progress" class="bs-fill"></div></div>
+                        <span id="a2-score" class="bs-score">0/16</span>
+                    </div>
+                    <div id="a2-feedback" class="bs-feedback"></div>
+
+                    <details class="bs-details bs-morado">
+                        <summary><i class="fa-solid fa-laptop-code"></i> Guion para realizarla en tu equipo</summary>
+                        <div class="inner">
+                            <h4 class="bs-h4" style="margin-top:12px;">Parte A. Organización de archivos</h4>
+                            <ol class="bs-pasos" style="margin-top:12px;">
+                                <li>Crea una carpeta con recursos de ejemplo, como si los hubiera entregado un diseñador:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> mkdir -p ~/Descargas/recursos-landing
+<span class="p">$</span> cd ~/Descargas/recursos-landing
+<span class="p">$</span> touch logo.PNG hero-banner.webp estilos.css app.js fuente.woff2 intro.mp4 notas.txt "foto equipo.jpg"</div></li>
+                                <li>Crea el archivo <code>organizar.sh</code> con el script de la sección «Clasificar
+                                    con case» de este contenido y ejecútalo con <code>bash organizar.sh</code>.</li>
+                                <li>Revisa el resultado con:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> find ~/proyectos/landing-cafe/public -type f</div></li>
+                                <li>Responde:
+                                    <ul class="bs-list">
+                                        <li>¿A qué carpeta fue <code>logo.PNG</code> y por qué se clasificó bien aunque su
+                                            extensión está en mayúsculas?</li>
+                                        <li>¿A qué carpeta fue <code>notas.txt</code> y por qué?</li>
+                                        <li>¿Se movió correctamente <code>foto equipo.jpg</code>, que tiene un espacio en
+                                            el nombre? ¿Qué parte del script lo permite?</li>
+                                    </ul></li>
+                            </ol>
+
+                            <h4 class="bs-h4">Parte B. Diagnóstico del sistema</h4>
+                            <ol class="bs-pasos" start="5" style="margin-top:12px;">
+                                <li>Ejecuta los siguientes comandos:
+                                    <div class="bs-code" style="margin:8px 0 0;border-top:1px solid var(--c-gris-b);border-radius:10px;"><span class="p">$</span> uptime
+<span class="p">$</span> nproc
+<span class="p">$</span> df -h /
+<span class="p">$</span> free -h
+<span class="p">$</span> du -sh ~/proyectos/* | sort -h
+<span class="p">$</span> ss -tln</div></li>
+                                <li>Con la información obtenida, responde:
+                                    <ul class="bs-list">
+                                        <li>¿El <em>load average</em> supera el número de núcleos que muestra
+                                            <code>nproc</code>?</li>
+                                        <li>¿Qué porcentaje de uso (<code>Use%</code>) tiene la partición <code>/</code>?</li>
+                                        <li>¿Cuánta memoria aparece en la columna <code>available</code>?</li>
+                                        <li>¿Qué carpeta de <code>~/proyectos</code> ocupa más espacio?</li>
+                                        <li>¿Hay algún puerto en estado <code>LISTEN</code>, como el 3000 o el 80?</li>
+                                    </ul></li>
+                            </ol>
+                            <div class="bs-entregable"><strong><i class="fa-solid fa-box-archive"></i> Producto esperado:</strong>
+                                documento con las evidencias (capturas y respuestas) de los puntos solucionados.</div>
+                        </div>
+                    </details>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== EVALUACIÓN ===================== -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación. Preguntas de selección
+                    múltiple (marca la respuesta correcta)</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre scripts de Bash, variables y
+                        códigos de salida, respaldos con <code>tar</code>, <code>rsync</code> y <code>find</code>,
+                        clasificación de archivos con <code>for</code> y <code>case</code>, diagnóstico del sistema y
+                        programación de tareas con <code>cron</code>. Selecciona la respuesta correcta para cada
+                        pregunta.
+                    </p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn"
+                        class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar
+                        evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== RECURSOS ===================== -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para profundizar en la gestión de archivos en Linux y en
+                    la creación de respaldos con scripts de Bash, te recomendamos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Guía básica para navegar y gestionar archivos</h3>
+                            <p class="text-slate-600 text-sm mt-1">Guía de consulta sobre cómo navegar por el sistema de
+                                archivos de Linux y gestionar archivos y carpetas desde la terminal, base para
+                                organizar recursos con tus scripts.</p>
+                            <a href="https://contabo.com/blog/es/guia-basica-para-navegar-y-gestionar-archivos-en-linux/?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=&amp;utm_term=&amp;utm_content=&amp;gad_source=1&amp;gad_campaignid=24250917296&amp;gbraid=0AAAAAD_Qy-c2obrGjGaeYkLFkdI-h0saN&amp;gclid=CjwKCAjwxeHWBhBPEiwAiqtQ-YuXgcgL1uWHbea9MLIgL8TeKc7QqEym4-ULGYkmTvdsGy2KTYusuBoCMH4QAvD_BwE" target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Anexo1.png" alt="Guía básica para navegar y gestionar archivos"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">BackUps desde la terminal con un script en Bash Shell</h3>
+                            <p class="text-slate-600 text-sm mt-1">Artículo que explica cómo crear copias de seguridad
+                                desde la terminal mediante un script en Bash, útil para reforzar lo aprendido sobre
+                                respaldos automatizados.</p>
+                            <a href="https://ubunlog.com/backups-desde-la-terminal-con-un-script-en-bash-shell/"
+                                target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Anexo2.png" alt="BackUps desde la terminal con un script en Bash Shell"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== BIBLIOGRAFÍA ===================== -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            ComputerNewAge. (2022, 23 de diciembre). <i>Bash scripting en Linux (VIII). Ejemplo: Realizar un backup y enviarlo a una unidad externa</i>.
+                            <a href="https://computernewage.com/2022/12/23/gnu-linux-scripting-bash-ejemplo-3/"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">computernewage.com</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            GeeksforGeeks. (s. f.). <i>Linux shell script to backup files and directory</i>.
+                            <a href="https://www.geeksforgeeks.org/linux-unix/linux-shell-script-to-backup-files-and-directory/"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">geeksforgeeks.org</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Saive, R. (2025, 8 de mayo). <i>How to create a backup script for important files in Linux</i>. TecMint.
+                            <a href="https://www.tecmint.com/linux-file-backup-script/"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">tecmint.com</a>
+                        </span>
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div><!-- /bibliografia -->
+        </main>
+    </div>
+
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/modal.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/accordion.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+
+</html>
