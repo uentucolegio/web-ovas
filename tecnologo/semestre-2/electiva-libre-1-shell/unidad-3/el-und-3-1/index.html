@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA: Variables, parámetros y lectura de entrada en Bash</title>
+    <meta name="description"
+        content="Aprende a automatizar tareas con scripts de Bash: variables, parámetros posicionales, lectura de entrada con read, validación de rutas y revisión crítica de scripts generados con inteligencia artificial.">
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex md:flex-col">
+            <div class="p-4">
+                <div style="width: 150px; height: 150px;"
+                    class="p-2 mx-auto flex items-center justify-center bg-white rounded-full shadow-lg border-2 border-green-500 transition-shadow duration-300 hover:shadow-green-400">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+            </div>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="sidebar-link active flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="introduccion"><span class="mr-3 text-xl">🚀</span> Introducción</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="objetivos"><span class="mr-3 text-xl">🎯</span> Objetivos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="contenido"><span class="mr-3 text-xl">📚</span> Contenido</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="actividades"><span class="mr-3 text-xl">✍️</span> Actividades</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="evaluacion"><span class="mr-3 text-xl">✔️</span> Evaluación</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="recursos"><span class="mr-3 text-xl">📖</span> Recursos</a>
+                <a href="#" class="sidebar-link flex items-center py-3 px-6 font-medium text-slate-700"
+                    data-target="bibliografia"><span class="mr-3 text-xl">📚</span> Bibliografía</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-gray-50">
+            <!-- Mobile Header -->
+            <div class="md:hidden mb-6 flex flex-col items-center">
+                <div style="width: 100px; height: 100px;"
+                    class="p-2 flex items-center justify-center bg-white rounded-full shadow-lg transition-shadow duration-300 hover:shadow-green-400 mb-2">
+                    <img src="img/logo.webp" alt="Logo OVA" class="w-5/6 h-5/6 object-contain" loading="lazy">
+                </div>
+                <select id="mobile-nav" class="w-full mt-2 p-2 border rounded-md bg-white shadow-sm">
+                    <option value="introduccion">🚀 Introducción</option>
+                    <option value="objetivos">🎯 Objetivos</option>
+                    <option value="contenido">📚 Contenido</option>
+                    <option value="actividades">✍️ Actividades</option>
+                    <option value="evaluacion">✔️ Evaluación</option>
+                    <option value="recursos">📖 Recursos</option>
+                    <option value="bibliografia">📚 Bibliografía</option>
+                </select>
+            </div>
+
+            <!-- ===================== INTRODUCCIÓN ===================== -->
+            <div id="introduccion" class="content-pane active">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-4">
+                    Variables, parámetros y lectura de entrada en Bash
+                </h2>
+
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    La terminal es una herramienta esencial en el desarrollo web, ya que muchas tareas de
+                    configuración, despliegue y mantenimiento se realizan en servidores Linux sin interfaz gráfica. Con
+                    ella, el desarrollador puede moverse entre directorios, crear y modificar archivos, revisar
+                    registros y trabajar con herramientas como <strong>Node.js</strong>, <strong>Nginx</strong>,
+                    <strong>Docker</strong> y <strong>Git</strong>, tanto en local como en servidores remotos mediante
+                    SSH.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    El shell permite además automatizar tareas repetitivas mediante <strong>scripts</strong> que usan
+                    <strong>variables</strong>, <strong>parámetros</strong> y <strong>entradas del usuario</strong>, lo
+                    que reduce errores manuales y agiliza el trabajo. Un archivo como
+                    <code class="bg-slate-100 px-1 rounded">package.json</code> o una carpeta
+                    <code class="bg-slate-100 px-1 rounded">dist</code> dejan de escribirse a mano en cada ejecución:
+                    el script los recibe, los valida y actúa en consecuencia.
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                    Por último, aunque la inteligencia artificial puede ayudar a generar scripts o detectar errores, no
+                    sustituye el conocimiento del sistema. El desarrollador debe entender qué hace cada comando antes de
+                    ejecutarlo, sobre todo en entornos con información importante.
+                </p>
+
+                <div class="mt-8 p-4 sm:p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <p class="text-green-800">
+                        🐧 <strong>¡Automatiza con criterio! Un buen script recibe datos, los valida y avisa cuando
+                            algo falla: entender cada línea antes de ejecutarla es lo que separa una automatización
+                            útil de un error costoso. 💻🛡️</strong>
+                    </p>
+                </div>
+
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== OBJETIVOS ===================== -->
+            <div id="objetivos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Objetivos de aprendizaje</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🧩</span>
+                        <span>
+                            Identificar la función de las <strong>variables</strong>, los
+                            <strong>parámetros posicionales</strong> y la <strong>entrada estándar</strong> en scripts
+                            de Bash.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">⚙️</span>
+                        <span>
+                            Crear scripts para automatizar tareas relacionadas con proyectos web construidos con
+                            <strong>Node.js</strong> y <strong>Git</strong>.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🗂️</span>
+                        <span>
+                            Utilizar comandos de navegación, consulta y manipulación de archivos
+                            (<code class="bg-slate-100 px-1 rounded">pwd</code>,
+                            <code class="bg-slate-100 px-1 rounded">ls</code>,
+                            <code class="bg-slate-100 px-1 rounded">cd</code>,
+                            <code class="bg-slate-100 px-1 rounded">mkdir</code>,
+                            <code class="bg-slate-100 px-1 rounded">touch</code>,
+                            <code class="bg-slate-100 px-1 rounded">cp</code>,
+                            <code class="bg-slate-100 px-1 rounded">mv</code>,
+                            <code class="bg-slate-100 px-1 rounded">rm</code>) dentro de una estructura real de
+                            desarrollo web.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">✅</span>
+                        <span>
+                            Validar entradas del usuario y controlar errores frecuentes relacionados con rutas,
+                            permisos y archivos inexistentes.
+                        </span>
+                    </li>
+                    <li class="flex items-start p-4 bg-white rounded-lg shadow-sm">
+                        <span class="text-green-700 mr-3 text-2xl">🤖</span>
+                        <span>
+                            Analizar sugerencias generadas por herramientas de <strong>inteligencia artificial</strong>
+                            para infraestructura y verificar su funcionamiento antes de aplicarlas.
+                        </span>
+                    </li>
+                </ul>
+
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== CONTENIDO ===================== -->
+            <div id="contenido" class="content-pane">
+                <!-- Hero -->
+                <div class="g1-hero">
+                    <h2>
+                        <span class="g1-hero-icon"><i class="fa-solid fa-terminal"></i></span>
+                        Variables, parámetros y lectura de entrada
+                    </h2>
+                    <p>Automatiza tareas de proyectos Node.js y Git con scripts de Bash: guarda valores en variables,
+                        recibe argumentos, pide datos al usuario, valida rutas y revisa con criterio lo que sugiere la
+                        inteligencia artificial.</p>
+                </div>
+
+                <!-- Progreso -->
+                <div class="g1-dots" id="g1-prog">
+                    <div class="g1-dot done" title="Bash y scripts"></div>
+                    <div class="g1-dot" title="Variables"></div>
+                    <div class="g1-dot" title="Parámetros"></div>
+                    <div class="g1-dot" title="Lectura de entrada"></div>
+                    <div class="g1-dot" title="Comandos de archivos"></div>
+                    <div class="g1-dot" title="Script integrador"></div>
+                    <div class="g1-dot" title="IA aplicada"></div>
+                    <span class="g1-counter" id="g1-counter">Tema 1 de 7</span>
+                </div>
+
+                <!-- Pestañas -->
+                <div class="g1-tabs" role="tablist">
+                    <button class="g1-tab active" onclick="g1Show('bash',0)" id="tab-bash">
+                        <i class="fa-solid fa-terminal" aria-hidden="true"></i><span>Bash y scripts</span>
+                    </button>
+                    <button class="g1-tab" onclick="g1Show('variables',1)" id="tab-variables">
+                        <i class="fa-solid fa-dollar-sign" aria-hidden="true"></i><span>Variables</span>
+                    </button>
+                    <button class="g1-tab" onclick="g1Show('parametros',2)" id="tab-parametros">
+                        <i class="fa-solid fa-list-ol" aria-hidden="true"></i><span>Parámetros</span>
+                    </button>
+                    <button class="g1-tab" onclick="g1Show('entrada',3)" id="tab-entrada">
+                        <i class="fa-solid fa-keyboard" aria-hidden="true"></i><span>Lectura con <code>read</code></span>
+                    </button>
+                    <button class="g1-tab" onclick="g1Show('archivos',4)" id="tab-archivos">
+                        <i class="fa-solid fa-folder-tree" aria-hidden="true"></i><span>Comandos de archivos</span>
+                    </button>
+                    <button class="g1-tab" onclick="g1Show('integrador',5)" id="tab-integrador">
+                        <i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i><span>Script integrador</span>
+                    </button>
+                    <button class="g1-tab" onclick="g1Show('ia',6)" id="tab-ia">
+                        <i class="fa-solid fa-robot" aria-hidden="true"></i><span>IA aplicada</span>
+                    </button>
+                </div>
+
+                <!-- ===== TEMA 1: BASH Y SCRIPTS ===== -->
+                <div class="g1-section g1-sec active" id="sec-bash">
+                    <h3 class="g1-h3">🐚 El shell Bash y los scripts</h3>
+
+                    <div class="g1-note">
+                        <span class="g1-note-icon">📋</span>
+                        <div>
+                            <strong>Imagínalo así:</strong>
+                            <p>Un script es una receta de cocina: una lista de pasos escritos una sola vez que el shell
+                                ejecuta siempre igual, sin olvidar ni cambiar ningún ingrediente.</p>
+                        </div>
+                    </div>
+
+                    <div class="g1-card">
+                        <p class="g1-p">
+                            <strong>Bash</strong> es un intérprete de comandos ampliamente utilizado en sistemas Linux.
+                            Su nombre proviene de <em>"Bourne Again Shell"</em>, una implementación compatible con el
+                            shell Bourne original. Además de ejecutar comandos individualmente, Bash permite almacenar
+                            instrucciones en archivos de texto llamados <strong>scripts</strong>.
+                        </p>
+                        <p class="g1-p" style="margin-bottom:0;">
+                            Un script puede automatizar tareas como preparar una compilación de Node.js, revisar si
+                            existe un archivo <code>package.json</code> o generar un informe sobre el estado de un
+                            repositorio Git.
+                        </p>
+                    </div>
+
+                    <h4 class="g1-h4">La línea shebang</h4>
+                    <p class="g1-p">Un script básico comienza normalmente con una línea llamada <strong>shebang</strong>,
+                        que indica qué intérprete debe utilizarse:</p>
+                    <span class="g1-code-title">preparar-entorno.sh</span>
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+echo "Preparación del proyecto frontend"</div>
+                    <p class="g1-p">La expresión <code>#!/usr/bin/env bash</code> busca el ejecutable de Bash dentro de
+                        las rutas configuradas en el sistema. La instrucción <code>echo</code> muestra texto en la
+                        terminal.</p>
+
+                    <h4 class="g1-h4">Crear y ejecutar un script en un proyecto web</h4>
+<div class="g1-code"><span class="p">usuario@equipo:~$</span> mkdir -p ~/proyectos/tienda-react/scripts
+<span class="p">usuario@equipo:~$</span> cd ~/proyectos/tienda-react/scripts
+<span class="p">usuario@equipo:~$</span> touch preparar-entorno.sh
+<span class="p">usuario@equipo:~$</span> chmod +x preparar-entorno.sh
+<span class="p">usuario@equipo:~$</span> ./preparar-entorno.sh</div>
+                    <ul class="g1-list">
+                        <li>La opción <code>-p</code> de <code>mkdir</code> crea también los directorios intermedios que
+                            no existan.</li>
+                        <li><code>chmod +x</code> agrega permiso de ejecución al archivo.</li>
+                        <li>El prefijo <code>./</code> indica que el archivo debe ejecutarse desde el directorio
+                            actual.</li>
+                    </ul>
+
+                    <h4 class="g1-h4">Formas de ejecutar un script <span class="g1-panel-hint">(haz clic en una
+                            fila)</span></h4>
+                    <div class="g1-table-wrap">
+                        <table class="g1-table" data-selectable>
+                            <thead>
+                                <tr>
+                                    <th>Comando</th>
+                                    <th>¿Necesita <code style="background:transparent;color:#fff;">+x</code>?</th>
+                                    <th>Cuándo usarlo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="clickable">
+                                    <td><code>./preparar-entorno.sh</code></td>
+                                    <td>Sí</td>
+                                    <td>Uso habitual cuando el script ya tiene permiso de ejecución y shebang.</td>
+                                </tr>
+                                <tr class="clickable">
+                                    <td><code>bash preparar-entorno.sh</code></td>
+                                    <td>No</td>
+                                    <td>Útil cuando el archivo todavía no tiene permiso de ejecución.</td>
+                                </tr>
+                                <tr class="clickable">
+                                    <td><code>bash -n preparar-entorno.sh</code></td>
+                                    <td>No</td>
+                                    <td>Solo analiza la sintaxis: no ejecuta ninguna instrucción.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4 class="g1-h4">Errores frecuentes</h4>
+                    <details class="g1-details">
+                        <summary>Ejecutar el script sin <code>./</code></summary>
+                        <div>Ejecutar <code>preparar-entorno.sh</code> sin <code>./</code> puede producir un mensaje
+                            indicando que el comando no existe, porque el directorio actual normalmente no forma parte
+                            de la variable <code>PATH</code>.</div>
+                    </details>
+                    <details class="g1-details">
+                        <summary>Omitir la línea shebang</summary>
+                        <div>Sin shebang, el sistema puede utilizar un intérprete diferente al esperado.</div>
+                    </details>
+                    <details class="g1-details">
+                        <summary>Usar permisos excesivos con <code>chmod 777</code></summary>
+                        <div>Expone innecesariamente los archivos. Para un script personal suele ser suficiente
+                            <code>chmod +x</code>.</div>
+                    </details>
+                    <details class="g1-details">
+                        <summary>Ejecutarlo desde el directorio equivocado</summary>
+                        <div>Puede provocar que el script no encuentre archivos como <code>package.json</code> o
+                            <code>vite.config.js</code>.</div>
+                    </details>
+                </div>
+
+                <!-- ===== TEMA 2: VARIABLES ===== -->
+                <div class="g1-section g1-sec g1-sec--teal" id="sec-variables">
+                    <h3 class="g1-h3">💲 Variables</h3>
+
+                    <div class="g1-card">
+                        <p class="g1-p" style="margin-bottom:0;">
+                            Una <strong>variable</strong> de Bash almacena texto o valores que pueden utilizarse
+                            posteriormente durante la ejecución de un script. Se asigna <strong>sin espacios</strong>
+                            alrededor del signo igual y se consulta anteponiendo el símbolo <code>$</code> al nombre.
+                            Las variables permiten evitar rutas repetidas y modificar fácilmente el comportamiento de
+                            una automatización.
+                        </p>
+                    </div>
+
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+
+PROJECT_DIR="$HOME/proyectos/portal-clientes"
+BUILD_DIR="$PROJECT_DIR/dist"
+
+echo "Proyecto: $PROJECT_DIR"
+echo "Directorio de compilación: $BUILD_DIR"</div>
+                    <p class="g1-p"><code>$HOME</code> es una variable predefinida que contiene la ruta del directorio
+                        personal del usuario. Si el usuario se llama <code>ana</code>, por ejemplo, su valor podría ser
+                        <code>/home/ana</code>.</p>
+
+                    <h4 class="g1-h4">Asignación correcta e incorrecta</h4>
+                    <div class="g1-compare">
+                        <div class="good">
+                            <h5>✅ Sin espacios alrededor del <code>=</code></h5>
+<div class="g1-code" style="margin:0;">APP_NAME="portal-clientes"
+echo "$APP_NAME"</div>
+                        </div>
+                        <div class="bad">
+                            <h5>❌ Con espacios: Bash busca un comando</h5>
+<div class="g1-code" style="margin:0;">APP_NAME = "portal-clientes"
+<span class="c"># APP_NAME: command not found</span></div>
+                        </div>
+                    </div>
+
+                    <h4 class="g1-h4">Comillas dobles y rutas con espacios</h4>
+                    <p class="g1-p">Las comillas dobles son importantes cuando una ruta puede contener espacios:</p>
+<div class="g1-code">PROJECT_DIR="$HOME/proyectos/portal clientes"
+echo "Revisando: $PROJECT_DIR"</div>
+                    <div class="g1-note g1-note--alert">
+                        <span class="g1-note-icon">⚠️</span>
+                        <div>Sin comillas, Bash podría interpretar una ruta con espacios como <strong>varios argumentos
+                                independientes</strong>: <code>portal</code> y <code>clientes</code> serían dos rutas
+                            distintas.</div>
+                    </div>
+
+                    <h4 class="g1-h4">Variables de entorno</h4>
+                    <p class="g1-p">Son valores disponibles para los procesos iniciados desde el shell. Pueden
+                        consultarse con <code>printenv</code> o <code>env</code>:</p>
+<div class="g1-code"><span class="p">usuario@equipo:~$</span> printenv HOME
+<span class="p">usuario@equipo:~$</span> printenv PATH</div>
+                    <p class="g1-p">Una variable puede <strong>exportarse</strong> para que también esté disponible
+                        dentro de programas ejecutados por el script:</p>
+<div class="g1-code"><span class="p">usuario@equipo:~$</span> export NODE_ENV=production
+<span class="p">usuario@equipo:~$</span> npm run build</div>
+                    <p class="g1-p">En este caso, <code>NODE_ENV</code> se entrega al proceso iniciado por
+                        <code>npm</code>.</p>
+
+                    <h4 class="g1-h4">Operaciones relacionadas</h4>
+                    <p class="g1-panel-hint">Haz clic en cada operación para ver cuándo usarla:</p>
+                    <div class="g1-chips" data-panel="panel-varops" data-source="varops">
+                        <button class="g1-chip" data-key="unset">unset</button>
+                        <button class="g1-chip" data-key="readonly">readonly</button>
+                        <button class="g1-chip" data-key="printf">printf</button>
+                    </div>
+                    <div class="g1-panel" id="panel-varops"></div>
+                </div>
+
+                <!-- ===== TEMA 3: PARÁMETROS ===== -->
+                <div class="g1-section g1-sec g1-sec--blue" id="sec-parametros">
+                    <h3 class="g1-h3">🔢 Parámetros posicionales</h3>
+
+                    <div class="g1-card">
+                        <p class="g1-p" style="margin-bottom:0;">
+                            Los <strong>parámetros posicionales</strong> permiten que un script reciba valores desde la
+                            línea de comandos. <code>$0</code> representa el nombre del script, <code>$1</code> el
+                            primer argumento, <code>$2</code> el segundo y así sucesivamente. <code>$#</code> indica
+                            cuántos argumentos se recibieron y <code>$@</code> representa todos los argumentos por
+                            separado.
+                        </p>
+                    </div>
+
+                    <span class="g1-code-title">revisar-archivo.sh</span>
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+
+PROJECT_DIR="$1"
+TARGET_FILE="$2"
+
+printf 'Proyecto recibido: %s\n' "$PROJECT_DIR"
+printf 'Archivo recibido: %s\n' "$TARGET_FILE"</div>
+                    <p class="g1-p">Se ejecutaría de esta forma (las comillas protegen la ruta si contiene espacios):
+                    </p>
+<div class="g1-code"><span class="p">usuario@equipo:~$</span> ./revisar-archivo.sh "$HOME/proyectos/portal-clientes" package.json</div>
+
+                    <h4 class="g1-h4">Parámetros especiales</h4>
+                    <p class="g1-panel-hint">Haz clic en un parámetro para ver su función y un ejemplo:</p>
+                    <div class="g1-chips" data-panel="panel-params" data-source="params">
+                        <button class="g1-chip" data-key="p0">$0</button>
+                        <button class="g1-chip" data-key="p12">$1, $2</button>
+                        <button class="g1-chip" data-key="pnum">$#</button>
+                        <button class="g1-chip" data-key="pat">$@</button>
+                        <button class="g1-chip" data-key="pq">$?</button>
+                        <button class="g1-chip" data-key="pid">$$</button>
+                    </div>
+                    <div class="g1-panel" id="panel-params"></div>
+
+                    <h4 class="g1-h4">Validar la cantidad de argumentos</h4>
+                    <p class="g1-p">Una validación básica evita que el script continúe cuando faltan argumentos:</p>
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+
+if [ "$#" -ne 2 ]; then
+    printf 'Uso: %s RUTA_PROYECTO ARCHIVO\n' "$0" &gt;&amp;2
+    exit 1
+fi
+
+PROJECT_DIR="$1"
+TARGET_FILE="$2"
+
+printf 'Se revisará %s dentro de %s\n' "$TARGET_FILE" "$PROJECT_DIR"</div>
+                    <ul class="g1-list">
+                        <li><code>[ "$#" -ne 2 ]</code> comprueba que la cantidad de argumentos sea <strong>diferente de
+                                dos</strong>.</li>
+                        <li><code>&gt;&amp;2</code> envía el mensaje al <strong>flujo de error estándar</strong>.</li>
+                        <li><code>exit 1</code> finaliza el script indicando que ocurrió un error.</li>
+                    </ul>
+
+                    <h4 class="g1-h4">Código de salida de un comando</h4>
+                    <p class="g1-p">Para comprobar si una compilación terminó correctamente se consulta <code>$?</code>:
+                    </p>
+<div class="g1-code">npm run build
+BUILD_STATUS=$?
+
+if [ "$BUILD_STATUS" -eq 0 ]; then
+    printf 'La compilación terminó correctamente.\n'
+else
+    printf 'La compilación falló con código %s.\n' "$BUILD_STATUS" &gt;&amp;2
+    exit "$BUILD_STATUS"
+fi</div>
+                    <div class="g1-note g1-note--info">
+                        <span class="g1-note-icon">💡</span>
+                        <div>Un código de salida igual a <strong>0</strong> representa normalmente éxito. Los valores
+                            diferentes de cero indican algún tipo de error.</div>
+                    </div>
+                </div>
+
+                <!-- ===== TEMA 4: LECTURA DE ENTRADA ===== -->
+                <div class="g1-section g1-sec g1-sec--purple" id="sec-entrada">
+                    <h3 class="g1-h3">⌨️ Lectura de entrada con <code
+                            style="background:transparent;color:inherit;">read</code></h3>
+
+                    <div class="g1-card">
+                        <p class="g1-p" style="margin-bottom:0;">
+                            El comando <code>read</code> obtiene información desde la <strong>entrada estándar</strong>
+                            y la almacena en una variable. Es útil para construir scripts interactivos, por ejemplo,
+                            cuando se necesita solicitar al usuario la ruta de un proyecto Node.js o elegir entre una
+                            compilación de desarrollo y una de producción.
+                        </p>
+                    </div>
+
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+
+printf 'Ingrese la ruta del proyecto Node.js: '
+read -r PROJECT_DIR
+
+printf 'El proyecto seleccionado es: %s\n' "$PROJECT_DIR"</div>
+                    <p class="g1-p">La opción <code>-r</code> evita que las barras invertidas sean interpretadas como
+                        caracteres especiales. Es una práctica recomendable para recibir rutas o texto introducido por
+                        el usuario.</p>
+
+                    <h4 class="g1-h4">Opciones útiles de <code>read</code></h4>
+                    <p class="g1-panel-hint">Haz clic en una opción para ver su ejemplo:</p>
+                    <div class="g1-chips" data-panel="panel-read" data-source="readopts">
+                        <button class="g1-chip" data-key="r">-r</button>
+                        <button class="g1-chip" data-key="p">-p</button>
+                        <button class="g1-chip" data-key="t">-t</button>
+                        <button class="g1-chip" data-key="s">-s</button>
+                    </div>
+                    <div class="g1-panel" id="panel-read"></div>
+
+                    <div class="g1-note g1-note--alert">
+                        <span class="g1-note-icon">🔑</span>
+                        <div>Los <strong>tokens nunca</strong> deben almacenarse en archivos del repositorio ni
+                            mostrarse mediante <code>echo</code>.</div>
+                    </div>
+
+                    <h4 class="g1-h4">Validación de la entrada</h4>
+<div class="g1-code">read -r -p "Ruta del proyecto: " PROJECT_DIR
+
+if [ ! -d "$PROJECT_DIR" ]; then
+    printf 'La ruta no corresponde a un directorio existente.\n' &gt;&amp;2
+    exit 1
+fi
+
+if [ ! -f "$PROJECT_DIR/package.json" ]; then
+    printf 'No se encontró package.json en %s.\n' "$PROJECT_DIR" &gt;&amp;2
+    exit 1
+fi
+
+printf 'El proyecto Node.js tiene una estructura válida.\n'</div>
+                    <div class="g1-table-wrap">
+                        <table class="g1-table" data-selectable>
+                            <thead>
+                                <tr>
+                                    <th>Prueba</th>
+                                    <th>Significado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="clickable">
+                                    <td><code>-d "$RUTA"</code></td>
+                                    <td>Comprueba si existe un <strong>directorio</strong>.</td>
+                                </tr>
+                                <tr class="clickable">
+                                    <td><code>-f "$RUTA"</code></td>
+                                    <td>Comprueba si existe un <strong>archivo regular</strong>.</td>
+                                </tr>
+                                <tr class="clickable">
+                                    <td><code>! -d "$RUTA"</code></td>
+                                    <td>El signo <code>!</code> niega la prueba: se cumple si el directorio
+                                        <strong>no</strong> existe.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="g1-p">Las comillas son necesarias para que las rutas con espacios se procesen como un solo
+                        valor.</p>
+                </div>
+
+                <!-- ===== TEMA 5: COMANDOS DE ARCHIVOS ===== -->
+                <div class="g1-section g1-sec g1-sec--pink" id="sec-archivos">
+                    <h3 class="g1-h3">🗂️ Comandos de archivos en proyectos web</h3>
+
+                    <div class="g1-card">
+                        <p class="g1-p" style="margin-bottom:0;">
+                            Los scripts de infraestructura suelen combinar comandos de Bash con herramientas habituales
+                            del ecosistema web. Estos son los ocho comandos básicos para moverse y trabajar con archivos
+                            dentro de un proyecto como <code>portal-clientes</code>.
+                        </p>
+                    </div>
+
+                    <p class="g1-panel-hint">Selecciona un comando para ver su función, un ejemplo y su precaución:</p>
+                    <div class="g1-chips" data-panel="panel-cmds" data-source="cmds">
+                        <button class="g1-chip" data-key="pwd">pwd</button>
+                        <button class="g1-chip" data-key="ls">ls</button>
+                        <button class="g1-chip" data-key="cd">cd</button>
+                        <button class="g1-chip" data-key="mkdir">mkdir</button>
+                        <button class="g1-chip" data-key="touch">touch</button>
+                        <button class="g1-chip" data-key="cp">cp</button>
+                        <button class="g1-chip" data-key="mv">mv</button>
+                        <button class="g1-chip" data-key="rm">rm</button>
+                    </div>
+                    <div class="g1-panel" id="panel-cmds"></div>
+
+                    <h4 class="g1-h4">Opciones de <code>ls</code></h4>
+                    <div class="g1-table-wrap">
+                        <table class="g1-table" data-selectable>
+                            <thead>
+                                <tr>
+                                    <th>Opción</th>
+                                    <th>Qué muestra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="clickable">
+                                    <td><code>-l</code></td>
+                                    <td>Información detallada: permisos, propietario y tamaño.</td>
+                                </tr>
+                                <tr class="clickable">
+                                    <td><code>-a</code></td>
+                                    <td>Incluye archivos ocultos, como <code>.gitignore</code> y
+                                        <code>.env.example</code>.</td>
+                                </tr>
+                                <tr class="clickable">
+                                    <td><code>-h</code></td>
+                                    <td>Tamaños en un formato más legible (KB, MB).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="g1-note g1-note--tip">
+                        <span class="g1-note-icon">🔎</span>
+                        <div>No debe confundirse un archivo oculto con un archivo inexistente. En un proyecto Git,
+                            <code>.gitignore</code> y <code>.git</code> son elementos relevantes, aunque no aparezcan
+                            con un <code>ls</code> sencillo.</div>
+                    </div>
+
+                    <h4 class="g1-h4">Eliminar con seguridad</h4>
+                    <p class="g1-p">Antes de eliminar una carpeta de compilación, conviene inspeccionarla:</p>
+<div class="g1-code"><span class="p">usuario@equipo:~$</span> ls -la "$HOME/proyectos/portal-clientes/dist"</div>
+                    <p class="g1-p">Una práctica más segura consiste en usar una variable y comprobar que no esté vacía:
+                    </p>
+<div class="g1-code">BUILD_DIR="$HOME/proyectos/portal-clientes/dist"
+
+if [ -n "$BUILD_DIR" ] &amp;&amp; [ -d "$BUILD_DIR" ]; then
+    rm -rf -- "$BUILD_DIR"
+fi</div>
+                    <div class="g1-note g1-note--alert">
+                        <span class="g1-note-icon">🛑</span>
+                        <div><code>--</code> indica que los argumentos siguientes no deben interpretarse como opciones.
+                            Aun así, la variable debe construirse de forma segura y <strong>no recibir valores
+                                arbitrarios sin validación</strong>.</div>
+                    </div>
+                </div>
+
+                <!-- ===== TEMA 6: SCRIPT INTEGRADOR ===== -->
+                <div class="g1-section g1-sec g1-sec--orange" id="sec-integrador">
+                    <h3 class="g1-h3">🧩 Combinación de variables, parámetros y lectura de entrada</h3>
+
+                    <div class="g1-card">
+                        <p class="g1-p" style="margin-bottom:0;">
+                            El siguiente script reúne los conceptos principales: solicita una ruta, comprueba que se
+                            trate de un proyecto Node.js, recibe una rama Git como parámetro opcional y crea un informe
+                            con información básica.
+                        </p>
+                    </div>
+
+                    <span class="g1-code-title">informe-proyecto.sh</span>
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+
+set -u
+
+DEFAULT_PROJECT_DIR="$HOME/proyectos/portal-clientes"
+
+if [ "$#" -ge 1 ]; then
+    PROJECT_DIR="$1"
+else
+    read -r -p "Ruta del proyecto [$DEFAULT_PROJECT_DIR]: " PROJECT_DIR
+
+    if [ -z "$PROJECT_DIR" ]; then
+        PROJECT_DIR="$DEFAULT_PROJECT_DIR"
+    fi
+fi
+
+BRANCH_NAME="${2:-main}"
+
+if [ ! -d "$PROJECT_DIR" ]; then
+    printf 'No existe el directorio: %s\n' "$PROJECT_DIR" &gt;&amp;2
+    exit 1
+fi
+
+if [ ! -f "$PROJECT_DIR/package.json" ]; then
+    printf 'No se encontró package.json en: %s\n' "$PROJECT_DIR" &gt;&amp;2
+    exit 1
+fi
+
+REPORT_DIR="$PROJECT_DIR/reports"
+REPORT_FILE="$REPORT_DIR/estado-proyecto.txt"
+
+mkdir -p "$REPORT_DIR"
+
+{
+    printf 'Proyecto: %s\n' "$PROJECT_DIR"
+    printf 'Rama solicitada: %s\n' "$BRANCH_NAME"
+    printf 'Fecha de revisión: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+
+    if [ -d "$PROJECT_DIR/.git" ]; then
+        git -C "$PROJECT_DIR" status --short
+    else
+        printf 'La ruta no contiene un repositorio Git.\n'
+    fi
+} &gt; "$REPORT_FILE"
+
+printf 'Informe creado en: %s\n' "$REPORT_FILE"</div>
+
+                    <h4 class="g1-h4">Claves del script</h4>
+                    <p class="g1-panel-hint">Haz clic en cada elemento para entender su papel:</p>
+                    <div class="g1-chips" data-panel="panel-claves" data-source="claves">
+                        <button class="g1-chip" data-key="setu">set -u</button>
+                        <button class="g1-chip" data-key="default">DEFAULT_PROJECT_DIR</button>
+                        <button class="g1-chip" data-key="param">${2:-main}</button>
+                        <button class="g1-chip" data-key="gitc">git -C</button>
+                        <button class="g1-chip" data-key="bloque">{ … } &gt; archivo</button>
+                    </div>
+                    <div class="g1-panel" id="panel-claves"></div>
+
+                    <h4 class="g1-h4">Errores frecuentes en scripts</h4>
+                    <div class="g1-grid">
+                        <div class="g1-card">
+                            <h5>🔤 Comillas</h5>
+                            <p>No colocar comillas alrededor de variables que contienen rutas.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>🔢 Argumentos</h5>
+                            <p>Suponer que <code>$1</code> siempre existe sin validar la cantidad de argumentos.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>🗑️ Borrado</h5>
+                            <p>Utilizar <code>rm -rf</code> sin revisar previamente el valor de la variable.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>📍 Rutas</h5>
+                            <p>Confundir una ruta relativa con una ruta absoluta.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>📦 Node.js</h5>
+                            <p>Ejecutar <code>npm run build</code> en una carpeta que no contiene
+                                <code>package.json</code>.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>🚦 Código de salida</h5>
+                            <p>Ignorar el código de salida de comandos como <code>npm</code>, <code>git</code> o
+                                <code>docker</code>.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>🔐 Secretos</h5>
+                            <p>Guardar contraseñas, tokens o claves privadas en scripts versionados.</p>
+                        </div>
+                        <div class="g1-card">
+                            <h5>🤖 IA sin revisión</h5>
+                            <p>Pedir a una herramienta de IA un script destructivo y ejecutarlo sin revisar las rutas
+                                que modifica.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TEMA 7: IA APLICADA ===== -->
+                <div class="g1-section g1-sec g1-sec--yellow" id="sec-ia">
+                    <h3 class="g1-h3">🤖 IA aplicada a infraestructura</h3>
+
+                    <div class="g1-card">
+                        <p class="g1-p">
+                            Las herramientas de inteligencia artificial pueden asistir en tareas como la generación de
+                            una primera versión de un script, la explicación de un error de Bash, la propuesta de
+                            validaciones o la conversión de un procedimiento manual en una automatización.
+                        </p>
+                        <p class="g1-p" style="margin-bottom:0;">
+                            Su uso debe estar acompañado por <strong>revisión técnica</strong>, porque una respuesta
+                            generada puede contener rutas incorrectas, opciones incompatibles o acciones peligrosas.
+                        </p>
+                    </div>
+
+                    <h4 class="g1-h4">Cómo formular la solicitud</h4>
+                    <p class="g1-p">Una solicitud útil proporciona contexto suficiente y limita el alcance de la
+                        operación:</p>
+                    <div class="g1-compare">
+                        <div class="good">
+                            <h5>✅ Solicitud útil</h5>
+                            <p>Genera un script Bash para Ubuntu que reciba como primer parámetro la ruta de un
+                                proyecto Node.js. Debe verificar que exista package.json, crear el directorio reports
+                                dentro del proyecto y guardar allí el resultado de git status --short. No debe eliminar
+                                archivos ni ejecutar comandos con sudo. Incluye validación de parámetros y explica los
+                                riesgos.</p>
+                        </div>
+                        <div class="bad">
+                            <h5>❌ Solicitud deficiente</h5>
+                            <p>Haz un script para limpiar el servidor.</p>
+                            <p style="margin-top:10px;font-style:normal;">No especifica qué debe limpiarse, en qué ruta,
+                                con qué permisos ni qué archivos deben conservarse.</p>
+                        </div>
+                    </div>
+
+                    <h4 class="g1-h4">Lista de revisión antes de usar un script sugerido por IA</h4>
+                    <p class="g1-panel-hint">Marca cada punto a medida que lo verificas:</p>
+                    <div class="g1-checklist" id="ia-check" data-full="✅ Revisión completa: el script puede probarse en una carpeta de práctica"
+                        data-mid="⚠️ Vas bien, aún faltan puntos por revisar" data-low="❌ Revisión incompleta: no ejecutes el script todavía"
+                        data-unit="puntos revisados">
+                        <label class="g1-check"><input type="checkbox"> <span>Las rutas exactas que consulta, crea,
+                                mueve o elimina.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>El uso de <code>sudo</code>,
+                                <code>rm</code>, <code>chmod</code>, <code>chown</code> y comandos relacionados con
+                                servicios.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>La validación de parámetros y entradas
+                                del usuario.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>La gestión de espacios en nombres de
+                                archivos.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>El código de salida de <code>npm</code>,
+                                <code>git</code>, <code>docker</code> o <code>systemctl</code>.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>La presencia accidental de contraseñas,
+                                tokens o claves.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>La compatibilidad con la distribución
+                                Linux y las herramientas instaladas.</span></label>
+                        <div class="g1-score" aria-live="polite"></div>
+                    </div>
+
+                    <h4 class="g1-h4">Probar de forma segura</h4>
+                    <p class="g1-p">Una práctica adecuada consiste en probar el script dentro de una carpeta de práctica,
+                        utilizar <code>bash -n</code> para verificar su sintaxis y ejecutar primero con datos no
+                        críticos:</p>
+<div class="g1-code"><span class="p">usuario@equipo:~$</span> bash -n preparar-entorno.sh</div>
+                    <div class="g1-note g1-note--tip">
+                        <span class="g1-note-icon">🧪</span>
+                        <div>La opción <code>-n</code> analiza la sintaxis <strong>sin ejecutar</strong> las
+                            instrucciones.</div>
+                    </div>
+                </div>
+
+                <!-- Navegación -->
+                <div class="g1-nav">
+                    <button id="g1-prev" class="g1-btn g1-btn--ghost" onclick="g1Navigate(-1)"
+                        style="display:none;">← Anterior</button>
+                    <button id="g1-next" class="g1-btn" onclick="g1Navigate(1)" style="margin-left:auto;">Siguiente
+                        →</button>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== ACTIVIDADES ===================== -->
+            <div id="actividades" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Actividades prácticas</h2>
+
+                <!-- ===== ACTIVIDAD 1 ===== -->
+                <div class="g1-act g1-sec">
+                    <div class="g1-act-head">
+                        <span class="g1-act-num">1</span>
+                        <h3>Estructura de un proyecto y primer script con variables</h3>
+                    </div>
+                    <p class="g1-act-intro">
+                        Usa los comandos de manejo de archivos para crear la estructura de <code>mi-tienda</code>. El
+                        script <code>scripts/info-proyecto.sh</code> que usarás tiene este contenido (se escribe con
+                        un editor como <code>nano</code> o <code>code</code>):
+                    </p>
+<div class="g1-code"><span class="c">#!/usr/bin/env bash</span>
+
+PROJECT_DIR="$HOME/proyectos/mi-tienda"
+BUILD_DIR="$PROJECT_DIR/dist"
+readonly APP_NAME="mi-tienda"
+
+printf 'Aplicación: %s\n' "$APP_NAME"
+printf 'Proyecto: %s\n' "$PROJECT_DIR"
+printf 'Compilación: %s\n' "$BUILD_DIR"</div>
+
+                    <div class="g1-challenge">
+                        <div class="g1-challenge-head">
+                            <i class="fa-solid fa-bullseye"></i>
+                            <span>Reto <span id="a1-num">1</span> de <span id="a1-total">12</span></span>
+                        </div>
+                        <p id="a1-text" class="g1-challenge-text"></p>
+                        <p id="a1-hint" class="g1-challenge-hint"></p>
+                    </div>
+
+                    <div class="g1-term">
+                        <div class="g1-term-bar"><i></i><i></i><i></i><span>Terminal — bash</span></div>
+                        <div id="a1-body" class="g1-term-body"></div>
+                        <div class="g1-term-input">
+                            <span class="prompt" id="a1-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a1-input" placeholder="Escribe tu comando aquí..."
+                                autocomplete="off" spellcheck="false" aria-label="Comando de la actividad 1">
+                        </div>
+                    </div>
+
+                    <div class="g1-term-tools">
+                        <button id="a1-reset" class="g1-btn g1-btn--accent">Reiniciar</button>
+                        <div class="g1-bar">
+                            <div id="a1-progress"></div>
+                        </div>
+                        <span id="a1-score" class="g1-count">0/12</span>
+                    </div>
+                    <div id="a1-feedback" class="g1-feedback"></div>
+
+                    <div class="g1-product">
+                        <span>📄</span>
+                        <span><strong>Producto esperado:</strong> archivo Word con las evidencias (capturas) de cada
+                            comando. Anota la diferencia entre <code>ls</code> y <code>ls -la</code> y explica en una
+                            línea por qué aparece un error al ejecutar el script sin <code>./</code>.</span>
+                    </div>
+                </div>
+
+                <!-- ===== ACTIVIDAD 2 ===== -->
+                <div class="g1-act g1-sec g1-sec--blue">
+                    <div class="g1-act-head">
+                        <span class="g1-act-num">2</span>
+                        <h3>Script con parámetros, lectura de entrada y validación</h3>
+                    </div>
+                    <p class="g1-act-intro">
+                        Crea <code>validar-proyecto.sh</code>, un script que reciba datos del usuario y valide que la
+                        ruta indicada corresponde a un proyecto Node.js. Debe:
+                    </p>
+                    <ul class="g1-list" style="margin-bottom:16px;">
+                        <li>Usar <code>$1</code> como ruta del proyecto si se envía como parámetro.</li>
+                        <li>Si no se envía, solicitar la ruta con <code>read -r -p</code>.</li>
+                        <li>Comprobar con <code>-d</code> que el directorio existe y con <code>-f</code> que contiene
+                            <code>package.json</code>.</li>
+                        <li>Mostrar un mensaje de error con <code>&gt;&amp;2</code> y terminar con
+                            <code>exit 1</code> si alguna validación falla.</li>
+                        <li>Mostrar el mensaje <strong>"Proyecto válido"</strong> si todo está correcto.</li>
+                    </ul>
+
+                    <div class="g1-challenge">
+                        <div class="g1-challenge-head">
+                            <i class="fa-solid fa-bullseye"></i>
+                            <span>Reto <span id="a2-num">1</span> de <span id="a2-total">10</span></span>
+                        </div>
+                        <p id="a2-text" class="g1-challenge-text"></p>
+                        <p id="a2-hint" class="g1-challenge-hint"></p>
+                    </div>
+
+                    <div class="g1-term">
+                        <div class="g1-term-bar"><i></i><i></i><i></i><span>Terminal — bash</span></div>
+                        <div id="a2-body" class="g1-term-body"></div>
+                        <div class="g1-term-input">
+                            <span class="prompt" id="a2-prompt">estudiante@linux:~$</span>
+                            <input type="text" id="a2-input" placeholder="Escribe tu comando aquí..."
+                                autocomplete="off" spellcheck="false" aria-label="Comando de la actividad 2">
+                        </div>
+                    </div>
+
+                    <div class="g1-term-tools">
+                        <button id="a2-reset" class="g1-btn g1-btn--accent">Reiniciar</button>
+                        <div class="g1-bar">
+                            <div id="a2-progress"></div>
+                        </div>
+                        <span id="a2-score" class="g1-count">0/10</span>
+                    </div>
+                    <div id="a2-feedback" class="g1-feedback"></div>
+
+                    <div class="g1-product">
+                        <span>📄</span>
+                        <span><strong>Producto esperado:</strong> el archivo <code>validar-proyecto.sh</code> y
+                            capturas de las tres pruebas (ruta válida, ruta inexistente y ejecución sin parámetros) con
+                            su código de salida obtenido con <code>echo $?</code>.</span>
+                    </div>
+                </div>
+
+                <!-- ===== ACTIVIDAD 3 ===== -->
+                <div class="g1-act g1-sec g1-sec--purple">
+                    <div class="g1-act-head">
+                        <span class="g1-act-num">3</span>
+                        <h3>Revisión crítica de un script generado por IA</h3>
+                    </div>
+                    <p class="g1-act-intro">
+                        Una herramienta de IA entregó este script para <em>"compilar y publicar el proyecto"</em>. Marca
+                        las líneas que, según la lista de revisión, <strong>no aceptarías sin modificar</strong> y pulsa
+                        <strong>Verificar revisión</strong>.
+                    </p>
+
+                    <div class="g1-review" id="ia-review"></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                        <button id="ia-verify" class="g1-btn">Verificar revisión</button>
+                        <button id="ia-reset" class="g1-btn g1-btn--accent">Reiniciar</button>
+                    </div>
+                    <div class="g1-legend">
+                        <span class="l-hit">Riesgo detectado</span>
+                        <span class="l-miss">Riesgo sin detectar</span>
+                        <span class="l-fp">Línea segura marcada</span>
+                        <span class="l-safe">Línea segura</span>
+                    </div>
+                    <div id="ia-feedback" class="g1-feedback"></div>
+                </div>
+
+                <!-- ===== ACTIVIDAD 4 ===== -->
+                <div class="g1-act g1-sec g1-sec--pink">
+                    <div class="g1-act-head">
+                        <span class="g1-act-num">4</span>
+                        <h3>Informe de evidencias y uso de IA</h3>
+                    </div>
+                    <p class="g1-act-intro">
+                        Reúne en un único archivo de <strong>Word</strong> las evidencias de las actividades 1 y 2 y
+                        solicita a una herramienta de IA una versión mejorada de <code>validar-proyecto.sh</code> usando
+                        una instrucción clara como el ejemplo del contenido. Marca cada apartado a medida que lo
+                        completes.
+                    </p>
+                    <div class="g1-checklist" id="doc-check" data-full="✅ Informe completo: listo para entregar"
+                        data-mid="⚠️ Vas por buen camino, faltan apartados" data-low="❌ Documentación incompleta"
+                        data-unit="apartados documentados">
+                        <label class="g1-check"><input type="checkbox"> <span>Capturas de <code>pwd</code>,
+                                <code>ls</code> y <code>ls -la</code> con la diferencia observada (archivos
+                                ocultos).</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>Copia de <code>.env.example</code> como
+                                <code>.env.local</code> y renombrado de <code>logs/build.log</code> a
+                                <code>logs/anterior-build.log</code>.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>Contenido de <code>info-proyecto.sh</code>,
+                                permiso <code>chmod +x</code> y su ejecución con <code>./</code>.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>Explicación en una línea del error al
+                                ejecutarlo sin <code>./</code>.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>Archivo <code>validar-proyecto.sh</code>
+                                completo y resultado de <code>bash -n</code>.</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>Capturas de las tres pruebas con su código
+                                de salida (<code>echo $?</code>).</span></label>
+                        <label class="g1-check"><input type="checkbox"> <span>Párrafo con la instrucción enviada a la IA
+                                y el análisis de su respuesta: dos aspectos que aceptarías y uno que modificarías o no
+                                utilizarías.</span></label>
+                        <div class="g1-score" aria-live="polite"></div>
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== EVALUACIÓN ===================== -->
+            <div id="evaluacion" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Evaluación. Preguntas de selección
+                    múltiple (marca la respuesta correcta)</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-slate-600 mb-6">Comprueba lo que has aprendido sobre variables, parámetros
+                        posicionales, lectura de entrada con <code>read</code>, validación de rutas y uso responsable de
+                        la IA en scripts de Bash. Selecciona la respuesta correcta para cada pregunta.
+                    </p>
+                    <div id="quiz-container"></div>
+                    <button id="submit-quiz-btn"
+                        class="mt-6 bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Finalizar
+                        evaluación</button>
+                    <div id="quiz-result" class="mt-4 text-lg font-bold"></div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== RECURSOS ===================== -->
+            <div id="recursos" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Recursos para profundizar</h2>
+                <p class="text-slate-700 leading-relaxed mb-6">Para reforzar el uso de la terminal, las variables y los
+                    scripts de Bash, te recomendamos:</p>
+                <ul class="space-y-4">
+                    <!-- Recurso 1 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Juego interactivo de comandos Linux</h3>
+                            <p class="text-slate-600 text-sm mt-1">Juego en línea para practicar comandos de Linux de
+                                forma divertida y reforzar la navegación y el manejo de archivos desde la terminal.</p>
+                            <a href="https://adictosalinux.com/" target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Recurso1.png" alt="Juego interactivo de comandos Linux"
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Recurso 2 -->
+                    <li
+                        class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-green-700">Linux desde cero para principiantes | Variables.</h3>
+                            <p class="text-slate-600 text-sm mt-1">Video explicativo sobre qué son las variables en
+                                Linux y cómo declararlas y utilizarlas desde la terminal y en scripts.</p>
+                            <a href="https://www.youtube.com/watch?v=09ORR6vzlJY" target="_blank"
+                                class="underline text-slate-700 hover:text-green-700">Ir al recurso</a>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                            <div class="bg-green-50 border border-green-300 rounded flex items-center justify-center"
+                                style="width:2cm;height:2cm;">
+                                <img src="img/Recurso2.png" alt="Linux desde cero para principiantes | Variables."
+                                    class="max-w-full max-h-full object-contain" loading="lazy">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div>
+
+            <!-- ===================== BIBLIOGRAFÍA ===================== -->
+            <div id="bibliografia" class="content-pane">
+                <h2 class="text-2xl sm:text-3xl font-bold text-green-800 mb-6">Bibliografía</h2>
+                <div class="space-y-6">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Free Software Foundation. (2025). <i>Bash Reference Manual</i> (Edición 5.3). GNU Project.
+                            <a href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">gnu.org/software/bash/manual/bash.html</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Free Software Foundation. (s. f.). <i>GNU Coreutils manual</i>. GNU Project.
+                            <a href="https://www.gnu.org/software/coreutils/manual/" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">gnu.org/software/coreutils/manual</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Linux man-pages project. (s. f.). <i>Linux man pages online</i>.
+                            <a href="https://man7.org/linux/man-pages/" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">man7.org/linux/man-pages</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Campus Empresa. (s. f.). <i>Entrada, salida y argumentos de un script</i>.
+                            <a href="https://campusempresa.com/cursos/linux/04-03-entrada-salida-y-argumentos"
+                                target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">campusempresa.com</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Datanovia. (s. f.). <i>6 Shell scripting – Linux: Fundamentos</i>.
+                            <a href="https://www.datanovia.com/books/linux/es/shell-scripting.html" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">datanovia.com</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            The Linux Documentation Project. (s. f.). <i>Catching user input</i>.
+                            <a href="https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_08_02.html" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">tldp.org</a>
+                        </span>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+                        <span class="block text-slate-700">
+                            Warp. (s. f.). <i>Reading user input in Bash</i>.
+                            <a href="https://www.warp.dev/terminus/bash-reading-user-input" target="_blank"
+                                class="underline text-green-700 hover:text-green-900 break-words">warp.dev</a>
+                        </span>
+                    </div>
+                </div>
+
+                <footer class="mt-12 pt-6 border-t-2 border-slate-200 flex flex-col items-center">
+                    <p class="text-slate-600 font-medium">Creado por:</p>
+                    <p class="text-green-800 font-bold text-lg">Centro de Innovación en TIC para el apoyo de la Docencia
+                        CINTIA</p>
+                    <p class="text-slate-500 text-sm">Universidad de Córdoba</p>
+                </footer>
+            </div><!-- /bibliografia -->
+        </main>
+    </div>
+
+
+    <!-- Modal para ampliar imágenes -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagen ampliada">
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/modal.js"></script>
+    <script src="js/contenido.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/accordion.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="https://elens.ecodestudio.dev/elens.js"></script>
+</body>
+
+</html>
