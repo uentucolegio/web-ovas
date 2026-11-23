@@ -163,11 +163,6 @@
                         La lógica proposicional es la base para construir razonamientos complejos y tomar decisiones correctas, no solo en la programación, sino en muchas áreas de la tecnología y la vida diaria. ✨
                     </p>
                 </div>
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="introduccion">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center"><span class="mr-1">▶️</span> Leer</button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏸️</span> Pausar</button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏹️</span> Detener</button>
-                </div>
             </div>
 
             <!-- Objetivos -->
@@ -178,11 +173,6 @@
                     <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">📝</span><span><strong>Aplicar</strong> los conectores lógicos para modelar y analizar situaciones que se presentan en sistemas computacionales.</span></li>
                     <li class="flex items-start p-4 bg-white rounded-lg shadow-sm"><span class="text-green-700 mr-3 text-2xl">💻</span><span><strong>Utilizar</strong> la lógica proposicional para la toma de decisiones en el contexto de la programación web y el desarrollo de software.</span></li>
                 </ul>
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="objetivos">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center"><span class="mr-1">▶️</span> Leer</button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏸️</span> Pausar</button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏹️</span> Detener</button>
-                </div>
             </div>
 
             <!-- Contenido -->
@@ -341,7 +331,6 @@
 
         function switchPane(targetId) {
             // Stop any ongoing speech
-            window.speechSynthesis.cancel();
 
             contentPanes.forEach(pane => {
                 pane.classList.remove('active');
@@ -398,55 +387,6 @@
             });
         });
 
-        // --- Speech Synthesis ---
-        const speechControls = document.querySelectorAll('.speech-controls');
-        let currentUtterance = null;
-
-        speechControls.forEach(control => {
-            const playBtn = control.querySelector('.play-btn');
-            const pauseBtn = control.querySelector('.pause-btn');
-            const stopBtn = control.querySelector('.stop-btn');
-            const targetId = control.dataset.target;
-            const contentElement = document.getElementById(targetId);
-
-            function updateControlsState(isSpeaking, isPaused) {
-                playBtn.disabled = isSpeaking && !isPaused;
-                pauseBtn.disabled = !isSpeaking || isPaused;
-                stopBtn.disabled = !isSpeaking && !isPaused;
-            }
-
-            playBtn.addEventListener('click', () => {
-                if (!contentElement) return;
-
-                if (window.speechSynthesis.paused && currentUtterance) {
-                    window.speechSynthesis.resume();
-                } else {
-                    window.speechSynthesis.cancel(); // Stop any other speech
-                    const textToRead = contentElement.innerText;
-                    currentUtterance = new SpeechSynthesisUtterance(textToRead);
-                    currentUtterance.lang = 'es-ES';
-
-                    currentUtterance.onstart = () => updateControlsState(true, false);
-                    currentUtterance.onpause = () => updateControlsState(true, true);
-                    currentUtterance.onresume = () => updateControlsState(true, false);
-                    currentUtterance.onend = () => updateControlsState(false, false);
-                    currentUtterance.onerror = () => updateControlsState(false, false);
-
-                    window.speechSynthesis.speak(currentUtterance);
-                }
-            });
-
-            pauseBtn.addEventListener('click', () => {
-                if (window.speechSynthesis.speaking) {
-                    window.speechSynthesis.pause();
-                }
-            });
-
-            stopBtn.addEventListener('click', () => {
-                window.speechSynthesis.cancel();
-            });
-        });
-        
         // --- Activities ---
         const checkActivityBtn = document.getElementById('check-activity-btn');
         const activityInputs = document.querySelectorAll('.activity-input');

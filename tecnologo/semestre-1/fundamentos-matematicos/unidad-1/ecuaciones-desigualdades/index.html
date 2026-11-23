@@ -98,11 +98,6 @@
                     </div>
                 </div>
 
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-6 no-mathjax" data-target="introduccion">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center shadow-md"><span class="mr-2">🔊</span> Leer introducción</button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full" disabled>⏸️</button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded-full" disabled>⏹️</button>
-                </div>
             </div>
 
             <!-- Objetivos -->
@@ -311,7 +306,6 @@
         const contentPanes = document.querySelectorAll('.content-pane');
 
         function switchPane(targetId) {
-            window.speechSynthesis.cancel();
             contentPanes.forEach(pane => pane.classList.remove('active'));
             const activePane = document.getElementById(targetId);
             if (activePane) activePane.classList.add('active');
@@ -326,22 +320,6 @@
 
         sidebarLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); switchPane(link.dataset.target); }));
         mobileNav.addEventListener('change', () => switchPane(mobileNav.value));
-
-        // --- Speech ---
-        document.querySelectorAll('.speech-controls').forEach(control => {
-            const playBtn = control.querySelector('.play-btn');
-            playBtn.addEventListener('click', () => {
-                window.speechSynthesis.cancel();
-                const text = document.getElementById(control.dataset.target).innerText;
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-CO';
-                window.speechSynthesis.speak(utterance);
-                control.querySelector('.pause-btn').disabled = false;
-                control.querySelector('.stop-btn').disabled = false;
-            });
-            control.querySelector('.pause-btn').addEventListener('click', () => window.speechSynthesis.pause());
-            control.querySelector('.stop-btn').addEventListener('click', () => window.speechSynthesis.cancel());
-        });
 
         // --- Quiz ---
         document.getElementById('submit-quiz-btn').addEventListener('click', () => {
