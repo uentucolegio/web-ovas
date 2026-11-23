@@ -283,7 +283,8 @@ for (const dir of ovas) {
   // (a) y (c): cualquier arreglo JS de preguntas, se llame como se llame.
   if (/\b(?:quizData|quizQuestions|preguntas|questions)\s*=\s*\[/.test(codigoOva) || /\bquizData\b/.test(codigoOva)) {
     tieneQuiz = true;
-    preguntas = Math.max(preguntas, (codigoOva.match(/\b(?:pregunta|question|prompt|enunciado)\s*:/gi) || []).length);
+    // La clave puede ir entre comillas ("question": …, estilo JSON) o ser la abreviada q: …
+    preguntas = Math.max(preguntas, (codigoOva.match(/["']?\b(?:pregunta|question|prompt|enunciado|q)["']?\s*:/gi) || []).length);
   }
 
   // (b) todas las respuestas en un solo atributo.
