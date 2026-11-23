@@ -34,7 +34,8 @@ const ROOT = process.cwd();
 const PROGRAMAS = ['tecnico', 'tecnologo']; // carpetas de programa permitidas
 const SECCIONES = ['introduccion', 'objetivos', 'contenido', 'actividades', 'evaluacion', 'recursos', 'bibliografia'];
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;   // minúsculas, números y guiones
-const IGNORAR = new Set(['_template', 'node_modules', 'scripts', '.git', '.github']);
+// "piloto" guarda prototipos del formato nuevo (diapositivas animadas): quedan fuera de la validación.
+const IGNORAR = new Set(['_template', 'node_modules', 'scripts', '.git', '.github', 'piloto']);
 const HORNEAR = 'npx tailwindcss@3.4.17 -o tailwind.css --content "./**/*.{html,js}" --minify';
 
 // --- Utilidades -----------------------------------------------------------
