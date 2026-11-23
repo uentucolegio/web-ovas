@@ -121,11 +121,6 @@
                     </div>
                 </div>
 
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4 no-mathjax" data-target="introduccion">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center"><span class="mr-1">▶️</span> Leer sección</button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏸️</span> Pausar</button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏹️</span> Detener</button>
-                </div>
             </div>
 
             <!-- Objetivos -->
@@ -448,7 +443,6 @@ public class GestionMatrices {
         const contentPanes = document.querySelectorAll('.content-pane');
 
         function switchPane(targetId) {
-            window.speechSynthesis.cancel();
             contentPanes.forEach(pane => pane.classList.remove('active'));
             const activePane = document.getElementById(targetId);
             if (activePane) activePane.classList.add('active');
@@ -489,44 +483,6 @@ public class GestionMatrices {
                     window.MathJax.typeset();
                 }
             });
-        });
-
-        // --- Speech Synthesis ---
-        const speechControls = document.querySelectorAll('.speech-controls');
-        let currentUtterance = null;
-
-        speechControls.forEach(control => {
-            const playBtn = control.querySelector('.play-btn');
-            const pauseBtn = control.querySelector('.pause-btn');
-            const stopBtn = control.querySelector('.stop-btn');
-            const targetId = control.dataset.target;
-            const contentElement = document.getElementById(targetId);
-
-            function updateControlsState(isSpeaking, isPaused) {
-                playBtn.disabled = isSpeaking && !isPaused;
-                pauseBtn.disabled = !isSpeaking || isPaused;
-                stopBtn.disabled = !isSpeaking && !isPaused;
-            }
-
-            playBtn.addEventListener('click', () => {
-                if (window.speechSynthesis.paused && currentUtterance) {
-                    window.speechSynthesis.resume();
-                } else {
-                    window.speechSynthesis.cancel();
-                    // Para lectura, ignoramos los tags de mathjax para evitar leer código LaTeX crudo
-                    const text = contentElement.innerText;
-                    currentUtterance = new SpeechSynthesisUtterance(text);
-                    currentUtterance.lang = 'es-CO';
-                    currentUtterance.onstart = () => updateControlsState(true, false);
-                    currentUtterance.onpause = () => updateControlsState(true, true);
-                    currentUtterance.onresume = () => updateControlsState(true, false);
-                    currentUtterance.onend = () => updateControlsState(false, false);
-                    window.speechSynthesis.speak(currentUtterance);
-                }
-            });
-
-            pauseBtn.addEventListener('click', () => window.speechSynthesis.pause());
-            stopBtn.addEventListener('click', () => window.speechSynthesis.cancel());
         });
 
         // --- Activities ---

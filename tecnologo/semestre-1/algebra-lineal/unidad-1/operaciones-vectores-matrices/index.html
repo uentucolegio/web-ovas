@@ -85,11 +85,6 @@
                     </div>
                 </div>
 
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4 no-mathjax" data-target="introduccion">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center"><span class="mr-1">▶️</span> Leer sección</button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏸️</span> Pausar</button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled><span class="mr-1">⏹️</span> Detener</button>
-                </div>
             </div>
 
             <!-- Objetivos -->
@@ -386,7 +381,6 @@
         const contentPanes = document.querySelectorAll('.content-pane');
 
         function switchPane(targetId) {
-            window.speechSynthesis.cancel();
             contentPanes.forEach(pane => pane.classList.remove('active'));
             const activePane = document.getElementById(targetId);
             if (activePane) activePane.classList.add('active');
@@ -412,23 +406,6 @@
             btn.querySelector('span').textContent = isOpen ? '➕' : '➖';
             if (!isOpen && window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
         }));
-
-        // --- Speech Synthesis ---
-        const speechControls = document.querySelectorAll('.speech-controls');
-        let currentUtterance = null;
-        speechControls.forEach(control => {
-            const playBtn = control.querySelector('.play-btn');
-            const targetId = control.dataset.target;
-            playBtn.addEventListener('click', () => {
-                window.speechSynthesis.cancel();
-                const text = document.getElementById(targetId).innerText;
-                currentUtterance = new SpeechSynthesisUtterance(text);
-                currentUtterance.lang = 'es-CO';
-                window.speechSynthesis.speak(currentUtterance);
-            });
-            control.querySelector('.pause-btn').addEventListener('click', () => window.speechSynthesis.pause());
-            control.querySelector('.stop-btn').addEventListener('click', () => window.speechSynthesis.cancel());
-        });
 
         // --- Quiz ---
         const submitQuizBtn = document.getElementById('submit-quiz-btn');

@@ -264,7 +264,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ### Semestre 3
 
-#### Innovación y emprendimiento digital  ·  7 OVAs
+#### Innovación y emprendimiento digital  ·  8 OVAs
 
 **Unidad 1**
 
@@ -280,9 +280,10 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 **Unidad 3**
 
+- [Control y generación de versiones](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/innovacion-emprendimiento-digital/unidad-3/control-generacion-versiones/)
 - [Validación y presentación pitch elevator del MVP](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/innovacion-emprendimiento-digital/unidad-3/validacion-pitch-elevator-mvp/)
 
-#### Programación Web II – Backend  ·  6 OVAs
+#### Programación Web II – Backend  ·  9 OVAs
 
 **Unidad 1**
 
@@ -295,6 +296,12 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Autenticación y autorización en APIs](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-2/autenticacion-autorizacion-apis/)
 - [Protección de la API: CORS, rate limiting, consultas parametrizadas y manejo seguro de errores](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-2/proteccion-api/)
 - [Validación y sanitización de datos en APIs](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-2/validacion-sanitizacion-apis/)
+
+**Unidad 3**
+
+- [Arquitectura backend organizada - Capas, módulos y patrones simples](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-3/arquitectura-capas-modulos-patrones/)
+- [Pruebas de la API](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-3/pruebas-api/)
+- [Documentación y Despliegue](https://uentucolegio.github.io/web-ovas/tecnico/semestre-3/backend-2/unidad-3/documentacion-despliegue/)
 
 #### Proyecto Web  ·  9 OVAs
 
@@ -490,7 +497,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 
 ### Semestre 2
 
-#### Base de datos 1  ·  8 OVAs
+#### Base de datos 1  ·  12 OVAs
 
 **Unidad 1**
 
@@ -506,7 +513,14 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Integridad referencial](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-3/)
 - [Primera, segunda y tercera forma normal](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-2/tema-4/)
 
-#### Electiva libre 1  ·  6 OVAs
+**Unidad 3**
+
+- [Consultas SELECT, filtros, ordenamiento y funciones](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-3/tema-3/)
+- [DDL: CREATE, ALTER y DROP](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-3/tema-1/)
+- [DML: INSERT, UPDATE y DELETE](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-3/tema-2/)
+- [JOIN básicos y consultas aplicadas](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/base-de-datos-1/unidad-3/tema-4/)
+
+#### Electiva libre 1  ·  10 OVAs
 
 **Unidad 1**
 
@@ -519,6 +533,13 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Creación, copia, movimiento y eliminación de archivos en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-1/)
 - [Redireccionamiento, tuberías y filtros básicos en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-2/)
 - [Permisos, usuarios, grupos, chmod, procesos y servicios en Linux](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-2/el-und-2-3/)
+
+**Unidad 3**
+
+- [Condicionales, ciclos y funciones básicas en Bash](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-3/el-und-3-2/)
+- [Prompting técnico, verificación y registro de comandos generados con IA](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-3/el-und-3-4/)
+- [Scripts para respaldos, organización de archivos y diagnóstico](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-3/el-und-3-3/)
+- [Variables, parámetros y lectura de entrada en Bash](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/electiva-libre-1-shell/unidad-3/el-und-3-1/)
 
 #### Estadística  ·  9 OVAs
 
@@ -586,7 +607,7 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Principios SOLID introductorios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-3/principios-solid/)
 - [Documentación y entrega del proyecto](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/programacion-orientada-a-objetos/unidad-3/documentacion-entrega-proyecto/)
 
-#### Requerimientos de sistemas de información  ·  8 OVAs
+#### Requerimientos de sistemas de información  ·  12 OVAs
 
 **Unidad 1**
 
@@ -602,6 +623,13 @@ Cada enlace abre el OVA directamente en el navegador; no requiere descargar nada
 - [Casos de Uso UML](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-3/)
 - [Priorización y Gestión de Cambios](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-2/tema-4/)
 
+**Unidad 3**
+
+- [Diagramas de Casos de Uso y Actividades](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-3/tema-3-diagramas-de-casos-de-uso-y-actividades/)
+- [Prototipos de Baja Fidelidad](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-3/tema-2-prototipos-baja-fidelidad/)
+- [Trazabilidad hacia el diseño y las pruebas](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-3/tema-4-trazabilidad-hacia-diseno-y-pruebas/)
+- [Validación y Verificación de Requerimientos](https://uentucolegio.github.io/web-ovas/tecnologo/semestre-2/requerimientos-sistemas-informacion/unidad-3/tema-1-validacion-y-verificacion-de-equerimientos/)
+
 ---
 
-**266 OVAs enlazados.**
+**282 OVAs enlazados.**
