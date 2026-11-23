@@ -111,7 +111,7 @@
         const txt = $('[data-iter-txt]', slide); txt.textContent = 'Persona 0 de 5';
         const tl = registrar(gsap.timeline({ delay: .4 }));
 
-        // Secuencial: la ficha baja de caja en caja, una sola vez
+        // Secuencial: la ficha baja por el costado, de caja en caja, una sola vez
         const fs = $('[data-ficha="sec"]', slide);
         gsap.set(fs, { attr: { cy: 24 } });
         [24, 84, 144].forEach((cy, k) => {
@@ -119,13 +119,12 @@
               .add(() => $(`[data-sec="${k}"]`, slide).classList.add('on'));
         });
 
-        // Condicional: de la pregunta al camino "Sí"
+        // Condicional: de la pregunta, por la flecha, hasta el camino "Sí" (sin tapar el texto)
         const fc = $('[data-ficha="cond"]', slide);
-        gsap.set(fc, { attr: { cx: 110, cy: 44 } });
+        gsap.set(fc, { attr: { cx: 30, cy: 44 } }); // vértice izquierdo del rombo: no tapa la pregunta
         tl.add(() => $('[data-cond="rombo"]', slide).classList.add('on'), 0)
           .to(fc, { attr: { cx: 14 }, duration: .6, ease: 'power1.inOut' }, .5)
-          .to(fc, { attr: { cy: 145 }, duration: .6, ease: 'power1.inOut' })
-          .to(fc, { attr: { cx: 48 }, duration: .3 })
+          .to(fc, { attr: { cy: 118 }, duration: .6, ease: 'power1.inOut' })
           .add(() => $('[data-cond="si"]', slide).classList.add('on'));
 
         // Iterativa: cinco vueltas, un vaso por vuelta
@@ -273,7 +272,8 @@
             const n = $(`[data-nodo="${nodo}"]`, this.flujo), f = $('[data-ficha="flujo"]', this.flujo);
             if (!n) return;
             const b = n.getBBox();
-            const destino = { cx: b.x + b.width / 2, cy: b.y + b.height / 2 };
+            // Al costado izquierdo del nodo, para no tapar su texto
+            const destino = { cx: b.x - 12, cy: b.y + b.height / 2 };
             if (inmediato) gsap.set(f, { attr: destino }); else gsap.to(f, { attr: destino, duration: .45, ease: 'power2.inOut' });
         }
         marcarNodo(s) {
@@ -436,7 +436,8 @@
     const quiz = { k: 0, aciertos: 0, puntos: $('[data-quiz-puntos]'), tarjeta: $('[data-quiz-tarjeta]') };
 
     function quizPintarPuntos() {
-        quiz.puntos.innerHTML = quizData.map((_, n) => `<span class="${n === quiz.k ? 'actual' : (quiz.resultados[n] === undefined ? '' : (quiz.resultados[n] ? 'ok' : 'mal'))}"></span>`).join('');
+        // Ya respondida: verde o rojo. Sin responder: ámbar si es la actual.
+        quiz.puntos.innerHTML = quizData.map((_, n) => `<span class="${quiz.resultados[n] !== undefined ? (quiz.resultados[n] ? 'ok' : 'mal') : (n === quiz.k ? 'actual' : '')}"></span>`).join('');
     }
     function quizIniciar() { quiz.k = 0; quiz.aciertos = 0; quiz.resultados = []; quizMostrar(); }
     function quizMostrar() {
@@ -489,9 +490,17 @@
     /* =====================================================
        EVENTOS DE BOTONES
        ===================================================== */
+    // En celular no hay diapositivas: el OVA es una página con scroll (ver iniciarMovil).
+    const MOVIL = window.matchMedia('(max-width: 699px)').matches;
+    const SECCIONES = $$('.reveal .slides > section');
+    function irA(h) {
+        if (MOVIL) SECCIONES[h].scrollIntoView({ behavior: MOVIMIENTO ? 'smooth' : 'auto', block: 'start' });
+        else Reveal.slide(h, 0);
+    }
+
     document.addEventListener('click', e => {
         const b = e.target.closest('button'); if (!b) return;
-        if (b.dataset.ir !== undefined) return Reveal.slide(+b.dataset.ir, 0);
+        if (b.dataset.ir !== undefined) return irA(+b.dataset.ir);
         if (b.dataset.arbol) return arbol(b);
         if (b.dataset.m3) return mision3(b);
         switch (b.dataset.accion) {
@@ -505,10 +514,32 @@
     });
 
     /* =====================================================
-       REVEAL.JS
+       ARRANQUE: diapositivas (escritorio/tableta) o página (celular)
        ===================================================== */
     function marcarNav(h) { $$('.barra-nav button').forEach(b => b.setAttribute('aria-current', String(+b.dataset.ir === h))); }
 
+    function iniciarMovil() {
+        document.body.classList.add('modo-movil');
+        // Sin fragmentos: todo el contenido visible, con las partes del ciclo Para resaltadas
+        $$('.fragment').forEach(f => f.classList.add('visible'));
+        $$('[data-resalta]').forEach(f => resaltarParte(f, true));
+        refrescarProgreso();
+        quizIniciar();
+        marcarNav(0);
+        // Cada lámina anima al entrar en pantalla (la primera vez) y activa su contenido (la escena 3D)
+        const animada = new WeakSet();
+        const laminas = $$('.reveal .slides section').filter(s => !s.querySelector(':scope > section'));
+        const io = new IntersectionObserver(entradas => entradas.forEach(e => {
+            if (!e.isIntersecting) return;
+            const s = e.target;
+            marcarNav(SECCIONES.indexOf(s.closest('.slides > section')));
+            if (!animada.has(s)) { animada.add(s); alEntrar(s); }
+            else document.dispatchEvent(new CustomEvent('piloto:diapositiva', { detail: { slide: s } }));
+        }), { threshold: 0.4 });
+        laminas.forEach(s => io.observe(s));
+    }
+
+    function iniciarReveal() {
     Reveal.initialize({
         embedded: true,
         hash: true,
@@ -537,4 +568,7 @@
     });
     Reveal.on('fragmentshown', e => resaltarParte(e.fragment, true));
     Reveal.on('fragmenthidden', e => resaltarParte(e.fragment, false));
+    }
+
+    if (MOVIL) iniciarMovil(); else iniciarReveal();
 })();

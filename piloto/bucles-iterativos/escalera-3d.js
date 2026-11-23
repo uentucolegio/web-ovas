@@ -10,6 +10,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const contenedor = document.getElementById('escalera-3d');
 const MOVIMIENTO = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ESCALONES = 10;
+// Con sizeAttenuation:false la escala es una fracción de la altura de la vista.
+const ESCALA_ETIQUETA = { x: 0.16, y: 0.06 };
 const VERDES = ['#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#16a34a', '#15803d', '#166534', '#14532d', '#0f766e', '#115e59'];
 
 let iniciado = false, activo = false, animando = false, paso = 0;
@@ -42,8 +44,11 @@ function etiqueta(texto) {
     g.beginPath(); g.roundRect(8, 12, 240, 72, 20); g.fill();
     g.fillStyle = '#166534'; g.font = '700 40px Poppins, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(texto, 128, 50);
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
-    sprite.scale.set(1.5, 0.56, 1);
+    // depthTest:false + renderOrder: la etiqueta nunca queda tapada por un escalón o la esfera
+    // sizeAttenuation:false: mismo tamaño en pantalla aunque el escalón esté al fondo
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, depthTest: false, sizeAttenuation: false }));
+    sprite.renderOrder = 10;
+    sprite.scale.set(ESCALA_ETIQUETA.x, ESCALA_ETIQUETA.y, 1);
     return sprite;
 }
 
@@ -81,7 +86,8 @@ function iniciar() {
         esc.rotation.y = -ang;
         grupo.add(esc);
         const et = etiqueta(`5×${k}=${5 * k}`);
-        et.position.set(Math.cos(ang) * 3.5, p.y + 0.2, Math.sin(ang) * 3.5);
+        // Debajo del borde exterior del escalón: la esfera (arriba) queda siempre despejada
+        et.position.set(Math.cos(ang) * 3.4, p.y - 0.8, Math.sin(ang) * 3.4);
         et.visible = false;
         grupo.add(et);
         escalones.push({ esc, et });
@@ -147,10 +153,17 @@ function subir() {
           .add(() => {
               paso = k;
               const { esc, et } = escalones[k - 1];
+              // Destello ámbar al pisar el escalón; luego vuelve a su verde
               esc.material.emissiveIntensity = .55;
-              gsap.to(esc.material, { emissiveIntensity: .12, duration: 1.2 });
-              et.visible = true;
-              gsap.fromTo(et.scale, { x: .3, y: .1 }, { x: 1.5, y: .56, duration: .4, ease: 'back.out(2.5)' });
+              gsap.to(esc.material, { emissiveIntensity: 0, duration: 1.2 });
+              // Las etiquetas anteriores se atenúan y achican: la del escalón actual manda
+              escalones.slice(0, k - 1).forEach(({ et: previa }) => {
+                  previa.renderOrder = 10;
+                  gsap.to(previa.material, { opacity: .6, duration: .3 });
+                  gsap.to(previa.scale, { x: ESCALA_ETIQUETA.x * .75, y: ESCALA_ETIQUETA.y * .75, duration: .3 });
+              });
+              et.visible = true; et.renderOrder = 20; et.material.opacity = 1;
+              gsap.fromTo(et.scale, { x: ESCALA_ETIQUETA.x * .2, y: ESCALA_ETIQUETA.y * .2 }, { x: ESCALA_ETIQUETA.x, y: ESCALA_ETIQUETA.y, duration: .4, ease: 'back.out(2.5)' });
               mostrarEstado(k);
           })
           .to({}, { duration: MOVIMIENTO ? .25 : 0 });
@@ -162,7 +175,10 @@ function reiniciar() {
     window.gsap.killTweensOf(bola.position);
     animando = false; paso = 0; ui.subir.disabled = false;
     bola.position.copy(posicion(0));
-    escalones.forEach(({ esc, et }) => { esc.material.emissiveIntensity = 0; et.visible = false; });
+    escalones.forEach(({ esc, et }) => {
+        esc.material.emissiveIntensity = 0;
+        et.visible = false; et.material.opacity = 1; et.scale.set(ESCALA_ETIQUETA.x, ESCALA_ETIQUETA.y, 1);
+    });
     mostrarEstado(0); ui.r.textContent = '—';
 }
 

@@ -24,7 +24,8 @@ html, body { margin: 0; height: 100%; background: var(--slate-50); font-family: 
     background: #fff; border-bottom: 1px solid var(--slate-200);
     box-shadow: 0 2px 12px -6px rgba(15, 23, 42, .18);
 }
-.barra-logo { width: 42px; height: 42px; object-fit: contain; border-radius: 50%; border: 2px solid var(--verde-500); padding: 2px; background: #fff; }
+/* El logo es cuadrado (cubo + "CINTIA" abajo): se muestra completo, sin recorte circular. */
+.barra-logo { height: 52px; width: 52px; flex: 0 0 52px; object-fit: contain; display: block; }
 .barra-titulo { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
 .barra-titulo span { font-size: 11px; color: var(--slate-500); white-space: nowrap; }
 .barra-titulo strong { font-size: 16px; color: var(--verde-800); white-space: nowrap; }
@@ -80,6 +81,8 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
     font-family: var(--mono); font-size: 19px; line-height: 1.6; margin: 0; padding: 16px 20px;
     background: var(--slate-900); color: #e2e8f0; border-radius: 14px; box-shadow: var(--sombra);
     white-space: pre; overflow: auto; text-align: left;
+    /* Sin ligaduras: >= y <= deben verse como se escriben en PSeInt */
+    font-variant-ligatures: none;
 }
 .codigo code { font-family: inherit; }
 .codigo.grande { font-size: 30px; padding: 26px 30px; margin: 18px 0 24px; }
@@ -148,17 +151,17 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
 .parte { background: #fff; border-radius: var(--radio); padding: 18px 20px; box-shadow: var(--sombra); border-top: 6px solid; }
 .parte b { font-size: 22px; } .parte p { font-size: 18px; color: var(--slate-600); margin: 6px 0 0; }
 .parte.ini { border-color: #4ade80; } .parte.fin { border-color: var(--ambar-400); } .parte.paso { border-color: #f87171; }
-.parte code { font-family: var(--mono); background: var(--slate-100); padding: 1px 6px; border-radius: 5px; }
+.parte code { font-family: var(--mono); background: var(--slate-100); padding: 1px 6px; border-radius: 5px; white-space: nowrap; }
 
 /* ---------- Visualizador (traza) ---------- */
-.traza { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "codigo panel" "nota panel" "botones panel"; gap: 14px 22px; align-items: start; margin-top: 8px; }
+.traza { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto auto 1fr; grid-template-areas: "codigo panel" "nota panel" "botones panel"; gap: 14px 22px; align-items: start; margin-top: 8px; }
 .traza > .codigo { grid-area: codigo; min-width: 0; font-size: 17px; }
 .traza-panel { grid-area: panel; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .traza-nota { grid-area: nota; font-size: 19px; background: var(--verde-50); border-radius: 12px; padding: 12px 16px; margin: 0; min-height: 56px; border-left: 5px solid var(--verde-500); }
 .traza-botones { grid-area: botones; display: flex; gap: 10px; flex-wrap: wrap; }
 .traza-dato { background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: var(--sombra); text-align: center; }
 .traza-dato span { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-500); }
-.traza-dato b { font-size: 24px; font-family: var(--mono); }
+.traza-dato b { font-size: 22px; font-family: var(--mono); white-space: nowrap; }
 .traza-dato i { font-style: normal; display: inline-block; }
 .traza-dato em { font-style: normal; color: var(--slate-500); }
 [data-cond].si { color: var(--verde-700); } [data-cond].no { color: var(--rojo-500); }
@@ -167,7 +170,7 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
     border-radius: 14px; padding: 12px 16px; height: 300px; overflow-y: auto; box-shadow: var(--sombra);
 }
 .consola::before { content: "SALIDA"; display: block; font-size: 11px; letter-spacing: .15em; color: var(--slate-500); margin-bottom: 6px; }
-.consola div { white-space: pre; }
+.consola div { white-space: pre-wrap; }
 .traza.compacta { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "codigo panel" "nota nota" "botones botones"; gap: 12px 18px; margin-top: 0; }
 .traza.compacta .codigo { font-size: 15px; padding: 12px 16px; }
 .traza.compacta .consola { height: 150px; }
@@ -193,7 +196,9 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
 .repetir-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px; align-items: start; margin-top: 6px; }
 .flujo-mini { width: 100%; margin-top: 16px; }
 .flujo-mini .caja-txt { font-size: 13px; }
-.simulador { background: #fff; border-radius: var(--radio); padding: 18px 20px; box-shadow: var(--sombra); display: grid; gap: 12px; }
+.simulador { background: #fff; border-radius: var(--radio); padding: 18px 20px; box-shadow: var(--sombra); display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+/* Reutiliza piezas del visualizador: se anulan sus posiciones de grilla */
+.simulador > * { grid-area: auto; grid-column: 1; }
 .simulador .consola { height: 140px; }
 .simulador-titulo { font-weight: 700; color: var(--verde-800); margin: 0; }
 .campo { font-size: 18px; color: var(--slate-700); display: flex; flex-direction: column; gap: 6px; }
@@ -235,7 +240,8 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
 .xp-barra div { height: 100%; width: 0; background: linear-gradient(90deg, var(--verde-500), var(--ambar-400)); border-radius: 999px; transition: width .8s cubic-bezier(.2,.8,.2,1); }
 .misiones-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .misiones-lista li { font-size: 19px; display: flex; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: var(--slate-50); border: 2px solid var(--slate-200); }
-.misiones-lista li em { font-style: normal; color: var(--slate-500); font-size: 16px; }
+.misiones-lista li { gap: 10px; }
+.misiones-lista li em { font-style: normal; color: var(--slate-500); font-size: 16px; white-space: nowrap; }
 .misiones-lista li.hecha { background: var(--verde-50); border-color: var(--verde-500); }
 .misiones-lista li.hecha::after { content: "✅"; margin-left: 8px; }
 .insignias { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -288,7 +294,7 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
 .recursos li { background: #fff; border-radius: var(--radio); padding: 18px; box-shadow: var(--sombra); display: grid; gap: 10px; justify-items: center; text-align: center; }
 .recursos img { width: 150px; height: 150px; object-fit: contain; }
 .recursos h3 { font-size: 20px; } .recursos p { font-size: 16px; color: var(--slate-600); }
-.recursos a { color: var(--verde-700); font-weight: 600; }
+.recursos a { color: var(--verde-700); font-weight: 600; font-size: 17px; }
 .biblio { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 14px; }
 .biblio li { font-size: 21px; background: #fff; padding: 14px 20px; border-radius: 12px; box-shadow: var(--sombra); padding-left: 2.6em; text-indent: -1.6em; }
 .creditos { margin-top: 36px; padding-top: 20px; border-top: 2px solid var(--slate-200); text-align: center; }
@@ -299,8 +305,79 @@ kbd { font-family: var(--mono); font-size: .8em; background: #fff; border: 1px s
 .flotante { position: fixed; z-index: 60; pointer-events: none; font: 800 26px 'Poppins', sans-serif; color: var(--ambar-500); text-shadow: 0 2px 0 #fff, 0 0 12px rgba(255,255,255,.9); }
 .chispa { position: fixed; z-index: 59; pointer-events: none; width: 10px; height: 10px; border-radius: 2px; }
 
-/* ---------- Vista con scroll (celulares) ---------- */
-.reveal-viewport.reveal-scroll .reveal .slides section, .reveal.reveal-scroll .slides section { height: auto; }
+/* =========================================================
+   MODO CELULAR (< 700 px): una página con scroll, sin diapositivas.
+   piloto.js no inicia Reveal y añade .modo-movil al <body>.
+   ========================================================= */
+@media (max-width: 699px) {
+    .barra { gap: 8px; padding: 0 8px; }
+    .barra-titulo { display: none; }
+    .barra-logo { height: 44px; width: 44px; flex-basis: 44px; }
+    .barra-nav { margin-left: 0; flex: 1; justify-content: space-between; }
+    .barra-nav button { padding: 8px; font-size: 18px; }
+}
+.modo-movil .reveal { position: static !important; height: auto !important; margin-top: var(--barra); overflow: visible; font-size: 17px; }
+.modo-movil .reveal .slides { position: static !important; width: auto !important; height: auto !important; inset: auto !important; margin: 0 !important; transform: none !important; zoom: 1 !important; pointer-events: auto !important; }
+.modo-movil .reveal .slides section {
+    position: relative !important; display: block !important; height: auto !important; width: auto !important; min-height: 0 !important;
+    top: auto !important; left: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important;
+    padding: 24px 16px 28px !important; border-bottom: 1px solid var(--slate-200);
+    scroll-margin-top: var(--barra); /* que la barra fija no tape el inicio al saltar a una sección */
+}
+.modo-movil .reveal .slides section:has(> section) { padding: 0 !important; border: 0; }
+.modo-movil .reveal .fragment { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+.modo-movil .reveal .controls, .modo-movil .reveal .progress { display: none !important; }
+
+.modo-movil .reveal h2 { font-size: 25px; }
+.modo-movil .reveal h3 { font-size: 19px; }
+.modo-movil .lead { font-size: 17px; }
+.modo-movil .nota, .modo-movil .aviso { font-size: 16px; }
+.modo-movil .titulo-xl { font-size: 56px !important; letter-spacing: -1px; }
+.modo-movil .portada-bucle svg { max-height: 230px; }
+.modo-movil .portada .pista { display: none; }
+.modo-movil .portada-grid, .modo-movil .tarjetas-3, .modo-movil .usos, .modo-movil .formas, .modo-movil .partes,
+.modo-movil .mientras-grid, .modo-movil .escalera-grid, .modo-movil .repetir-grid, .modo-movil .carriles,
+.modo-movil .centro, .modo-movil .m2-grid, .modo-movil .m3-grid, .modo-movil .recursos { grid-template-columns: minmax(0, 1fr) !important; gap: 14px; }
+.modo-movil .portada-grid { height: auto; }
+.modo-movil .tarjeta-icono { font-size: 36px; }
+.modo-movil .uso { font-size: 17px; padding: 16px; } .modo-movil .uso span { font-size: 32px; }
+.modo-movil .objetivos li { font-size: 16px; padding: 12px 14px; } .modo-movil .objetivos li span { font-size: 26px; }
+.modo-movil .forma svg { height: 210px; }
+.modo-movil .codigo { font-size: 13px; padding: 12px 14px; }
+.modo-movil .codigo.grande { font-size: 15px; padding: 14px; margin: 12px 0 16px; }
+.modo-movil .traza, .modo-movil .traza.compacta { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: "codigo" "panel" "nota" "botones"; gap: 12px; }
+.modo-movil .traza > .codigo, .modo-movil .traza.compacta .codigo { font-size: 13px; }
+.modo-movil .traza-panel, .modo-movil .traza.compacta .traza-panel { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.modo-movil .traza.compacta .traza-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.modo-movil .traza-dato { padding: 8px 6px; } .modo-movil .traza-dato b { font-size: 15px; } .modo-movil .traza-dato span { font-size: 11px; }
+.modo-movil .consola, .modo-movil .traza.compacta .consola, .modo-movil .simulador .consola { height: 170px; font-size: 13px; }
+.modo-movil .traza-nota { font-size: 15px; min-height: 0; }
+.modo-movil .flujo { height: 360px; max-width: 280px; display: block; margin: 0 auto; }
+.modo-movil .escalera-grid { height: auto; }
+.modo-movil .escalera-lienzo { height: 320px; min-height: 320px; }
+.modo-movil .escalera-info p { font-size: 16px; }
+.modo-movil .escalera-estado b { font-size: 30px; }
+.modo-movil .descubre-chip { position: static; display: inline-block; margin-bottom: 10px; font-size: 13px; }
+.modo-movil .carril-pasos { flex-direction: column; }
+.modo-movil .carril .codigo { font-size: 13px; }
+.modo-movil .arbol-paso { flex-direction: column; align-items: flex-start; gap: 10px; }
+.modo-movil .arbol-paso p, .modo-movil .arbol-resultado { font-size: 17px; }
+.modo-movil .fila-centro, .modo-movil .mision-cabecera { flex-direction: column; align-items: flex-start; gap: 10px; }
+.modo-movil .m1-codigo { font-size: 13px; line-height: 2.3; padding: 14px; overflow-x: auto; }
+.modo-movil .m1-codigo input { font-size: 13px; }
+.modo-movil .m3-caso p { font-size: 16px; }
+.modo-movil .xp-cabecera { font-size: 16px; } .modo-movil .misiones-lista li { font-size: 15px; }
+.modo-movil .insignia span { font-size: 34px; } .modo-movil .insignia b { font-size: 14px; }
+.modo-movil .reto p { font-size: 15px; }
+.modo-movil .quiz-tarjeta { padding: 16px; } .modo-movil .quiz-tarjeta h3 { font-size: 17px; } .modo-movil .quiz-opcion { font-size: 15px; }
+.modo-movil .btn { font-size: 15px; padding: 9px 14px; }
+.modo-movil .biblio li { font-size: 15px; }
+.modo-movil .retro { font-size: 16px; }
+
+/* ---------- Código sin ligaduras ----------
+   Va al final a propósito: el atajo "font:" de las reglas anteriores reinicia
+   font-variant-ligatures. Así >= y <= se ven como se escriben en PSeInt. */
+.codigo, .consola, .m1-codigo, .m1-codigo input, .campo input, .traza-dato b, .carril-pasos span { font-variant-ligatures: none; }
 
 /* ---------- Movimiento reducido ---------- */
 @media (prefers-reduced-motion: reduce) {
