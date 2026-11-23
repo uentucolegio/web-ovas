@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OVA: Recurso Educativo Digital (RED)</title>
+    <title>OVA: Elementos y etiquetas HTML</title>
     <link rel="stylesheet" href="tailwind.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -787,12 +787,33 @@
                         </div>
                         
                         <div class="text-center">
-                            <button onclick="window.open('https://codi.link/PGRpdj4KICA8YnV0dG9uPvCfpbMgQ2xpY2sgbWUgdGVzdCE8L2J1dHRvbj4KPC9kaXY+%7CYnV0dG9uIHsKICBmb250LXNpemU6IDQ4cHg7CiAgYm9yZGVyOiAxcHggc29saWQgcmVkOwogIGJhY2tncm91bmQ6IHllbGxvdzsKICBjb2xvcjogIzMzMzsKICBwYWRkaW5nOiA0cHggMTZweDsKICBjdXJzb3I6IHBvaW50ZXI7CiAgYm9yZGVyLXJhZGl1czogOTk5OXB4Owp9Cgpib2R5IHsKICBkaXNwbGF5OiBncmlkOwogIHBsYWNlLWNvbnRlbnQ6IGNlbnRlcjsKICBoZWlnaHQ6IDEwMHZoOwp9%7CaW1wb3J0IENhbnZhc0NvbmZldHRpIGZyb20gJ2h0dHBzOi8vY2RuLnNreXBhY2suZGV2L2NhbnZhcy1jb25mZXR0aSc7Cgpkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdidXR0b24nKS5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsICgpID0+IHsKICBDYW52YXNDb25mZXR0aSgpCn0p');" id="submit-quiz-btn" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-lg rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            <button onclick="window.open('https://codi.link/PGRpdj4KICA8YnV0dG9uPvCfpbMgQ2xpY2sgbWUgdGVzdCE8L2J1dHRvbj4KPC9kaXY+%7CYnV0dG9uIHsKICBmb250LXNpemU6IDQ4cHg7CiAgYm9yZGVyOiAxcHggc29saWQgcmVkOwogIGJhY2tncm91bmQ6IHllbGxvdzsKICBjb2xvcjogIzMzMzsKICBwYWRkaW5nOiA0cHggMTZweDsKICBjdXJzb3I6IHBvaW50ZXI7CiAgYm9yZGVyLXJhZGl1czogOTk5OXB4Owp9Cgpib2R5IHsKICBkaXNwbGF5OiBncmlkOwogIHBsYWNlLWNvbnRlbnQ6IGNlbnRlcjsKICBoZWlnaHQ6IDEwMHZoOwp9%7CaW1wb3J0IENhbnZhc0NvbmZldHRpIGZyb20gJ2h0dHBzOi8vY2RuLnNreXBhY2suZGV2L2NhbnZhcy1jb25mZXR0aSc7Cgpkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdidXR0b24nKS5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsICgpID0+IHsKICBDYW52YXNDb25mZXR0aSgpCn0p');" id="abrir-editor-btn" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-lg rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                 <span class="mr-3">🚀</span>
-                                Iniciar evaluación
+                                Abrir editor en línea
                             </button>
                         </div>
-                        
+                    </div>
+
+                    <div class="bg-white p-8 rounded-lg shadow-md border-l-4 border-green-500 mt-8">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                <span class="text-xl">✅</span>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-gray-800">Autoevaluación</h4>
+                                <p class="text-gray-600">Selecciona una respuesta en cada pregunta y verifica tu puntuación.</p>
+                            </div>
+                        </div>
+
+                        <div id="quiz-container"></div>
+
+                        <div class="text-center">
+                            <button id="submit-quiz-btn" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-lg rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                <span class="mr-3">📝</span>
+                                Verificar respuestas
+                            </button>
+                        </div>
+
                         <div id="quiz-result" class="mt-6 text-center"></div>
                     </div>
                 </div>
@@ -983,21 +1004,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Evaluación Quiz ---
+    // El enunciado se pinta con innerHTML: las etiquetas van escapadas (&lt; &gt;).
+    // Las opciones se pintan con textContent: ahí las etiquetas van tal cual.
     const quizData = [
         {
-            question: "¿Cuál es el propósito principal de un RED?",
-            options: ["Entretener al usuario", "Facilitar un proceso de enseñanza y aprendizaje", "Vender un producto digital", "Mostrar publicidad"],
-            answer: "Facilitar un proceso de enseñanza y aprendizaje"
+            question: "¿Para qué se escribe &lt;!DOCTYPE html&gt; al inicio del archivo?",
+            options: ["Para crear el título de la pestaña", "Para indicar que el documento usa HTML5", "Para agregar estilos a la página", "Para insertar una imagen"],
+            answer: "Para indicar que el documento usa HTML5"
         },
         {
-            question: "La característica que permite usar un RED en diferentes contextos se llama:",
-            options: ["Interactividad", "Adaptabilidad", "Reusabilidad", "Accesibilidad"],
-            answer: "Reusabilidad"
+            question: "¿Cuál es la etiqueta raíz que envuelve todo el documento HTML?",
+            options: ["<body>", "<head>", "<main>", "<html>"],
+            answer: "<html>"
         },
         {
-            question: "Un ejemplo de un RED es:",
-            options: ["Una película de Hollywood", "Un videojuego de acción comercial", "Una simulación interactiva de PhET Colorado", "Un anuncio de televisión"],
-            answer: "Una simulación interactiva de PhET Colorado"
+            question: "En la página de la tienda de Pedrito, ¿dónde va &lt;title&gt;Mi primera Tienda OnLine&lt;/title&gt; para que el texto aparezca en la pestaña del navegador?",
+            options: ["Dentro de <head>", "Dentro de <body>", "Dentro de <h1>", "Después de cerrar </html>"],
+            answer: "Dentro de <head>"
+        },
+        {
+            question: "¿Qué etiqueta usarías para el encabezado principal “Mi primera Tienda OnLine” que los clientes ven en la página?",
+            options: ["<title>", "<p>", "<h1>", "<head>"],
+            answer: "<h1>"
+        },
+        {
+            question: "¿Qué contenido va dentro de &lt;body&gt;?",
+            options: [
+                "Solo el título de la pestaña y los datos de configuración",
+                "Lo que el usuario ve en la página: títulos, párrafos, imágenes, enlaces y formularios",
+                "Únicamente la declaración <!DOCTYPE html>",
+                "Nada: <body> siempre debe quedar vacío"
+            ],
+            answer: "Lo que el usuario ve en la página: títulos, párrafos, imágenes, enlaces y formularios"
+        },
+        {
+            question: "Pedrito quiere que sus clientes escriban sus datos para realizar la compra. ¿Qué necesita en su página?",
+            options: [
+                "Una lista <ul> con los productos",
+                "Un encabezado <h6> al final de la página",
+                "Una imagen <img> del carrito",
+                "Un formulario <form> con campos <input> y un botón para enviar"
+            ],
+            answer: "Un formulario <form> con campos <input> y un botón para enviar"
+        },
+        {
+            question: "Al terminar la estructura básica, ¿en qué orden se cierran las etiquetas?",
+            options: ["Primero </html> y luego </body>", "Primero </body> y luego </html>", "Solo se cierra </head>", "No hace falta cerrar ninguna"],
+            answer: "Primero </body> y luego </html>"
         }
     ];
 
