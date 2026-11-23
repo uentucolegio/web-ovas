@@ -74,21 +74,6 @@
         </p>
       </div>
                 <!-- Componente de síntesis de voz para introducción -->
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="introduccion">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
-                        <span class="mr-1">▶️</span> Leer
-                    </button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
-                        <span class="mr-1">⏸️</span> Pausar
-                    </button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
-                        <span class="mr-1">⏹️</span> Detener
-                    </button>
-                    <div class="flex items-center ml-2">
-                        <label for="speech-rate-introduccion" class="text-sm text-green-800 mr-2">Velocidad:</label>
-                        <input type="range" class="speech-rate" id="speech-rate-introduccion" min="0.5" max="2" step="0.1" value="1" class="w-24">
-                    </div>
-                </div>
     </section>
 
     <!-- Objetivos -->
@@ -117,21 +102,6 @@
         </li>
       </ul>
                 <!-- Componente de síntesis de voz para objetivos -->
-                <div class="speech-controls mb-4 p-3 bg-green-100 rounded-lg flex items-center flex-wrap gap-2 mt-4" data-target="objetivos">
-                    <button class="play-btn bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-4 rounded-full flex items-center">
-                        <span class="mr-1">▶️</span> Leer
-                    </button>
-                    <button class="pause-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
-                        <span class="mr-1">⏸️</span> Pausar
-                    </button>
-                    <button class="stop-btn bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-4 rounded-full flex items-center" disabled>
-                        <span class="mr-1">⏹️</span> Detener
-                    </button>
-                    <div class="flex items-center ml-2">
-                        <label for="speech-rate-objetivos" class="text-sm text-green-800 mr-2">Velocidad:</label>
-                        <input type="range" class="speech-rate" id="speech-rate-objetivos" min="0.5" max="2" step="0.1" value="1" class="w-24">
-                    </div>
-                </div>
     </section>
 
     <!-- Contenido -->
@@ -1246,121 +1216,6 @@ document.getElementById('submit-quiz-btn')?.addEventListener('click',()=>{
 document.getElementById('reset-quiz-btn')?.addEventListener('click',()=>{
   renderQuiz();
   document.getElementById('quiz-result').textContent='';
-});
-
-/* ===== Sistema de síntesis de voz simplificado ===== */
-let isPlaying = false;
-
-function getSectionText(sectionId) {
-  const section = document.getElementById(sectionId);
-  if (!section) return '';
-  
-  const textElements = section.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, span:not(.speech-controls *)');
-  let text = '';
-  
-  textElements.forEach(element => {
-    if (element.textContent.trim()) {
-      text += element.textContent.trim() + ' ';
-    }
-  });
-  
-  return text.trim();
-}
-
-function speakText(text, rate = 1, lang = 'en-US') {
-  if (!('speechSynthesis' in window)) {
-    alert('Tu navegador no soporta síntesis de voz');
-    return;
-  }
-  
-  if (isPlaying) {
-    speechSynthesis.cancel();
-  }
-  
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang;
-  utterance.rate = rate;
-  utterance.pitch = 1;
-  utterance.volume = 1;
-  
-  utterance.onstart = () => {
-    isPlaying = true;
-    updateSpeechButtons(true);
-  };
-  
-  utterance.onend = () => {
-    isPlaying = false;
-    updateSpeechButtons(false);
-  };
-  
-  utterance.onerror = () => {
-    isPlaying = false;
-    updateSpeechButtons(false);
-  };
-  
-  speechSynthesis.speak(utterance);
-}
-
-function pauseSpeaking() {
-  if (isPlaying) {
-    speechSynthesis.pause();
-    isPlaying = false;
-    updateSpeechButtons(false);
-  }
-}
-
-function stopSpeaking() {
-  speechSynthesis.cancel();
-  isPlaying = false;
-  updateSpeechButtons(false);
-}
-
-function updateSpeechButtons(playing) {
-  document.querySelectorAll('.speech-controls').forEach(control => {
-    const playBtn = control.querySelector('.play-btn');
-    const pauseBtn = control.querySelector('.pause-btn');
-    const stopBtn = control.querySelector('.stop-btn');
-    
-    if (playing) {
-      playBtn.disabled = true;
-      pauseBtn.disabled = false;
-      stopBtn.disabled = false;
-    } else {
-      playBtn.disabled = false;
-      pauseBtn.disabled = true;
-      stopBtn.disabled = true;
-    }
-  });
-}
-
-// Event listeners para controles de voz
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.speech-controls').forEach(control => {
-    const playBtn = control.querySelector('.play-btn');
-    const pauseBtn = control.querySelector('.pause-btn');
-    const stopBtn = control.querySelector('.stop-btn');
-    const rateSlider = control.querySelector('.speech-rate');
-    const target = control.dataset.target;
-    
-    playBtn.addEventListener('click', () => {
-      const text = getSectionText(target);
-      const rate = parseFloat(rateSlider.value);
-      const lang = target === 'contenido' ? 'en-US' : 'es-ES';
-      speakText(text, rate, lang);
-    });
-    
-    pauseBtn.addEventListener('click', pauseSpeaking);
-    stopBtn.addEventListener('click', stopSpeaking);
-    
-    rateSlider.addEventListener('input', (e) => {
-      if (isPlaying) {
-        stopSpeaking();
-        const text = getSectionText(target);
-        const lang = target === 'contenido' ? 'en-US' : 'es-ES';
-        speakText(text, parseFloat(e.target.value), lang);
-      }
-    });
-  });
 });
 
 </script>
