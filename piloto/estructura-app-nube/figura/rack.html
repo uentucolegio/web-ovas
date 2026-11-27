@@ -832,6 +832,8 @@ const est = {
   siguiente: 0, peticiones: 0, ms: 0, fase: -1, servidor: 1,
   cola: [], accion: null, limite: Infinity, visible: true, activo: true, tour: MODO === 'viaje' && qs.get('tour') !== '0', ultimaMano: 0,
   reloj: 0, desarmado: false, sel: null, hover: null, abierta: null,
+  // Velocidad de la petición: 1 = la original; por defecto más lenta para poder seguirla con la vista
+  vel: Math.max(0.15, Math.min(2, +qs.get('vel') || (MODO === 'escalado' ? 1 : 0.55))),
 };
 const cajon = {};
 for (let s = 1; s <= M.maxServidores; s++) cajon[s] = { off: s <= est.servidores ? 0 : DATA.slide, alfa: s <= est.servidores ? 1 : 0 };
@@ -1073,7 +1075,7 @@ function tick(now) {
   siguienteAccion();
   const a = est.accion;
   if (a) {
-    a.t += dt * rapido;
+    a.t += dt * rapido * est.vel;
     if (a.tipo === 'mover') {
       const u = Math.min(1, a.t / (calma ? 0.001 : a.dur));
       const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
@@ -1128,6 +1130,7 @@ const ORDENES = {
   carga(m) { est.usuarios = Math.max(0, m.usuarios | 0); decir(); correr(); },
   tour(m) { est.tour = !!m.valor; correr(); },
   activo(m) { est.activo = !!m.valor; if (est.activo) correr(); },
+  velocidad(m) { est.vel = Math.max(0.15, Math.min(2, +m.valor || 0.55)); },
   desarmar(m) { mano(); desarmar(m.valor === undefined ? !est.desarmado : !!m.valor); decir(); },
   seleccionar(m) { mano(); seleccionar(m.id || null, 'diapositiva'); },
 };

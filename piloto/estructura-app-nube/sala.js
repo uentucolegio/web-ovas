@@ -456,6 +456,10 @@
         const b = e.target.closest('button'); if (!b) return;
         if (b.dataset.ir !== undefined) return irA(+b.dataset.ir);
         if (b.dataset.atajo) return voltear(b);
+        if (b.dataset.velocidad) {
+            $$('[data-velocidad]').forEach(v => v.setAttribute('aria-pressed', String(v === b)));
+            return ordenRack(viajeRack, { tipo: 'velocidad', valor: +b.dataset.velocidad });
+        }
         if (b.dataset.arq !== undefined) return clasificar(b);
         if (b.dataset.m1 !== undefined) return m1Tocar(b);
         if (b.dataset.opcion) return caso(b);
