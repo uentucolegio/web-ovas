@@ -19,8 +19,8 @@
        ESTADO Y GAMIFICACIÓN (XP, descubrimientos, insignias)
        ===================================================== */
     const CLAVE = 'piloto-estructura-app-nube-v1';
-    const XP_MAX = 160;
-    const DESCUBRIMIENTOS = ['viaje', 'atajos', 'escalado', 'clasificar', 'terminal'];
+    const XP_MAX = 170;
+    const DESCUBRIMIENTOS = ['viaje', 'taller', 'atajos', 'escalado', 'clasificar', 'terminal'];
     const nuevoEstado = () => ({ xp: 0, misiones: {}, descubrimientos: {}, insignias: {} });
     const estado = (() => {
         try { return Object.assign(nuevoEstado(), JSON.parse(localStorage.getItem(CLAVE)) || {}); }
@@ -102,6 +102,7 @@
             if (f.hasAttribute('data-escalado')) escala.enviar();
         }
         if (f.hasAttribute('data-viaje')) viajeMensaje(m, f);
+        if (f.hasAttribute('data-taller')) tallerMensaje(m);
         if (f.hasAttribute('data-escalado') && m.tipo === 'servidores') { escala.servidores = m.n; escala.pintar(); }
     });
 
@@ -123,6 +124,40 @@
             $('[data-viaje-ms]').textContent = m.ms + ' ms';
             gsap.fromTo('[data-viaje-ms]', { scale: 1.6 }, { scale: 1, duration: .5, ease: 'back.out(3)' });
             descubrir('viaje', $('[data-viaje-ms]'));
+        }
+    }
+
+    /* ---------- Taller: desarmar e inspeccionar ---------- */
+    const tallerRack = $('[data-taller]');
+    const ICONOS = {
+        navegador: '🖥️', router: '📡', region: '🌎', rack: '🗄️', bandeja: '🔌', balanceador: '⚖️', 'red-lb': '🔀',
+        servidor: '🖥️', cpu: '🧠', ram: '💾', ssd: '💽', ventiladores: '🌀', fuente: '⚡', nic: '🔗',
+        bd: '🗃️', discos: '🗄️', controlador: '🎛️'
+    };
+    const encontradas = new Set();
+    function tallerMensaje(m) {
+        if (m.tipo === 'desarmado') $('[data-accion="taller-desarmar"]').textContent = m.valor ? '🧱 Armar' : '🔧 Desarmar';
+        if (m.tipo !== 'seleccion') return;
+        const p = m.parte, caja = $('[data-ficha]');
+        if (!p) {
+            $('[data-ficha-icono]').textContent = '🔧';
+            $('[data-ficha-capa]').textContent = 'Taller';
+            $('[data-ficha-nombre]').textContent = 'Elige una pieza';
+            $('[data-ficha-texto]').textContent = 'Toca cualquier pieza de la figura. También puedes usar las flechas del teclado sobre ella.';
+            caja.classList.remove('activa');
+            return;
+        }
+        $('[data-ficha-icono]').textContent = ICONOS[p.clase] || '🔧';
+        $('[data-ficha-capa]').textContent = p.capa;
+        $('[data-ficha-nombre]').textContent = p.nombre;
+        $('[data-ficha-texto]').textContent = p.texto;
+        caja.classList.add('activa');
+        gsap.fromTo(caja, { x: 18, opacity: .4 }, { x: 0, opacity: 1, duration: .4, ease: 'power2.out' });
+        const chip = $(`[data-busca="${p.clase}"]`);
+        if (chip && !encontradas.has(p.clase)) {
+            encontradas.add(p.clase); chip.classList.add('hallada');
+            gsap.fromTo(chip, { scale: 1.3 }, { scale: 1, duration: .45, ease: 'back.out(3)' });
+            if (encontradas.size === $$('[data-busca]').length) descubrir('taller', chip);
         }
     }
 
@@ -202,7 +237,11 @@
        ATAJOS: CDN y caché
        ===================================================== */
     function voltear(b) {
-        b.classList.toggle('volteada');
+        // Se cierra como una página (escala en X), cambia de cara y se abre
+        gsap.to(b, { scaleX: 0, duration: .16, ease: 'power2.in', onComplete: () => {
+            b.classList.toggle('volteada');
+            gsap.to(b, { scaleX: 1, duration: .24, ease: 'back.out(2)', clearProps: 'transform' });
+        } });
         b.dataset.vista = '1';
         if ($$('[data-atajo]').every(a => a.dataset.vista)) descubrir('atajos', b);
     }
@@ -424,6 +463,8 @@
             case 'viaje-enviar': return ordenRack(viajeRack, { tipo: 'enviar' });
             case 'viaje-paso': return ordenRack(viajeRack, { tipo: 'paso' });
             case 'viaje-reiniciar': $$('[data-paso]').forEach(li => li.classList.remove('actual', 'hecho')); $('[data-viaje-ms]').textContent = '0 ms'; return ordenRack(viajeRack, { tipo: 'reiniciar' });
+            case 'taller-desarmar': return ordenRack(tallerRack, { tipo: 'desarmar' });
+            case 'taller-soltar': return ordenRack(tallerRack, { tipo: 'seleccionar', id: null });
             case 'esc-carga': return escala.accion('carga', b);
             case 'esc-mas': return escala.accion('mas', b);
             case 'esc-menos': return escala.accion('menos', b);

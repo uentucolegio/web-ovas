@@ -27,8 +27,15 @@ con animaciones e interacciones (estilo Genially) en lugar de una página web co
 ### La figura isométrica de Sala de máquinas
 
 `estructura-app-nube/figura/rack.html` es una página autónoma (no usa CDN) que el
-piloto carga en un `<iframe>` y maneja con `postMessage`: enviar una petición, ir paso
-a paso, meter o sacar servidores y cambiar la carga. Se genera con el kit de Anatomy:
+piloto carga en un `<iframe>` y maneja con `postMessage`. Tiene tres modos (`?modo=`):
+
+- `viaje`: una petición recorre router, balanceador, servidor y base de datos (entera o paso a paso).
+- `taller`: el rack se desarma por conjuntos (cada uno con su resorte) y cada pieza se
+  inspecciona; los servidores y el balanceador salen como cajones, se les desliza la tapa y
+  se ven su CPU, RAM, discos, ventiladores, fuente y tarjeta de red.
+- `escalado`: los servidores entran o salen del rack según la carga.
+
+Se genera con el kit de Anatomy:
 
 ```
 node piloto/estructura-app-nube/figura/build.mjs
